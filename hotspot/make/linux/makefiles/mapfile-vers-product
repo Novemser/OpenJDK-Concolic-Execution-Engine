@@ -252,6 +252,9 @@ SUNWprivate_1.1 {
                 JVM_Yield;
                 JVM_handle_linux_signal;
 
+                #Concolic
+                JVM_StartConcolic;
+
                 # miscellaneous functions
                 jio_fprintf;
                 jio_printf;

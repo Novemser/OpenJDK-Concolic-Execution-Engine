@@ -104,6 +104,9 @@ JVM_CurrentTimeMillis(JNIEnv *env, jclass ignored);
 JNIEXPORT jlong JNICALL
 JVM_NanoTime(JNIEnv *env, jclass ignored);
 
+JNIEXPORT jlong JNICALL
+JVM_StartConcolic(JNIEnv *env, jclass ignored);
+
 JNIEXPORT void JNICALL
 JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
               jobject dst, jint dst_pos, jint length);

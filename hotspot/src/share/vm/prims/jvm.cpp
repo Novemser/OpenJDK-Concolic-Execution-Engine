@@ -309,6 +309,10 @@ JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))
   return os::javaTimeNanos();
 JVM_END
 
+JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
+  JVMWrapper("JVM_StartConcolic");
+  return os::javaTimeNanos();
+JVM_END
 
 JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
                                jobject dst, jint dst_pos, jint length))

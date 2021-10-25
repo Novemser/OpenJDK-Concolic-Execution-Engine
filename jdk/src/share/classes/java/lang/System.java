@@ -401,6 +401,11 @@ public final class System {
     public static native long nanoTime();
 
     /**
+     * Start Entry of our concolic execution
+     */
+    public static native long startConcolic();
+
+    /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.
      * A subsequence of array components are copied from the source
