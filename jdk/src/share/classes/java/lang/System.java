@@ -403,7 +403,7 @@ public final class System {
     /**
      * Start Entry of our concolic execution
      */
-    public static native long startConcolic();
+    public static native long startConcolic(Object obj);
 
     /**
      * Copies an array from the specified source array, beginning at the
