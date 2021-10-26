@@ -2,16 +2,21 @@
 
 This is a document for debugging OpenJDK with `gdb`.
 
+Before debugging, you should build jdk and run
+
+```shell
+./scripts/unzipDebuginfo.sh
+```
 -----
 
 ## Breakpoints
-We focus on the [bytecode interpretor](../hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp)
+Our debugging target is [bytecode interpretor](../hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp)
 
-- While 循环中, 判断指令类型的 switch 语句:
-    ```gdb
-    break .../openjdk8/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp:1011
-    ```
-    - 指令类型编码: `print opcode`, 具体对应关系见 `bytecodes.hpp`
+
+
+```gdb
+break bytecodeInterpreter.cpp:1011
+```
 
 
 ## Use CLion
