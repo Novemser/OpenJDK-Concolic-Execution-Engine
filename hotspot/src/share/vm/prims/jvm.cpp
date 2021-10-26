@@ -75,6 +75,8 @@
 #include "utilities/histogram.hpp"
 #include "utilities/top.hpp"
 #include "utilities/utf8.hpp"
+
+#include "concolic/ConcolicMngr.hpp"
 #ifdef TARGET_OS_FAMILY_linux
 # include "jvm_linux.h"
 #endif
@@ -311,7 +313,7 @@ JVM_END
 
 JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_StartConcolic");
-  return os::javaTimeNanos();
+  return ConcolicMngr::startConcolic();
 JVM_END
 
 JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
