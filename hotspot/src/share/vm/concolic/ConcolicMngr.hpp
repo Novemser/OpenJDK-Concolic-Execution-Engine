@@ -33,7 +33,8 @@
 
 class ConcolicMngr {
 public:
-  static jlong startConcolic() {
+  static jlong startConcolic(oop o) {
+    o->print();
     printf("Start concolic!\n");
     return 0;
   }

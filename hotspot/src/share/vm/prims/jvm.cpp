@@ -311,9 +311,15 @@ JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))
   return os::javaTimeNanos();
 JVM_END
 
-JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
+JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored, jobject obj))
   JVMWrapper("JVM_StartConcolic");
-  return ConcolicMngr::startConcolic();
+  if (obj == NULL) {
+    // TODO: use THROW instead of assertion
+    assert(false, "JVM_StartConcolic: obj is null");
+  }
+  oop o = JNIHandles::resolve_non_null(obj);
+  assert(o->is_oop(), "JVM_StartConcolic: obj not an oop");
+  return ConcolicMngr::startConcolic(o);
 JVM_END
 
 JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,

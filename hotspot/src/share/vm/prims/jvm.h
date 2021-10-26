@@ -132,7 +132,7 @@ JNIEXPORT jlong JNICALL
 JVM_NanoTime(JNIEnv *env, jclass ignored);
 
 JNIEXPORT jlong JNICALL
-JVM_StartConcolic(JNIEnv *env, jclass ignored);
+JVM_StartConcolic(JNIEnv *env, jclass ignored, jobject obj);
 
 JNIEXPORT void JNICALL
 JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
