@@ -33,12 +33,14 @@
 
 class ConcolicMngr {
 public:
-  static jlong startConcolic(oop o) {
-    o->print();
+  static jlong startConcolic() {
     printf("Start concolic!\n");
     return 0;
   }
 
+  static void symbolize(oop o) {
+    o->print();
+  }
 };
 
 #endif // SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP

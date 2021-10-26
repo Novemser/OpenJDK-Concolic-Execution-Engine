@@ -1,2 +1,4 @@
 *.class
 .gdbinit
+*.log
+*.iml

@@ -20,7 +20,7 @@ Our debugging target is [bytecode interpretor](../hotspot/src/share/vm/interpret
 ## Run
 
 ```gdb
-break bytecodeInterpreter.cpp:1011
+break hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp:1011
 ```
 
 ## Use CLion

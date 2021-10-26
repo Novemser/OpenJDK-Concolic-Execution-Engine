@@ -254,6 +254,7 @@ SUNWprivate_1.1 {
 
                 #Concolic
                 JVM_StartConcolic;
+                JVM_Symbolize;
 
                 # debug JVM
                 JVM_AccessVMBooleanFlag;

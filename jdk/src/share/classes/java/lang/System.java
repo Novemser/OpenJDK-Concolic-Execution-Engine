@@ -403,7 +403,12 @@ public final class System {
     /**
      * Start Entry of our concolic execution
      */
-    public static native long startConcolic(Object obj);
+    public static native long startConcolic();
+
+    /**
+     * make an Object symbolic
+     */
+    public static native void symbolize(Object obj);
 
     /**
      * Copies an array from the specified source array, beginning at the

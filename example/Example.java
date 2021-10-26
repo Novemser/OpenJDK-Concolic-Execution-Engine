@@ -4,6 +4,7 @@ public class Example {
         int b = 2;
         int c = a + b;
         System.out.println(c);
-        System.out.println(System.startConcolic(new Integer(6)));
+        System.startConcolic();
+        System.symbolize(new Integer(6));
     }
 }

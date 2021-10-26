@@ -1008,6 +1008,24 @@ run:
 #ifdef USELABELS
       DISPATCH(opcode);
 #else
+// #define CONCOLIC
+#ifdef CONCOLIC
+    static Method* lastCallee = NULL;
+    Method* callee = istate->callee();
+    if (callee != NULL && callee != lastCallee) {
+      ResourceMark rm;
+      Symbol* method_holder_name = callee->method_holder()->name();
+      Symbol* method_name = callee->name();
+      char* name_and_sig = istate->method()->name_and_sig_as_C_string();
+      tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
+      tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
+      // NOTE: stop at any specified method as below
+      if (method_name->equals("symbolize")) {
+        int a = 1 + 2;
+      }
+      lastCallee = callee;
+    }
+#endif
       switch (opcode)
 #endif
       {
