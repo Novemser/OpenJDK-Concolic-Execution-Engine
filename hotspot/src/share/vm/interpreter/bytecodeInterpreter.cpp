@@ -1011,39 +1011,40 @@ run:
       DISPATCH(opcode);
 #else
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-    static Method* lastCallee = NULL;
+    // FIXME: these static variables may face problem when multithreading
+    static Method* last_method = NULL;
+    static Method* last_callee = NULL;
     static bool is_reach_main = false;
+    Thread* thread = istate->thread();
+    Method* method = istate->method();
     Method* callee = istate->callee();
-    if (callee != NULL) {
+    if (method != NULL) {
       ResourceMark rm;
-      Symbol* method_holder_name = callee->method_holder()->name();
-      Symbol* method_name = callee->name();
-      char* name_and_sig = istate->method()->name_and_sig_as_C_string();
-      // print if reach main
+      Symbol* method_holder_name = method->method_holder()->name();
+      Symbol* method_name = method->name();
+      char* name_and_sig = method->name_and_sig_as_C_string();
+      // mark if reach main (use main to avoid printing instructions when running javac)
       if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
         tty->print("\033[1;33m=================================================================\033[0m\n");
         is_reach_main = true;
       }
       // print if it is new callee
-      if (callee != lastCallee) {
-        tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
+      if (method != last_method) {
+        // tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
         tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
-        // tty->print("\tat %d\n", InterpreterRuntime::bci(THREAD));
-        // tty->print("\tat %s : %d\n", THREAD_AND_LOCATION, CALL_VM(InterpreterRuntime::bci, THREAD));
       }
-      // print instructino if is after main
-      if (strstr(name_and_sig, "Example.main") || is_reach_main) {
-        // tty->print("\t\t\033[1;33m%s\033[0m \n", Bytecodes::name(Bytecodes::cast(opcode)));
-        // ByteCodePrinter::print(opcode);
-        callee->print_codes();
-        // BytecodeTracer::trace_current(Thread::current(), istate->method(), istate->bcp(), tty);
+      // print instruction if main is reached
+      if (is_reach_main) {
+        methodHandle mh (thread, (Method*)method);
+        BytecodeTracer::set_closure(BytecodeTracer::std_closure());;
+        BytecodeTracer::trace(mh, pc, tty);
       }
 
       // NOTE: stop at any specified method as below
       if (method_name->equals("symbolize")) {
         int a = 1 + 2;
       }
-      lastCallee = callee;
+      last_method = method;
     }
 #endif
       switch (opcode)

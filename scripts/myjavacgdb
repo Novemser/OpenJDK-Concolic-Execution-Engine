@@ -1,0 +1,7 @@
+#!/bin/sh
+# This script requires setting `MYJAVA_HOME` to `openjdk8/build/linux-x86_64-normal-zero-release/jdk`
+if [ $MYJAVA_HOME ]; then
+    gdb --args $MYJAVA_HOME/bin/javac $* 
+else
+    echo "Please set an environment variable for MYJAVA_HOME, like 'export MYJAVA_HOME=/home/hank/openjdk8/build/linux-x86_64-normal-zero-release/jdk'"
+fi
