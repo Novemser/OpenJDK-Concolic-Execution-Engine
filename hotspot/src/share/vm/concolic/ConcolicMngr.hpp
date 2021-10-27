@@ -1,6 +1,8 @@
 #ifndef SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 #define SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 
+#include "SymbolicStore.hpp"
+
 #include "jvmtifiles/jvmti.h"
 #include "runtime/handles.hpp"
 #include "utilities/top.hpp"
