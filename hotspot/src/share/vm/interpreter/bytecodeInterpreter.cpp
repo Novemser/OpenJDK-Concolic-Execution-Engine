@@ -1008,8 +1008,7 @@ run:
 #ifdef USELABELS
       DISPATCH(opcode);
 #else
-// #define CONCOLIC
-#ifdef CONCOLIC
+#ifdef ENABLE_CONCOLIC
     static Method* lastCallee = NULL;
     Method* callee = istate->callee();
     if (callee != NULL && callee != lastCallee) {

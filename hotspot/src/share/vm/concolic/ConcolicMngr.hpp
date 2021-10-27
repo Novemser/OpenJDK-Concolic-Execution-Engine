@@ -29,8 +29,6 @@
 # endif
 #endif
 
-// #include <iostream>
-
 class ConcolicMngr {
 public:
   static jlong startConcolic() {
