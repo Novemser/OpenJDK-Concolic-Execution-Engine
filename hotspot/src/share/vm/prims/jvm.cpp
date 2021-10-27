@@ -320,6 +320,15 @@ JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
 #endif
 JVM_END
 
+JVM_LEAF(jlong, JVM_EndConcolic(JNIEnv *env, jclass ignored))
+  JVMWrapper("JVM_EndConcolic");
+#ifdef ENABLE_CONCOLIC
+  return ConcolicMngr::endConcolic();
+#else
+  return os::javaTimeNanos();
+#endif
+JVM_END
+
 JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
   JVMWrapper("JVM_Symbolize");
 #ifdef ENABLE_CONCOLIC

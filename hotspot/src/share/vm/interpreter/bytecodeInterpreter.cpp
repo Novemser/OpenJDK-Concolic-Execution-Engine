@@ -24,6 +24,7 @@
 
 // no precompiled headers
 #include "classfile/vmSymbols.hpp"
+#include "concolic/ConcolicMngr.hpp"
 #include "gc_interface/collectedHeap.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
 #include "interpreter/bytecodeInterpreter.hpp"
@@ -1007,10 +1008,8 @@ run:
       assert(topOfStack >= istate->stack_limit(), "Stack overrun");
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
-#ifdef USELABELS
-      DISPATCH(opcode);
-#else
-#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
+
+CONCOLIC_DEBUG_BLOCK_BEGIN
     // FIXME: these static variables may face problem when multithreading
     static Method* last_method = NULL;
     static Method* last_callee = NULL;
@@ -1046,7 +1045,11 @@ run:
       }
       last_method = method;
     }
-#endif
+CONCOLIC_DEBUG_BLOCK_END
+
+#ifdef USELABELS
+      DISPATCH(opcode);
+#else
       switch (opcode)
 #endif
       {

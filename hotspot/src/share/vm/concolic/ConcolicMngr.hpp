@@ -29,8 +29,17 @@
 
 class ConcolicMngr {
 public:
+  static bool is_doing_concolic;
+
   static jlong startConcolic() {
     printf("Start concolic!\n");
+    ConcolicMngr::is_doing_concolic = true;
+    return 0;
+  }
+
+  static jlong endConcolic() {
+    printf("End concolic!\n");
+    ConcolicMngr::is_doing_concolic = false;
     return 0;
   }
 
@@ -39,5 +48,31 @@ public:
     handle()->set_handle(handle.raw_value());
   }
 };
+
+/**
+ * Macro for CONCOLIC_BLOCK
+ */ 
+#ifdef ENABLE_CONCOLIC
+  #define CONCOLIC_BLOCK_BEGIN \
+    if (ConcolicMngr::is_doing_concolic) {
+#else
+  #define CONCOLIC_BLOCK_BEGIN \
+    if (false) {
+#endif
+
+#define CONCOLIC_BLOCK_END }
+
+/**
+ * Macro for CONCOLIC_DEBUG_BLOCK
+ */ 
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
+  #define CONCOLIC_DEBUG_BLOCK_BEGIN \
+    if (ConcolicMngr::is_doing_concolic) {
+#else
+  #define CONCOLIC_DEBUG_BLOCK_BEGIN \
+    if (false) {
+#endif
+
+#define CONCOLIC_DEBUG_BLOCK_END }
 
 #endif // SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP

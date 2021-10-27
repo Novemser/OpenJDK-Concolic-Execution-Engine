@@ -406,6 +406,11 @@ public final class System {
     public static native long startConcolic();
 
     /**
+     * End of our concolic execution
+     */
+    public static native long endConcolic();
+
+    /**
      * make an Object symbolic
      */
     public static native void symbolize(Object obj);
