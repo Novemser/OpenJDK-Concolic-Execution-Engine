@@ -2,8 +2,6 @@
 #define SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 
 #include "jvmtifiles/jvmti.h"
-#include "runtime/atomic.hpp"
-#include "runtime/extendedPC.hpp"
 #include "runtime/handles.hpp"
 #include "utilities/top.hpp"
 #ifdef TARGET_OS_FAMILY_linux
@@ -36,8 +34,9 @@ public:
     return 0;
   }
 
-  static void symbolize(oop o) {
-    o->print();
+  static void symbolize(Handle handle) {
+    handle()->print();
+    handle()->set_handle(handle.raw_value());
   }
 };
 

@@ -2,3 +2,5 @@
 .gdbinit
 *.log
 *.iml
+
+output.txt

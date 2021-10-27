@@ -1010,7 +1010,7 @@ run:
 #ifdef USELABELS
       DISPATCH(opcode);
 #else
-#ifdef ENABLE_CONCOLIC
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
     static Method* lastCallee = NULL;
     static bool is_reach_main = false;
     Method* callee = istate->callee();

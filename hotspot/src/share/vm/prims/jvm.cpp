@@ -313,19 +313,29 @@ JVM_END
 
 JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_StartConcolic");
+#ifdef ENABLE_CONCOLIC
   return ConcolicMngr::startConcolic();
+#else
+  return os::javaTimeNanos();
+#endif
 JVM_END
 
-JVM_LEAF(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
+JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
   JVMWrapper("JVM_Symbolize");
+#ifdef ENABLE_CONCOLIC
   if (obj == NULL) {
     // TODO: use THROW instead of assertion
     assert(false, "JVM_Symbolize: obj is null");
   }
   // TODO: check behaviors when facing like `arrayOop`
   oop o = JNIHandles::resolve_non_null(obj);
-  assert(o->is_oop(), "JVM_Symbolize: obj not an oop");
-  ConcolicMngr::symbolize(o);
+  Handle handle(THREAD, o);
+
+  assert(handle()->is_oop(), "JVM_Symbolize: obj not an oop");
+  ConcolicMngr::symbolize(handle);
+#else
+  return;
+#endif
 JVM_END
 
 JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
