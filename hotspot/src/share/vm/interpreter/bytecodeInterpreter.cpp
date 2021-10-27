@@ -29,6 +29,7 @@
 #include "interpreter/bytecodeInterpreter.hpp"
 #include "interpreter/bytecodeInterpreter.inline.hpp"
 #include "interpreter/bytecodeInterpreterProfiling.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "interpreter/interpreter.hpp"
 #include "interpreter/interpreterRuntime.hpp"
 #include "memory/resourceArea.hpp"
@@ -45,6 +46,7 @@
 #include "runtime/sharedRuntime.hpp"
 #include "runtime/threadCritical.hpp"
 #include "utilities/exceptions.hpp"
+#include "utilities/globalDefinitions.hpp"
 
 // no precompiled headers
 #ifdef CC_INTERP
@@ -1008,17 +1010,36 @@ run:
 #ifdef USELABELS
       DISPATCH(opcode);
 #else
-// #define CONCOLIC
+#define CONCOLIC
 #ifdef CONCOLIC
     static Method* lastCallee = NULL;
+    static bool is_reach_main = false;
     Method* callee = istate->callee();
-    if (callee != NULL && callee != lastCallee) {
+    if (callee != NULL) {
       ResourceMark rm;
       Symbol* method_holder_name = callee->method_holder()->name();
       Symbol* method_name = callee->name();
       char* name_and_sig = istate->method()->name_and_sig_as_C_string();
-      tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
-      tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
+      // print if reach main
+      if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
+        tty->print("\033[1;33m=================================================================\033[0m\n");
+        is_reach_main = true;
+      }
+      // print if it is new callee
+      if (callee != lastCallee) {
+        tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
+        tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
+        // tty->print("\tat %d\n", InterpreterRuntime::bci(THREAD));
+        // tty->print("\tat %s : %d\n", THREAD_AND_LOCATION, CALL_VM(InterpreterRuntime::bci, THREAD));
+      }
+      // print instructino if is after main
+      if (strstr(name_and_sig, "Example.main") || is_reach_main) {
+        // tty->print("\t\t\033[1;33m%s\033[0m \n", Bytecodes::name(Bytecodes::cast(opcode)));
+        // ByteCodePrinter::print(opcode);
+        callee->print_codes();
+        // BytecodeTracer::trace_current(Thread::current(), istate->method(), istate->bcp(), tty);
+      }
+
       // NOTE: stop at any specified method as below
       if (method_name->equals("symbolize")) {
         int a = 1 + 2;
