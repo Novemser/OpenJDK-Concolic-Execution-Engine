@@ -21,7 +21,7 @@ jlong ConcolicMngr::endConcolic() {
 
 void ConcolicMngr::symbolize(Handle handle) {
 	handle()->print();
-	handle()->set_handle(handle.raw_value());
+	ctx->symbolize(handle);
 }
 
 #else
