@@ -76,7 +76,7 @@
 #include "utilities/top.hpp"
 #include "utilities/utf8.hpp"
 
-#include "concolic/ConcolicMngr.hpp"
+#include "concolic/concolicMngr.hpp"
 #ifdef TARGET_OS_FAMILY_linux
 # include "jvm_linux.h"
 #endif
