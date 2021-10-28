@@ -90,7 +90,6 @@ void oopDesc::verify_on(outputStream* st) {
   }
 }
 
-
 void oopDesc::verify() {
   verify_on(tty);
 }
@@ -117,6 +116,16 @@ unsigned int oopDesc::new_hash(juint seed) {
     return 0;
   }
 }
+
+#ifdef ENABLE_CONCOLIC
+void oopDesc::set_handle(oop* handle) {
+  _handle = handle;
+}
+
+bool oopDesc::is_symbolic() const {
+  return _handle != NULL;
+}
+#endif
 
 VerifyOopClosure VerifyOopClosure::verify_oop;
 

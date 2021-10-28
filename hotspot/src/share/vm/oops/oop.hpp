@@ -65,10 +65,21 @@ class oopDesc {
     narrowKlass _compressed_klass;
   } _metadata;
 
+#ifdef ENABLE_CONCOLIC
+  oop* _handle;
+#endif
+
   // Fast access to barrier set.  Must be initialized.
   static BarrierSet* _bs;
 
  public:
+#ifdef ENABLE_CONCOLIC
+  void set_handle(oop* handle);
+
+  bool is_symbolic() const;
+#endif
+
+
   markOop  mark() const         { return _mark; }
   markOop* mark_addr() const    { return (markOop*) &_mark; }
 
