@@ -7,12 +7,12 @@
 void SymbolicObject::symbolize(Handle handle) {
   tty->print("SymbolicObject::symbolize!\n");
 
-  do_symbolize(handle(), 1);
+  FieldSymbolizer::do_symbolize(handle());
 }
 
 void SymbolicObject::do_symbolize(oop obj, int depth) {
   if (obj->is_instance()) {
-    FieldSymbolizer fieldSymbolizer(obj, depth, FieldSymbolizer::print_field);
+    FieldSymbolizer fieldSymbolizer(obj, depth, &FieldSymbolizer::print_field);
     InstanceKlass *instanceKlass = (InstanceKlass *)obj->klass();
 
     /**
@@ -25,35 +25,61 @@ void SymbolicObject::do_symbolize(oop obj, int depth) {
   }
 }
 
+void FieldSymbolizer::do_symbolize(oop obj) {
+  FieldSymbolizer fieldSymbolizer(obj, 1, &FieldSymbolizer::print_field);
+  fieldSymbolizer.do_field_helper();
+}
+
+void FieldSymbolizer::do_field_helper() {
+  if (_obj->is_instance()) {
+    InstanceKlass *instanceKlass = (InstanceKlass *)_obj->klass();
+    /**
+     * Currently, we do not consider static fields
+     */
+    // instanceKlass->do_local_static_fields(&fieldSymbolizer);
+    instanceKlass->do_nonstatic_fields(this);
+  } else {
+    assert(false, "unhandled");
+  }
+}
+
 void FieldSymbolizer::do_field(fieldDescriptor *fd) {
   // FIXME: for some object may refer to it self, resulting endless symbolizing.
   if (_depth > 3)
     return;
   ResourceMark rm;
   InstanceKlass *ik = InstanceKlass::cast(_obj->klass());
-  // output indents
-  for (int i = 0; i < _depth; i++) {
-    tty->print("    ");
-  }
-  // check if static field
+
   oop obj;
-  if (fd->is_static()) {
-    tty->print("static ");
+  if (fd->is_static()) { // check if static field
+
+    // tty->print("static ");
     obj = ik->java_mirror(); // TODO: check whether we should use `java_mirror`
   } else {
     obj = _obj;
   }
-  // print `signature` and `name`
-  tty->print("'%s' '%s' ", fd->signature()->as_C_string(),
-             fd->name()->as_C_string());
 
-  bool need_recursive = _field_handler(fd, obj);
+  bool need_recursive = (this->*_field_handler)(fd, obj);
   if (need_recursive) {
-    SymbolicObject::do_symbolize(obj->obj_field(fd->offset()), _depth + 1);
+    _depth += 1;
+		oop temp_obj = this->_obj;
+		this->_obj = obj->obj_field(fd->offset());
+		this->do_field_helper();
+		this->_obj = temp_obj;
+    _depth -= 1;
   }
 }
 
 bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj) {
+	// output indents
+  for (int i = 0; i < _depth; i++) {
+    tty->print("    ");
+  }
+
+  // print `signature` and `name`
+  tty->print("'%s' '%s' ", fd->signature()->as_C_string(),
+             fd->name()->as_C_string());
+
   switch (fd->field_type()) {
   case T_BYTE:
     tty->print(" = %uc\n", obj->byte_field(fd->offset()));
