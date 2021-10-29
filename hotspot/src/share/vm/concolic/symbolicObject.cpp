@@ -1,8 +1,11 @@
-#include "concolic/Concol.hpp"
+#ifdef ENABLE_CONCOLIC
+
+#include "concolic/symbolicObject.hpp"
+#include "utilities/ostream.hpp"
 
 void FieldSymbolizer::do_field(fieldDescriptor* fd) {
     // FIXME: for some object may refer to it self, resulting endless symbolizing.
-    if (_depth > 7) return;
+    if (_depth > 3) return;
     ResourceMark rm;
     InstanceKlass* ik = InstanceKlass::cast(_obj->klass());
     // output indents
@@ -13,18 +16,12 @@ void FieldSymbolizer::do_field(fieldDescriptor* fd) {
     oop obj;
     if (fd->is_static()) {
         tty->print("static ");
-        obj = ik->java_mirror();
+        obj = ik->java_mirror(); // TODO: check whether we should use `java_mirror`
     } else {
         obj = _obj;
     }
     // print `signature` and `name`
     tty->print("'%s' '%s' ", fd->signature()->as_C_string(), fd->name()->as_C_string());
-    // TODO: fix this
-    // if (fd->name()->equals("TYPE")) {
-    //     tty->print("TYPE \n");
-    //     return;
-    // }
-    // see `BasicType char2type` in `globalDefinitions.hpp` for all possible value
     oop sub_obj = NULL;
     switch (fd->field_type())
     {
@@ -58,7 +55,7 @@ void FieldSymbolizer::do_field(fieldDescriptor* fd) {
         tty->print("\n");
         sub_obj = obj->obj_field(fd->offset());
         if (sub_obj != NULL) {
-            Concol::symbolize(obj->obj_field(fd->offset()), _depth+1);
+            SymbolicObject::do_symbolize(obj->obj_field(fd->offset()), _depth+1);
         }
         break;
     case T_ARRAY:
@@ -71,13 +68,13 @@ void FieldSymbolizer::do_field(fieldDescriptor* fd) {
     }
 }
 
-Concol::Concol(oop obj) {
+void SymbolicObject::symbolize(Handle handle) {
+    handle()->print();
     tty->print(" - ---- details\n");
-    symbolize(obj, 1);
+    do_symbolize(handle(), 1);
 }
 
-void Concol::symbolize(oop obj, int depth) {
-    // TODO: check is_instance
+void SymbolicObject::do_symbolize(oop obj, int depth) {
     if (obj->is_instance()) {
         FieldSymbolizer fieldSymbolizer(obj, depth);
         InstanceKlass* instanceKlass = (InstanceKlass*)obj->klass();
@@ -88,4 +85,4 @@ void Concol::symbolize(oop obj, int depth) {
     }
 }
 
-
+#endif

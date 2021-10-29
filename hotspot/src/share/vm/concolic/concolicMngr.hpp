@@ -3,7 +3,8 @@
 
 // #include "SymbolicStore.hpp"
 
-#include "concolic/Concol.hpp"
+#include "concolic/symbolicObject.hpp"
+#include "concolic/threadContext.hpp"
 #include "jvmtifiles/jvmti.h"
 #include "runtime/handles.hpp"
 #include "utilities/top.hpp"
@@ -30,28 +31,16 @@
 # endif
 #endif
 
+class ThreadContext;
+
 class ConcolicMngr {
 public:
   static bool is_doing_concolic;
+  static ThreadContext* ctx;
 
-  static jlong startConcolic() {
-    printf("Start concolic!\n");
-    ConcolicMngr::is_doing_concolic = true;
-    return 0;
-  }
-
-  static jlong endConcolic() {
-    printf("End concolic!\n");
-    ConcolicMngr::is_doing_concolic = false;
-    return 0;
-  }
-
-  static void symbolize(Handle handle) {
-    handle()->print();
-    handle()->set_handle(handle.raw_value());
-
-    Concol concol(handle());
-  }
+  static jlong startConcolic();
+  static jlong endConcolic();
+  static void symbolize(Handle handle);
 };
 
 /**
