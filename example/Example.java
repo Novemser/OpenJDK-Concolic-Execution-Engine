@@ -8,14 +8,14 @@ public class Example {
         }
     }
     static class TestClass {
-        Byte b;
-        Character c;
-        Double d;
-        Float f;
-        Integer i;
-        Short s;
+        public Byte b;
+        public Character c;
+        public Double d;
+        public Float f;
+        public Integer i;
+        public Short s;
+        public TestInnerClass tic;
         // Boolean bo;
-        TestInnerClass tic;
         // String s;
         TestClass() {
             b = 1;
@@ -31,12 +31,12 @@ public class Example {
 
     public static void main(String[] args) {
         new Integer(0);
-        new TestClass();
+        TestClass test = new TestClass();
         System.startConcolic();
+        System.symbolize(test);
         int a = 1000;
-        int b = 2;
+        int b = test.i;
         int c = a + b;
-        System.symbolize(new TestClass());
         System.endConcolic();
         System.out.println(Integer.MIN_VALUE);
         System.out.println((new Integer(0)).MIN_VALUE);
