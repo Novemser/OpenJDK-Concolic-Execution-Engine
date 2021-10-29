@@ -5,11 +5,14 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/symbolicExpression.hpp"
+#include "memory/resourceArea.hpp"
+#include "oops/instanceKlass.hpp"
+#include "runtime/fieldDescriptor.hpp"
 #include "runtime/handles.hpp"
 #include "utilities/debug.hpp"
 
-#include <stdio.h>
 #include <map>
+#include <stdio.h>
 
 class SymbolicObject {
   static const int SYM_NAME_LENGTH = 8;
@@ -34,6 +37,24 @@ public:
   char *get_sym_name() { return sym_name; }
 
   void symbolize(Handle handle);
+  static void do_symbolize(oop obj, int depth);
+};
+
+class FieldSymbolizer : public FieldClosure {
+  typedef bool (*fieldHandler)(fieldDescriptor *fd, oop obj) ;
+
+private:
+  int _depth;
+  oop _obj;
+  fieldHandler _field_handler;
+
+public:
+  FieldSymbolizer(oop obj, int depth, fieldHandler field_handler)
+      : _obj(obj), _depth(depth), _field_handler(field_handler) {}
+  void do_field(fieldDescriptor *fd);
+
+public:
+  static bool print_field(fieldDescriptor *fd, oop obj);
 };
 
 #endif // ENABLE_CONCOLIC
