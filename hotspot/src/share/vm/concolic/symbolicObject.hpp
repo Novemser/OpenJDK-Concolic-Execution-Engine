@@ -26,8 +26,6 @@ public:
     set_sym_name();
   }
 
-  ~SymbolicObject() {}
-
   void set_sym_name() {
     int ret = sprintf(sym_name, "S_%ld", _sym_oid);
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
