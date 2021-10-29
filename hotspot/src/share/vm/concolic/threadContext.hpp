@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/SymbolicObject.hpp"
+#include "concolic/symbolicObject.hpp"
 #include "runtime/handles.hpp"
 
 #include <map>
@@ -20,16 +20,7 @@ public:
   ThreadContext();
   ~ThreadContext() { reset(); }
 
-  void symbolize(Handle handle) {
-    sym_oid_t sym_oid = get_next_sym_oid();
-    assert(sym_oid < MAX_SYM_OID, "sym_oid limitted");
-
-    handle()->set_sym_oid(sym_oid);
-
-    SymbolicObject *sym_obj = new SymbolicObject(sym_oid);
-
-    _sym_objs.insert(std::make_pair(sym_oid, sym_obj));
-  }
+  void symbolize(Handle handle);
 
   void reset() {
     SymStore::iterator sym_iter;

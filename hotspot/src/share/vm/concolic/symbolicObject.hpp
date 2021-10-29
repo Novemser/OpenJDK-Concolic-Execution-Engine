@@ -4,17 +4,19 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
+#include "concolic/symbolicExpression.hpp"
+#include "runtime/handles.hpp"
 #include "utilities/debug.hpp"
 
 #include <stdio.h>
-
+#include <map>
 
 class SymbolicObject {
-private:
   static const int SYM_NAME_LENGTH = 8;
+  typedef std::map<int, SymbolicExpression *> ExpStore;
 
+private:
   sym_oid_t _sym_oid;
-
   char sym_name[SYM_NAME_LENGTH];
 
 public:
@@ -27,11 +29,13 @@ public:
   ~SymbolicObject() {}
 
   void set_sym_name() {
-    int ret = sprintf(sym_name, "SYM_%ld", _sym_oid);
+    int ret = sprintf(sym_name, "S_%ld", _sym_oid);
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
   char *get_sym_name() { return sym_name; }
+
+  void symbolize(Handle handle);
 };
 
 #endif // ENABLE_CONCOLIC
