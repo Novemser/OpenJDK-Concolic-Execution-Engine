@@ -24,6 +24,7 @@
 
 // no precompiled headers
 #include "classfile/vmSymbols.hpp"
+#include "concolic/Concol.hpp"
 #include "concolic/ConcolicMngr.hpp"
 #include "gc_interface/collectedHeap.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
@@ -2219,6 +2220,10 @@ CONCOLIC_DEBUG_BLOCK_END
         }
 
       CASE(_new): {
+        CONCOLIC_BLOCK_BEGIN
+        int _ = 1;
+        int __ = _ + _;
+        CONCOLIC_BLOCK_END
         u2 index = Bytes::get_Java_u2(pc+1);
         ConstantPool* constants = istate->method()->constants();
         if (!constants->tag_at(index).is_unresolved_klass()) {
