@@ -1,15 +1,14 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/symbolicObject.hpp"
-#include "concolic/fieldSymbolizer.hpp"
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
-void SymbolicObject::symbolize(Handle handle) {
-  tty->print("SymbolicObject::symbolize!\n");
+void SymbolicObject::init_sym_exp(int field_index) {
+  SymbolicExpression *sym_exp =
+      new SymbolicExpression(this->get_sym_name(), field_index);
 
-  FieldSymbolizer::do_recursive_symbolize(handle());
-  FieldSymbolizer::do_recursive_print(handle());
+  sym_exp_store.insert(std::make_pair(field_index, sym_exp));
 }
 
 #endif

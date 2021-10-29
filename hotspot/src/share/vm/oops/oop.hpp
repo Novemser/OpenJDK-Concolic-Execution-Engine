@@ -25,24 +25,24 @@
 #ifndef SHARE_VM_OOPS_OOP_HPP
 #define SHARE_VM_OOPS_OOP_HPP
 
+#include "concolic/defs.hpp"
 #include "memory/iterator.hpp"
 #include "memory/memRegion.hpp"
 #include "memory/specialized_oop_closures.hpp"
 #include "oops/metadata.hpp"
 #include "utilities/macros.hpp"
 #include "utilities/top.hpp"
-#include "concolic/defs.hpp"
 
-// oopDesc is the top baseclass for objects classes.  The {name}Desc classes describe
-// the format of Java objects so the fields can be accessed from C++.
+// oopDesc is the top baseclass for objects classes.  The {name}Desc classes
+// describe the format of Java objects so the fields can be accessed from C++.
 // oopDesc is abstract.
 // (see oopHierarchy for complete oop class hierarchy)
 //
 // no virtual functions allowed
 
 // store into oop with store check
-template <class T> void oop_store(T* p, oop v);
-template <class T> void oop_store(volatile T* p, oop v);
+template <class T> void oop_store(T *p, oop v);
+template <class T> void oop_store(volatile T *p, oop v);
 
 extern bool always_do_update_barrier;
 
@@ -59,10 +59,11 @@ class ParCompactionManager;
 
 class oopDesc {
   friend class VMStructs;
- private:
-  volatile markOop  _mark;
+
+private:
+  volatile markOop _mark;
   union _metadata {
-    Klass*      _klass;
+    Klass *_klass;
     narrowKlass _compressed_klass;
   } _metadata;
 
@@ -71,36 +72,35 @@ class oopDesc {
 #endif
 
   // Fast access to barrier set.  Must be initialized.
-  static BarrierSet* _bs;
+  static BarrierSet *_bs;
 
- public:
+public:
 #ifdef ENABLE_CONCOLIC
-  void set_sym_oid(sym_oid_t sym_oid);
-
-  bool is_symbolic() const;
+  void set_sym_oid(sym_oid_t sym_oid) { _sym_oid = sym_oid; }
+  sym_oid_t get_sym_oid() const { return _sym_oid; }
+  bool is_symbolic() const { return _sym_oid != NULL_SYM_OID; }
 #endif
 
+  markOop mark() const { return _mark; }
+  markOop *mark_addr() const { return (markOop *)&_mark; }
 
-  markOop  mark() const         { return _mark; }
-  markOop* mark_addr() const    { return (markOop*) &_mark; }
+  void set_mark(volatile markOop m) { _mark = m; }
 
-  void set_mark(volatile markOop m)      { _mark = m;   }
-
-  void    release_set_mark(markOop m);
+  void release_set_mark(markOop m);
   markOop cas_set_mark(markOop new_mark, markOop old_mark);
 
   // Used only to re-initialize the mark word (e.g., of promoted
   // objects during a GC) -- requires a valid klass pointer
   void init_mark();
 
-  Klass* klass() const;
-  Klass* klass_or_null() const volatile;
-  Klass* klass_or_null_acquire() const volatile;
-  Klass** klass_addr();
-  narrowKlass* compressed_klass_addr();
+  Klass *klass() const;
+  Klass *klass_or_null() const volatile;
+  Klass *klass_or_null_acquire() const volatile;
+  Klass **klass_addr();
+  narrowKlass *compressed_klass_addr();
 
-  void set_klass(Klass* k);
-  void release_set_klass(Klass* k);
+  void set_klass(Klass *k);
+  void release_set_klass(Klass *k);
 
   // For klass field compression
   int klass_gap() const;
@@ -110,51 +110,51 @@ class oopDesc {
   oop list_ptr_from_klass();
 
   // size of object header, aligned to platform wordSize
-  static int header_size()          { return sizeof(oopDesc)/HeapWordSize; }
+  static int header_size() { return sizeof(oopDesc) / HeapWordSize; }
 
   // Returns whether this is an instance of k or an instance of a subclass of k
-  bool is_a(Klass* k)  const;
+  bool is_a(Klass *k) const;
 
   // Returns the actual oop size of the object
   int size();
 
   // Sometimes (for complicated concurrency-related reasons), it is useful
   // to be able to figure out the size of an object knowing its klass.
-  int size_given_klass(Klass* klass);
+  int size_given_klass(Klass *klass);
 
   // type test operations (inlined in oop.inline.h)
-  bool is_instance()            const;
-  bool is_instanceMirror()      const;
+  bool is_instance() const;
+  bool is_instanceMirror() const;
   bool is_instanceClassLoader() const;
-  bool is_instanceRef()         const;
-  bool is_array()               const;
-  bool is_objArray()            const;
-  bool is_typeArray()           const;
+  bool is_instanceRef() const;
+  bool is_array() const;
+  bool is_objArray() const;
+  bool is_typeArray() const;
 
- private:
+private:
   // field addresses in oop
-  void*     field_base(int offset)        const;
+  void *field_base(int offset) const;
 
-  jbyte*    byte_field_addr(int offset)   const;
-  jchar*    char_field_addr(int offset)   const;
-  jboolean* bool_field_addr(int offset)   const;
-  jint*     int_field_addr(int offset)    const;
-  jshort*   short_field_addr(int offset)  const;
-  jlong*    long_field_addr(int offset)   const;
-  jfloat*   float_field_addr(int offset)  const;
-  jdouble*  double_field_addr(int offset) const;
-  Metadata** metadata_field_addr(int offset) const;
+  jbyte *byte_field_addr(int offset) const;
+  jchar *char_field_addr(int offset) const;
+  jboolean *bool_field_addr(int offset) const;
+  jint *int_field_addr(int offset) const;
+  jshort *short_field_addr(int offset) const;
+  jlong *long_field_addr(int offset) const;
+  jfloat *float_field_addr(int offset) const;
+  jdouble *double_field_addr(int offset) const;
+  Metadata **metadata_field_addr(int offset) const;
 
- public:
+public:
   // Need this as public for garbage collection.
-  template <class T> T* obj_field_addr(int offset) const;
+  template <class T> T *obj_field_addr(int offset) const;
 
   // Needed for javaClasses
-  address*  address_field_addr(int offset) const;
+  address *address_field_addr(int offset) const;
 
   static bool is_null(oop obj);
   static bool is_null(narrowOop obj);
-  static bool is_null(Klass* obj);
+  static bool is_null(Klass *obj);
 
   // Decode an oop pointer from a narrowOop if compressed.
   // These are overloaded for oop and narrowOop as are the other functions
@@ -171,32 +171,33 @@ class oopDesc {
   static narrowOop encode_heap_oop(oop v);
 
   // Load an oop out of the Java heap
-  static narrowOop load_heap_oop(narrowOop* p);
-  static oop       load_heap_oop(oop* p);
+  static narrowOop load_heap_oop(narrowOop *p);
+  static oop load_heap_oop(oop *p);
 
   // Load an oop out of Java heap and decode it to an uncompressed oop.
-  static oop load_decode_heap_oop_not_null(narrowOop* p);
-  static oop load_decode_heap_oop_not_null(oop* p);
-  static oop load_decode_heap_oop(narrowOop* p);
-  static oop load_decode_heap_oop(oop* p);
+  static oop load_decode_heap_oop_not_null(narrowOop *p);
+  static oop load_decode_heap_oop_not_null(oop *p);
+  static oop load_decode_heap_oop(narrowOop *p);
+  static oop load_decode_heap_oop(oop *p);
 
   // Store an oop into the heap.
-  static void store_heap_oop(narrowOop* p, narrowOop v);
-  static void store_heap_oop(oop* p, oop v);
+  static void store_heap_oop(narrowOop *p, narrowOop v);
+  static void store_heap_oop(oop *p, oop v);
 
   // Encode oop if UseCompressedOops and store into the heap.
-  static void encode_store_heap_oop_not_null(narrowOop* p, oop v);
-  static void encode_store_heap_oop_not_null(oop* p, oop v);
-  static void encode_store_heap_oop(narrowOop* p, oop v);
-  static void encode_store_heap_oop(oop* p, oop v);
+  static void encode_store_heap_oop_not_null(narrowOop *p, oop v);
+  static void encode_store_heap_oop_not_null(oop *p, oop v);
+  static void encode_store_heap_oop(narrowOop *p, oop v);
+  static void encode_store_heap_oop(oop *p, oop v);
 
-  static void release_store_heap_oop(volatile narrowOop* p, narrowOop v);
-  static void release_store_heap_oop(volatile oop* p, oop v);
+  static void release_store_heap_oop(volatile narrowOop *p, narrowOop v);
+  static void release_store_heap_oop(volatile oop *p, oop v);
 
-  static void release_encode_store_heap_oop_not_null(volatile narrowOop* p, oop v);
-  static void release_encode_store_heap_oop_not_null(volatile oop* p, oop v);
-  static void release_encode_store_heap_oop(volatile narrowOop* p, oop v);
-  static void release_encode_store_heap_oop(volatile oop* p, oop v);
+  static void release_encode_store_heap_oop_not_null(volatile narrowOop *p,
+                                                     oop v);
+  static void release_encode_store_heap_oop_not_null(volatile oop *p, oop v);
+  static void release_encode_store_heap_oop(volatile narrowOop *p, oop v);
+  static void release_encode_store_heap_oop(volatile oop *p, oop v);
 
   static oop atomic_exchange_oop(oop exchange_value, volatile HeapWord *dest);
   static oop atomic_compare_exchange_oop(oop exchange_value,
@@ -211,8 +212,8 @@ class oopDesc {
   void obj_field_put_raw(int offset, oop value);
   void obj_field_put_volatile(int offset, oop value);
 
-  Metadata* metadata_field(int offset) const;
-  void metadata_field_put(int offset, Metadata* value);
+  Metadata *metadata_field(int offset) const;
+  void metadata_field_put(int offset, Metadata *value);
 
   jbyte byte_field(int offset) const;
   void byte_field_put(int offset, jbyte contents);
@@ -272,9 +273,9 @@ class oopDesc {
   void release_address_field_put(int offset, address contents);
 
   // printing functions for VM debugging
-  void print_on(outputStream* st) const;         // First level print
-  void print_value_on(outputStream* st) const;   // Second level print.
-  void print_address_on(outputStream* st) const; // Address printing
+  void print_on(outputStream *st) const;         // First level print
+  void print_value_on(outputStream *st) const;   // Second level print.
+  void print_address_on(outputStream *st) const; // Address printing
 
   // printing on default output stream
   void print();
@@ -282,15 +283,15 @@ class oopDesc {
   void print_address();
 
   // return the print strings
-  char* print_string();
-  char* print_value_string();
+  char *print_string();
+  char *print_value_string();
 
   // verification operations
-  void verify_on(outputStream* st);
+  void verify_on(outputStream *st);
   void verify();
 
   // locking operations
-  bool is_locked()   const;
+  bool is_locked() const;
   bool is_unlocked() const;
   bool has_bias_pattern() const;
 
@@ -309,12 +310,12 @@ class oopDesc {
 
 #if INCLUDE_ALL_GCS
   // Parallel Scavenge
-  void push_contents(PSPromotionManager* pm);
+  void push_contents(PSPromotionManager *pm);
 
   // Parallel Old
-  void update_contents(ParCompactionManager* cm);
+  void update_contents(ParCompactionManager *cm);
 
-  void follow_contents(ParCompactionManager* cm);
+  void follow_contents(ParCompactionManager *cm);
 #endif // INCLUDE_ALL_GCS
 
   bool is_scavengable() const;
@@ -347,32 +348,33 @@ class oopDesc {
   void follow_body(int begin, int end);
 
   // Fast access to barrier set
-  static BarrierSet* bs()            { return _bs; }
-  static void set_bs(BarrierSet* bs) { _bs = bs; }
+  static BarrierSet *bs() { return _bs; }
+  static void set_bs(BarrierSet *bs) { _bs = bs; }
 
   // iterators, returns size of object
-#define OOP_ITERATE_DECL(OopClosureType, nv_suffix)                      \
-  int oop_iterate(OopClosureType* blk);                                  \
-  int oop_iterate(OopClosureType* blk, MemRegion mr);  // Only in mr.
+#define OOP_ITERATE_DECL(OopClosureType, nv_suffix)                            \
+  int oop_iterate(OopClosureType *blk);                                        \
+  int oop_iterate(OopClosureType *blk, MemRegion mr); // Only in mr.
 
   ALL_OOP_OOP_ITERATE_CLOSURES_1(OOP_ITERATE_DECL)
   ALL_OOP_OOP_ITERATE_CLOSURES_2(OOP_ITERATE_DECL)
 
 #if INCLUDE_ALL_GCS
 
-#define OOP_ITERATE_BACKWARDS_DECL(OopClosureType, nv_suffix)            \
-  int oop_iterate_backwards(OopClosureType* blk);
+#define OOP_ITERATE_BACKWARDS_DECL(OopClosureType, nv_suffix)                  \
+  int oop_iterate_backwards(OopClosureType *blk);
 
   ALL_OOP_OOP_ITERATE_CLOSURES_1(OOP_ITERATE_BACKWARDS_DECL)
   ALL_OOP_OOP_ITERATE_CLOSURES_2(OOP_ITERATE_BACKWARDS_DECL)
 #endif
 
-  int oop_iterate_no_header(OopClosure* bk);
-  int oop_iterate_no_header(OopClosure* bk, MemRegion mr);
+  int oop_iterate_no_header(OopClosure *bk);
+  int oop_iterate_no_header(OopClosure *bk, MemRegion mr);
 
   // identity hash; returns the identity hash key (computes it if necessary)
-  // NOTE with the introduction of UseBiasedLocking that identity_hash() might reach a
-  // safepoint if called on a biased object. Calling code must be aware of that.
+  // NOTE with the introduction of UseBiasedLocking that identity_hash() might
+  // reach a safepoint if called on a biased object. Calling code must be aware
+  // of that.
   intptr_t identity_hash();
   intptr_t slow_identity_hash();
 
@@ -380,13 +382,15 @@ class oopDesc {
   unsigned int new_hash(juint seed);
 
   // marks are forwarded to stack when object is locked
-  bool     has_displaced_mark() const;
-  markOop  displaced_mark() const;
-  void     set_displaced_mark(markOop m);
+  bool has_displaced_mark() const;
+  markOop displaced_mark() const;
+  void set_displaced_mark(markOop m);
 
   // for code generation
-  static int mark_offset_in_bytes()    { return offset_of(oopDesc, _mark); }
-  static int klass_offset_in_bytes()   { return offset_of(oopDesc, _metadata._klass); }
+  static int mark_offset_in_bytes() { return offset_of(oopDesc, _mark); }
+  static int klass_offset_in_bytes() {
+    return offset_of(oopDesc, _metadata._klass);
+  }
   static int klass_gap_offset_in_bytes();
 };
 

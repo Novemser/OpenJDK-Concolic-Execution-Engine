@@ -2275,6 +2275,7 @@ run:
               }
               result->set_klass_gap(0);
               result->set_klass(k_entry);
+              result->set_sym_oid(0);
               // Must prevent reordering of stores for object initialization
               // with stores that publish the new object.
               OrderAccess::storestore();

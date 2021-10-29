@@ -117,16 +117,6 @@ unsigned int oopDesc::new_hash(juint seed) {
   }
 }
 
-#ifdef ENABLE_CONCOLIC
-void oopDesc::set_sym_oid(sym_oid_t sym_oid) {
-  _sym_oid = sym_oid;
-}
-
-bool oopDesc::is_symbolic() const {
-  return _sym_oid != NULL_SYM_OID;
-}
-#endif
-
 VerifyOopClosure VerifyOopClosure::verify_oop;
 
 void VerifyOopClosure::do_oop(oop* p)       { VerifyOopClosure::do_oop_work(p); }

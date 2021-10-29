@@ -5,8 +5,7 @@
 
 // Symbolioc Object ID related
 #define NULL_SYM_OID 0
+#define MAX_SYM_OID 10000
 typedef ulong sym_oid_t;
-
-
 
 #endif // SHARE_VM_CONCOLIC_DEFS_HPP

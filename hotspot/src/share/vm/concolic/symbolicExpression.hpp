@@ -23,9 +23,9 @@ private:
   bool _is_leaf;
 
 public:
-  SymbolicExpression(char *sym_name, int field_no)
+  SymbolicExpression(char *sym_name, int field_index)
       : _ref_count(0), _op(0), _is_leaf(true) {
-    int ret = sprintf(_data.exp, "%s.%d", sym_name, field_no);
+    int ret = sprintf(_data.exp, "%s.%d", sym_name, field_index);
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 

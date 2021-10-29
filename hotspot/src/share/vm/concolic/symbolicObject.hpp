@@ -16,11 +16,12 @@
 
 class SymbolicObject {
   static const int SYM_NAME_LENGTH = 8;
-  typedef std::map<int, SymbolicExpression *> ExpStore;
+  typedef std::map<int, SymbolicExpression *> SymExpStore;
 
 private:
   sym_oid_t _sym_oid;
   char sym_name[SYM_NAME_LENGTH];
+  SymExpStore sym_exp_store;
 
 public:
   SymbolicObject(sym_oid_t sym_oid) {
@@ -35,7 +36,7 @@ public:
 
   char *get_sym_name() { return sym_name; }
 
-  void symbolize(Handle handle);
+  void init_sym_exp(int field_index);
 };
 
 #endif // ENABLE_CONCOLIC

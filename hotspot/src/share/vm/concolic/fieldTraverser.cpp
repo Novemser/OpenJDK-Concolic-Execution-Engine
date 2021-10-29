@@ -1,20 +1,20 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/fieldSymbolizer.hpp"
+#include "concolic/fieldTraverser.hpp"
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
-void FieldSymbolizer::do_recursive_symbolize(oop obj) {
-  FieldSymbolizer fieldSymbolizer(obj, &FieldSymbolizer::symbolize_field);
-  fieldSymbolizer.do_field_helper();
+void FieldTraverser::do_recursive() {
+  this->_target_depth = 3; // TODO: unlimited
+  this->do_recursive_helper();
 }
 
-void FieldSymbolizer::do_recursive_print(oop obj) {
-  FieldSymbolizer fieldSymbolizer(obj, &FieldSymbolizer::print_field);
-  fieldSymbolizer.do_field_helper();
+void FieldTraverser::do_once() {
+  this->_target_depth = 1;
+  this->do_recursive_helper();
 }
 
-void FieldSymbolizer::do_field_helper() {
+void FieldTraverser::do_recursive_helper() {
   if (_obj->is_instance()) {
     InstanceKlass *instanceKlass = (InstanceKlass *)_obj->klass();
     /**
@@ -27,9 +27,9 @@ void FieldSymbolizer::do_field_helper() {
   }
 }
 
-void FieldSymbolizer::do_field(fieldDescriptor *fd) {
+void FieldTraverser::do_field(fieldDescriptor *fd) {
   // FIXME: for some object may refer to it self, resulting endless symbolizing.
-  if (_depth > 3)
+  if (_depth > _target_depth)
     return;
 
   bool need_recursive;
@@ -45,40 +45,53 @@ void FieldSymbolizer::do_field(fieldDescriptor *fd) {
     } else {
       obj = this->_obj;
     }
-    need_recursive = (this->*_field_handler)(fd, obj);
+    need_recursive = this->do_field_helper(fd, obj);
   }
 
   if (need_recursive) {
-    // before recursive
     _depth += 1;
     oop temp_obj = this->_obj;
     this->_obj = obj->obj_field(fd->offset());
 
-    // recursive
-    this->do_field_helper();
+    this->do_recursive_helper();
 
-    // after recursive
     this->_obj = temp_obj;
     _depth -= 1;
   }
 }
 
-bool FieldSymbolizer::symbolize_field(fieldDescriptor *fd, oop obj) {
+void FieldTraverser::print_indent() {
+  for (int i = 0; i < _depth; i++) {
+    tty->print("    ");
+  }
+}
+
+bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
+  print_indent();
   tty->print("---- %d\n", fd->index());
-	// SymbolicExpression* sym_exp = new SymbolicExpression(obj)
+
+  // TODO: directly transfer SymbolicObject*
+  SymbolicObject *sym_obj;
+
   switch (fd->field_type()) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
-    tty->print("unhandled\n");
+    assert(false, "unhandled!");
     // TODO: return true;
     return false;
   default:
+    if (obj->is_symbolic()) {
+      sym_obj = this->_ctx.get_sym_obj(obj->get_sym_oid());
+    } else {
+      sym_obj = this->_ctx.alloc_sym_obj(obj);
+    }
+    sym_obj->init_sym_exp(fd->index());
     return false;
   }
 }
 
-bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj) {
+bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
 
   // print `signature` and `name`
@@ -123,12 +136,6 @@ bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj) {
   default:
     assert(false, "illegal field type");
     return false;
-  }
-}
-
-void FieldSymbolizer::print_indent() {
-  for (int i = 0; i < _depth; i++) {
-    tty->print("    ");
   }
 }
 

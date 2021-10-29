@@ -2,4 +2,6 @@
 
 * Should we also symbolize static fields?
 
-* We should handle array in FieldSymbolizer.
+* We should handle array in FieldTraverser.
+
+* Transfer SymbolicObject* in FieldTraverser.
