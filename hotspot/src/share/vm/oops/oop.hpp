@@ -31,6 +31,7 @@
 #include "oops/metadata.hpp"
 #include "utilities/macros.hpp"
 #include "utilities/top.hpp"
+#include "concolic/defs.hpp"
 
 // oopDesc is the top baseclass for objects classes.  The {name}Desc classes describe
 // the format of Java objects so the fields can be accessed from C++.
@@ -66,7 +67,7 @@ class oopDesc {
   } _metadata;
 
 #ifdef ENABLE_CONCOLIC
-  oop* _handle;
+  sym_oid_t _sym_oid;
 #endif
 
   // Fast access to barrier set.  Must be initialized.
@@ -74,7 +75,7 @@ class oopDesc {
 
  public:
 #ifdef ENABLE_CONCOLIC
-  void set_handle(oop* handle);
+  void set_sym_oid(sym_oid_t sym_oid);
 
   bool is_symbolic() const;
 #endif

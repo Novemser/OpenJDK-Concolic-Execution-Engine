@@ -118,12 +118,12 @@ unsigned int oopDesc::new_hash(juint seed) {
 }
 
 #ifdef ENABLE_CONCOLIC
-void oopDesc::set_handle(oop* handle) {
-  _handle = handle;
+void oopDesc::set_sym_oid(sym_oid_t sym_oid) {
+  _sym_oid = sym_oid;
 }
 
 bool oopDesc::is_symbolic() const {
-  return _handle != NULL;
+  return _sym_oid != NULL_SYM_OID;
 }
 #endif
 
