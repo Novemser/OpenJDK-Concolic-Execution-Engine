@@ -20,8 +20,8 @@ class SymbolicObject {
 
 private:
   sym_oid_t _sym_oid;
-  char sym_name[SYM_NAME_LENGTH];
-  SymExpStore sym_exp_store;
+  char _sym_name[SYM_NAME_LENGTH];
+  SymExpStore _sym_exps;
 
 public:
   SymbolicObject(sym_oid_t sym_oid) {
@@ -30,13 +30,16 @@ public:
   }
 
   void set_sym_name() {
-    int ret = sprintf(sym_name, "S_%ld", _sym_oid);
+    int ret = sprintf(_sym_name, "S_%ld", _sym_oid);
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
-  char *get_sym_name() { return sym_name; }
+  char *get_sym_name() { return _sym_name; }
 
   void init_sym_exp(int field_index);
+
+public:
+  void print();
 };
 
 #endif // ENABLE_CONCOLIC

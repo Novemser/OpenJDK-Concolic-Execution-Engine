@@ -38,4 +38,20 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
   field_symbolzier.do_recursive();
 }
 
+void ThreadContext::print() {
+  SymStore::iterator sym_iter;
+  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
+    sym_iter->second->print();
+  }
+}
+
+void ThreadContext::reset() {
+  SymStore::iterator sym_iter;
+  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
+    delete sym_iter->second;
+  }
+  _sym_objs.clear();
+  _sym_oid_counter = 0;
+}
+
 #endif

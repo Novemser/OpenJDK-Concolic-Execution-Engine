@@ -15,6 +15,7 @@ jlong ConcolicMngr::startConcolic() {
 
 jlong ConcolicMngr::endConcolic() {
   tty->print("End concolic!\n");
+  ctx->print();
   delete ctx;
   ConcolicMngr::is_doing_concolic = false;
   return 0;

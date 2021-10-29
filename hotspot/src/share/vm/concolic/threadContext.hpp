@@ -38,15 +38,8 @@ private:
   }
 
 public:
-  void reset() {
-    SymStore::iterator sym_iter;
-    for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end();
-         ++sym_iter) {
-      delete sym_iter->second;
-    }
-    _sym_objs.clear();
-    _sym_oid_counter = 0;
-  }
+  void print();
+  void reset();
 };
 
 #endif
