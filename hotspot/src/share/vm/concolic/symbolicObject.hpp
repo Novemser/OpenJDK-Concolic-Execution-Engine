@@ -44,6 +44,8 @@ class FieldSymbolizer : public FieldClosure {
   typedef bool (FieldSymbolizer::*fieldHandler)(fieldDescriptor *fd, oop obj) ;
 
 private:
+  int _depth;
+  oop _obj;
   fieldHandler _field_handler;
 
 public:
