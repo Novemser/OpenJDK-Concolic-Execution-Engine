@@ -4,6 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/symbolicObject.hpp"
+#include "concolic/shadowStack.hpp"
 #include "runtime/handles.hpp"
 
 #include <map>
@@ -13,12 +14,13 @@ class ThreadContext {
 
 private:
   JavaThread* _thread;
-  sym_oid_t _sym_oid_counter;
   SymStore _sym_objs;
+  ShadowStack _s_stack;
 
+  sym_oid_t _sym_oid_counter;
 public:
-  ThreadContext(JavaThread* thread);
-  ~ThreadContext() { reset(); }
+  ThreadContext(JavaThread* jt);
+  ~ThreadContext();
 
   void symbolize(Handle handle);
 
@@ -41,7 +43,6 @@ private:
 public:
   void print();
   void print_stack_trace();
-  void reset();
 };
 
 #endif

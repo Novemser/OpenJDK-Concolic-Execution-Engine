@@ -5,7 +5,16 @@
 #include "concolic/fieldTraverser.hpp"
 #include "utilities/vmError.hpp"
 
-ThreadContext::ThreadContext(JavaThread *thread) : _thread(thread) {
+ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
+  _sym_oid_counter = 0;
+}
+
+ThreadContext::~ThreadContext() {
+  SymStore::iterator sym_iter;
+  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
+    delete sym_iter->second;
+  }
+  _sym_objs.clear();
   _sym_oid_counter = 0;
 }
 
@@ -52,15 +61,6 @@ void ThreadContext::print_stack_trace() {
   ZeroStack *stack = _thread->zero_stack();
   static char buf[O_BUFLEN];
   VMError::print_stack_trace(tty, _thread, buf, sizeof(buf));
-}
-
-void ThreadContext::reset() {
-  SymStore::iterator sym_iter;
-  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
-    delete sym_iter->second;
-  }
-  _sym_objs.clear();
-  _sym_oid_counter = 0;
 }
 
 #endif

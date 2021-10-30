@@ -12,8 +12,6 @@ jlong ConcolicMngr::startConcolic(JavaThread *thread) {
   ConcolicMngr::is_doing_concolic = true;
   assert(thread != NULL, "not null java thread");
   ctx = new ThreadContext(thread);
-
-  ctx->print_stack_trace();
   return 0;
 }
 
