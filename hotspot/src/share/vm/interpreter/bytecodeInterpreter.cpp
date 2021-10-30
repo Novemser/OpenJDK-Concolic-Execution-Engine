@@ -2275,7 +2275,13 @@ run:
               }
               result->set_klass_gap(0);
               result->set_klass(k_entry);
+#ifdef ENABLE_CONCOLIC
+              /**
+               * This is where an object created
+               * We can set the default sym_oid here
+               */
               result->set_sym_oid(0);
+#endif
               // Must prevent reordering of stores for object initialization
               // with stores that publish the new object.
               OrderAccess::storestore();

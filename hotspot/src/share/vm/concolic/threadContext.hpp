@@ -12,11 +12,12 @@ class ThreadContext {
   typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
 
 private:
+  JavaThread* _thread;
   sym_oid_t _sym_oid_counter;
   SymStore _sym_objs;
 
 public:
-  ThreadContext();
+  ThreadContext(JavaThread* thread);
   ~ThreadContext() { reset(); }
 
   void symbolize(Handle handle);
@@ -39,6 +40,7 @@ private:
 
 public:
   void print();
+  void print_stack_trace();
   void reset();
 };
 

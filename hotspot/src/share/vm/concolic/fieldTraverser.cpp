@@ -67,8 +67,8 @@ void FieldTraverser::print_indent() {
 }
 
 bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
-  print_indent();
-  tty->print("---- %d\n", fd->index());
+  // print_indent();
+  // tty->print("---- %d\n", fd->index());
 
   // TODO: directly transfer SymbolicObject*
   SymbolicObject *sym_obj;

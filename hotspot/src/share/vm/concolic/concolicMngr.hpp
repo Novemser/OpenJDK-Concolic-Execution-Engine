@@ -38,7 +38,7 @@ public:
   static bool is_doing_concolic;
   static ThreadContext* ctx;
 
-  static jlong startConcolic();
+  static jlong startConcolic(JavaThread* thread);
   static jlong endConcolic();
   static void symbolize(Handle handle);
 };

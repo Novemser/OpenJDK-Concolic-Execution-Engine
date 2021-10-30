@@ -33,7 +33,9 @@ class VM_ReportJavaOutOfMemory;
 class VMError : public StackObj {
   friend class VM_ReportJavaOutOfMemory;
   friend class Decoder;
-
+#ifdef ENABLE_CONCOLIC
+  friend class ThreadContext;
+#endif
   int          _id;          // Solaris/Linux signals: 0 - SIGRTMAX
                              // Windows exceptions: 0xCxxxxxxx system errors
                              //                     0x8xxxxxxx system warnings

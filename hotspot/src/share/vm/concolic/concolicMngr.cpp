@@ -1,15 +1,19 @@
 #include "concolic/concolicMngr.hpp"
 #include "utilities/ostream.hpp"
+#include "utilities/vmError.hpp"
 
 bool ConcolicMngr::is_doing_concolic = false;
 ThreadContext *ConcolicMngr::ctx = NULL;
 
 #ifdef ENABLE_CONCOLIC
 
-jlong ConcolicMngr::startConcolic() {
+jlong ConcolicMngr::startConcolic(JavaThread *thread) {
   tty->print("Start concolic!\n");
   ConcolicMngr::is_doing_concolic = true;
-  ctx = new ThreadContext;
+  assert(thread != NULL, "not null java thread");
+  ctx = new ThreadContext(thread);
+
+  ctx->print_stack_trace();
   return 0;
 }
 

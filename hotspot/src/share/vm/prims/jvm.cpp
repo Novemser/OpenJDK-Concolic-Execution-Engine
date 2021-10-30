@@ -311,10 +311,10 @@ JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))
   return os::javaTimeNanos();
 JVM_END
 
-JVM_LEAF(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
+JVM_ENTRY(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_StartConcolic");
 #ifdef ENABLE_CONCOLIC
-  return ConcolicMngr::startConcolic();
+  return ConcolicMngr::startConcolic((JavaThread*) THREAD);
 #else
   return os::javaTimeNanos();
 #endif
