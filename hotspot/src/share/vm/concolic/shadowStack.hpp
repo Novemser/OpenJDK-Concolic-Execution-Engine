@@ -10,7 +10,7 @@
 
 class ShadowStack {
   typedef std::vector<ShadowFrame *> ShadowFrames;
-	static const int DEFAULT_MAX_STACK_DEPTH = 32;
+  static const int DEFAULT_MAX_STACK_DEPTH = 32;
 
 private:
   ShadowFrames _s_frames;
@@ -18,6 +18,9 @@ private:
 public:
   ShadowStack(JavaThread *jt);
   ~ShadowStack();
+
+  void print_origin();
+  void print();
 };
 
 #endif

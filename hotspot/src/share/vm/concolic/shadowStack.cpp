@@ -25,6 +25,7 @@ ShadowStack::ShadowStack(JavaThread *jt) {
 
     for (int frame_index = 0; !sfs.is_done(); sfs.next(), frame_index++) {
       ShadowFrame *s_frame = new ShadowFrame(*sfs.current(), frame_index);
+      s_frame->copy();
       _s_frames.push_back(s_frame);
     }
     // reverse the stack
@@ -34,11 +35,8 @@ ShadowStack::ShadowStack(JavaThread *jt) {
     if (!has_last_Java_frame)
       jt->reset_last_Java_frame();
 
-    for (ShadowFrames::iterator iter = _s_frames.begin();
-         iter != _s_frames.end(); ++iter) {
-      ShadowFrame *s_frame = *iter;
-      s_frame->copy();
-    }
+    print_origin();
+    print();
   }
 }
 
@@ -48,6 +46,23 @@ ShadowStack::~ShadowStack() {
     delete *iter;
   }
   _s_frames.clear();
+}
+
+void ShadowStack::print_origin() {
+  for (ShadowFrames::reverse_iterator iter = _s_frames.rbegin();
+       iter != _s_frames.rend(); ++iter) {
+    ShadowFrame *s_frame = *iter;
+    s_frame->print_origin();
+  }
+}
+
+void ShadowStack::print() {
+  tty->print_cr("ShadowStack: ");
+  for (ShadowFrames::reverse_iterator iter = _s_frames.rbegin();
+       iter != _s_frames.rend(); ++iter) {
+    ShadowFrame *s_frame = *iter;
+    s_frame->print();
+  }
 }
 
 #endif

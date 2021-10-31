@@ -30,7 +30,6 @@ public class Example {
     }
 
     public static void main(String[] args) {
-        new Integer(0);
         TestClass test = new TestClass();
         System.startConcolic();
         System.symbolize(test);
@@ -38,7 +37,7 @@ public class Example {
         int b = test.i;
         int c = a + b;
         System.endConcolic();
-        System.out.println(Integer.MIN_VALUE);
-        System.out.println((new Integer(0)).MIN_VALUE);
+        // System.out.println(Integer.MIN_VALUE);
+        // System.out.println((new Integer(0)).MIN_VALUE);
     }
 }
