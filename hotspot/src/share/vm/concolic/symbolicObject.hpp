@@ -5,10 +5,6 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/symbolicExpression.hpp"
-#include "memory/resourceArea.hpp"
-#include "oops/instanceKlass.hpp"
-#include "runtime/fieldDescriptor.hpp"
-#include "runtime/handles.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>

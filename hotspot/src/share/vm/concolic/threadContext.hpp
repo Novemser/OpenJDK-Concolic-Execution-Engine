@@ -22,6 +22,8 @@ public:
   ThreadContext(JavaThread* jt);
   ~ThreadContext();
 
+  ShadowStack& get_shadow_stack() { return _s_stack; }
+
   void symbolize(Handle handle);
 
   SymbolicObject *alloc_sym_obj(oop obj);

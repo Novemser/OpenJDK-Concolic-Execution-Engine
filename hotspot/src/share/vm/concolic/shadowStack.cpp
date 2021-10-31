@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadowStack.hpp"
+#include "runtime/thread.hpp"
 
 #include <algorithm>
 
@@ -11,7 +12,6 @@ ShadowStack::ShadowStack(JavaThread *jt) {
     bool has_last_Java_frame = jt->has_last_Java_frame();
     if (!has_last_Java_frame)
       jt->set_last_Java_frame();
-    tty->print_cr("Java frames:");
 
     // If the top frame is a Shark frame and the frame anchor isn't
     // set up then it's possible that the information in the frame
@@ -34,9 +34,6 @@ ShadowStack::ShadowStack(JavaThread *jt) {
     // Reset the frame anchor if necessary
     if (!has_last_Java_frame)
       jt->reset_last_Java_frame();
-
-    print_origin();
-    print();
   }
 }
 
@@ -46,6 +43,10 @@ ShadowStack::~ShadowStack() {
     delete *iter;
   }
   _s_frames.clear();
+}
+
+void ShadowStack::pop() {
+  // _s_frames.pop_back();
 }
 
 void ShadowStack::print_origin() {

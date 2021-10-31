@@ -1,4 +1,5 @@
 #include "concolic/concolicMngr.hpp"
+#include "concolic/threadContext.hpp"
 #include "utilities/ostream.hpp"
 #include "utilities/vmError.hpp"
 

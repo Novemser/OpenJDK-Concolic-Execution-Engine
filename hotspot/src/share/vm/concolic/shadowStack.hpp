@@ -4,9 +4,10 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadowFrame.hpp"
-#include "runtime/thread.hpp"
 
 #include <vector>
+
+class JavaThread;
 
 class ShadowStack {
   typedef std::vector<ShadowFrame *> ShadowFrames;
@@ -18,6 +19,8 @@ private:
 public:
   ShadowStack(JavaThread *jt);
   ~ShadowStack();
+
+  void pop();
 
   void print_origin();
   void print();

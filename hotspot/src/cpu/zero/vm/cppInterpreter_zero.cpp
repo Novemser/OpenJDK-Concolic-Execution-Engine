@@ -25,6 +25,8 @@
 
 #include "precompiled.hpp"
 #include "asm/assembler.hpp"
+#include "concolic/concolicMngr.hpp"
+#include "concolic/threadContext.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
 #include "interpreter/cppInterpreter.hpp"
 #include "interpreter/interpreter.hpp"
@@ -49,6 +51,7 @@
 #include "stack_zero.inline.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/macros.hpp"
+#include "utilities/vmError.hpp"
 #ifdef SHARK
 #include "shark/shark_globals.hpp"
 #endif
@@ -73,6 +76,19 @@ int CppInterpreter::normal_entry(Method* method, intptr_t UNUSED, TRAPS) {
   // Allocate and initialize our frame.
   InterpreterFrame *frame = InterpreterFrame::build(method, CHECK_0);
   thread->push_zero_frame(frame);
+
+#ifdef ENABLE_CONCOLIC
+  // {
+  //   ResourceMark rm;
+  //   char* name_and_sig = method->name_and_sig_as_C_string();
+  //   if (strstr(name_and_sig, "main([Ljava/lang/String;)V")) {
+  //     tty->print("\033[1;33m=================================================================\033[0m\n");
+  //     Symbol* method_holder_name = method->method_holder()->name();
+  //     Symbol* method_name = method->name();
+  //     tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
+  //   }
+  // }
+#endif
 
   // Execute those bytecodes!
   main_loop(0, THREAD);
@@ -510,6 +526,16 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
       ShouldNotReachHere();
     }
   }
+
+#ifdef ENABLE_CONCOLIC
+  if (ConcolicMngr::is_doing_concolic) {
+    ResourceMark rm;
+    char* name_and_sig = method->name_and_sig_as_C_string();
+    tty->print_cr("native_call of %s !", name_and_sig);
+    ConcolicMngr::ctx->print_stack_trace();
+    ConcolicMngr::ctx->get_shadow_stack().print();
+  }
+#endif
 
   // No deoptimized frames on the stack
   return 0;
