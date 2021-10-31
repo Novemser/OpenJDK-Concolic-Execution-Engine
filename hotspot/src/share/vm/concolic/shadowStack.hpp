@@ -20,7 +20,8 @@ public:
   ShadowStack(JavaThread *jt);
   ~ShadowStack();
 
-  void pop();
+  void push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame, intptr_t *sp);
+  void pop(ZeroFrame *zero_frame);
 
   void print_origin();
   void print();

@@ -43,16 +43,28 @@
   ZeroFrame *top_zero_frame() {
     return _top_zero_frame;
   }
-  void push_zero_frame(ZeroFrame *frame) {
-    *(ZeroFrame **) frame = _top_zero_frame;
-    _top_zero_frame = frame;
+  void push_zero_frame(ZeroFrame *zframe) {
+    *(ZeroFrame **) zframe = _top_zero_frame;
+    _top_zero_frame = zframe;
+#ifdef ENABLE_CONCOLIC
+    if (ConcolicMngr::is_doing_concolic) {
+      ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame, *(ZeroFrame **) zframe,
+                                               zero_stack()->sp());
+      ConcolicMngr::ctx->print_stack_trace();
+      ConcolicMngr::ctx->get_shadow_stack().print();
+    }
+#endif
   }
   void pop_zero_frame() {
+#ifdef ENABLE_CONCOLIC
+    ZeroFrame* temp_frame = _top_zero_frame;
+#endif
+
     zero_stack()->set_sp((intptr_t *) _top_zero_frame + 1);
     _top_zero_frame = *(ZeroFrame **) _top_zero_frame;
 #ifdef ENABLE_CONCOLIC
     if (ConcolicMngr::is_doing_concolic) {
-      ConcolicMngr::ctx->get_shadow_stack().pop();
+      ConcolicMngr::ctx->get_shadow_stack().pop(temp_frame);
     }
 #endif
   }

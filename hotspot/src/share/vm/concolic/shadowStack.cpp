@@ -45,11 +45,25 @@ ShadowStack::~ShadowStack() {
   _s_frames.clear();
 }
 
-void ShadowStack::pop() {
+void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
+                       intptr_t *sp) {
+  _s_frames.back()->check(old_zero_frame);
+
+  ShadowFrame *s_frame = new ShadowFrame(new_zero_frame, sp, 8);
+  s_frame->copy();
+  _s_frames.push_back(s_frame);
+}
+
+void ShadowStack::pop(ZeroFrame *zero_frame) {
   /**
    * This is a workaround when we do not suppot shadow stack completely
    */
-  if (_s_frames.empty()) return;
+  if (_s_frames.empty())
+    return;
+
+  ShadowFrame *s_frame = _s_frames.back();
+  s_frame->check(zero_frame);
+  delete s_frame;
   _s_frames.pop_back();
 }
 
