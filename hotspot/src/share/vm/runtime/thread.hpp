@@ -56,6 +56,8 @@
 #include "jfr/support/jfrThreadExtension.hpp"
 #endif
 
+#include "concolic/concolicMngr.hpp"
+
 class ThreadSafepointState;
 class ThreadProfiler;
 

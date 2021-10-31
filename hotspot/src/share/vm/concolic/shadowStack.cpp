@@ -46,7 +46,11 @@ ShadowStack::~ShadowStack() {
 }
 
 void ShadowStack::pop() {
-  // _s_frames.pop_back();
+  /**
+   * This is a workaround when we do not suppot shadow stack completely
+   */
+  if (_s_frames.empty()) return;
+  _s_frames.pop_back();
 }
 
 void ShadowStack::print_origin() {

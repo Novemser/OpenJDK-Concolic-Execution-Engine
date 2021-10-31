@@ -50,6 +50,11 @@
   void pop_zero_frame() {
     zero_stack()->set_sp((intptr_t *) _top_zero_frame + 1);
     _top_zero_frame = *(ZeroFrame **) _top_zero_frame;
+#ifdef ENABLE_CONCOLIC
+    if (ConcolicMngr::is_doing_concolic) {
+      ConcolicMngr::ctx->get_shadow_stack().pop();
+    }
+#endif
   }
 
  public:
