@@ -2,6 +2,7 @@
 #define SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 
 #include "jni_zero.h"
+#include "concolic/defs.hpp"
 #include "concolic/threadContext.hpp"
 #include "runtime/handles.hpp"
 

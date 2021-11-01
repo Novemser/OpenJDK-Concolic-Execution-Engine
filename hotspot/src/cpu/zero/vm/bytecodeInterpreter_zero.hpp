@@ -168,4 +168,8 @@
 #define SET_VMSLOTS_DOUBLE(value, offset) (((VMJavaVal64*)&vmslots[(offset) - 1])->d = (value))
 #define SET_VMSLOTS_LONG(value, offset)   (((VMJavaVal64*)&vmslots[(offset) - 1])->l = (value))
 
+#ifdef ENABLE_CONCOLIC
+#define GET_STACK_OFFSET ((int)(istate->stack() - topOfStack))
+#endif
+
 #endif // CPU_ZERO_VM_BYTECODEINTERPRETER_ZERO_HPP

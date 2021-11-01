@@ -22,6 +22,9 @@ public:
 
   void copy();
 
+  inline ShadowTable& get_opr_stack() { return _opr_stack; }
+  inline ShadowTable& get_local_tbl() { return _local_tbl; }
+
   void check(ZeroFrame *zero_frame);
 
   void print_origin();

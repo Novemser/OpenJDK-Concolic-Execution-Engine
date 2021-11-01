@@ -30,6 +30,12 @@ public:
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
+  SymbolicExpression *get(int field_index) {
+    SymbolicExpression *sym_exp = _sym_exps[field_index];
+    assert(sym_exp, "not null");
+    return sym_exp;
+  }
+
   char *get_sym_name() { return _sym_name; }
 
   void init_sym_exp(int field_index);

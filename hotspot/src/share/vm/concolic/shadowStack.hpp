@@ -20,6 +20,8 @@ public:
   ShadowStack(JavaThread *jt);
   ~ShadowStack();
 
+  inline ShadowFrame &get_last_frame() { return *_s_frames.back(); }
+
   void push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame, intptr_t *sp);
   void pop(ZeroFrame *zero_frame);
 
