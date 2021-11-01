@@ -11,7 +11,7 @@ class ShadowFrame {
 private:
   const ZeroFrame *_zero_frame;
   intptr_t *_sp;
-  int _fr_index;
+  int _fr_index; // TODO: remove this useless field
   ShadowTable _opr_stack;
   ShadowTable _local_tbl;
 

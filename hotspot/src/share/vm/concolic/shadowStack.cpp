@@ -58,8 +58,7 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
   /**
    * This is a workaround when we do not suppot shadow stack completely
    */
-  if (_s_frames.empty())
-    return;
+  assert(!_s_frames.empty(), "not empty");
 
   ShadowFrame *s_frame = _s_frames.back();
   s_frame->check(zero_frame);
