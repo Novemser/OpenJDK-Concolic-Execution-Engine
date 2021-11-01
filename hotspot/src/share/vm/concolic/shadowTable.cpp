@@ -12,9 +12,10 @@ void ShadowTable::print() {
   int size = _tbl.size();
   tty->print_cr(" size: %d", size);
   for (int i = 0; i < size; ++i) {
-    Entry &entry = _tbl[i];
-    tty->print_cr("     [%d] SymbolicExpression: %p, sym_oid: %lu, index %d", i,
-                  entry.sym_exp, entry.sym_oid, entry.index);
+    int offset = size - i - 1;
+    Entry &entry = _tbl[offset];
+    tty->print_cr("     [%d] SymbolicExpression: %p, sym_oid: %lu, index %d",
+                  offset, entry.sym_exp, entry.sym_oid, entry.index);
   }
 }
 
