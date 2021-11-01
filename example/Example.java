@@ -29,15 +29,36 @@ public class Example {
         }
     }
 
-    public static void main(String[] args) {
-        TestClass test = new TestClass();
-        System.startConcolic();
-        System.symbolize(test);
-        int a = 1000;
-        int b = test.i;
-        int c = a + b;
-        System.endConcolic();
-        // System.out.println(Integer.MIN_VALUE);
-        // System.out.println((new Integer(0)).MIN_VALUE);
+    static class MyInteger {
+        public int value;
+
+        public MyInteger(int v) { value = v; }
     }
+
+    public static void main(String[] args) {
+        MyInteger obj1 = new MyInteger(1000);
+        MyInteger obj2 = new MyInteger(20);
+        MyInteger obj3 = new MyInteger(30);
+
+        System.startConcolic();
+        System.symbolize(obj1);
+        System.symbolize(obj2);
+        
+        obj3.value = obj1.value + obj2.value;
+
+        System.endConcolic();
+        System.out.println(obj3.value);
+    }
+
+    // public static void main(String[] args) {
+    //     TestClass test = new TestClass();
+    //     System.startConcolic();
+    //     System.symbolize(test);
+    //     int a = 1000;
+    //     int b = test.i;
+    //     int c = a + b;
+    //     System.endConcolic();
+    //     // System.out.println(Integer.MIN_VALUE);
+    //     // System.out.println((new Integer(0)).MIN_VALUE);
+    // }
 }

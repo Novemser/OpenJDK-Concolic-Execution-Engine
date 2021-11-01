@@ -47,6 +47,9 @@ ShadowStack::~ShadowStack() {
 
 void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
                        intptr_t *sp) {
+  // ConcolicMngr::ctx->print_stack_trace();
+  // ConcolicMngr::ctx->get_shadow_stack().print();
+
   _s_frames.back()->check(old_zero_frame);
 
   ShadowFrame *s_frame = new ShadowFrame(new_zero_frame, sp, 8);

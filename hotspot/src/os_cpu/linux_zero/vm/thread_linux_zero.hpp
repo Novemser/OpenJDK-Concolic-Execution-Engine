@@ -50,8 +50,6 @@
     if (ConcolicMngr::is_doing_concolic) {
       ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame, *(ZeroFrame **) zframe,
                                                zero_stack()->sp());
-      ConcolicMngr::ctx->print_stack_trace();
-      ConcolicMngr::ctx->get_shadow_stack().print();
     }
 #endif
   }

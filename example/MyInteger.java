@@ -5,7 +5,7 @@ public class MyInteger {
     public MyInteger(int v) { value = v; }
 
     public static int ver4() {
-        MyInteger obj1 = new MyInteger(1000000000);
+        MyInteger obj1 = new MyInteger(1000);
         MyInteger obj2 = new MyInteger(20);
         MyInteger obj3 = new MyInteger(30);
 
