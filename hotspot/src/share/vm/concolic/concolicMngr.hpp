@@ -40,6 +40,10 @@ public:
         .get_opr_stack()
         .clear_slot(offset);
   }
+
+  inline static void record_path_condition(SymbolicExpression* ) {
+    
+  }
 };
 
 /**

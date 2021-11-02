@@ -46,6 +46,10 @@ public class Example {
         
         obj3.value = obj1.value + obj2.value;
 
+        if (obj3.value > 4) {
+            obj3.value = obj1.value;
+        }
+
         System.endConcolic();
         System.out.println(obj3.value);
     }
