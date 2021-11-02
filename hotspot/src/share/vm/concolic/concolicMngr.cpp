@@ -27,6 +27,10 @@ jlong ConcolicMngr::endConcolic() {
 void ConcolicMngr::symbolize(Handle handle) {
   tty->print("Symbolize!\n");
   ctx->symbolize(handle);
+  // tty->print("\033[1;36m=================================================================\033[0m\n");
+  // handle()->print();
+  // tty->print("sym_oid: %ld, oop address: %p\n", handle()->get_sym_oid(), handle());
+  // tty->print("\033[1;36m=================================================================\033[0m\n");
 }
 
 #else

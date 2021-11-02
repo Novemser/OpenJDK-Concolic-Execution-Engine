@@ -37,10 +37,20 @@ public:
     entry.index = index;
   }
 
-  SymbolicExpression *set_slot(int offset) {
+  SymbolicExpression *get_slot(int offset) {
     SymbolicExpression *ret = _tbl[offset].sym_exp;
     assert(ret, "not null");
     return ret;
+  }
+
+  Entry &get_entry(int offset) {
+    return _tbl[offset];
+  }
+
+  void copy_entries(ShadowTable &last_opr_stack, int size);
+
+  int size() {
+    return _tbl.size();
   }
 
   void print();

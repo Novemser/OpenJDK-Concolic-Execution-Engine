@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadowStack.hpp"
+#include "runtime/frame.inline.hpp"
 #include "runtime/thread.hpp"
 
 #include <algorithm>
@@ -52,8 +53,18 @@ void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
 
   _s_frames.back()->check(old_zero_frame);
 
+  ShadowFrame &last_s_frame = get_frame(0);
+  ShadowTable &last_opr_stack = last_s_frame.get_opr_stack();
   ShadowFrame *s_frame = new ShadowFrame(new_zero_frame, sp, 8);
   s_frame->copy();
+  /**
+   * TODO: skip native here. Need to confirm correctness
+   */
+  Method *new_method = new_zero_frame->as_interpreter_frame()->interpreter_state()->method();
+  if (!new_method->is_native()) {
+    int size = new_method->size_of_parameters();
+    s_frame->copy_locals(last_opr_stack, size);
+  }
   _s_frames.push_back(s_frame);
 }
 
@@ -83,6 +94,7 @@ void ShadowStack::print() {
        iter != _s_frames.rend(); ++iter) {
     ShadowFrame *s_frame = *iter;
     s_frame->print();
+    tty->print("\n");
   }
 }
 

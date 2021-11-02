@@ -1009,7 +1009,7 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-    CONCOLIC_DEBUG_BLOCK_BEGIN
+  if (ConcolicMngr::is_doing_concolic) {
     // FIXME: these static variables may face problem when multithreading
     static Method* last_method = NULL;
     static Method* last_callee = NULL;
@@ -1037,6 +1037,12 @@ run:
         methodHandle mh (thread, (Method*)method);
         BytecodeTracer::set_closure(BytecodeTracer::std_closure());;
         BytecodeTracer::trace(mh, pc, tty);
+      
+        tty->print("\033[1;32m=================================================================\033[0m\n");
+        ConcolicMngr::ctx->get_shadow_stack().print();
+        tty->print("\033[1;33m=================================================================\033[0m\n");
+        ConcolicMngr::ctx->print_stack_trace();
+        tty->print("\033[1;32m=================================================================\033[0m\n");
       }
 
       // NOTE: stop at any specified method as below
@@ -1045,7 +1051,7 @@ run:
       }
       last_method = method;
     }
-    CONCOLIC_DEBUG_BLOCK_END
+  }
 #endif
 
 #ifdef USELABELS
@@ -2220,10 +2226,6 @@ run:
         }
 
       CASE(_new): {
-        CONCOLIC_BLOCK_BEGIN
-        int _ = 1;
-        int __ = _ + _;
-        CONCOLIC_BLOCK_END
         u2 index = Bytes::get_Java_u2(pc+1);
         ConstantPool* constants = istate->method()->constants();
         if (!constants->tag_at(index).is_unresolved_klass()) {
@@ -2699,6 +2701,9 @@ run:
                   handle_exception);
           cache = cp->entry_at(index);
         }
+        // if (ConcolicMngr::is_doing_concolic) {
+        //   tty->print("\033[1;31mparameter_size: %d\033[0m\n", cache->parameter_size());
+        // }
 
         istate->set_msg(call_method);
         {
@@ -2752,6 +2757,9 @@ run:
           }
 
           istate->set_callee(callee);
+          // if (ConcolicMngr::is_doing_concolic) {
+          //   tty->print("\033[1;31mcallee: max_local=%d, size_of_parameters=%d\033[0m\n", callee->max_locals(), callee->size_of_parameters());
+          // }
           istate->set_callee_entry_point(callee->from_interpreted_entry());
 #ifdef VM_JVMTI
           if (JvmtiExport::can_post_interpreter_events() && THREAD->is_interp_only_mode()) {

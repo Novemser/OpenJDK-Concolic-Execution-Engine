@@ -21,6 +21,7 @@ public:
   ~ShadowFrame() {}
 
   void copy();
+  void copy_locals(ShadowTable &last_opr_stack, int size);
 
   inline ShadowTable& get_opr_stack() { return _opr_stack; }
   inline ShadowTable& get_local_tbl() { return _local_tbl; }
