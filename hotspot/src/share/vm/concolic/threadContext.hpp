@@ -8,10 +8,14 @@
 #include "runtime/handles.hpp"
 
 #include <map>
+#include <vector>
 
 class ThreadContext {
+  /**
+   * TODO: make this hashtable!
+   */
   typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
-  typedef std::map<sym_tmp_id_t, SymbolicExpression *> SymTmpExpStore;
+  typedef std::vector<SymbolicExpression *> SymTmpExpStore;
 
 private:
   JavaThread *_thread;
@@ -50,7 +54,14 @@ private:
   }
 
   inline void init_sym_oid_counter() { _sym_oid_counter = 1; }
-  inline void init_sym_tmp_id_counter() { _sym_tmp_id_counter = 1; }
+  inline void init_sym_tmp_id_counter() {
+    /** 
+     * tmp_id start from 1. 
+     * Therefore, we push a placeholder.
+     */
+    _sym_tmp_exps.push_back(NULL);
+    _sym_tmp_id_counter = 1;
+  }
 
 public:
   void print();

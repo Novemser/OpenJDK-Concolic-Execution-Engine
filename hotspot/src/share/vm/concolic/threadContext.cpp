@@ -16,6 +16,7 @@ ThreadContext::~ThreadContext() {
     delete sym_iter->second;
   }
   _sym_objs.clear();
+  _sym_tmp_exps.clear();
   init_sym_oid_counter();
   init_sym_tmp_id_counter();
 }
@@ -62,15 +63,23 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
 
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(SymbolicExpression *sym_exp) {
   sym_oid_t sym_tmp_id = _sym_tmp_id_counter++;
-  _sym_tmp_exps.insert(std::make_pair(sym_tmp_id, sym_exp));
+  _sym_tmp_exps.push_back(sym_exp);
+  assert(_sym_tmp_exps.size() == sym_tmp_id + 1, "sanity check");
   assert(sym_tmp_id < MAX_SYM_OID, "sym_tmp_id limitted");
   return sym_tmp_id;
 }
 
 void ThreadContext::print() {
-  SymStore::iterator sym_iter;
-  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
+  for (SymStore::iterator sym_iter = _sym_objs.begin();
+       sym_iter != _sym_objs.end(); ++sym_iter) {
+    tty->print_cr("- sym_obj[%lu]:", sym_iter->first);
     sym_iter->second->print();
+  }
+
+  int size = _sym_tmp_exps.size();
+  for (int i = 1; i < size; ++i) {
+    tty->print_cr("- sym_tmp_exp[%d]:", i);
+    _sym_tmp_exps[i]->print();
   }
 }
 
