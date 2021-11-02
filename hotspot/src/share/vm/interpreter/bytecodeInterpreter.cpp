@@ -2233,6 +2233,19 @@ run:
           // Now store the result
           //
           int field_offset = cache->f2_as_index();
+
+#ifdef ENABLE_CONCOLIC
+          if (ConcolicMngr::is_doing_concolic) {
+            int stack_offset = GET_STACK_OFFSET;
+            int field_index = cache->field_index();
+                
+            SymbolicExpression *sym_exp =
+                ConcolicMngr::get_stack_slot(stack_offset - 1);
+            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+            sym_obj->set_sym_exp(field_index, sym_exp);
+          }
+#endif
+
           if (cache->is_volatile()) {
             if (tos_type == itos) {
               obj->release_int_field_put(field_offset, STACK_INT(-1));
