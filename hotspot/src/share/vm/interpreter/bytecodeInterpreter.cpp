@@ -1330,6 +1330,15 @@ run:
                       "/ by long zero", note_div0Check_trap);                  \
       }                                                                        \
     }                                                                          \
+    if (ConcolicMngr::is_doing_concolic) {                                     \
+      int stack_offset = GET_STACK_OFFSET;                                     \
+      SymbolicExpression *left =                                               \
+          ConcolicMngr::get_stack_slot(stack_offset - 3);                      \
+      SymbolicExpression *right =                                              \
+          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
+      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
+      ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
+    }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
     SET_STACK_LONG(VMlong##opname(STACK_LONG(-3), STACK_LONG(-1)), -3);        \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                                     \
@@ -2111,9 +2120,13 @@ run:
                 int field_index = cache->field_index();
                 sym_oid_t sym_oid = obj->get_sym_oid();
 
+                if (tos_type != ltos && tos_type != dtos) {
+                  stack_offset -= 1;
+                }
+
                 SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
                 SymbolicExpression* sym_exp = sym_obj->get(field_index);
-                ConcolicMngr::set_stack_slot(stack_offset - 1, sym_exp, sym_oid, field_index);
+                ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
               }
             }
           }
