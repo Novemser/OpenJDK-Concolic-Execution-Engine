@@ -1413,7 +1413,6 @@ run:
       OPC_INT_BINARY(xor, Xor, 0);
       OPC_INT_BINARY(div, Div, 1);
       OPC_INT_BINARY(rem, Rem, 1);
-#endif
 
       /* Perform various binary floating number operations */
       /* On some machine/platforms/compilers div zero check can be implicit */
