@@ -46,7 +46,7 @@ public class Example {
         
         obj3.value = obj1.value + obj2.value;
 
-        if (obj3.value > 4) {
+        if (obj3.value > obj2.value) {
             obj3.value = obj1.value;
         }
 

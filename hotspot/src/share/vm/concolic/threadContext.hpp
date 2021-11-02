@@ -11,14 +11,16 @@
 
 class ThreadContext {
   typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
+  typedef std::map<sym_tmp_id_t, SymbolicExpression *> SymTmpExpStore;
 
 private:
   JavaThread *_thread;
-  SymStore _sym_objs;
   ShadowStack _s_stack;
+  SymStore _sym_objs;
+  SymTmpExpStore _sym_tmp_exps;
 
   sym_oid_t _sym_oid_counter;
-  tmp_id_t _tmp_id_counter;
+  sym_tmp_id_t _sym_tmp_id_counter;
 
 public:
   ThreadContext(JavaThread *jt);
@@ -28,16 +30,11 @@ public:
 
   void symbolize(Handle handle);
 
-
   SymbolicObject *get_or_alloc_sym_obj(oop obj);
   SymbolicObject *alloc_sym_obj(oop obj);
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
 
-  tmp_id_t get_next_tmp_id() {
-    sym_oid_t ret = _tmp_id_counter++;
-    assert(ret < MAX_SYM_OID, "tmp_id limitted");
-    return ret;
-  }
+  sym_tmp_id_t get_next_sym_tmp_id(SymbolicExpression *sym_exp);
 
 private:
   void symbolize_recursive(SymbolicObject *sym_obj, oop obj);
@@ -53,7 +50,7 @@ private:
   }
 
   inline void init_sym_oid_counter() { _sym_oid_counter = 1; }
-  inline void init_tmp_id_counter() { _tmp_id_counter = 1; }
+  inline void init_sym_tmp_id_counter() { _sym_tmp_id_counter = 1; }
 
 public:
   void print();

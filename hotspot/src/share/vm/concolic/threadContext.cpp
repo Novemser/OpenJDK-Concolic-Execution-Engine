@@ -7,7 +7,7 @@
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
   init_sym_oid_counter();
-  init_tmp_id_counter();
+  init_sym_tmp_id_counter();
 }
 
 ThreadContext::~ThreadContext() {
@@ -17,7 +17,7 @@ ThreadContext::~ThreadContext() {
   }
   _sym_objs.clear();
   init_sym_oid_counter();
-  init_tmp_id_counter();
+  init_sym_tmp_id_counter();
 }
 
 void ThreadContext::symbolize(Handle handle) {
@@ -58,6 +58,13 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
 
   FieldSymbolizer field_symbolzier(obj, *this);
   field_symbolzier.do_recursive();
+}
+
+sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(SymbolicExpression *sym_exp) {
+  sym_oid_t sym_tmp_id = _sym_tmp_id_counter++;
+  _sym_tmp_exps.insert(std::make_pair(sym_tmp_id, sym_exp));
+  assert(sym_tmp_id < MAX_SYM_OID, "sym_tmp_id limitted");
+  return sym_tmp_id;
 }
 
 void ThreadContext::print() {

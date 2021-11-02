@@ -8,8 +8,8 @@
 #define MAX_SYM_OID 10000
 typedef ulong sym_oid_t;
 
-#define MAX_TMP_OID 10000
-typedef int tmp_id_t;
+#define MAX_SYM_TMP_ID 10000
+typedef int sym_tmp_id_t;
 
 
 #endif // SHARE_VM_CONCOLIC_DEFS_HPP

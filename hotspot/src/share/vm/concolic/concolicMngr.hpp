@@ -18,9 +18,9 @@ public:
 
   inline static void set_stack_slot(int offset, SymbolicExpression *sym_exp) {
     assert(offset >= 0, "offset >= 0");
-    tmp_id_t tmp_id = ctx->get_next_tmp_id();
+    sym_tmp_id_t sym_tmp_id = ctx->get_next_sym_tmp_id(sym_exp);
     ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-        offset, sym_exp, NULL_SYM_OID, tmp_id);
+        offset, sym_exp, NULL_SYM_OID, sym_tmp_id);
   }
 
   inline static void set_stack_slot(int offset, SymbolicExpression *sym_exp,
@@ -35,15 +35,11 @@ public:
   }
 
   inline static void clear_stack_slot(int offset) {
-    return ctx->get_shadow_stack()
-        .get_last_frame()
-        .get_opr_stack()
-        .clear_slot(offset);
+    return ctx->get_shadow_stack().get_last_frame().get_opr_stack().clear_slot(
+        offset);
   }
 
-  inline static void record_path_condition(SymbolicExpression* ) {
-    
-  }
+  inline static void record_path_condition(SymbolicExpression *) {}
 };
 
 /**

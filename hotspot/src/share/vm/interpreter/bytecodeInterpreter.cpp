@@ -1604,7 +1604,7 @@ run:
 
       /* comparison operators */
 
-#ifndef ENABLE_CONCOLIC
+#ifdef ENABLE_CONCOLIC
 #define COMPARISON_OP(name, comparison)                                        \
   CASE(_if_icmp##name) : {                                                     \
     const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));                 \
@@ -1617,8 +1617,9 @@ run:
           ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
-      ConcolicMngr::record_path_condition(res);                     \
+      SymbolicExpression *res =                                                \
+          new SymbolicExpression(left, right, op_##name);                      \
+      ConcolicMngr::record_path_condition(res);                                \
     }                                                                          \
                                                                                \
     /* Profile branch. */                                                      \
