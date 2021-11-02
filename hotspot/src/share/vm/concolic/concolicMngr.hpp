@@ -17,7 +17,7 @@ public:
   static void symbolize(Handle handle);
 
   inline static void set_stack_slot(int offset, SymbolicExpression *sym_exp) {
-    assert(offset > 0, "offset > 0");
+    assert(offset >= 0, "offset >= 0");
     tmp_id_t tmp_id = ctx->get_next_tmp_id();
     ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
         offset, sym_exp, NULL_SYM_OID, tmp_id);
