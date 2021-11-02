@@ -5,6 +5,7 @@
 
 #include "concolic/shadowStack.hpp"
 #include "concolic/symbolicObject.hpp"
+#include "concolic/pathCondition.hpp"
 #include "runtime/handles.hpp"
 
 #include <map>
@@ -22,6 +23,7 @@ private:
   ShadowStack _s_stack;
   SymStore _sym_objs;
   SymTmpExpStore _sym_tmp_exps;
+  PathCondition _path_condition;
 
   sym_oid_t _sym_oid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
@@ -40,6 +42,9 @@ public:
 
   sym_tmp_id_t get_next_sym_tmp_id(SymbolicExpression *sym_exp);
 
+  inline void record_path_condition(SymbolicExpression *sym_exp) {
+    _path_condition.add(sym_exp);
+  }
 private:
   void symbolize_recursive(SymbolicObject *sym_obj, oop obj);
 

@@ -39,7 +39,9 @@ public:
         offset);
   }
 
-  inline static void record_path_condition(SymbolicExpression *) {}
+  inline static void record_path_condition(SymbolicExpression *sym_exp) {
+    ctx->record_path_condition(sym_exp);
+  }
 };
 
 /**

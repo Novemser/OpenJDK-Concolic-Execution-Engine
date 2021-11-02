@@ -81,6 +81,8 @@ void ThreadContext::print() {
     tty->print_cr("- sym_tmp_exp[%d]:", i);
     _sym_tmp_exps[i]->print();
   }
+
+  _path_condition.print();
 }
 
 void ThreadContext::print_stack_trace() {
