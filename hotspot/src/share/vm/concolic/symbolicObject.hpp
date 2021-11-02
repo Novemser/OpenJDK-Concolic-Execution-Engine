@@ -39,6 +39,7 @@ public:
   char *get_sym_name() { return _sym_name; }
 
   void init_sym_exp(int field_index);
+  void set_sym_exp(int field_index, SymbolicExpression* sym_exp);
 
 public:
   void print();

@@ -81,11 +81,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     // TODO: return true;
     return false;
   default:
-    if (obj->is_symbolic()) {
-      sym_obj = this->_ctx.get_sym_obj(obj->get_sym_oid());
-    } else {
-      sym_obj = this->_ctx.alloc_sym_obj(obj);
-    }
+    sym_obj = this->_ctx.get_or_alloc_sym_obj(obj);
     sym_obj->init_sym_exp(fd->index());
     return false;
   }

@@ -35,6 +35,11 @@ public class Example {
         public MyInteger(int v) { value = v; }
     }
 
+    static int test_add(MyInteger a, MyInteger b) {
+        int c = a.value + b.value;
+        return c;
+    }
+
     public static void main(String[] args) {
         MyInteger obj1 = new MyInteger(1000);
         MyInteger obj2 = new MyInteger(20);
@@ -45,7 +50,7 @@ public class Example {
         System.symbolize(obj2);
         
         obj3.value = obj1.value + obj2.value;
-
+        test_add(obj1, obj2);
         System.endConcolic();
         System.out.println(obj3.value);
     }

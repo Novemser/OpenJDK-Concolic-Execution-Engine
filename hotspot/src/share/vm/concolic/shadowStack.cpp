@@ -60,10 +60,17 @@ void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
   /**
    * TODO: skip native here. Need to confirm correctness
    */
-  Method *new_method = new_zero_frame->as_interpreter_frame()->interpreter_state()->method();
+  interpreterState new_istate = new_zero_frame->as_interpreter_frame()->interpreter_state();
+  Method *new_method = new_istate->method();
   if (!new_method->is_native()) {
-    int size = new_method->size_of_parameters();
-    s_frame->copy_locals(last_opr_stack, size);
+    interpreterState old_istate = old_zero_frame->as_interpreter_frame()->interpreter_state();
+    /**
+     * At this time, `istate->locals()` points to the start of locals,
+     * while `old_istate->stack()` points to end of locals
+     */
+    int begin_offset = old_istate->stack_base() - new_istate->locals() - 1;
+    int end_offset = old_istate->stack_base() - old_istate->stack() - 1;
+    s_frame->copy_locals(last_opr_stack, begin_offset, end_offset);
   }
   _s_frames.push_back(s_frame);
 }

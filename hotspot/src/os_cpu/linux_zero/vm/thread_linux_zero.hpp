@@ -50,13 +50,6 @@
     if (ConcolicMngr::is_doing_concolic) {
       ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame, *(ZeroFrame **) zframe,
                                                zero_stack()->sp());
-      #ifdef CONCOLIC_DEBUG
-        tty->print("\033[1;32mafter pushs=================================================================\033[0m\n");
-        ConcolicMngr::ctx->get_shadow_stack().print();
-        tty->print("\033[1;33m=================================================================\033[0m\n");
-        ConcolicMngr::ctx->print_stack_trace();
-        tty->print("\033[1;32mafter pushs=================================================================\033[0m\n");
-      #endif
     }
 #endif
   }

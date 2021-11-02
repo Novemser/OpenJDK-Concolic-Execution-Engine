@@ -6,7 +6,8 @@
 #include "utilities/vmError.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
-  _sym_oid_counter = 0;
+  init_sym_oid_counter();
+  init_tmp_id_counter();
 }
 
 ThreadContext::~ThreadContext() {
@@ -15,12 +16,21 @@ ThreadContext::~ThreadContext() {
     delete sym_iter->second;
   }
   _sym_objs.clear();
-  _sym_oid_counter = 0;
+  init_sym_oid_counter();
+  init_tmp_id_counter();
 }
 
 void ThreadContext::symbolize(Handle handle) {
   SymbolicObject *sym_obj = this->alloc_sym_obj(handle());
   this->symbolize_recursive(sym_obj, handle());
+}
+
+SymbolicObject *ThreadContext::get_or_alloc_sym_obj(oop obj) {
+  if (obj->is_symbolic()) {
+    return this->get_sym_obj(obj->get_sym_oid());
+  } else {
+    return this->alloc_sym_obj(obj);
+  }
 }
 
 SymbolicObject *ThreadContext::alloc_sym_obj(oop obj) {

@@ -3,8 +3,8 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/symbolicObject.hpp"
 #include "concolic/shadowStack.hpp"
+#include "concolic/symbolicObject.hpp"
 #include "runtime/handles.hpp"
 
 #include <map>
@@ -13,21 +13,31 @@ class ThreadContext {
   typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
 
 private:
-  JavaThread* _thread;
+  JavaThread *_thread;
   SymStore _sym_objs;
   ShadowStack _s_stack;
 
   sym_oid_t _sym_oid_counter;
+  tmp_id_t _tmp_id_counter;
+
 public:
-  ThreadContext(JavaThread* jt);
+  ThreadContext(JavaThread *jt);
   ~ThreadContext();
 
-  ShadowStack& get_shadow_stack() { return _s_stack; }
+  ShadowStack &get_shadow_stack() { return _s_stack; }
 
   void symbolize(Handle handle);
 
+
+  SymbolicObject *get_or_alloc_sym_obj(oop obj);
   SymbolicObject *alloc_sym_obj(oop obj);
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
+
+  tmp_id_t get_next_tmp_id() {
+    sym_oid_t ret = _tmp_id_counter++;
+    assert(ret < MAX_SYM_OID, "tmp_id limitted");
+    return ret;
+  }
 
 private:
   void symbolize_recursive(SymbolicObject *sym_obj, oop obj);
@@ -41,6 +51,9 @@ private:
     assert(ret < MAX_SYM_OID, "sym_oid limitted");
     return ret;
   }
+
+  inline void init_sym_oid_counter() { _sym_oid_counter = 1; }
+  inline void init_tmp_id_counter() { _tmp_id_counter = 1; }
 
 public:
   void print();

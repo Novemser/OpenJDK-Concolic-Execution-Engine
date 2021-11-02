@@ -32,8 +32,8 @@ void ShadowFrame::copy() {
   }
 }
 
-void ShadowFrame::copy_locals(ShadowTable &last_opr_stack, int size) {
-  this->_local_tbl.copy_entries(last_opr_stack, size);
+void ShadowFrame::copy_locals(ShadowTable &last_opr_stack, int begin_offset, int end_offset) {
+  this->_local_tbl.copy_entries(last_opr_stack, begin_offset, end_offset);
 }
 
 void ShadowFrame::check(ZeroFrame *zero_frame) {

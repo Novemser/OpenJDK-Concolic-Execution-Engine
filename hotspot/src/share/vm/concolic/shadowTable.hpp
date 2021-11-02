@@ -11,15 +11,17 @@
 class ShadowTable {
 private:
   struct Entry {
-    Entry() {
-      sym_oid = 0;
-      index = -1;
-      sym_exp = NULL;
-    }
+    Entry() { reset(); }
 
     sym_oid_t sym_oid; // for comparison
     int index;
     SymbolicExpression *sym_exp;
+
+    inline void reset() {
+      sym_oid = 0;
+      index = -1;
+      sym_exp = NULL;
+    }
   };
 
   std::vector<Entry> _tbl;
@@ -30,12 +32,15 @@ public:
 
   void init(int max_slot_size);
 
-  void set_slot(int offset, SymbolicExpression *sym_exp, sym_oid_t sym_oid, int index) {
-    Entry& entry = _tbl[offset];
+  void set_slot(int offset, SymbolicExpression *sym_exp, sym_oid_t sym_oid,
+                int index) {
+    Entry &entry = _tbl[offset];
     entry.sym_exp = sym_exp;
     entry.sym_oid = sym_oid;
     entry.index = index;
   }
+
+  void clear_slot(int offset) { _tbl[offset].reset(); }
 
   SymbolicExpression *get_slot(int offset) {
     SymbolicExpression *ret = _tbl[offset].sym_exp;
@@ -47,7 +52,7 @@ public:
     return _tbl[offset];
   }
 
-  void copy_entries(ShadowTable &last_opr_stack, int size);
+  void copy_entries(ShadowTable &last_opr_stack, int begin_offset, int end_offset);
 
   int size() {
     return _tbl.size();
