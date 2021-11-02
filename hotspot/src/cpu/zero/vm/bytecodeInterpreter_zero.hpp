@@ -169,7 +169,7 @@
 #define SET_VMSLOTS_LONG(value, offset)   (((VMJavaVal64*)&vmslots[(offset) - 1])->l = (value))
 
 #ifdef ENABLE_CONCOLIC
-#define GET_STACK_OFFSET ((int)(istate->stack() - topOfStack))
+#define GET_STACK_OFFSET ((int)(istate->stack_base() - topOfStack - 1))
 #endif
 
 #endif // CPU_ZERO_VM_BYTECODEINTERPRETER_ZERO_HPP

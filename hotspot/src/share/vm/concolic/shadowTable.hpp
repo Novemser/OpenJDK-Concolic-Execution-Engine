@@ -37,7 +37,7 @@ public:
     entry.index = index;
   }
 
-  SymbolicExpression *set_slot(int offset) {
+  SymbolicExpression *get_slot(int offset) {
     SymbolicExpression *ret = _tbl[offset].sym_exp;
     assert(ret, "not null");
     return ret;

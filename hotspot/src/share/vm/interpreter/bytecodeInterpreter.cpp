@@ -1009,43 +1009,44 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-    CONCOLIC_DEBUG_BLOCK_BEGIN
-    // FIXME: these static variables may face problem when multithreading
-    static Method* last_method = NULL;
-    static Method* last_callee = NULL;
-    static bool is_reach_main = false;
-    Thread* thread = istate->thread();
-    Method* method = istate->method();
-    Method* callee = istate->callee();
-    if (method != NULL) {
-      ResourceMark rm;
-      Symbol* method_holder_name = method->method_holder()->name();
-      Symbol* method_name = method->name();
-      char* name_and_sig = method->name_and_sig_as_C_string();
-      // mark if reach main (use main to avoid printing instructions when running javac)
-      if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
-        tty->print("\033[1;33m=================================================================\033[0m\n");
-        is_reach_main = true;
-      }
-      // print if it is new callee
-      if (method != last_method) {
-        // tty->print("%s ------> ", istate->method()->name_and_sig_as_C_string());
-        tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
-      }
-      // print instruction if main is reached
-      if (is_reach_main) {
-        methodHandle mh (thread, (Method*)method);
-        BytecodeTracer::set_closure(BytecodeTracer::std_closure());;
-        BytecodeTracer::trace(mh, pc, tty);
-      }
+    if (ConcolicMngr::is_doing_concolic) {
+      // FIXME: these static variables may face problem when multithreading
+      static Method* last_method = NULL;
+      static Method* last_callee = NULL;
+      static bool is_reach_main = false;
+      Thread* thread = istate->thread();
+      Method* method = istate->method();
+      Method* callee = istate->callee();
+      if (method != NULL) {
+        ResourceMark rm;
+        Symbol* method_holder_name = method->method_holder()->name();
+        Symbol* method_name = method->name();
+        char* name_and_sig = method->name_and_sig_as_C_string();
+        // mark if reach main (use main to avoid printing instructions when running javac)
+        if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
+          tty->print("\033[1;33m=================================================================\033[0m\n");
+          tty->print_cr("%s", name_and_sig);
+          is_reach_main = true;
+        }
+        // print if it is new callee
+        // if (method != last_method) {
+        //   tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
+        // }
 
-      // NOTE: stop at any specified method as below
-      if (method_name->equals("symbolize")) {
-        int a = 1 + 2;
+        // print instruction if main is reached
+        if (is_reach_main) {
+          tty->print("\033[1;33m=================================================================\033[0m\n");
+          tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
+          ConcolicMngr::ctx->print_stack_trace();
+          ConcolicMngr::ctx->get_shadow_stack().print();
+          methodHandle mh (thread, (Method*)method);
+          BytecodeTracer::set_closure(BytecodeTracer::std_closure());;
+          BytecodeTracer::trace(mh, pc, tty);
+        }
+
+        last_method = method;
       }
-      last_method = method;
     }
-    CONCOLIC_DEBUG_BLOCK_END
 #endif
 
 #ifdef USELABELS
@@ -1302,6 +1303,47 @@ run:
           /* Perform various binary integer operations */
 
 #undef  OPC_INT_BINARY
+#ifdef ENABLE_CONCOLIC
+#define OPC_INT_BINARY(opcname, opname, test, opchar)                          \
+  CASE(_i##opcname) : {                                                        \
+    if (test && (STACK_INT(-1) == 0)) {                                        \
+      VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), "/ by zero",   \
+                    note_div0Check_trap);                                      \
+    }                                                                          \
+    if (ConcolicMngr::is_doing_concolic) {                                     \
+      int stack_offset = GET_STACK_OFFSET;                                     \
+      SymbolicExpression *left =                                               \
+          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
+      SymbolicExpression *right =                                              \
+          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
+      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
+      ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
+    }                                                                          \
+    SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
+    UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                     \
+  }                                                                            \
+  CASE(_l##opcname) : {                                                        \
+    if (test) {                                                                \
+      jlong l1 = STACK_LONG(-1);                                               \
+      if (VMlongEqz(l1)) {                                                     \
+        VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(),              \
+                      "/ by long zero", note_div0Check_trap);                  \
+      }                                                                        \
+    }                                                                          \
+    /* First long at (-1,-2) next long at (-3,-4) */                           \
+    SET_STACK_LONG(VMlong##opname(STACK_LONG(-3), STACK_LONG(-1)), -3);        \
+    UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                                     \
+  }
+
+      OPC_INT_BINARY(add, Add, 0, '+');
+      OPC_INT_BINARY(sub, Sub, 0, '-');
+      OPC_INT_BINARY(mul, Mul, 0, '*');
+      OPC_INT_BINARY(and, And, 0, '&');
+      OPC_INT_BINARY(or,  Or,  0, '|');
+      OPC_INT_BINARY(xor, Xor, 0, '^');
+      OPC_INT_BINARY(div, Div, 1, '/');
+      OPC_INT_BINARY(rem, Rem, 1, '%');
+#else
 #define OPC_INT_BINARY(opcname, opname, test)                           \
       CASE(_i##opcname):                                                \
           if (test && (STACK_INT(-1) == 0)) {                           \
@@ -1327,7 +1369,7 @@ run:
                                         -3);                            \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
       }
-
+      
       OPC_INT_BINARY(add, Add, 0);
       OPC_INT_BINARY(sub, Sub, 0);
       OPC_INT_BINARY(mul, Mul, 0);
@@ -1336,6 +1378,7 @@ run:
       OPC_INT_BINARY(xor, Xor, 0);
       OPC_INT_BINARY(div, Div, 1);
       OPC_INT_BINARY(rem, Rem, 1);
+#endif
 
 
       /* Perform various binary floating number operations */
@@ -2055,6 +2098,27 @@ run:
           //
           TosState tos_type = cache->flag_state();
           int field_offset = cache->f2_as_index();
+
+#ifdef ENABLE_CONCOLIC
+          if (ConcolicMngr::is_doing_concolic) {
+            // ConcolicMngr::ctx->print_stack_trace();
+            if (obj->is_symbolic()) {
+                if (tos_type != atos) {
+                /**
+                 * TODO: Consider Object and Array
+                 */
+                int stack_offset = GET_STACK_OFFSET;
+                int field_index = cache->field_index();
+                sym_oid_t sym_oid = obj->get_sym_oid();
+
+                SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
+                SymbolicExpression* sym_exp = sym_obj->get(field_index);
+                ConcolicMngr::set_stack_slot(stack_offset - 1, sym_exp, sym_oid, field_index);
+              }
+            }
+          }
+#endif
+
           if (cache->is_volatile()) {
             if (support_IRIW_for_not_multiple_copy_atomic_cpu) {
               OrderAccess::fence();
@@ -2220,10 +2284,6 @@ run:
         }
 
       CASE(_new): {
-        CONCOLIC_BLOCK_BEGIN
-        int _ = 1;
-        int __ = _ + _;
-        CONCOLIC_BLOCK_END
         u2 index = Bytes::get_Java_u2(pc+1);
         ConstantPool* constants = istate->method()->constants();
         if (!constants->tag_at(index).is_unresolved_klass()) {

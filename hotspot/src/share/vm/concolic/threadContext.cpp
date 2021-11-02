@@ -6,7 +6,8 @@
 #include "utilities/vmError.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
-  _sym_oid_counter = 0;
+  init_sym_oid_counter();
+  init_tmp_id_counter();
 }
 
 ThreadContext::~ThreadContext() {
@@ -15,7 +16,8 @@ ThreadContext::~ThreadContext() {
     delete sym_iter->second;
   }
   _sym_objs.clear();
-  _sym_oid_counter = 0;
+  init_sym_oid_counter();
+  init_tmp_id_counter();
 }
 
 void ThreadContext::symbolize(Handle handle) {
