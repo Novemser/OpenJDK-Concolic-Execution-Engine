@@ -8,13 +8,17 @@ ShadowTable::ShadowTable() {}
 void ShadowTable::init(int max_slot_size) { _tbl.resize(max_slot_size); }
 
 
-void ShadowTable::copy_entries(ShadowTable &last_opr_stack, int begin_offset, int end_offset) {
+void ShadowTable::copy_entries(ShadowTable &src_tbl, int src_begin, int dst_begin, int size) {
   /**
    * TODO: memcpy
    */
-  for (int offset = begin_offset; offset < end_offset; offset++) {
-    Entry &entry = last_opr_stack.get_entry(offset);
-    set_slot(offset - begin_offset, entry.sym_exp, entry.sym_oid, entry.index);
+  // for (int offset = begin_offset; offset < end_offset; offset++) {
+  //   Entry &entry = src_opr_stack.get_entry(offset);
+  //   set_slot(offset - begin_offset, entry.sym_exp, entry.sym_oid, entry.index);
+  // }
+  for (int i = 0; i < size; i++) {
+    Entry &entry = src_tbl.get_entry(src_begin++);
+    set_slot(dst_begin++, entry.sym_exp, entry.sym_oid, entry.index);
   }
 }
 

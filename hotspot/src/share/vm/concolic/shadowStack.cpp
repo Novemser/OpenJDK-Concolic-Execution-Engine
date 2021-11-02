@@ -70,7 +70,7 @@ void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
      */
     int begin_offset = old_istate->stack_base() - new_istate->locals() - 1;
     int end_offset = old_istate->stack_base() - old_istate->stack() - 1;
-    s_frame->copy_locals(last_opr_stack, begin_offset, end_offset);
+    s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0, end_offset - begin_offset);
   }
   _s_frames.push_back(s_frame);
 }
@@ -81,10 +81,40 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
    */
   assert(!_s_frames.empty(), "not empty");
 
+  /**
+   * do pop
+   */
   ShadowFrame *s_frame = _s_frames.back();
   s_frame->check(zero_frame);
-  delete s_frame;
   _s_frames.pop_back();
+
+  ShadowTable &opr_stack = s_frame->get_opr_stack();
+  ShadowTable &next_opr_stack = get_last_frame().get_opr_stack();
+
+  /**
+   * return result from current opr_stack to locals
+   */
+  interpreterState istate = zero_frame->as_interpreter_frame()->interpreter_state();
+  Method* method = istate->method();
+  // here `result` describes whatever returned
+  int result_slots = type2size[method->result_type()];
+  assert(result_slots >= 0 && result_slots <= 2, "what?");
+  
+  intptr_t *result = istate->stack() + result_slots;
+  int opr_stack_offset = istate->stack_base() - result - 1;
+
+  interpreterState next_istate = zero_frame->next()->as_interpreter_frame()->interpreter_state();
+  intptr_t *result_in_next = next_istate->stack_limit() + method->max_locals();
+  int next_opr_stack_offset = next_istate->stack_base() - result_in_next - 1;
+  /**
+   * TODO: skip native here. Need to confirm correctness
+   */
+  if (!method->is_native()) {
+    next_opr_stack.copy_entries(opr_stack, opr_stack_offset, next_opr_stack_offset, 1);
+    tty->print("\033[1;32m copy from %d to %d with size=%d\033[0m\n", opr_stack_offset, next_opr_stack_offset, result_slots);
+  }
+
+  delete s_frame;
 }
 
 void ShadowStack::print_origin() {

@@ -52,7 +52,7 @@ public:
     return _tbl[offset];
   }
 
-  void copy_entries(ShadowTable &last_opr_stack, int begin_offset, int end_offset);
+  void copy_entries(ShadowTable &last_opr_stack, int src_begin, int dst_begin, int size);
 
   int size() {
     return _tbl.size();
