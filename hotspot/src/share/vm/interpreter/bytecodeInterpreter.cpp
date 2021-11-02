@@ -1335,7 +1335,7 @@ run:
 
 #undef  OPC_INT_BINARY
 #ifdef ENABLE_CONCOLIC
-#define OPC_INT_BINARY(opcname, opname, test, opchar)                          \
+#define OPC_INT_BINARY(opcname, opname, test)                                  \
   CASE(_i##opcname) : {                                                        \
     if (test && (STACK_INT(-1) == 0)) {                                        \
       VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), "/ by zero",   \
@@ -1347,7 +1347,8 @@ run:
           ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
+      SymbolicExpression *res =                                                \
+          new SymbolicExpression(left, right, op_##opcname);                   \
       ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
     }                                                                          \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
@@ -1367,7 +1368,8 @@ run:
           ConcolicMngr::get_stack_slot(stack_offset - 3);                      \
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
+      SymbolicExpression *res =                                                \
+          new SymbolicExpression(left, right, op_##opcname);                   \
       ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
@@ -1375,14 +1377,6 @@ run:
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                                     \
   }
 
-      OPC_INT_BINARY(add, Add, 0, '+');
-      OPC_INT_BINARY(sub, Sub, 0, '-');
-      OPC_INT_BINARY(mul, Mul, 0, '*');
-      OPC_INT_BINARY(and, And, 0, '&');
-      OPC_INT_BINARY(or,  Or,  0, '|');
-      OPC_INT_BINARY(xor, Xor, 0, '^');
-      OPC_INT_BINARY(div, Div, 1, '/');
-      OPC_INT_BINARY(rem, Rem, 1, '%');
 #else
 #define OPC_INT_BINARY(opcname, opname, test)                           \
       CASE(_i##opcname):                                                \
@@ -1409,7 +1403,8 @@ run:
                                         -3);                            \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
       }
-      
+#endif
+
       OPC_INT_BINARY(add, Add, 0);
       OPC_INT_BINARY(sub, Sub, 0);
       OPC_INT_BINARY(mul, Mul, 0);
@@ -1419,7 +1414,6 @@ run:
       OPC_INT_BINARY(div, Div, 1);
       OPC_INT_BINARY(rem, Rem, 1);
 #endif
-
 
       /* Perform various binary floating number operations */
       /* On some machine/platforms/compilers div zero check can be implicit */
@@ -1611,7 +1605,40 @@ run:
 
       /* comparison operators */
 
-
+#ifndef ENABLE_CONCOLIC
+#define COMPARISON_OP(name, comparison)                                        \
+  CASE(_if_icmp##name) : {                                                     \
+    const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));                 \
+    int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
+    address branch_pc = pc;                                                    \
+                                                                               \
+    if (ConcolicMngr::is_doing_concolic) {                                     \
+      int stack_offset = GET_STACK_OFFSET;                                     \
+      SymbolicExpression *left =                                               \
+          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
+      SymbolicExpression *right =                                              \
+          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
+      SymbolicExpression *res = new SymbolicExpression(left, right, opchar);   \
+      ConcolicMngr::record_path_condition(res);                     \
+    }                                                                          \
+                                                                               \
+    /* Profile branch. */                                                      \
+    BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
+    UPDATE_PC_AND_TOS(skip, -2);                                               \
+    DO_BACKEDGE_CHECKS(skip, branch_pc);                                       \
+    CONTINUE;                                                                  \
+  }                                                                            \
+  CASE(_if##name) : {                                                          \
+    const bool cmp = (STACK_INT(-1) comparison 0);                             \
+    int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
+    address branch_pc = pc;                                                    \
+    /* Profile branch. */                                                      \
+    BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
+    UPDATE_PC_AND_TOS(skip, -1);                                               \
+    DO_BACKEDGE_CHECKS(skip, branch_pc);                                       \
+    CONTINUE;                                                                  \
+  }
+#else
 #define COMPARISON_OP(name, comparison)                                      \
       CASE(_if_icmp##name): {                                                \
           const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));         \
@@ -1635,6 +1662,7 @@ run:
           DO_BACKEDGE_CHECKS(skip, branch_pc);                               \
           CONTINUE;                                                          \
       }
+#endif
 
 #define COMPARISON_OP2(name, comparison)                                     \
       COMPARISON_OP(name, comparison)                                        \

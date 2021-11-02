@@ -40,6 +40,13 @@ public:
         .get_opr_stack()
         .clear_slot(offset);
   }
+<<<<<<< HEAD
+=======
+
+  inline static void record_path_condition(SymbolicExpression* ) {
+    
+  }
+>>>>>>> d9b7c2c292f8305659e7f80a600c5808abd4930d
 };
 
 /**

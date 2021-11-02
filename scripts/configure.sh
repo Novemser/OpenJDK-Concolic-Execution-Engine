@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG"
-FLAGS="-DENABLE_CONCOLIC"
+FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG"
+# FLAGS="-DENABLE_CONCOLIC"
 
 bash ./configure                    \
     --with-jvm-variants=zero        \
