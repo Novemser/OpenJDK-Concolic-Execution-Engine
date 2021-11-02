@@ -1060,15 +1060,34 @@ run:
 
           /* Push miscellaneous constants onto the stack. */
 
+#ifdef ENABLE_CONCOLIC
+      CASE(_aconst_null) : 
+          if (ConcolicMngr::is_doing_concolic) {
+            ConcolicMngr::clear_stack_slot(GET_STACK_OFFSET);
+          }
+          SET_STACK_OBJECT(NULL, 0);
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+#else
       CASE(_aconst_null):
           SET_STACK_OBJECT(NULL, 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+#endif
 
 #undef  OPC_CONST_n
+#ifdef ENABLE_CONCOLIC
+#define OPC_CONST_n(opcode, const_type, value)                          \
+      CASE(opcode):                                                     \
+          if (ConcolicMngr::is_doing_concolic) {                        \
+            ConcolicMngr::clear_stack_slot(GET_STACK_OFFSET);           \
+          }                                                             \
+          SET_STACK_##const_type(value, 0);                             \
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+#else
 #define OPC_CONST_n(opcode, const_type, value)                          \
       CASE(opcode):                                                     \
           SET_STACK_ ## const_type(value, 0);                           \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+#endif
 
           OPC_CONST_n(_iconst_m1,   INT,       -1);
           OPC_CONST_n(_iconst_0,    INT,        0);
@@ -1082,12 +1101,24 @@ run:
           OPC_CONST_n(_fconst_2,    FLOAT,      2.0);
 
 #undef  OPC_CONST2_n
+#ifdef ENABLE_CONCOLIC
+#define OPC_CONST2_n(opcname, value, key, kind)                         \
+      CASE(_##opcname):                                                 \
+      {                                                                 \
+          if (ConcolicMngr::is_doing_concolic) {                        \
+            ConcolicMngr::clear_stack_slot(GET_STACK_OFFSET + 1);       \
+          }                                                             \
+          SET_STACK_ ## kind(VM##key##Const##value(), 1);               \
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);                         \
+      }
+#else
 #define OPC_CONST2_n(opcname, value, key, kind)                         \
       CASE(_##opcname):                                                 \
       {                                                                 \
           SET_STACK_ ## kind(VM##key##Const##value(), 1);               \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);                         \
       }
+#endif
          OPC_CONST2_n(dconst_0, Zero, double, DOUBLE);
          OPC_CONST2_n(dconst_1, One,  double, DOUBLE);
          OPC_CONST2_n(lconst_0, Zero, long, LONG);

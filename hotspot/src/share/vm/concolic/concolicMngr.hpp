@@ -33,6 +33,13 @@ public:
     return ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_slot(
         offset);
   }
+
+  inline static void clear_stack_slot(int offset) {
+    return ctx->get_shadow_stack()
+        .get_last_frame()
+        .get_opr_stack()
+        .clear_slot(offset);
+  }
 };
 
 /**
