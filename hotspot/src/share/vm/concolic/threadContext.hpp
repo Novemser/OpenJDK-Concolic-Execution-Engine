@@ -28,6 +28,8 @@ public:
 
   void symbolize(Handle handle);
 
+
+  SymbolicObject *get_or_alloc_sym_obj(oop obj);
   SymbolicObject *alloc_sym_obj(oop obj);
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
 

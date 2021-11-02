@@ -25,6 +25,14 @@ void ThreadContext::symbolize(Handle handle) {
   this->symbolize_recursive(sym_obj, handle());
 }
 
+SymbolicObject *ThreadContext::get_or_alloc_sym_obj(oop obj) {
+  if (obj->is_symbolic()) {
+    return this->get_sym_obj(obj->get_sym_oid());
+  } else {
+    return this->alloc_sym_obj(obj);
+  }
+}
+
 SymbolicObject *ThreadContext::alloc_sym_obj(oop obj) {
   sym_oid_t sym_oid = get_next_sym_oid();
 
