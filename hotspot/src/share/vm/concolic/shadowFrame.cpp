@@ -28,8 +28,12 @@ void ShadowFrame::copy() {
     _opr_stack.init(max_stack);
     _local_tbl.init(max_locals);
 
-    // tty->print_cr("max_stack %d, max_locals %d", max_stack, max_locals);
+    tty->print_cr("max_stack %d, max_locals %d", max_stack, max_locals);
   }
+}
+
+void ShadowFrame::copy_locals(ShadowTable &last_opr_stack, int begin_offset, int end_offset) {
+  this->_local_tbl.copy_entries(last_opr_stack, begin_offset, end_offset);
 }
 
 void ShadowFrame::check(ZeroFrame *zero_frame) {
@@ -72,7 +76,9 @@ void ShadowFrame::print_origin() {
 
 void ShadowFrame::print() {
   tty->print_cr("ShadowFrame[%d]: ", _fr_index);
+  tty->print_cr("- opr_stack:");
   _opr_stack.print();
+  tty->print_cr("- local_tbl:");
   _local_tbl.print();
 }
 

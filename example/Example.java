@@ -35,6 +35,11 @@ public class Example {
         public MyInteger(int v) { value = v; }
     }
 
+    static int test_add(MyInteger a, MyInteger b) {
+        int c = a.value + b.value;
+        return c;
+    }
+
     public static void main(String[] args) {
         MyInteger obj1 = new MyInteger(1000);
         MyInteger obj2 = new MyInteger(20);

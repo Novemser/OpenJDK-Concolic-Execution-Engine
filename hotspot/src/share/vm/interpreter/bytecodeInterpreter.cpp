@@ -2171,7 +2171,7 @@ run:
           if (ConcolicMngr::is_doing_concolic) {
             // ConcolicMngr::ctx->print_stack_trace();
             if (obj->is_symbolic()) {
-                if (tos_type != atos) {
+              if (tos_type != atos) {
                 /**
                  * TODO: Consider Object and Array
                  */
@@ -2844,6 +2844,9 @@ run:
                   handle_exception);
           cache = cp->entry_at(index);
         }
+        // if (ConcolicMngr::is_doing_concolic) {
+        //   tty->print("\033[1;31mparameter_size: %d\033[0m\n", cache->parameter_size());
+        // }
 
         istate->set_msg(call_method);
         {
@@ -2897,6 +2900,9 @@ run:
           }
 
           istate->set_callee(callee);
+          // if (ConcolicMngr::is_doing_concolic) {
+          //   tty->print("\033[1;31mcallee: max_local=%d, size_of_parameters=%d\033[0m\n", callee->max_locals(), callee->size_of_parameters());
+          // }
           istate->set_callee_entry_point(callee->from_interpreted_entry());
 #ifdef VM_JVMTI
           if (JvmtiExport::can_post_interpreter_events() && THREAD->is_interp_only_mode()) {

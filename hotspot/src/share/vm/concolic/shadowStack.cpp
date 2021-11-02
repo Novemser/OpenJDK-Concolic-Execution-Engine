@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadowStack.hpp"
+#include "runtime/frame.inline.hpp"
 #include "runtime/thread.hpp"
 
 #include <algorithm>
@@ -52,8 +53,25 @@ void ShadowStack::push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame,
 
   _s_frames.back()->check(old_zero_frame);
 
+  ShadowFrame &last_s_frame = get_frame(0);
+  ShadowTable &last_opr_stack = last_s_frame.get_opr_stack();
   ShadowFrame *s_frame = new ShadowFrame(new_zero_frame, sp, 8);
   s_frame->copy();
+  /**
+   * TODO: skip native here. Need to confirm correctness
+   */
+  interpreterState new_istate = new_zero_frame->as_interpreter_frame()->interpreter_state();
+  Method *new_method = new_istate->method();
+  if (!new_method->is_native()) {
+    interpreterState old_istate = old_zero_frame->as_interpreter_frame()->interpreter_state();
+    /**
+     * At this time, `istate->locals()` points to the start of locals,
+     * while `old_istate->stack()` points to end of locals
+     */
+    int begin_offset = old_istate->stack_base() - new_istate->locals() - 1;
+    int end_offset = old_istate->stack_base() - old_istate->stack() - 1;
+    s_frame->copy_locals(last_opr_stack, begin_offset, end_offset);
+  }
   _s_frames.push_back(s_frame);
 }
 
@@ -83,6 +101,7 @@ void ShadowStack::print() {
        iter != _s_frames.rend(); ++iter) {
     ShadowFrame *s_frame = *iter;
     s_frame->print();
+    tty->print("\n");
   }
 }
 

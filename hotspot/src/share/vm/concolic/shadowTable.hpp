@@ -48,6 +48,16 @@ public:
     return ret;
   }
 
+  Entry &get_entry(int offset) {
+    return _tbl[offset];
+  }
+
+  void copy_entries(ShadowTable &last_opr_stack, int begin_offset, int end_offset);
+
+  int size() {
+    return _tbl.size();
+  }
+
   void print();
 };
 
