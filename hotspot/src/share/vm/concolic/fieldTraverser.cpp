@@ -24,28 +24,7 @@ void FieldTraverser::do_recursive_helper() {
     instanceKlass->do_nonstatic_fields(this);
   } else if (_obj->is_array()) {
     arrayOop array_obj = (arrayOop)_obj;
-    do_array_helper(array_obj);
-    
-    tty->print("\033[1;32m================================================\033[0m\n");
-    if (this->_obj->is_objArray()) {
-      _depth += 1;
-      oop temp_obj = this->_obj;
-      objArrayOop obj_array = ((objArrayOop)_obj);
-      // if it is an objArray, iterate over all object element
-      for (int index = 0; index < obj_array->length(); index++) {
-        this->_obj = obj_array->obj_at(index);
-        this->do_recursive_helper();
-      }
-      this->_obj = temp_obj;
-      _depth -= 1;
-    } else if (this->_obj->is_typeArray()) {
-      // DO NOTHING
-    } else {
-      assert(false, "should not be here");
-    }
-    /**
-     * TODO: do elements in array if necessary
-     */
+    do_array_elements(this);
   } else {
     assert(false, "unhandled");
   }
@@ -84,6 +63,40 @@ void FieldTraverser::do_field(fieldDescriptor *fd) {
   }
 }
 
+void FieldTraverser::do_array_elements(FieldTraverser* field_traverser) {
+  assert(this->_obj->is_array(), "should be array");
+  arrayOop array = (arrayOop)(this->_obj);
+  for (int index = 0; index < array->length(); index++) {
+    field_traverser->do_array_element(index);
+  }
+}
+
+void FieldTraverser::do_array_element(int index) {
+  // FIXME: for some object may refer to it self, resulting endless symbolizing.
+  if (_depth > _target_depth)
+    return;
+
+  bool need_recursive;
+  arrayOop array_obj = (arrayOop)_obj;
+  need_recursive = this->do_array_element_helper(index, array_obj);
+
+  if (need_recursive) {
+    if (_obj->is_objArray()) {
+      _depth += 1;
+      oop temp_obj = this->_obj;
+      this->_obj = ((objArrayOop)_obj)->obj_at(index);
+
+      this->do_recursive_helper();
+
+      this->_obj = temp_obj;
+      _depth -= 1;
+    } else {
+      assert(false, "non-objarray won't be recursively done for now");
+    }
+  }
+  
+}
+
 void FieldTraverser::print_indent() {
   for (int i = 0; i < _depth; i++) {
     tty->print("    ");
@@ -116,8 +129,9 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   }
 }
 
-bool FieldSymbolizer::do_array_helper(arrayOop array_obj) {
+bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   ArrayKlass* array_klass = ArrayKlass::cast(array_obj->klass());
+
   SymbolicObject *sym_obj;
   switch (array_klass->element_type())
   {
@@ -126,16 +140,15 @@ bool FieldSymbolizer::do_array_helper(arrayOop array_obj) {
     return true;
     break;
   case T_ARRAY:
-    assert(false, "array of array unhandled");
+    assert(false, "element won't be array(it will be object)");
     return false;
     break;
   default:
     // the element_type is primitive
     assert(array_obj->is_typeArray(), "It shall be typeArrayOop here");
     sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
-    for (int index = 0; index < array_obj->length(); index++) {
-      sym_obj->init_sym_exp(index);
-    }
+    sym_obj->init_sym_exp(index);
+    return false;
     break;
   }
 }
@@ -191,8 +204,10 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   }
 }
   
-bool SimpleFieldPrinter::do_array_helper(arrayOop array_obj) {
-  // pass
+bool SimpleFieldPrinter::do_array_element_helper(int index, arrayOop array_obj) {
+  /**
+   * TODO: complete this
+   */
 }
 
 #endif

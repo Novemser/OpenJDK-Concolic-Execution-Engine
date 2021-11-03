@@ -28,14 +28,15 @@ protected:
   FieldTraverser(oop obj) : _obj(obj), _depth(1) {}
 
   virtual bool do_field_helper(fieldDescriptor *fd, oop obj) {}
-  // Do elements in an array (and array itself if necessary)
-  virtual bool do_array_helper(arrayOop array_obj) {}
+  virtual bool do_array_element_helper(int index, arrayOop array_obj) {}
 
   void print_indent();
 
 private:
   void do_field(fieldDescriptor *fd);
+  void do_array_element(int index);
   void do_recursive_helper();
+  void do_array_elements(FieldTraverser* field_traverser);
 };
 
 class FieldSymbolizer : public FieldTraverser {
@@ -48,7 +49,7 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
-  bool do_array_helper(arrayOop array_obj);
+  bool do_array_element_helper(int index, arrayOop array_obj);
 };
 
 class SimpleFieldPrinter : public FieldTraverser {
@@ -57,7 +58,7 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
-  bool do_array_helper(arrayOop array_obj);
+  bool do_array_element_helper(int index, arrayOop array_obj);
 };
 
 
