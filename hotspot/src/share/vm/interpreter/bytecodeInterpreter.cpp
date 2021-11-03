@@ -1331,10 +1331,29 @@ run:
           UPDATE_PC_AND_CONTINUE(1);
       }
 
-          /* Perform various binary integer operations */
-
-#undef  OPC_INT_BINARY
 #ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)       \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
+    Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
+    if (left || right) {                                                       \
+      if (!left) {                                                             \
+        left = new ConExpression(l_value);                                     \
+      }                                                                        \
+      if (!right) {                                                            \
+        right = new ConExpression(r_value);                                    \
+      }                                                                        \
+      Expression *new_exp = new OpSymExpression(left, right, op);              \
+      ConcolicMngr::set_stack_slot(stack_offset + res_off, new_exp);           \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)
+#endif
+
+          /* Perform various binary integer operations */
+#undef  OPC_INT_BINARY
 /**
  * We do not clear stack slot when both parameters are concrete
  * Because the result solt is already concrete (NULL)
@@ -1345,21 +1364,8 @@ run:
       VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), "/ by zero",   \
                     note_div0Check_trap);                                      \
     }                                                                          \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
-      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      if (left || right) {                                                     \
-        if (!left) {                                                           \
-          left = new ConExpression(STACK_INT(-2));                             \
-        }                                                                      \
-        if (!right) {                                                          \
-          right = new ConExpression(STACK_INT(-1));                            \
-        }                                                                      \
-        Expression *new_exp = new OpSymExpression(left, right, op_##opcname);  \
-        ConcolicMngr::set_stack_slot(stack_offset - 2, new_exp);               \
-      }                                                                        \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_INT(-2), STACK_INT(-1),              \
+                        op_##opcname);                                         \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                     \
   }                                                                            \
@@ -1371,53 +1377,12 @@ run:
                       "/ by long zero", note_div0Check_trap);                  \
       }                                                                        \
     }                                                                          \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 3);       \
-      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      if (left || right) {                                                     \
-        if (!left) {                                                           \
-          left = new ConExpression(STACK_LONG(-3));                            \
-        }                                                                      \
-        if (!right) {                                                          \
-          right = new ConExpression(STACK_LONG(-1));                           \
-        }                                                                      \
-        Expression *new_exp = new OpSymExpression(left, right, op_##opcname);  \
-        ConcolicMngr::set_stack_slot(stack_offset - 3, new_exp);               \
-      }                                                                        \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY(-3, -1, -3, STACK_LONG(-3), STACK_LONG(-1),            \
+                        op_##opcname);                                         \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
     SET_STACK_LONG(VMlong##opname(STACK_LONG(-3), STACK_LONG(-1)), -3);        \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                                     \
   }
-
-#else
-#define OPC_INT_BINARY(opcname, opname, test)                           \
-      CASE(_i##opcname):                                                \
-          if (test && (STACK_INT(-1) == 0)) {                           \
-              VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), \
-                            "/ by zero", note_div0Check_trap);          \
-          }                                                             \
-          SET_STACK_INT(VMint##opname(STACK_INT(-2),                    \
-                                      STACK_INT(-1)),                   \
-                                      -2);                              \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                        \
-      CASE(_l##opcname):                                                \
-      {                                                                 \
-          if (test) {                                                   \
-            jlong l1 = STACK_LONG(-1);                                  \
-            if (VMlongEqz(l1)) {                                        \
-              VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), \
-                            "/ by long zero", note_div0Check_trap);     \
-            }                                                           \
-          }                                                             \
-          /* First long at (-1,-2) next long at (-3,-4) */              \
-          SET_STACK_LONG(VMlong##opname(STACK_LONG(-3),                 \
-                                        STACK_LONG(-1)),                \
-                                        -3);                            \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
-      }
-#endif
 
       OPC_INT_BINARY(add, Add, 0);
       OPC_INT_BINARY(sub, Sub, 0);
