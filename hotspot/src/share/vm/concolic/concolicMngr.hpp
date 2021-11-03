@@ -43,8 +43,10 @@ public:
     ShadowTable &opr_stack =
         ctx->get_shadow_stack().get_last_frame().get_opr_stack();
     ShadowTable::Entry &entry = opr_stack.get_entry(offset);
-    assert(entry.sym_oid == NULL_SYM_OID, "not sym obj");
-    ctx->detach_tmp_exp(entry.index);
+    if (entry.sym_exp) {
+      assert(entry.sym_oid == NULL_SYM_OID, "not sym obj");
+      ctx->detach_tmp_exp(entry.index);
+    }
     return entry.sym_exp;
   }
 

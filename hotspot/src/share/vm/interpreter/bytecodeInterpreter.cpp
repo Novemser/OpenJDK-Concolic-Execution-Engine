@@ -2200,12 +2200,12 @@ run:
 
 #ifdef ENABLE_CONCOLIC
           if (ConcolicMngr::is_doing_concolic) {
-            // ConcolicMngr::ctx->print_stack_trace();
             if (obj->is_symbolic()) {
+              /**
+               * It seems that we do not need to handle Object (atos)
+               * TODO: check whether array belongs to atos
+               */
               if (tos_type != atos) {
-                /**
-                 * TODO: Consider Object and Array
-                 */
                 int stack_offset = GET_STACK_OFFSET;
                 int field_index = cache->field_index();
                 sym_oid_t sym_oid = obj->get_sym_oid();
