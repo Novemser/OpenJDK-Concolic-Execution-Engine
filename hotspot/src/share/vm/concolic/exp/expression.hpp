@@ -57,6 +57,7 @@ private:
 
 public:
   ConExpression(jint i);
+  ConExpression(jlong l);
 
 public:
   void print();

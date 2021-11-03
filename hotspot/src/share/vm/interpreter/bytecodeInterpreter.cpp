@@ -1376,7 +1376,16 @@ run:
       Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 3);       \
       Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
       Expression *res = new OpSymExpression(left, right, op_##opcname);        \
-      ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
+      if (left || right) {                                                     \
+        if (!left) {                                                           \
+          left = new ConExpression(STACK_LONG(-3));                            \
+        }                                                                      \
+        if (!right) {                                                          \
+          right = new ConExpression(STACK_LONG(-1));                           \
+        }                                                                      \
+        Expression *res = new OpSymExpression(left, right, op_##opcname);      \
+        ConcolicMngr::set_stack_slot(stack_offset - 3, res);                   \
+      }                                                                        \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
     SET_STACK_LONG(VMlong##opname(STACK_LONG(-3), STACK_LONG(-1)), -3);        \

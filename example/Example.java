@@ -40,10 +40,16 @@ public class Example {
         return c;
     }
 
+    static class MyLong {
+        public long value;
+
+        public MyLong(long v) { value = v; }
+    }
+
     public static void main(String[] args) {
-        MyInteger obj1 = new MyInteger(1000);
-        MyInteger obj2 = new MyInteger(20);
-        MyInteger obj3 = new MyInteger(30);
+        MyLong obj1 = new MyLong(1000);
+        MyLong obj2 = new MyLong(20);
+        MyLong obj3 = new MyLong(30);
 
         System.startConcolic();
         System.symbolize(obj1);

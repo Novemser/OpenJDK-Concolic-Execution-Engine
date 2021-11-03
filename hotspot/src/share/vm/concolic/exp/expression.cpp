@@ -36,6 +36,10 @@ ConExpression::ConExpression(jint i) {
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
+ConExpression::ConExpression(jlong l) {
+  int ret = sprintf(_str, "%ld", l);
+  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+}
 void ConExpression::print() { tty->print("C_%s\n", _str); }
 
 #endif
