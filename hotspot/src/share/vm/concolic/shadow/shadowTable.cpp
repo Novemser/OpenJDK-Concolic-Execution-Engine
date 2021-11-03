@@ -1,6 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowTable.hpp"
+#include "concolic/shadow/shadowTable.hpp"
 #include "utilities/ostream.hpp"
 
 ShadowTable::ShadowTable() {}

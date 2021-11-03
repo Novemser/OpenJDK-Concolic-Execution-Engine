@@ -4,7 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/symbolicExpression.hpp"
+#include "concolic/exp/symbolicExpression.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>

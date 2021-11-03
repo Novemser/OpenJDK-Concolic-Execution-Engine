@@ -1,6 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/symbolicExpression.hpp"
+#include "concolic/exp/symbolicExpression.hpp"
 #include "utilities/ostream.hpp"
 
 void SymbolicExpression::print() {

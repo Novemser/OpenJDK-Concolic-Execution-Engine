@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowStack.hpp"
+#include "concolic/shadow/shadowStack.hpp"
 #include "concolic/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
 #include "runtime/handles.hpp"

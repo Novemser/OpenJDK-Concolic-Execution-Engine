@@ -1,9 +1,9 @@
-#ifndef SHARE_VM_CONCOLIC_SHADOWSTACK_HPP
-#define SHARE_VM_CONCOLIC_SHADOWSTACK_HPP
+#ifndef SHARE_VM_CONCOLIC_SHADOW_SHADOWSTACK_HPP
+#define SHARE_VM_CONCOLIC_SHADOW_SHADOWSTACK_HPP
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowFrame.hpp"
+#include "concolic/shadow/shadowFrame.hpp"
 
 #include <vector>
 
@@ -41,4 +41,4 @@ public:
 
 #endif
 
-#endif // SHARE_VM_CONCOLIC_SHADOWSTACK_HPP
+#endif // SHARE_VM_CONCOLIC__SHADOW_SHADOWSTACK_HPP

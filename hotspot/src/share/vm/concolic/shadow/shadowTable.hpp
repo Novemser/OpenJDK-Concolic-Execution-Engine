@@ -1,10 +1,10 @@
-#ifndef SHARE_VM_CONCOLIC_SHADOWTABLE_HPP
-#define SHARE_VM_CONCOLIC_SHADOWTABLE_HPP
+#ifndef SHARE_VM_CONCOLIC_SHADOW_SHADOWTABLE_HPP
+#define SHARE_VM_CONCOLIC_SHADOW_SHADOWTABLE_HPP
 
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/symbolicExpression.hpp"
+#include "concolic/exp/symbolicExpression.hpp"
 
 #include <vector>
 
@@ -63,4 +63,4 @@ public:
 
 #endif
 
-#endif // SHARE_VM_CONCOLIC_SHADOWTABLE_HPP
+#endif // SHARE_VM_CONCOLIC_SHADOW_SHADOWTABLE_HPP

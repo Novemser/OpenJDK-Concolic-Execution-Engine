@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/symbolicExpression.hpp"
+#include "concolic/exp/symbolicExpression.hpp"
 
 #include <vector>
 
