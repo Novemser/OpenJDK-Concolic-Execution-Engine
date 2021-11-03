@@ -1,6 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowTable.hpp"
+#include "concolic/shadow/shadowTable.hpp"
 #include "utilities/ostream.hpp"
 
 ShadowTable::ShadowTable() {}
@@ -28,7 +28,7 @@ void ShadowTable::print() {
   for (int i = 0; i < size; ++i) {
     int offset = size - i - 1;
     Entry &entry = _tbl[offset];
-    tty->print_cr("     [%d] SymbolicExpression: %p, sym_oid: %lu, index %d",
+    tty->print_cr("     [%d] SymExpression: %p, sym_oid: %lu, index %d",
                   offset, entry.sym_exp, entry.sym_oid, entry.index);
   }
 }

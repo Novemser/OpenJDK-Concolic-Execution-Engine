@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowStack.hpp"
+#include "concolic/shadow/shadowStack.hpp"
 #include "concolic/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
 #include "runtime/handles.hpp"
@@ -16,7 +16,7 @@ class ThreadContext {
    * TODO: make this hashtable!
    */
   typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
-  typedef std::vector<SymbolicExpression *> SymTmpExpStore;
+  typedef std::vector<Expression *> SymTmpExpStore;
 
 private:
   JavaThread *_thread;
@@ -40,9 +40,9 @@ public:
   SymbolicObject *alloc_sym_obj(oop obj);
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
 
-  sym_tmp_id_t get_next_sym_tmp_id(SymbolicExpression *sym_exp);
+  sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
 
-  inline void record_path_condition(SymbolicExpression *sym_exp) {
+  inline void record_path_condition(Expression *sym_exp) {
     _path_condition.add(sym_exp);
   }
 private:

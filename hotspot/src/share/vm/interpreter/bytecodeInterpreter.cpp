@@ -1331,26 +1331,41 @@ run:
           UPDATE_PC_AND_CONTINUE(1);
       }
 
-          /* Perform various binary integer operations */
-
-#undef  OPC_INT_BINARY
 #ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)       \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
+    Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
+    if (left || right) {                                                       \
+      if (!left) {                                                             \
+        left = new ConExpression(l_value);                                     \
+      }                                                                        \
+      if (!right) {                                                            \
+        right = new ConExpression(r_value);                                    \
+      }                                                                        \
+      Expression *new_exp = new OpSymExpression(left, right, op);              \
+      ConcolicMngr::set_stack_slot(stack_offset + res_off, new_exp);           \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)
+#endif
+
+          /* Perform various binary integer operations */
+#undef  OPC_INT_BINARY
+/**
+ * We do not clear stack slot when both parameters are concrete
+ * Because the result solt is already concrete (NULL)
+ */
 #define OPC_INT_BINARY(opcname, opname, test)                                  \
   CASE(_i##opcname) : {                                                        \
     if (test && (STACK_INT(-1) == 0)) {                                        \
       VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), "/ by zero",   \
                     note_div0Check_trap);                                      \
     }                                                                          \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##opcname);                   \
-      ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_INT(-2), STACK_INT(-1),              \
+                        op_##opcname);                                         \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                     \
   }                                                                            \
@@ -1362,48 +1377,12 @@ run:
                       "/ by long zero", note_div0Check_trap);                  \
       }                                                                        \
     }                                                                          \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 3);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##opcname);                   \
-      ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY(-3, -1, -3, STACK_LONG(-3), STACK_LONG(-1),            \
+                        op_##opcname);                                         \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
     SET_STACK_LONG(VMlong##opname(STACK_LONG(-3), STACK_LONG(-1)), -3);        \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                                     \
   }
-
-#else
-#define OPC_INT_BINARY(opcname, opname, test)                           \
-      CASE(_i##opcname):                                                \
-          if (test && (STACK_INT(-1) == 0)) {                           \
-              VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), \
-                            "/ by zero", note_div0Check_trap);          \
-          }                                                             \
-          SET_STACK_INT(VMint##opname(STACK_INT(-2),                    \
-                                      STACK_INT(-1)),                   \
-                                      -2);                              \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                        \
-      CASE(_l##opcname):                                                \
-      {                                                                 \
-          if (test) {                                                   \
-            jlong l1 = STACK_LONG(-1);                                  \
-            if (VMlongEqz(l1)) {                                        \
-              VM_JAVA_ERROR(vmSymbols::java_lang_ArithmeticException(), \
-                            "/ by long zero", note_div0Check_trap);     \
-            }                                                           \
-          }                                                             \
-          /* First long at (-1,-2) next long at (-3,-4) */              \
-          SET_STACK_LONG(VMlong##opname(STACK_LONG(-3),                 \
-                                        STACK_LONG(-1)),                \
-                                        -3);                            \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
-      }
-#endif
 
       OPC_INT_BINARY(add, Add, 0);
       OPC_INT_BINARY(sub, Sub, 0);
@@ -1473,24 +1452,42 @@ run:
 
      /* negate the value on the top of the stack */
 
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)                      \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *old_exp =                                                      \
+        ConcolicMngr::get_stack_slot(stack_offset + input_offset);             \
+    if (old_exp) {                                                             \
+      Expression *new_exp = new OpSymExpression(old_exp, op);                  \
+      ConcolicMngr::set_stack_slot(stack_offset + output_offset, new_exp);     \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)
+#endif
       CASE(_ineg):
-         SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_fneg):
-         SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_lneg):
       {
-         SET_STACK_LONG(VMlongNeg(STACK_LONG(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_LONG(VMlongNeg(STACK_LONG(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
       CASE(_dneg):
       {
-         SET_STACK_DOUBLE(VMdoubleNeg(STACK_DOUBLE(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_DOUBLE(VMdoubleNeg(STACK_DOUBLE(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
       /* Conversion operations */
@@ -1602,25 +1599,36 @@ run:
           SET_STACK_INT(VMint2Short(STACK_INT(-1)), -1);
           UPDATE_PC_AND_CONTINUE(1);
 
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)            \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
+    Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
+    if (left || right) {                                                       \
+      if (!left) {                                                             \
+        left = new ConExpression(l_value);                                     \
+      }                                                                        \
+      if (!right) {                                                            \
+        right = new ConExpression(r_value);                                    \
+      }                                                                        \
+      Expression *new_exp = new OpSymExpression(left, right, op, cmp);         \
+      ConcolicMngr::record_path_condition(new_exp);                            \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)
+#endif
+
       /* comparison operators */
 
-#ifdef ENABLE_CONCOLIC
 #define COMPARISON_OP(name, comparison)                                        \
   CASE(_if_icmp##name) : {                                                     \
     const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));                 \
     int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
     address branch_pc = pc;                                                    \
                                                                                \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##name);                      \
-      ConcolicMngr::record_path_condition(res);                                \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY_CMP(-2, -1, STACK_INT(-2), STACK_INT(-1), op_##name);  \
                                                                                \
     /* Profile branch. */                                                      \
     BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
@@ -1638,31 +1646,6 @@ run:
     DO_BACKEDGE_CHECKS(skip, branch_pc);                                       \
     CONTINUE;                                                                  \
   }
-#else
-#define COMPARISON_OP(name, comparison)                                      \
-      CASE(_if_icmp##name): {                                                \
-          const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));         \
-          int skip = cmp                                                     \
-                      ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;             \
-          address branch_pc = pc;                                            \
-          /* Profile branch. */                                              \
-          BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                        \
-          UPDATE_PC_AND_TOS(skip, -2);                                       \
-          DO_BACKEDGE_CHECKS(skip, branch_pc);                               \
-          CONTINUE;                                                          \
-      }                                                                      \
-      CASE(_if##name): {                                                     \
-          const bool cmp = (STACK_INT(-1) comparison 0);                     \
-          int skip = cmp                                                     \
-                      ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;             \
-          address branch_pc = pc;                                            \
-          /* Profile branch. */                                              \
-          BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                        \
-          UPDATE_PC_AND_TOS(skip, -1);                                       \
-          DO_BACKEDGE_CHECKS(skip, branch_pc);                               \
-          CONTINUE;                                                          \
-      }
-#endif
 
 #define COMPARISON_OP2(name, comparison)                                     \
       COMPARISON_OP(name, comparison)                                        \
@@ -1764,34 +1747,44 @@ run:
       }
 
       CASE(_fcmpl):
+      {
+        int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), -1);
+        CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpl);
+        SET_STACK_INT(r, -2);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
+      }
       CASE(_fcmpg):
       {
-          SET_STACK_INT(VMfloatCompare(STACK_FLOAT(-2),
-                                        STACK_FLOAT(-1),
-                                        (opcode == Bytecodes::_fcmpl ? -1 : 1)),
-                        -2);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
+        int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), 1);
+        CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpg);
+        SET_STACK_INT(r, -2);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
 
       CASE(_dcmpl):
+      {
+        int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), -1);
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpl);
+        MORE_STACK(-4); // Pop
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
       CASE(_dcmpg):
       {
-          int r = VMdoubleCompare(STACK_DOUBLE(-3),
-                                  STACK_DOUBLE(-1),
-                                  (opcode == Bytecodes::_dcmpl ? -1 : 1));
-          MORE_STACK(-4); // Pop
-          SET_STACK_INT(r, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), 1);
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpg);
+        MORE_STACK(-4); // Pop
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
-
       CASE(_lcmp):
       {
-          int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
-          MORE_STACK(-4);
-          SET_STACK_INT(r, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
+        MORE_STACK(-4);
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
-
 
       /* Return from a method */
 
@@ -1854,7 +1847,7 @@ run:
             int stack_offset = GET_STACK_OFFSET;                                      \
             sym_oid_t sym_oid = arrObj->get_sym_oid();                                \
             SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);        \
-            SymbolicExpression* sym_exp = sym_obj->get(index);                        \
+            Expression* sym_exp = sym_obj->get(index);                        \
             ConcolicMngr::set_stack_slot(stack_offset-2, sym_exp, sym_oid, index);    \
           }                                                                           \
                                                                                       \
@@ -1883,7 +1876,7 @@ run:
             int stack_offset = GET_STACK_OFFSET;                                           \
             SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj);    \
             sym_oid_t sym_oid = arrObj->get_sym_oid();                                     \
-            SymbolicExpression* sym_exp = sym_obj->get(index);                             \
+            Expression* sym_exp = sym_obj->get(index);                             \
             ConcolicMngr::set_stack_slot(stack_offset-1, sym_exp, sym_oid, index);         \
           }                                                                                \
                                                                                            \
@@ -1929,7 +1922,7 @@ run:
                                                                                         \
           if (ConcolicMngr::is_doing_concolic) {                                        \
             int stack_offset = GET_STACK_OFFSET;                                        \
-            SymbolicExpression *sym_exp =                                               \
+            Expression *sym_exp =                                               \
                 ConcolicMngr::get_stack_slot(stack_offset - 1);                         \
             SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
             sym_obj->set_sym_exp(index, sym_exp);                                       \
@@ -1956,7 +1949,7 @@ run:
                                                                                         \
           if (ConcolicMngr::is_doing_concolic) {                                        \
             int stack_offset = GET_STACK_OFFSET;                                        \
-            SymbolicExpression *sym_exp =                                               \
+            Expression *sym_exp =                                               \
                 ConcolicMngr::get_stack_slot(stack_offset - 1);                         \
             SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
             sym_obj->set_sym_exp(index, sym_exp);                                       \
@@ -2259,7 +2252,7 @@ run:
                 }
 
                 SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-                SymbolicExpression* sym_exp = sym_obj->get(field_index);
+                Expression* sym_exp = sym_obj->get(field_index);
                 ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
               }
             }
@@ -2385,11 +2378,14 @@ run:
           if (ConcolicMngr::is_doing_concolic) {
             int stack_offset = GET_STACK_OFFSET;
             int field_index = cache->field_index();
-                
-            SymbolicExpression *sym_exp =
+
+            Expression *sym_exp =
                 ConcolicMngr::get_stack_slot(stack_offset - 1);
-            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-            sym_obj->set_sym_exp(field_index, sym_exp);
+            if (sym_exp) {
+              SymbolicObject *sym_obj =
+                  ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+              sym_obj->set_sym_exp(field_index, sym_exp);
+            }
           }
 #endif
 

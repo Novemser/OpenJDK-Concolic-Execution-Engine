@@ -4,7 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/symbolicExpression.hpp"
+#include "concolic/exp/expression.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>
@@ -12,7 +12,7 @@
 
 class SymbolicObject {
   static const int SYM_NAME_LENGTH = 8;
-  typedef std::map<int, SymbolicExpression *> SymExpStore;
+  typedef std::map<int, Expression *> SymExpStore;
 
 private:
   sym_oid_t _sym_oid;
@@ -30,16 +30,14 @@ public:
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
-  SymbolicExpression *get(int field_index) {
-    SymbolicExpression *sym_exp = _sym_exps[field_index];
-    assert(sym_exp, "not null");
-    return sym_exp;
+  Expression *get(int field_index) {
+    return _sym_exps[field_index];
   }
 
   char *get_sym_name() { return _sym_name; }
 
   void init_sym_exp(int field_index);
-  void set_sym_exp(int field_index, SymbolicExpression* sym_exp);
+  void set_sym_exp(int field_index, Expression* sym_exp);
 
 public:
   void print();

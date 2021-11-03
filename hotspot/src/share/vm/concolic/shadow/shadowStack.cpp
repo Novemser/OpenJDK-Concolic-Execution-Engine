@@ -1,6 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowStack.hpp"
+#include "concolic/shadow/shadowStack.hpp"
 #include "runtime/frame.inline.hpp"
 #include "runtime/thread.hpp"
 

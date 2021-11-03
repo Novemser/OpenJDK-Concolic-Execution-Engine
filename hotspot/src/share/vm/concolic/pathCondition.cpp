@@ -3,7 +3,7 @@
 #include "concolic/pathCondition.hpp"
 #include "utilities/ostream.hpp"
 
-void PathCondition::add(SymbolicExpression *sym_exp) {
+void PathCondition::add(Expression *sym_exp) {
   _sym_exps.push_back(sym_exp);
 }
 

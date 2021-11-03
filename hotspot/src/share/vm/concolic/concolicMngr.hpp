@@ -16,20 +16,25 @@ public:
   static jlong endConcolic();
   static void symbolize(Handle handle);
 
-  inline static void set_stack_slot(int offset, SymbolicExpression *sym_exp) {
+  inline static void set_stack_slot(int offset, Expression *sym_exp) {
     assert(offset >= 0, "offset >= 0");
     sym_tmp_id_t sym_tmp_id = ctx->get_next_sym_tmp_id(sym_exp);
     ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
         offset, sym_exp, NULL_SYM_OID, sym_tmp_id);
   }
 
-  inline static void set_stack_slot(int offset, SymbolicExpression *sym_exp,
+  inline static void set_stack_slot(int offset, Expression *sym_exp,
                                     sym_oid_t sym_oid, int index) {
-    ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-        offset, sym_exp, sym_oid, index);
+    ShadowTable &opr_stack =
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack();
+    if (sym_exp) {
+      opr_stack.set_slot(offset, sym_exp, sym_oid, index);
+    } else {
+      opr_stack.clear_slot(offset);
+    }
   }
 
-  inline static SymbolicExpression *get_stack_slot(int offset) {
+  inline static Expression *get_stack_slot(int offset) {
     return ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_slot(
         offset);
   }
@@ -39,7 +44,7 @@ public:
         offset);
   }
 
-  inline static void record_path_condition(SymbolicExpression *sym_exp) {
+  inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }
 };

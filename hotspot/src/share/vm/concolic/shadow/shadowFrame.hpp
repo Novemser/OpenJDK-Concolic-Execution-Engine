@@ -1,9 +1,9 @@
-#ifndef SHARE_VM_CONCOLIC_SHADOWFRAME_HPP
-#define SHARE_VM_CONCOLIC_SHADOWFRAME_HPP
+#ifndef SHARE_VM_CONCOLIC_SHADOW_SHADOWFRAME_HPP
+#define SHARE_VM_CONCOLIC_SHADOW_SHADOWFRAME_HPP
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadowTable.hpp"
+#include "concolic/shadow/shadowTable.hpp"
 #include "runtime/frame.hpp"
 
 class ShadowFrame {
@@ -36,4 +36,4 @@ private:
 
 #endif
 
-#endif // SHARE_VM_CONCOLIC_SHADOWFRAME_HPP
+#endif // SHARE_VM_CONCOLIC_SHADOW_SHADOWFRAME_HPP

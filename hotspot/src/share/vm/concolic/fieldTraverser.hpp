@@ -4,7 +4,6 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/symbolicExpression.hpp"
 #include "concolic/threadContext.hpp"
 #include "memory/resourceArea.hpp"
 #include "oops/instanceKlass.hpp"
@@ -60,7 +59,6 @@ protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
   bool do_array_element_helper(int index, arrayOop array_obj);
 };
-
 
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_FIELDTRAVERSER_HPP
