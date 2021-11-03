@@ -1620,6 +1620,23 @@ run:
 #define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)
 #endif
 
+/**
+ * TODO: too costly for allocating one ConExpression for each constant value
+*/
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_UNARY_CMP(off, value, op)                                 \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *old_exp = ConcolicMngr::get_stack_slot(stack_offset + off);    \
+    if (old_exp) {                                                             \
+      Expression *const_exp = new ConExpression(value);                        \
+      Expression *new_exp = new OpSymExpression(old_exp, const_exp, op, cmp);  \
+      ConcolicMngr::record_path_condition(new_exp);                            \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_UNARY_CMP(off, value, op)
+#endif
       /* comparison operators */
 
 #define COMPARISON_OP(name, comparison)                                        \
@@ -1640,6 +1657,9 @@ run:
     const bool cmp = (STACK_INT(-1) comparison 0);                             \
     int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
     address branch_pc = pc;                                                    \
+                                                                               \
+    CONCOLIC_OPC_UNARY_CMP(-1, 0, op_##name);                                 \
+                                                                               \
     /* Profile branch. */                                                      \
     BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
     UPDATE_PC_AND_TOS(skip, -1);                                               \
