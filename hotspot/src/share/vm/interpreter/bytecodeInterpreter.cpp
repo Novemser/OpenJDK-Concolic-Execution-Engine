@@ -1749,12 +1749,14 @@ run:
       CASE(_fcmpl):
       {
         int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), -1);
+        CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpl);
         SET_STACK_INT(r, -2);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
       CASE(_fcmpg):
       {
         int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), 1);
+        CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpg);
         SET_STACK_INT(r, -2);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
@@ -1762,6 +1764,7 @@ run:
       CASE(_dcmpl):
       {
         int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), -1);
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpl);
         MORE_STACK(-4); // Pop
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
@@ -1769,6 +1772,7 @@ run:
       CASE(_dcmpg):
       {
         int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), 1);
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpg);
         MORE_STACK(-4); // Pop
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);

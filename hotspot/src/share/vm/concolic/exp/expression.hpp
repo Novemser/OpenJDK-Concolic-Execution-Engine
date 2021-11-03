@@ -58,6 +58,8 @@ private:
 public:
   ConExpression(jint i);
   ConExpression(jlong l);
+  ConExpression(jfloat f);
+  ConExpression(jdouble d);
 
 public:
   void print();
