@@ -25,8 +25,13 @@ public:
 
   inline static void set_stack_slot(int offset, Expression *sym_exp,
                                     sym_oid_t sym_oid, int index) {
-    ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-        offset, sym_exp, sym_oid, index);
+    ShadowTable &opr_stack =
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack();
+    if (sym_exp) {
+      opr_stack.set_slot(offset, sym_exp, sym_oid, index);
+    } else {
+      opr_stack.clear_slot(offset);
+    }
   }
 
   inline static Expression *get_stack_slot(int offset) {

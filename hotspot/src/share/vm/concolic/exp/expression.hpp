@@ -20,20 +20,20 @@ protected:
   Expression() : _ref_count(0) {}
 };
 
-class FieldSymbolicExpression : public Expression {
+class FieldSymExpression : public Expression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
-  char _sym_str[EXP_NAME_LENGTH];
+  char _str[EXP_NAME_LENGTH];
 
 public:
-  FieldSymbolicExpression(char *sym_name, int field_index);
+  FieldSymExpression(char *sym_name, int field_index);
 
 public:
   void print();
 };
 
-class OpSymbolicExpression : public Expression {
+class OpSymExpression : public Expression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
@@ -42,12 +42,26 @@ private:
   SymbolicOp _op;
 
 public:
-  OpSymbolicExpression(Expression *l, Expression *r,
+  OpSymExpression(Expression *l, Expression *r,
                        SymbolicOp op, bool cmp = true);
 
 public:
   void print();
 };
+
+class ConExpression : public Expression {
+  static const int EXP_NAME_LENGTH = 16;
+
+private:
+  char _str[EXP_NAME_LENGTH];
+
+public:
+  ConExpression(jint i);
+
+public:
+  void print();
+};
+
 
 #endif
 

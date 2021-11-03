@@ -3,20 +3,17 @@
 #include "concolic/exp/expression.hpp"
 #include "utilities/ostream.hpp"
 
-void Expression::print() {
-  tty->print_cr("ref_count: %u", _ref_count);
-};
+void Expression::print() { tty->print_cr("ref_count: %u", _ref_count); };
 
-FieldSymbolicExpression::FieldSymbolicExpression(char *sym_name,
-                                                 int field_index) {
-  int ret = sprintf(_sym_str, "%s.%d", sym_name, field_index);
+FieldSymExpression::FieldSymExpression(char *sym_name, int field_index) {
+  int ret = sprintf(_str, "%s.%d", sym_name, field_index);
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
-void FieldSymbolicExpression::print() { tty->print("%s\n", _sym_str); }
+void FieldSymExpression::print() { tty->print("%s\n", _str); }
 
-OpSymbolicExpression::OpSymbolicExpression(Expression *l, Expression *r,
-                                           SymbolicOp op, bool cmp)
+OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
+                                 bool cmp)
     : _op(cmp ? op : NotSymbolicOp[op]) {
   if (l) {
     l->inc_ref();
@@ -28,10 +25,17 @@ OpSymbolicExpression::OpSymbolicExpression(Expression *l, Expression *r,
   }
 }
 
-void OpSymbolicExpression::print() {
+void OpSymExpression::print() {
   _left->print();
   tty->print("%s\n", SymbolicOpStr[(int)_op]);
   _right->print();
 }
+
+ConExpression::ConExpression(jint i) {
+  int ret = sprintf(_str, "%d", i);
+  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+}
+
+void ConExpression::print() { tty->print("C_%s\n", _str); }
 
 #endif

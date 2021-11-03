@@ -49,7 +49,7 @@ public class Example {
         System.symbolize(obj1);
         System.symbolize(obj2);
         
-        obj3.value = obj1.value + obj2.value;
+        obj3.value = obj1.value + 2;
 
         if (obj3.value > obj2.value) {
             obj3.value = obj1.value;

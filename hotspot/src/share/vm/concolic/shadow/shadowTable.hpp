@@ -44,7 +44,7 @@ public:
 
   Expression *get_slot(int offset) {
     Expression *ret = _tbl[offset].sym_exp;
-    assert(ret, "not null");
+    // assert(ret, "not null");
     return ret;
   }
 

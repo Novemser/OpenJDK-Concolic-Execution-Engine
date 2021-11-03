@@ -1335,6 +1335,10 @@ run:
 
 #undef  OPC_INT_BINARY
 #ifdef ENABLE_CONCOLIC
+/**
+ * We do not clear stack slot when both parameters are concrete
+ * Because the result solt is already concrete (NULL)
+ */
 #define OPC_INT_BINARY(opcname, opname, test)                                  \
   CASE(_i##opcname) : {                                                        \
     if (test && (STACK_INT(-1) == 0)) {                                        \
@@ -1345,8 +1349,16 @@ run:
       int stack_offset = GET_STACK_OFFSET;                                     \
       Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
       Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      Expression *res = new OpSymbolicExpression(left, right, op_##opcname);   \
-      ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
+      if (left || right) {                                                     \
+        if (!left) {                                                           \
+          left = new ConExpression(STACK_INT(-2));                             \
+        }                                                                      \
+        if (!right) {                                                          \
+          right = new ConExpression(STACK_INT(-1));                            \
+        }                                                                      \
+        Expression *res = new OpSymExpression(left, right, op_##opcname);      \
+        ConcolicMngr::set_stack_slot(stack_offset - 2, res);                   \
+      }                                                                        \
     }                                                                          \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
     UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                     \
@@ -1363,7 +1375,7 @@ run:
       int stack_offset = GET_STACK_OFFSET;                                     \
       Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 3);       \
       Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      Expression *res = new OpSymbolicExpression(left, right, op_##opcname);   \
+      Expression *res = new OpSymExpression(left, right, op_##opcname);        \
       ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
@@ -1609,7 +1621,7 @@ run:
       int stack_offset = GET_STACK_OFFSET;                                     \
       Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
       Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      Expression *res = new OpSymbolicExpression(left, right, op_##name, cmp); \
+      Expression *res = new OpSymExpression(left, right, op_##name, cmp); \
       ConcolicMngr::record_path_condition(res);                                \
     }                                                                          \
                                                                                \

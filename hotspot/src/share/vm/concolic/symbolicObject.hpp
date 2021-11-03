@@ -31,9 +31,7 @@ public:
   }
 
   Expression *get(int field_index) {
-    Expression *sym_exp = _sym_exps[field_index];
-    assert(sym_exp, "not null");
-    return sym_exp;
+    return _sym_exps[field_index];
   }
 
   char *get_sym_name() { return _sym_name; }
