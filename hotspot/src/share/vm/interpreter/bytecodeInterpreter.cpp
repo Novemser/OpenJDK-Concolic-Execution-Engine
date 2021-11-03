@@ -1845,6 +1845,25 @@ run:
       }
 
       /* 32-bit loads. These handle conversion from < 32-bit types */
+#ifdef ENABLE_CONCOLIC
+#define ARRAY_LOADTO32(T, T2, format, stackRes, extra)                                \
+      {                                                                               \
+          ARRAY_INTRO(-2);                                                            \
+                                                                                      \
+          if (ConcolicMngr::is_doing_concolic) {                                      \
+            int stack_offset = GET_STACK_OFFSET;                                      \
+            sym_oid_t sym_oid = arrObj->get_sym_oid();                                \
+            SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);        \
+            SymbolicExpression* sym_exp = sym_obj->get(index);                        \
+            ConcolicMngr::set_stack_slot(stack_offset-2, sym_exp, sym_oid, index);    \
+          }                                                                           \
+                                                                                      \
+          (void)extra;                                                                \
+          SET_ ## stackRes(*(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)), \
+                           -2);                                                       \
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                      \
+      }
+#else
 #define ARRAY_LOADTO32(T, T2, format, stackRes, extra)                                \
       {                                                                               \
           ARRAY_INTRO(-2);                                                            \
@@ -1853,8 +1872,26 @@ run:
                            -2);                                                       \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                                      \
       }
-
+#endif
       /* 64-bit loads */
+#ifdef ENABLE_CONCOLIC 
+#define ARRAY_LOADTO64(T,T2, stackRes, extra)                                              \
+      {                                                                                    \
+          ARRAY_INTRO(-2);                                                                 \
+                                                                                           \
+          if (ConcolicMngr::is_doing_concolic) {                                           \
+            int stack_offset = GET_STACK_OFFSET;                                           \
+            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj);    \
+            sym_oid_t sym_oid = arrObj->get_sym_oid();                                     \
+            SymbolicExpression* sym_exp = sym_obj->get(index);                             \
+            ConcolicMngr::set_stack_slot(stack_offset-1, sym_exp, sym_oid, index);         \
+          }                                                                                \
+                                                                                           \
+          SET_ ## stackRes(*(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)), -1); \
+          (void)extra;                                                                     \
+          UPDATE_PC_AND_CONTINUE(1);                                                       \
+      }
+#else
 #define ARRAY_LOADTO64(T,T2, stackRes, extra)                                              \
       {                                                                                    \
           ARRAY_INTRO(-2);                                                                 \
@@ -1862,6 +1899,7 @@ run:
           (void)extra;                                                                     \
           UPDATE_PC_AND_CONTINUE(1);                                                       \
       }
+#endif
 
       CASE(_iaload):
           ARRAY_LOADTO32(T_INT, jint,   "%d",   STACK_INT, 0);
@@ -1884,6 +1922,24 @@ run:
           ARRAY_LOADTO64(T_DOUBLE, jdouble, STACK_DOUBLE, 0);
 
       /* 32-bit stores. These handle conversion to < 32-bit types */
+#ifdef ENABLE_CONCOLIC
+#define ARRAY_STOREFROM32(T, T2, format, stackSrc, extra)                               \
+      {                                                                                 \
+          ARRAY_INTRO(-3);                                                              \
+                                                                                        \
+          if (ConcolicMngr::is_doing_concolic) {                                        \
+            int stack_offset = GET_STACK_OFFSET;                                        \
+            SymbolicExpression *sym_exp =                                               \
+                ConcolicMngr::get_stack_slot(stack_offset - 1);                         \
+            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
+            sym_obj->set_sym_exp(index, sym_exp);                                       \
+          }                                                                             \
+                                                                                        \
+          (void)extra;                                                                  \
+          *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);                                        \
+      }
+#else
 #define ARRAY_STOREFROM32(T, T2, format, stackSrc, extra)                            \
       {                                                                              \
           ARRAY_INTRO(-3);                                                           \
@@ -1891,8 +1947,26 @@ run:
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1); \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);                                     \
       }
-
-      /* 64-bit stores */
+#endif
+      /* 64-bit stores */ 
+#ifdef ENABLE_CONCOLIC
+#define ARRAY_STOREFROM64(T, T2, stackSrc, extra)                                       \
+      {                                                                                 \
+          ARRAY_INTRO(-4);                                                              \
+                                                                                        \
+          if (ConcolicMngr::is_doing_concolic) {                                        \
+            int stack_offset = GET_STACK_OFFSET;                                        \
+            SymbolicExpression *sym_exp =                                               \
+                ConcolicMngr::get_stack_slot(stack_offset - 1);                         \
+            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
+            sym_obj->set_sym_exp(index, sym_exp);                                       \
+          }                                                                             \
+                                                                                        \
+          (void)extra;                                                                  \
+          *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -4);                                        \
+      }
+#else
 #define ARRAY_STOREFROM64(T, T2, stackSrc, extra)                                    \
       {                                                                              \
           ARRAY_INTRO(-4);                                                           \
@@ -1900,6 +1974,7 @@ run:
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1); \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -4);                                     \
       }
+#endif
 
       CASE(_iastore):
           ARRAY_STOREFROM32(T_INT, jint,   "%d",   STACK_INT, 0);

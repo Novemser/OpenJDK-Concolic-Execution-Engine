@@ -28,6 +28,8 @@ protected:
   FieldTraverser(oop obj) : _obj(obj), _depth(1) {}
 
   virtual bool do_field_helper(fieldDescriptor *fd, oop obj) {}
+  // Do elements in an array (and array itself if necessary)
+  virtual bool do_array_helper(arrayOop array_obj) {}
 
   void print_indent();
 
@@ -46,6 +48,7 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
+  bool do_array_helper(arrayOop array_obj);
 };
 
 class SimpleFieldPrinter : public FieldTraverser {
@@ -54,6 +57,7 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
+  bool do_array_helper(arrayOop array_obj);
 };
 
 

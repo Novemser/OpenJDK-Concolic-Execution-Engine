@@ -22,6 +22,7 @@ ThreadContext::~ThreadContext() {
 }
 
 void ThreadContext::symbolize(Handle handle) {
+  oop obj = handle();
   SymbolicObject *sym_obj = this->alloc_sym_obj(handle());
   this->symbolize_recursive(sym_obj, handle());
 }
@@ -59,6 +60,10 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
 
   FieldSymbolizer field_symbolzier(obj, *this);
   field_symbolzier.do_recursive();
+  // OopTraverser oop_traverser;
+  // tty->print("\033[1;36m===============================================\033[0m\n");
+  // obj->oop_iterate(&oop_traverser);
+  // tty->print("\033[1;36m===============================================\033[0m\n");
 }
 
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(SymbolicExpression *sym_exp) {

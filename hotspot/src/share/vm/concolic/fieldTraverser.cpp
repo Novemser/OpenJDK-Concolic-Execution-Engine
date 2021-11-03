@@ -22,6 +22,12 @@ void FieldTraverser::do_recursive_helper() {
      */
     // instanceKlass->do_local_static_fields(this);
     instanceKlass->do_nonstatic_fields(this);
+  } else if (_obj->is_array()) {
+    arrayOop array_obj = (arrayOop)_obj;
+    do_array_helper(array_obj);
+    /**
+     * TODO: do elements in array if necessary
+     */
   } else {
     assert(false, "unhandled");
   }
@@ -66,6 +72,10 @@ void FieldTraverser::print_indent() {
   }
 }
 
+/**************************************************
+ * FieldSymbolizer
+ */
+
 bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   // print_indent();
   // tty->print("---- %d\n", fd->index());
@@ -77,6 +87,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
+    // we treat elements in an array as `field`
     assert(false, "unhandled!");
     // TODO: return true;
     return false;
@@ -87,6 +98,32 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   }
 }
 
+bool FieldSymbolizer::do_array_helper(arrayOop array_obj) {
+  ArrayKlass* array_klass = ArrayKlass::cast(array_obj->klass());
+  SymbolicObject *sym_obj;
+  switch (array_klass->element_type())
+  {
+  case T_OBJECT:
+    assert(false, "objarray unhandled");
+    return false;
+    break;
+  case T_ARRAY:
+    assert(false, "array of array unhandled");
+    return false;
+    break;
+  default:
+    // the element_type is primitive
+    sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
+    for (int index = 0; index < array_obj->length(); index++) {
+      sym_obj->init_sym_exp(index);
+    }
+    break;
+  }
+}
+
+/**************************************************
+ * SimpleFieldPrinter
+ */
 bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
 
@@ -133,6 +170,10 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
     assert(false, "illegal field type");
     return false;
   }
+}
+  
+bool SimpleFieldPrinter::do_array_helper(arrayOop array_obj) {
+  // pass
 }
 
 #endif

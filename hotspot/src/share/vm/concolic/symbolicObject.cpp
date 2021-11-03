@@ -12,7 +12,7 @@ void SymbolicObject::init_sym_exp(int field_index) {
 }
 
 void SymbolicObject::set_sym_exp(int field_index, SymbolicExpression *sym_exp) {
-  _sym_exps.insert(std::make_pair(field_index, sym_exp));
+  _sym_exps[field_index] = sym_exp;
 }
 
 void SymbolicObject::print() {

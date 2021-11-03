@@ -13,13 +13,15 @@ This [link](https://gist.github.com/arturmkrtchyan/43d6135e8a15798cc46c) and [li
 
 - **mark**:
 - **klass**: 包含了类的信息
-  - **InstanceKclass**:
+  - **InstanceKlass**:
     - 获取 fields 数量: `ik->java_fields_count()`
     - 获取 fields 的 offset: `p ((InstanceKlass*)obj->_metadata._klass)->field_offset(1)`
     - 获取 field 名: `ik->field_name(index)`
     - 获取 field 签名: `ik->field_signature(index)`
     - 获取 field: `ik->field(index)`
       - **FieldInfo**
+  - **ArrayKlass**:
+    - ArrayKlass::cast(stack_object(topOfStack, -2)->klass())
 
 ## 关于对象
 
