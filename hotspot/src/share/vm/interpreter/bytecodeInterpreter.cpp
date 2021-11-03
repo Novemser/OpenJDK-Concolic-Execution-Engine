@@ -1283,34 +1283,95 @@ run:
       CASE(_pop2):               /* Discard the top 2 items on the stack */
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);
 
+      CASE(_dup): { /* Duplicate the top item on the stack */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
+        }
+#endif
+        dup(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
 
-      CASE(_dup):               /* Duplicate the top item on the stack */
-          dup(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      CASE(_dup2) : { /* Duplicate the top 2 items on the stack */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset, 2);
+        }
+#endif
+        dup2(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      }
 
-      CASE(_dup2):              /* Duplicate the top 2 items on the stack */
-          dup2(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      CASE(_dup_x1) : { /* insert top word two down */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset, stack_offset - 2, 1);
+        }
+#endif
+        dup_x1(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
 
-      CASE(_dup_x1):    /* insert top word two down */
-          dup_x1(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      CASE(_dup_x2) : { /* insert top word three down  */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 3, stack_offset - 2, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset, stack_offset - 3, 1);
+        }
+#endif 
+        dup_x2(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
 
-      CASE(_dup_x2):    /* insert top word three down  */
-          dup_x2(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      CASE(_dup2_x1) : { /* insert top 2 slots three down */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset + 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 0, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 3, stack_offset - 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset + 1, stack_offset - 2, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset, stack_offset - 3, 1);
+        }
+#endif
+        dup2_x1(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      }
 
-      CASE(_dup2_x1):   /* insert top 2 slots three down */
-          dup2_x1(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      CASE(_dup2_x2) : { /* insert top 2 slots four down */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset + 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 0, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 3, stack_offset - 1, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset - 4, stack_offset - 2, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset + 1, stack_offset - 3, 1);
+          ConcolicMngr::copy_stack_slot(stack_offset, stack_offset - 4, 1);
+        }
+#endif
+        dup2_x2(topOfStack);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      }
 
-      CASE(_dup2_x2):   /* insert top 2 slots four down */
-          dup2_x2(topOfStack);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
-
-      CASE(_swap): {        /* swap top two elements on the stack */
-          swap(topOfStack);
-          UPDATE_PC_AND_CONTINUE(1);
+      CASE(_swap) : { /* swap top two elements on the stack */
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          ConcolicMngr::swap_two_stack_slot(stack_offset - 1, stack_offset - 2);
+        }
+#endif
+        swap(topOfStack);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
 #ifdef ENABLE_CONCOLIC

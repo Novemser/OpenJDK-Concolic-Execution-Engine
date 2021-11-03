@@ -58,6 +58,18 @@ public:
         offset);
   }
 
+  inline static void copy_stack_slot(int src_off, int dst_off, int size) {
+    ShadowTable &opr_stack =
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack();
+    opr_stack.copy_entries(opr_stack, src_off, dst_off, size);
+  }
+
+  inline static void swap_two_stack_slot(int off1, int off2) {
+    ShadowTable &opr_stack =
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack();
+    opr_stack.swap_two_entries(off1, off2);
+  }
+
   inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }

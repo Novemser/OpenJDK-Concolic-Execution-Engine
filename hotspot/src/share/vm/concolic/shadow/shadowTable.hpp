@@ -22,6 +22,12 @@ public:
       index = -1;
       sym_exp = NULL;
     }
+
+    Entry &operator=(const Entry &other) {
+      this->sym_oid = other.sym_oid;
+      this->index = other.index;
+      this->sym_exp = other.sym_exp;
+    }
   };
 
 private:
@@ -32,6 +38,8 @@ public:
   ~ShadowTable() {}
 
   void init(int max_slot_size);
+
+  void set_slot(int offset, const Entry &other) { _tbl[offset] = other; }
 
   void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid, int index) {
     Entry &entry = _tbl[offset];
@@ -48,12 +56,20 @@ public:
     return ret;
   }
 
-  inline Entry& get_entry(int offset) {
-    return _tbl[offset];
-  }
+  inline Entry &get_entry(int offset) { return _tbl[offset]; }
 
   void copy_entries(ShadowTable &last_opr_stack, int src_begin, int dst_begin,
                     int size);
+
+  void swap_two_entries(int off1, int off2) {
+    Entry &entry1 = _tbl[off1];
+    Entry &entry2 = _tbl[off2];
+    Entry temp;
+
+    temp = entry1;
+    entry1 = entry2;
+    entry2 = temp;
+  }
 
   inline int size() { return _tbl.size(); }
 

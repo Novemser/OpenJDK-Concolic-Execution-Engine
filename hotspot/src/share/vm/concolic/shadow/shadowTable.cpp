@@ -17,8 +17,8 @@ void ShadowTable::copy_entries(ShadowTable &src_tbl, int src_begin, int dst_begi
   //   set_slot(offset - begin_offset, entry.sym_exp, entry.sym_oid, entry.index);
   // }
   for (int i = 0; i < size; i++) {
-    Entry &entry = src_tbl.get_entry(src_begin++);
-    set_slot(dst_begin++, entry.sym_exp, entry.sym_oid, entry.index);
+    const Entry &entry = src_tbl.get_entry(src_begin++);
+    set_slot(dst_begin++, entry);
   }
 }
 
