@@ -1770,6 +1770,7 @@ run:
       CASE(_lcmp):
       {
           int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
+          CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
           MORE_STACK(-4);
           SET_STACK_INT(r, 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
