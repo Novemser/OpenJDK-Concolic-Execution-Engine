@@ -1747,35 +1747,40 @@ run:
       }
 
       CASE(_fcmpl):
+      {
+        int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), -1);
+        SET_STACK_INT(r, -2);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
+      }
       CASE(_fcmpg):
       {
-          int r = VMfloatCompare(STACK_FLOAT(-2),
-                                 STACK_FLOAT(-1),
-                                 (opcode == Bytecodes::_fcmpl ? -1 : 1));
-          SET_STACK_INT(r, -2);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
+        int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), 1);
+        SET_STACK_INT(r, -2);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
 
       CASE(_dcmpl):
+      {
+        int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), -1);
+        MORE_STACK(-4); // Pop
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
       CASE(_dcmpg):
       {
-          int r = VMdoubleCompare(STACK_DOUBLE(-3),
-                                  STACK_DOUBLE(-1),
-                                  (opcode == Bytecodes::_dcmpl ? -1 : 1));
-          MORE_STACK(-4); // Pop
-          SET_STACK_INT(r, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), 1);
+        MORE_STACK(-4); // Pop
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
-
       CASE(_lcmp):
       {
-          int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
-          CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
-          MORE_STACK(-4);
-          SET_STACK_INT(r, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
+        MORE_STACK(-4);
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
-
 
       /* Return from a method */
 
