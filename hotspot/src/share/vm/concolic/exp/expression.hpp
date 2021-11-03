@@ -42,8 +42,8 @@ private:
   SymbolicOp _op;
 
 public:
-  OpSymExpression(Expression *l, Expression *r,
-                       SymbolicOp op, bool cmp = true);
+  OpSymExpression(Expression *l, Expression *r, SymbolicOp op, bool cmp = true);
+  OpSymExpression(Expression *r, SymbolicOp op);
 
 public:
   void print();
@@ -62,7 +62,6 @@ public:
 public:
   void print();
 };
-
 
 #endif
 

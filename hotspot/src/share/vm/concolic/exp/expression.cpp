@@ -25,8 +25,17 @@ OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
   }
 }
 
+OpSymExpression::OpSymExpression(Expression *r, SymbolicOp op) : _op(op) {
+  if (r) {
+    r->inc_ref();
+    _right = r;
+  }
+}
+
 void OpSymExpression::print() {
-  _left->print();
+  if (_left) {
+    _left->print();
+  }
   tty->print("%s\n", SymbolicOpStr[(int)_op]);
   _right->print();
 }

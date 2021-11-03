@@ -1356,8 +1356,8 @@ run:
         if (!right) {                                                          \
           right = new ConExpression(STACK_INT(-1));                            \
         }                                                                      \
-        Expression *res = new OpSymExpression(left, right, op_##opcname);      \
-        ConcolicMngr::set_stack_slot(stack_offset - 2, res);                   \
+        Expression *new_exp = new OpSymExpression(left, right, op_##opcname);  \
+        ConcolicMngr::set_stack_slot(stack_offset - 2, new_exp);               \
       }                                                                        \
     }                                                                          \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
@@ -1383,8 +1383,8 @@ run:
         if (!right) {                                                          \
           right = new ConExpression(STACK_LONG(-1));                           \
         }                                                                      \
-        Expression *res = new OpSymExpression(left, right, op_##opcname);      \
-        ConcolicMngr::set_stack_slot(stack_offset - 3, res);                   \
+        Expression *new_exp = new OpSymExpression(left, right, op_##opcname);  \
+        ConcolicMngr::set_stack_slot(stack_offset - 3, new_exp);               \
       }                                                                        \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
@@ -1489,8 +1489,18 @@ run:
      /* negate the value on the top of the stack */
 
       CASE(_ineg):
-         SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+#ifdef ENABLE_CONCOLIC
+        if (ConcolicMngr::is_doing_concolic) {
+          int stack_offset = GET_STACK_OFFSET;
+          Expression *old_exp = ConcolicMngr::get_stack_slot(stack_offset - 1);
+          if (old_exp) {
+            Expression *new_exp = new OpSymExpression(old_exp, op_neg);
+            ConcolicMngr::set_stack_slot(stack_offset - 1, new_exp);
+          }
+        }
+#endif
+        SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_fneg):
          SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
@@ -2325,9 +2335,11 @@ run:
 
             Expression *sym_exp =
                 ConcolicMngr::get_stack_slot(stack_offset - 1);
-            SymbolicObject *sym_obj =
-                ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-            sym_obj->set_sym_exp(field_index, sym_exp);
+            if (sym_exp) {
+              SymbolicObject *sym_obj =
+                  ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+              sym_obj->set_sym_exp(field_index, sym_exp);
+            }
           }
 #endif
 

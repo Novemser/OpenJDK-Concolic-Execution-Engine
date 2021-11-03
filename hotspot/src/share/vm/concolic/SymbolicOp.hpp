@@ -18,15 +18,17 @@ enum SymbolicOp {
   op_ge = 11,
   op_eq = 12,
   op_ne = 13,
+  op_neg = 14,
   op_num,
   op_null
 };
 static const SymbolicOp NotSymbolicOp[op_num] = {
-    op_null, op_null, op_null, op_null, op_null, op_null, op_null,
-    op_null, op_ge,   op_le,   op_gt,   op_lt,   op_ne,   op_eq};
+    op_null, op_null, op_null, op_null, op_null, op_null, op_null, op_null,
+    op_ge,   op_le,   op_gt,   op_lt,   op_ne,   op_eq,   op_null};
 
-static const char *SymbolicOpStr[op_num] = {
-    "+", "-", "*", "&", "|", "^", "/", "%", "<", ">", "<=", ">=", "==", "!="};
+static const char *SymbolicOpStr[op_num] = {"+",  "-",  "*",  "&",  "|",
+                                            "^",  "/",  "%",  "<",  ">",
+                                            "<=", ">=", "==", "!=", "-"};
 
 #endif
 
