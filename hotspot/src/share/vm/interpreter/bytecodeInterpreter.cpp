@@ -2582,6 +2582,8 @@ run:
             wide = true;
           }
 
+          CONCOLIC_CONST(0);
+
           ConstantPool* constants = METHOD->constants();
           switch (constants->tag_at(index).value()) {
           case JVM_CONSTANT_Integer:
@@ -2626,6 +2628,8 @@ run:
       CASE(_ldc2_w):
         {
           u2 index = Bytes::get_Java_u2(pc+1);
+
+          CONCOLIC_CONST(1);
 
           ConstantPool* constants = METHOD->constants();
           switch (constants->tag_at(index).value()) {
