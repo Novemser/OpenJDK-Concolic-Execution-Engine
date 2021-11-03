@@ -24,7 +24,20 @@ void FieldTraverser::do_recursive_helper() {
     instanceKlass->do_nonstatic_fields(this);
   } else if (_obj->is_array()) {
     arrayOop array_obj = (arrayOop)_obj;
-    do_array_helper(array_obj);
+    bool need_recursive = do_array_helper(array_obj);
+
+    if (need_recursive) {
+      if (this->_obj->is_objArray()) {
+        objArrayOop obj_array = ((objArrayOop)_obj);
+        // if it is an objArray, iterate over all object element
+        for (int index = 0; index < obj_array->length(); index++) {
+          this->_obj = obj_array->obj_at(index);
+          this->do_recursive_helper();
+        }
+      } else {
+        assert(false, "unhandled");
+      }
+    }
     /**
      * TODO: do elements in array if necessary
      */
@@ -104,8 +117,8 @@ bool FieldSymbolizer::do_array_helper(arrayOop array_obj) {
   switch (array_klass->element_type())
   {
   case T_OBJECT:
-    assert(false, "objarray unhandled");
-    return false;
+    assert(array_obj->is_objArray(), "An array with OBJECT element type should be objArray");
+    return true;
     break;
   case T_ARRAY:
     assert(false, "array of array unhandled");
@@ -113,6 +126,7 @@ bool FieldSymbolizer::do_array_helper(arrayOop array_obj) {
     break;
   default:
     // the element_type is primitive
+    assert(array_obj->is_typeArray(), "It shall be typeArrayOop here");
     sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
     for (int index = 0; index < array_obj->length(); index++) {
       sym_obj->init_sym_exp(index);
