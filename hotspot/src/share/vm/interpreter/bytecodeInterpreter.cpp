@@ -1749,10 +1749,10 @@ run:
       CASE(_fcmpl):
       CASE(_fcmpg):
       {
-          SET_STACK_INT(VMfloatCompare(STACK_FLOAT(-2),
-                                        STACK_FLOAT(-1),
-                                        (opcode == Bytecodes::_fcmpl ? -1 : 1)),
-                        -2);
+          int r = VMfloatCompare(STACK_FLOAT(-2),
+                                 STACK_FLOAT(-1),
+                                 (opcode == Bytecodes::_fcmpl ? -1 : 1));
+          SET_STACK_INT(r, -2);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
 
