@@ -41,6 +41,7 @@ public:
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
+  void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
 
   inline void record_path_condition(Expression *sym_exp) {
     _path_condition.add(sym_exp);

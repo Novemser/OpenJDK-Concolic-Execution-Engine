@@ -20,24 +20,20 @@ private:
   SymExpStore _sym_exps;
 
 public:
-  SymbolicObject(sym_oid_t sym_oid) {
-    _sym_oid = sym_oid;
-    set_sym_name();
-  }
+  SymbolicObject(sym_oid_t sym_oid);
+  ~SymbolicObject();
 
   void set_sym_name() {
     int ret = sprintf(_sym_name, "S_%ld", _sym_oid);
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
-  Expression *get(int field_index) {
-    return _sym_exps[field_index];
-  }
+  Expression *get(int field_index) { return _sym_exps[field_index]; }
 
   char *get_sym_name() { return _sym_name; }
 
   void init_sym_exp(int field_index);
-  void set_sym_exp(int field_index, Expression* sym_exp);
+  void set_sym_exp(int field_index, Expression *sym_exp);
 
 public:
   void print();

@@ -1900,7 +1900,7 @@ run:
   if (ConcolicMngr::is_doing_concolic) {                                        \
     int stack_offset = GET_STACK_OFFSET;                                        \
     Expression *sym_exp =                                                       \
-        ConcolicMngr::get_stack_slot(stack_offset + res_off);                   \
+        ConcolicMngr::get_stack_slot_and_detach(stack_offset + res_off);         \
     SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
     sym_obj->set_sym_exp(index, sym_exp);                                       \
   }
@@ -2339,7 +2339,7 @@ run:
             int field_index = cache->field_index();
 
             Expression *sym_exp =
-                ConcolicMngr::get_stack_slot(stack_offset - 1);
+                ConcolicMngr::get_stack_slot_and_detach(stack_offset - 1);
             if (sym_exp) {
               SymbolicObject *sym_obj =
                   ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);

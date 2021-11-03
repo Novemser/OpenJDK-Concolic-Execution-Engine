@@ -11,14 +11,22 @@ ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
 }
 
 ThreadContext::~ThreadContext() {
-  SymStore::iterator sym_iter;
-  for (sym_iter = _sym_objs.begin(); sym_iter != _sym_objs.end(); ++sym_iter) {
-    delete sym_iter->second;
+  for (SymStore::iterator iter = _sym_objs.begin(); iter != _sym_objs.end();
+       ++iter) {
+    delete iter->second;
   }
   _sym_objs.clear();
+
+  int size = _sym_tmp_exps.size();
+  for (int i = 1; i != size; ++i) {
+    Expression *sym_exp = _sym_tmp_exps[i];
+    if (sym_exp && sym_exp->able_to_gc()) {
+      delete sym_exp;
+    }
+  }
   _sym_tmp_exps.clear();
-  init_sym_oid_counter();
-  init_sym_tmp_id_counter();
+
+  _path_condition.gc();
 }
 
 void ThreadContext::symbolize(Handle handle) {
@@ -74,6 +82,10 @@ sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
   return sym_tmp_id;
 }
 
+void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
+  _sym_tmp_exps[sym_tmp_id] = NULL;
+}
+
 void ThreadContext::print() {
   for (SymStore::iterator sym_iter = _sym_objs.begin();
        sym_iter != _sym_objs.end(); ++sym_iter) {
@@ -83,8 +95,11 @@ void ThreadContext::print() {
 
   int size = _sym_tmp_exps.size();
   for (int i = 1; i < size; ++i) {
-    tty->print_cr("- sym_tmp_exp[%d]:", i);
-    _sym_tmp_exps[i]->print();
+    Expression *sym_exp = _sym_tmp_exps[i];
+    if (sym_exp) {
+      tty->print_cr("<< sym_tmp_exp[%d]:", i);
+      sym_exp->print();
+    }
   }
 
   _path_condition.print();

@@ -9,7 +9,7 @@
 #include <vector>
 
 class ShadowTable {
-private:
+public:
   struct Entry {
     Entry() { reset(); }
 
@@ -24,6 +24,7 @@ private:
     }
   };
 
+private:
   std::vector<Entry> _tbl;
 
 public:
@@ -32,8 +33,7 @@ public:
 
   void init(int max_slot_size);
 
-  void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid,
-                int index) {
+  void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid, int index) {
     Entry &entry = _tbl[offset];
     entry.sym_exp = sym_exp;
     entry.sym_oid = sym_oid;
@@ -48,15 +48,14 @@ public:
     return ret;
   }
 
-  Entry &get_entry(int offset) {
+  inline Entry& get_entry(int offset) {
     return _tbl[offset];
   }
 
-  void copy_entries(ShadowTable &last_opr_stack, int src_begin, int dst_begin, int size);
+  void copy_entries(ShadowTable &last_opr_stack, int src_begin, int dst_begin,
+                    int size);
 
-  int size() {
-    return _tbl.size();
-  }
+  inline int size() { return _tbl.size(); }
 
   void print();
 };

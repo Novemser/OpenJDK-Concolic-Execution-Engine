@@ -20,6 +20,8 @@ jlong ConcolicMngr::endConcolic() {
   tty->print("End concolic!\n");
   ctx->print();
   delete ctx;
+  tty->print_cr("Checking memory leaks for Expression, %lu remains...",
+             Expression::total_count);
   ConcolicMngr::is_doing_concolic = false;
   return 0;
 }

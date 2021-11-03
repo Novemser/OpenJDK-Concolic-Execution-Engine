@@ -5,6 +5,7 @@
 
 #include "concolic/SymbolicOp.hpp"
 #include "utilities/debug.hpp"
+#include "utilities/ostream.hpp"
 
 #include <stdio.h>
 
@@ -13,11 +14,17 @@ private:
   uint _ref_count;
 
 public:
+  static ulong total_count;
+
+  virtual ~Expression() { total_count--; }
   virtual void print();
+
   inline void inc_ref() { _ref_count += 1; }
+  inline bool dec_ref() { return --_ref_count == 0; }
+  inline bool able_to_gc() { return _ref_count == 0; }
 
 protected:
-  Expression() : _ref_count(0) {}
+  Expression() : _ref_count(0) { total_count++; }
 };
 
 class FieldSymExpression : public Expression {
@@ -28,6 +35,7 @@ private:
 
 public:
   FieldSymExpression(char *sym_name, int field_index);
+  ~FieldSymExpression();
 
 public:
   void print();
@@ -44,6 +52,7 @@ private:
 public:
   OpSymExpression(Expression *l, Expression *r, SymbolicOp op, bool cmp = true);
   OpSymExpression(Expression *r, SymbolicOp op);
+  ~OpSymExpression();
 
 public:
   void print();

@@ -39,6 +39,18 @@ public:
         offset);
   }
 
+  inline static Expression *get_stack_slot_and_detach(int offset) {
+    ShadowTable &opr_stack =
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack();
+    ShadowTable::Entry &entry = opr_stack.get_entry(offset);
+    assert(entry.sym_oid == NULL_SYM_OID, "not sym obj");
+    ctx->detach_tmp_exp(entry.index);
+    return entry.sym_exp;
+  }
+
+  /**
+   * TODO: document when to clear the stack
+   */
   inline static void clear_stack_slot(int offset) {
     return ctx->get_shadow_stack().get_last_frame().get_opr_stack().clear_slot(
         offset);

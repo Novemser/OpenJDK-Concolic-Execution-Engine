@@ -11,10 +11,11 @@ class PathCondition {
   typedef std::vector<Expression *> SymExpList;
 
 private:
-  SymExpList _sym_exps;
+  SymExpList _exps;
 
 public:
-  void add(Expression *sym_exp);
+  void add(Expression *exp);
+  void gc();
   void print();
 };
 
