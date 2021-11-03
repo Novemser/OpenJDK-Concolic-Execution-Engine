@@ -1375,7 +1375,6 @@ run:
       int stack_offset = GET_STACK_OFFSET;                                     \
       Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 3);       \
       Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      Expression *res = new OpSymExpression(left, right, op_##opcname);        \
       if (left || right) {                                                     \
         if (!left) {                                                           \
           left = new ConExpression(STACK_LONG(-3));                            \
@@ -1488,34 +1487,42 @@ run:
 
      /* negate the value on the top of the stack */
 
-      CASE(_ineg):
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
-          int stack_offset = GET_STACK_OFFSET;
-          Expression *old_exp = ConcolicMngr::get_stack_slot(stack_offset - 1);
-          if (old_exp) {
-            Expression *new_exp = new OpSymExpression(old_exp, op_neg);
-            ConcolicMngr::set_stack_slot(stack_offset - 1, new_exp);
-          }
-        }
+#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)                      \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *old_exp =                                                      \
+        ConcolicMngr::get_stack_slot(stack_offset + input_offset);             \
+    if (old_exp) {                                                             \
+      Expression *new_exp = new OpSymExpression(old_exp, op);                  \
+      ConcolicMngr::set_stack_slot(stack_offset + output_offset, new_exp);     \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)
 #endif
+      CASE(_ineg):
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
         SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_fneg):
-         SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_lneg):
       {
-         SET_STACK_LONG(VMlongNeg(STACK_LONG(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_LONG(VMlongNeg(STACK_LONG(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
       CASE(_dneg):
       {
-         SET_STACK_DOUBLE(VMdoubleNeg(STACK_DOUBLE(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
+        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        SET_STACK_DOUBLE(VMdoubleNeg(STACK_DOUBLE(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
       /* Conversion operations */
