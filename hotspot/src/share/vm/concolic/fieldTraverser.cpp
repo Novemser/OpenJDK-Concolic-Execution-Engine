@@ -66,7 +66,8 @@ void FieldTraverser::do_field(fieldDescriptor *fd) {
 void FieldTraverser::do_array_elements(FieldTraverser* field_traverser) {
   assert(this->_obj->is_array(), "should be array");
   arrayOop array = (arrayOop)(this->_obj);
-  for (int index = 0; index < array->length(); index++) {
+  int length = array->length();
+  for (int index = 0; index < length; index++) {
     field_traverser->do_array_element(index);
   }
 }
@@ -136,20 +137,16 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   switch (array_klass->element_type())
   {
   case T_OBJECT:
-    assert(array_obj->is_objArray(), "An array with OBJECT element type should be objArray");
     return true;
-    break;
   case T_ARRAY:
     assert(false, "element won't be array(it will be object)");
     return false;
-    break;
   default:
     // the element_type is primitive
     assert(array_obj->is_typeArray(), "It shall be typeArrayOop here");
     sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
     sym_obj->init_sym_exp(index);
     return false;
-    break;
   }
 }
 
