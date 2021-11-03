@@ -4,3 +4,4 @@ build/
 */.hg/
 .vscode/
 .idea/
+*.iml

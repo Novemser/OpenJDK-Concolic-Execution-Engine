@@ -1381,16 +1381,20 @@ run:
 #undef  OPC_FLOAT_BINARY
 #define OPC_FLOAT_BINARY(opcname, opname)                                  \
       CASE(_d##opcname): {                                                 \
-          SET_STACK_DOUBLE(VMdouble##opname(STACK_DOUBLE(-3),              \
-                                            STACK_DOUBLE(-1)),             \
-                                            -3);                           \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                           \
+        CONCOLIC_OPC_BINARY(-3, -1, -3, STACK_DOUBLE(-3), STACK_DOUBLE(-1),\
+          op_##opcname);                                                   \
+        SET_STACK_DOUBLE(VMdouble##opname(STACK_DOUBLE(-3),              \
+                                          STACK_DOUBLE(-1)),             \
+                                          -3);                           \
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                           \
       }                                                                    \
       CASE(_f##opcname):                                                   \
+          CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1),\
+          op_##opcname);                                                   \
           SET_STACK_FLOAT(VMfloat##opname(STACK_FLOAT(-2),                 \
                                           STACK_FLOAT(-1)),                \
                                           -2);                             \
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
+          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                           
 
 
      OPC_FLOAT_BINARY(add, Add);
