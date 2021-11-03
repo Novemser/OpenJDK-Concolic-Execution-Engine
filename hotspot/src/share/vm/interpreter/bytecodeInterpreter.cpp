@@ -1599,22 +1599,36 @@ run:
           SET_STACK_INT(VMint2Short(STACK_INT(-1)), -1);
           UPDATE_PC_AND_CONTINUE(1);
 
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)            \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
+    Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
+    if (left || right) {                                                       \
+      if (!left) {                                                             \
+        left = new ConExpression(l_value);                                     \
+      }                                                                        \
+      if (!right) {                                                            \
+        right = new ConExpression(r_value);                                    \
+      }                                                                        \
+      Expression *new_exp = new OpSymExpression(left, right, op, cmp);         \
+      ConcolicMngr::record_path_condition(new_exp);                            \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)
+#endif
+
       /* comparison operators */
 
-#ifdef ENABLE_CONCOLIC
 #define COMPARISON_OP(name, comparison)                                        \
   CASE(_if_icmp##name) : {                                                     \
     const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));                 \
     int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
     address branch_pc = pc;                                                    \
                                                                                \
-    if (ConcolicMngr::is_doing_concolic) {                                     \
-      int stack_offset = GET_STACK_OFFSET;                                     \
-      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
-      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
-      Expression *res = new OpSymExpression(left, right, op_##name, cmp); \
-      ConcolicMngr::record_path_condition(res);                                \
-    }                                                                          \
+    CONCOLIC_OPC_BINARY_CMP(-2, -1, STACK_INT(-2), STACK_INT(-1), op_##name);  \
                                                                                \
     /* Profile branch. */                                                      \
     BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
@@ -1632,31 +1646,6 @@ run:
     DO_BACKEDGE_CHECKS(skip, branch_pc);                                       \
     CONTINUE;                                                                  \
   }
-#else
-#define COMPARISON_OP(name, comparison)                                      \
-      CASE(_if_icmp##name): {                                                \
-          const bool cmp = (STACK_INT(-2) comparison STACK_INT(-1));         \
-          int skip = cmp                                                     \
-                      ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;             \
-          address branch_pc = pc;                                            \
-          /* Profile branch. */                                              \
-          BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                        \
-          UPDATE_PC_AND_TOS(skip, -2);                                       \
-          DO_BACKEDGE_CHECKS(skip, branch_pc);                               \
-          CONTINUE;                                                          \
-      }                                                                      \
-      CASE(_if##name): {                                                     \
-          const bool cmp = (STACK_INT(-1) comparison 0);                     \
-          int skip = cmp                                                     \
-                      ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;             \
-          address branch_pc = pc;                                            \
-          /* Profile branch. */                                              \
-          BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                        \
-          UPDATE_PC_AND_TOS(skip, -1);                                       \
-          DO_BACKEDGE_CHECKS(skip, branch_pc);                               \
-          CONTINUE;                                                          \
-      }
-#endif
 
 #define COMPARISON_OP2(name, comparison)                                     \
       COMPARISON_OP(name, comparison)                                        \
