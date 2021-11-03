@@ -2996,6 +2996,14 @@ run:
         jint size = STACK_INT(-1);
         CALL_VM(InterpreterRuntime::newarray(THREAD, atype, size),
                 handle_exception);
+        
+#ifdef ENABLE_CONCOLIC
+        /**
+         * This is where an object created
+         * We can set the default sym_oid here
+         */
+        THREAD->vm_result()->set_sym_oid(0);
+#endif
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();

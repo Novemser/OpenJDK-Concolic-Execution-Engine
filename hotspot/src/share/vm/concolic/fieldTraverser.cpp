@@ -24,19 +24,24 @@ void FieldTraverser::do_recursive_helper() {
     instanceKlass->do_nonstatic_fields(this);
   } else if (_obj->is_array()) {
     arrayOop array_obj = (arrayOop)_obj;
-    bool need_recursive = do_array_helper(array_obj);
-
-    if (need_recursive) {
-      if (this->_obj->is_objArray()) {
-        objArrayOop obj_array = ((objArrayOop)_obj);
-        // if it is an objArray, iterate over all object element
-        for (int index = 0; index < obj_array->length(); index++) {
-          this->_obj = obj_array->obj_at(index);
-          this->do_recursive_helper();
-        }
-      } else {
-        assert(false, "unhandled");
+    do_array_helper(array_obj);
+    
+    tty->print("\033[1;32m================================================\033[0m\n");
+    if (this->_obj->is_objArray()) {
+      _depth += 1;
+      oop temp_obj = this->_obj;
+      objArrayOop obj_array = ((objArrayOop)_obj);
+      // if it is an objArray, iterate over all object element
+      for (int index = 0; index < obj_array->length(); index++) {
+        this->_obj = obj_array->obj_at(index);
+        this->do_recursive_helper();
       }
+      this->_obj = temp_obj;
+      _depth -= 1;
+    } else if (this->_obj->is_typeArray()) {
+      // DO NOTHING
+    } else {
+      assert(false, "should not be here");
     }
     /**
      * TODO: do elements in array if necessary
