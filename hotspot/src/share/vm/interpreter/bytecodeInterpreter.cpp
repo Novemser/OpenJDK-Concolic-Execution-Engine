@@ -1348,7 +1348,7 @@ run:
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
       SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##opcname);                   \
+          new OpSymbolicExpression(left, right, op_##opcname);                   \
       ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
     }                                                                          \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
@@ -1369,7 +1369,7 @@ run:
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
       SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##opcname);                   \
+          new OpSymbolicExpression(left, right, op_##opcname);                   \
       ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
@@ -1618,7 +1618,7 @@ run:
       SymbolicExpression *right =                                              \
           ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
       SymbolicExpression *res =                                                \
-          new SymbolicExpression(left, right, op_##name);                      \
+          new OpSymbolicExpression(left, right, op_##name, cmp);                 \
       ConcolicMngr::record_path_condition(res);                                \
     }                                                                          \
                                                                                \

@@ -9,27 +9,43 @@
 #include <stdio.h>
 
 class SymbolicExpression {
+private:
+  uint _ref_count;
+
+public:
+  virtual void print();
+  inline void inc_ref() { _ref_count += 1; }
+
+protected:
+  SymbolicExpression() : _ref_count(0) {}
+};
+
+class FieldSymbolicExpression : public SymbolicExpression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
-  union {
-    char exp[EXP_NAME_LENGTH];
-    struct {
-      SymbolicExpression *left;
-      SymbolicExpression *right;
-    };
-  } _data;
-  uint _ref_count;
-  SymbolicOp _op;
-  bool _is_leaf;
+  char _sym_str[EXP_NAME_LENGTH];
 
 public:
-  SymbolicExpression(char *sym_name, int field_index);
-  SymbolicExpression(SymbolicExpression *l, SymbolicExpression *r,
-                     SymbolicOp op);
+  FieldSymbolicExpression(char *sym_name, int field_index);
 
-  inline void inc_ref() { _ref_count += 1; }
+public:
+  void print();
+};
 
+class OpSymbolicExpression : public SymbolicExpression {
+  static const int EXP_NAME_LENGTH = 16;
+
+private:
+  SymbolicExpression *_left;
+  SymbolicExpression *_right;
+  SymbolicOp _op;
+
+public:
+  OpSymbolicExpression(SymbolicExpression *l, SymbolicExpression *r,
+                       SymbolicOp op, bool cmp = true);
+
+public:
   void print();
 };
 

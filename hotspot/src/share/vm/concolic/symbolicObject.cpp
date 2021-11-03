@@ -6,7 +6,7 @@
 
 void SymbolicObject::init_sym_exp(int field_index) {
   SymbolicExpression *sym_exp =
-      new SymbolicExpression(this->get_sym_name(), field_index);
+      new FieldSymbolicExpression(this->get_sym_name(), field_index);
 
   _sym_exps.insert(std::make_pair(field_index, sym_exp));
 }
