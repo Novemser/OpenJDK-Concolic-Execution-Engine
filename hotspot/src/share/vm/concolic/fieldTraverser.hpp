@@ -4,7 +4,6 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/exp/symbolicExpression.hpp"
 #include "concolic/threadContext.hpp"
 #include "memory/resourceArea.hpp"
 #include "oops/instanceKlass.hpp"

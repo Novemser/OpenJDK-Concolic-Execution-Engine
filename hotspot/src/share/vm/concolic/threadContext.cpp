@@ -61,7 +61,7 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
   field_symbolzier.do_recursive();
 }
 
-sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(SymbolicExpression *sym_exp) {
+sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
   sym_oid_t sym_tmp_id = _sym_tmp_id_counter++;
   _sym_tmp_exps.push_back(sym_exp);
   assert(_sym_tmp_exps.size() == sym_tmp_id + 1, "sanity check");

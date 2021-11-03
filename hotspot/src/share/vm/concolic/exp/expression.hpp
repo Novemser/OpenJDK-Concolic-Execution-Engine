@@ -1,5 +1,5 @@
-#ifndef SHARE_VM_CONCOLIC_EXP_SYMBOLICEXPRESSION_HPP
-#define SHARE_VM_CONCOLIC_EXP_SYMBOLICEXPRESSION_HPP
+#ifndef SHARE_VM_CONCOLIC_EXP_EXPRESSION_HPP
+#define SHARE_VM_CONCOLIC_EXP_EXPRESSION_HPP
 
 #ifdef ENABLE_CONCOLIC
 
@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-class SymbolicExpression {
+class Expression {
 private:
   uint _ref_count;
 
@@ -17,10 +17,10 @@ public:
   inline void inc_ref() { _ref_count += 1; }
 
 protected:
-  SymbolicExpression() : _ref_count(0) {}
+  Expression() : _ref_count(0) {}
 };
 
-class FieldSymbolicExpression : public SymbolicExpression {
+class FieldSymbolicExpression : public Expression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
@@ -33,16 +33,16 @@ public:
   void print();
 };
 
-class OpSymbolicExpression : public SymbolicExpression {
+class OpSymbolicExpression : public Expression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
-  SymbolicExpression *_left;
-  SymbolicExpression *_right;
+  Expression *_left;
+  Expression *_right;
   SymbolicOp _op;
 
 public:
-  OpSymbolicExpression(SymbolicExpression *l, SymbolicExpression *r,
+  OpSymbolicExpression(Expression *l, Expression *r,
                        SymbolicOp op, bool cmp = true);
 
 public:
@@ -51,4 +51,4 @@ public:
 
 #endif
 
-#endif // SHARE_VM_CONCOLIC_EXP_SYMBOLICEXPRESSION_HPP
+#endif // SHARE_VM_CONCOLIC_EXP_EXPRESSION_HPP

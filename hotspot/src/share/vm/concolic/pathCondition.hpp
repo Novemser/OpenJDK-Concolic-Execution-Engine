@@ -3,18 +3,18 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/symbolicExpression.hpp"
+#include "concolic/exp/expression.hpp"
 
 #include <vector>
 
 class PathCondition {
-  typedef std::vector<SymbolicExpression *> SymExpList;
+  typedef std::vector<Expression *> SymExpList;
 
 private:
   SymExpList _sym_exps;
 
 public:
-  void add(SymbolicExpression *sym_exp);
+  void add(Expression *sym_exp);
   void print();
 };
 

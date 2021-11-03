@@ -1,9 +1,9 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/symbolicExpression.hpp"
+#include "concolic/exp/expression.hpp"
 #include "utilities/ostream.hpp"
 
-void SymbolicExpression::print() {
+void Expression::print() {
   tty->print_cr("ref_count: %u", _ref_count);
 };
 
@@ -15,9 +15,8 @@ FieldSymbolicExpression::FieldSymbolicExpression(char *sym_name,
 
 void FieldSymbolicExpression::print() { tty->print("%s\n", _sym_str); }
 
-OpSymbolicExpression::OpSymbolicExpression(SymbolicExpression *l,
-                                           SymbolicExpression *r, SymbolicOp op,
-                                           bool cmp)
+OpSymbolicExpression::OpSymbolicExpression(Expression *l, Expression *r,
+                                           SymbolicOp op, bool cmp)
     : _op(cmp ? op : NotSymbolicOp[op]) {
   if (l) {
     l->inc_ref();

@@ -5,13 +5,13 @@
 #include "utilities/ostream.hpp"
 
 void SymbolicObject::init_sym_exp(int field_index) {
-  SymbolicExpression *sym_exp =
+  Expression *sym_exp =
       new FieldSymbolicExpression(this->get_sym_name(), field_index);
 
   _sym_exps.insert(std::make_pair(field_index, sym_exp));
 }
 
-void SymbolicObject::set_sym_exp(int field_index, SymbolicExpression *sym_exp) {
+void SymbolicObject::set_sym_exp(int field_index, Expression *sym_exp) {
   _sym_exps.insert(std::make_pair(field_index, sym_exp));
 }
 

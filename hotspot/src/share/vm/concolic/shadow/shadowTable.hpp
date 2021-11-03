@@ -4,7 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
-#include "concolic/exp/symbolicExpression.hpp"
+#include "concolic/exp/expression.hpp"
 
 #include <vector>
 
@@ -15,7 +15,7 @@ private:
 
     sym_oid_t sym_oid; // for comparison
     int index;
-    SymbolicExpression *sym_exp;
+    Expression *sym_exp;
 
     inline void reset() {
       sym_oid = 0;
@@ -32,7 +32,7 @@ public:
 
   void init(int max_slot_size);
 
-  void set_slot(int offset, SymbolicExpression *sym_exp, sym_oid_t sym_oid,
+  void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid,
                 int index) {
     Entry &entry = _tbl[offset];
     entry.sym_exp = sym_exp;
@@ -42,8 +42,8 @@ public:
 
   void clear_slot(int offset) { _tbl[offset].reset(); }
 
-  SymbolicExpression *get_slot(int offset) {
-    SymbolicExpression *ret = _tbl[offset].sym_exp;
+  Expression *get_slot(int offset) {
+    Expression *ret = _tbl[offset].sym_exp;
     assert(ret, "not null");
     return ret;
   }

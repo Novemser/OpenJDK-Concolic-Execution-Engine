@@ -1343,12 +1343,9 @@ run:
     }                                                                          \
     if (ConcolicMngr::is_doing_concolic) {                                     \
       int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new OpSymbolicExpression(left, right, op_##opcname);                   \
+      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
+      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
+      Expression *res = new OpSymbolicExpression(left, right, op_##opcname);   \
       ConcolicMngr::set_stack_slot(stack_offset - 2, res);                     \
     }                                                                          \
     SET_STACK_INT(VMint##opname(STACK_INT(-2), STACK_INT(-1)), -2);            \
@@ -1364,12 +1361,9 @@ run:
     }                                                                          \
     if (ConcolicMngr::is_doing_concolic) {                                     \
       int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 3);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new OpSymbolicExpression(left, right, op_##opcname);                   \
+      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 3);       \
+      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
+      Expression *res = new OpSymbolicExpression(left, right, op_##opcname);   \
       ConcolicMngr::set_stack_slot(stack_offset - 3, res);                     \
     }                                                                          \
     /* First long at (-1,-2) next long at (-3,-4) */                           \
@@ -1613,12 +1607,9 @@ run:
                                                                                \
     if (ConcolicMngr::is_doing_concolic) {                                     \
       int stack_offset = GET_STACK_OFFSET;                                     \
-      SymbolicExpression *left =                                               \
-          ConcolicMngr::get_stack_slot(stack_offset - 2);                      \
-      SymbolicExpression *right =                                              \
-          ConcolicMngr::get_stack_slot(stack_offset - 1);                      \
-      SymbolicExpression *res =                                                \
-          new OpSymbolicExpression(left, right, op_##name, cmp);                 \
+      Expression *left = ConcolicMngr::get_stack_slot(stack_offset - 2);       \
+      Expression *right = ConcolicMngr::get_stack_slot(stack_offset - 1);      \
+      Expression *res = new OpSymbolicExpression(left, right, op_##name, cmp); \
       ConcolicMngr::record_path_condition(res);                                \
     }                                                                          \
                                                                                \
@@ -2184,7 +2175,7 @@ run:
                 }
 
                 SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-                SymbolicExpression* sym_exp = sym_obj->get(field_index);
+                Expression* sym_exp = sym_obj->get(field_index);
                 ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
               }
             }
@@ -2310,10 +2301,11 @@ run:
           if (ConcolicMngr::is_doing_concolic) {
             int stack_offset = GET_STACK_OFFSET;
             int field_index = cache->field_index();
-                
-            SymbolicExpression *sym_exp =
+
+            Expression *sym_exp =
                 ConcolicMngr::get_stack_slot(stack_offset - 1);
-            SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+            SymbolicObject *sym_obj =
+                ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
             sym_obj->set_sym_exp(field_index, sym_exp);
           }
 #endif
