@@ -1142,12 +1142,12 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
       CASE(_lload):
-          CONCOLIC_LOAD(pc[1]+1, 1);
+          CONCOLIC_LOAD(pc[1] + 1, 1);
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
       CASE(_dload):
-          CONCOLIC_LOAD(pc[1]+1, 1);
+          CONCOLIC_LOAD(pc[1] + 1, 1);
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
@@ -1165,11 +1165,11 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);                         \
                                                                         \
       CASE(_lload_##num):                                               \
-          CONCOLIC_LOAD(num+1, 1);                                      \
+          CONCOLIC_LOAD(num + 1, 1);                                    \
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(num), 1);             \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);                         \
       CASE(_dload_##num):                                               \
-          CONCOLIC_LOAD(num+1, 1);                                      \
+          CONCOLIC_LOAD(num + 1, 1);                                    \
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(num), 1);         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
 
@@ -1200,12 +1200,12 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -1);
 
       CASE(_lstore):
-          CONCOLIC_STORE(-1, pc[1]+1);
+          CONCOLIC_STORE(-1, pc[1] + 1);
           SET_LOCALS_LONG(STACK_LONG(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
       CASE(_dstore):
-          CONCOLIC_STORE(-1, pc[1]+1);
+          CONCOLIC_STORE(-1, pc[1] + 1);
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
@@ -1294,11 +1294,11 @@ run:
 #undef  OPC_DSTORE_n
 #define OPC_DSTORE_n(num)                                               \
       CASE(_dstore_##num):                                              \
-          CONCOLIC_STORE(-1, num+1);                                    \
+          CONCOLIC_STORE(-1, num + 1);                                  \
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), num);                     \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
       CASE(_lstore_##num):                                              \
-          CONCOLIC_STORE(-1, num+1);                                    \
+          CONCOLIC_STORE(-1, num + 1);                                  \
           SET_LOCALS_LONG(STACK_LONG(-1), num);                         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);
 
@@ -2049,16 +2049,16 @@ run:
           ARRAY_LOADTO64(T_DOUBLE, jdouble, STACK_DOUBLE, 0);
 
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_ASTORE(res_off)                                                \
+#define CONCOLIC_ASTORE(delta)                                                \
   if (ConcolicMngr::is_doing_concolic) {                                        \
     int stack_offset = GET_STACK_OFFSET;                                        \
     Expression *sym_exp =                                                       \
-        ConcolicMngr::get_stack_slot_and_detach(stack_offset + res_off);         \
+        ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);        \
     SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
     sym_obj->set_sym_exp(index, sym_exp);                                       \
   }
 #else
-#define CONCOLIC_ASTORE(res_off)
+#define CONCOLIC_ASTORE(delta)
 #endif
 
       /* 32-bit stores. These handle conversion to < 32-bit types */
@@ -2653,6 +2653,22 @@ run:
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(3, 1);
       }
+
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_NEW_ARRAY()                                                   \
+  THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);                              \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    Expression *exp = ConcolicMngr::get_stack_slot(GET_STACK_OFFSET - 1);      \
+    if (exp) {                                                                 \
+      SymbolicObject *sym_obj =                                                \
+          ConcolicMngr::ctx->get_or_alloc_sym_obj(THREAD->vm_result());        \
+      sym_obj->set_sym_exp(ARRAY_LENGTH_FIELD_INDEX, exp);                     \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_NEW_ARRAY()
+#endif
+
       CASE(_anewarray): {
         u2 index = Bytes::get_Java_u2(pc+1);
         jint size = STACK_INT(-1);
@@ -2661,13 +2677,9 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
-#ifdef ENABLE_CONCOLIC
-        /**
-         * This is where an object created
-         * We can set the default sym_oid here
-         */
-        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
-#endif
+
+        CONCOLIC_NEW_ARRAY();
+
         SET_STACK_OBJECT(THREAD->vm_result(), -1);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_CONTINUE(3);
@@ -3157,13 +3169,8 @@ run:
         CALL_VM(InterpreterRuntime::newarray(THREAD, atype, size),
                 handle_exception);
         
-#ifdef ENABLE_CONCOLIC
-        /**
-         * This is where an object created
-         * We can set the default sym_oid here
-         */
-        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
-#endif
+        CONCOLIC_NEW_ARRAY();
+
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
