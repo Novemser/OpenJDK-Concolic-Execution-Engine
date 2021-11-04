@@ -1121,13 +1121,13 @@ run:
 
           /* load from local variable */
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_LOAD(local_off, stack_off)                                     \
-  if (ConcolicMngr::is_doing_concolic) {                                        \
-    ShadowTable::Entry &entry = ConcolicMngr::get_local_entry(local_off);       \
-    ConcolicMngr::set_stack_entry(stack_off, entry);                            \
+#define CONCOLIC_LOAD(local_off, delta_stack_off)       \
+  if (ConcolicMngr::is_doing_concolic) {                \
+    ConcolicMngr::copy_entry_from_local_to_stack(       \
+        local_off, GET_STACK_OFFSET + delta_stack_off); \
   }
 #else
-#define CONCOLIC_LOAD(stack_off, local_off)
+#define CONCOLIC_LOAD(local_off, stack_off)
 #endif
 
       CASE(_aload):
@@ -1137,17 +1137,17 @@ run:
 
       CASE(_iload):
       CASE(_fload):
-          CONCOLIC_LOAD(pc[1], GET_STACK_OFFSET);
+          CONCOLIC_LOAD(pc[1], 0);
           SET_STACK_SLOT(LOCALS_SLOT(pc[1]), 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
       CASE(_lload):
-          CONCOLIC_LOAD(pc[1]+1, GET_STACK_OFFSET + 1);
+          CONCOLIC_LOAD(pc[1]+1, 1);
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
       CASE(_dload):
-          CONCOLIC_LOAD(pc[1]+1, GET_STACK_OFFSET + 1);
+          CONCOLIC_LOAD(pc[1]+1, 1);
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
@@ -1160,16 +1160,16 @@ run:
                                                                         \
       CASE(_iload_##num):                                               \
       CASE(_fload_##num):                                               \
-          CONCOLIC_LOAD(num, GET_STACK_OFFSET);                         \
+          CONCOLIC_LOAD(num, 0);                                        \
           SET_STACK_SLOT(LOCALS_SLOT(num), 0);                          \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);                         \
                                                                         \
       CASE(_lload_##num):                                               \
-          CONCOLIC_LOAD(num+1, GET_STACK_OFFSET + 1);                   \
+          CONCOLIC_LOAD(num+1, 1);                                      \
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(num), 1);             \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);                         \
       CASE(_dload_##num):                                               \
-          CONCOLIC_LOAD(num+1, GET_STACK_OFFSET + 1);                   \
+          CONCOLIC_LOAD(num+1, 1);                                      \
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(num), 1);         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
 
@@ -1180,10 +1180,10 @@ run:
 
           /* store to a local variable */
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_STORE(stack_off, local_off)                                    \
-  if (ConcolicMngr::is_doing_concolic) {                                        \
-    ShadowTable::Entry &entry = ConcolicMngr::get_stack_entry(stack_off);       \
-    ConcolicMngr::set_local_entry(local_off, entry);                            \
+#define CONCOLIC_STORE(delta_stack_off, local_off)      \
+  if (ConcolicMngr::is_doing_concolic) {                \
+    ConcolicMngr::copy_entry_from_stack_to_local(       \
+        GET_STACK_OFFSET + delta_stack_off, local_off); \
   }
 #else
 #define CONCOLIC_STORE(stack_off, local_off)
@@ -1195,17 +1195,17 @@ run:
 
       CASE(_istore):
       CASE(_fstore):
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]);
+          CONCOLIC_STORE(-1, pc[1]);
           SET_LOCALS_SLOT(STACK_SLOT(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -1);
 
       CASE(_lstore):
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]+1);
+          CONCOLIC_STORE(-1, pc[1]+1);
           SET_LOCALS_LONG(STACK_LONG(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
       CASE(_dstore):
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]+1);
+          CONCOLIC_STORE(-1, pc[1]+1);
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
@@ -1279,7 +1279,7 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                        \
       CASE(_istore_##num):                                              \
       CASE(_fstore_##num):                                              \
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, num);                      \
+          CONCOLIC_STORE(-1, num);                                      \
           SET_LOCALS_SLOT(STACK_SLOT(-1), num);                         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
 
@@ -1291,11 +1291,11 @@ run:
 #undef  OPC_DSTORE_n
 #define OPC_DSTORE_n(num)                                               \
       CASE(_dstore_##num):                                              \
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, num+1);                    \
+          CONCOLIC_STORE(-1, num+1);                                    \
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), num);                     \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
       CASE(_lstore_##num):                                              \
-          CONCOLIC_STORE(GET_STACK_OFFSET-1, num+1);                    \
+          CONCOLIC_STORE(-1, num+1);                                    \
           SET_LOCALS_LONG(STACK_LONG(-1), num);                         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);
 

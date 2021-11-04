@@ -38,17 +38,6 @@ public:
     }
   }
 
-  inline static void set_stack_entry(int offset, ShadowTable::Entry &entry) {
-    assert(offset >= 0, "offset >= 0");
-    ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-        offset, entry);
-  }
-
-  inline static ShadowTable::Entry &get_stack_entry(int offset) {
-    ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(
-        offset);
-  }
-
   inline static Expression *get_stack_slot(int offset) {
     return ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_slot(
         offset);
@@ -88,17 +77,22 @@ public:
     opr_stack.swap_two_entries(off1, off2);
   }
 
-
-  inline static void set_local_entry(int offset, ShadowTable::Entry &entry) {
-    assert(offset >= 0, "offset >= 0");
-    ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
-        offset, entry);
+  inline static void copy_entry_from_local_to_stack(int local_offset, int stack_offset) {
+    assert(local_offset >= 0, "local_offset >= 0");
+    assert(stack_offset >= 0, "stack_offset >= 0");
+    ShadowTable::Entry &entry = 
+        ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_entry(local_offset);
+    ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
+        stack_offset, entry);
   }
 
-  inline static ShadowTable::Entry &get_local_entry(int offset) {
-    assert(offset >= 0, "offset >= 0");
-    ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_entry(
-        offset);
+  inline static void copy_entry_from_stack_to_local(int stack_offset, int local_offset) {
+    assert(local_offset >= 0, "local_offset >= 0");
+    assert(stack_offset >= 0, "stack_offset >= 0");
+    ShadowTable::Entry &entry = 
+        ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(stack_offset);
+    ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
+        local_offset, entry);
   }
 
   inline static void record_path_condition(Expression *sym_exp) {
