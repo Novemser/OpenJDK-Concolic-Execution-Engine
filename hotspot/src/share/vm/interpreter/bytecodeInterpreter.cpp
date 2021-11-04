@@ -1123,7 +1123,6 @@ run:
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_LOAD(local_off, stack_off)                                     \
   if (ConcolicMngr::is_doing_concolic) {                                        \
-    tty->print("\033[1;32mload from %d to %d\033[0m\n", local_off, stack_off);  \
     ShadowTable::Entry &entry = ConcolicMngr::get_local_entry(local_off);       \
     ConcolicMngr::set_stack_entry(stack_off, entry);                            \
   }
@@ -1143,9 +1142,6 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
       CASE(_lload):
-          if (ConcolicMngr::is_doing_concolic) {
-            int _ = 5;
-          }
           CONCOLIC_LOAD(pc[1]+1, GET_STACK_OFFSET + 1);
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
@@ -1186,7 +1182,6 @@ run:
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_STORE(stack_off, local_off)                                    \
   if (ConcolicMngr::is_doing_concolic) {                                        \
-    tty->print("\033[1;32mstore from %d to %d\033[0m\n", stack_off, local_off); \
     ShadowTable::Entry &entry = ConcolicMngr::get_stack_entry(stack_off);       \
     ConcolicMngr::set_local_entry(local_off, entry);                            \
   }
