@@ -13,7 +13,7 @@ public class TestLoadStore {
     System.symbolize(obj1);
     System.symbolize(obj2);
     long a = obj1.value;
-    long b = obj1.value + a;
+    long b = obj2.value + a + 5;
     System.endConcolic();   
   }
 }

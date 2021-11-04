@@ -96,6 +96,11 @@ public:
     }
   }
 
+  inline static Expression *get_local_slot(int offset) {
+    return ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_slot(
+        offset);
+  }
+
   inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }

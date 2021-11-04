@@ -1120,6 +1120,20 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(3, 1);
 
           /* load from local variable */
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_LOAD(local_off, stack_off)                                    \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    tty->print("\033[1;32mload from %d to %d\033[0m\n", local_off, stack_off);\
+    Expression *sym_exp =                                                      \
+        ConcolicMngr::get_local_slot(local_off);                               \
+    if (sym_exp) {                                                             \
+      ConcolicMngr::set_stack_slot(stack_off, sym_exp);                        \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_STORE(stack_off, local_off)
+#endif
+
       CASE(_aload):
           VERIFY_OOP(LOCALS_OBJECT(pc[1]));
           SET_STACK_OBJECT(LOCALS_OBJECT(pc[1]), 0);
@@ -1127,14 +1141,20 @@ run:
 
       CASE(_iload):
       CASE(_fload):
+          CONCOLIC_LOAD(pc[1], GET_STACK_OFFSET);
           SET_STACK_SLOT(LOCALS_SLOT(pc[1]), 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
       CASE(_lload):
+          if (ConcolicMngr::is_doing_concolic) {
+            int _ = 5;
+          }
+          CONCOLIC_LOAD(pc[1], GET_STACK_OFFSET + 1);
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
       CASE(_dload):
+          CONCOLIC_LOAD(pc[1], GET_STACK_OFFSET + 1);
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(pc[1]), 1);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 2);
 
@@ -1147,13 +1167,16 @@ run:
                                                                         \
       CASE(_iload_##num):                                               \
       CASE(_fload_##num):                                               \
+          CONCOLIC_LOAD(num, GET_STACK_OFFSET);                         \
           SET_STACK_SLOT(LOCALS_SLOT(num), 0);                          \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);                         \
                                                                         \
       CASE(_lload_##num):                                               \
+          CONCOLIC_LOAD(num, GET_STACK_OFFSET + 1);                     \
           SET_STACK_LONG_FROM_ADDR(LOCALS_LONG_AT(num), 1);             \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);                         \
       CASE(_dload_##num):                                               \
+          CONCOLIC_LOAD(num, GET_STACK_OFFSET + 1);                     \
           SET_STACK_DOUBLE_FROM_ADDR(LOCALS_DOUBLE_AT(num), 1);         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
 
