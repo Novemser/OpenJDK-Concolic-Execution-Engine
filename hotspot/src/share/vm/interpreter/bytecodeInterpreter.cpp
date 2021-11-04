@@ -1163,6 +1163,19 @@ run:
           OPC_LOAD_n(3);
 
           /* store to a local variable */
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_STORE(stack_off, local_off)                                   \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    tty->print("\033[1;32mstore from %d to %d\033[0m\n", stack_off, local_off);\
+    Expression *sym_exp =                                                      \
+        ConcolicMngr::get_stack_slot(stack_off);                               \
+    if (sym_exp) {                                                             \
+      ConcolicMngr::set_local_slot(local_off, sym_exp);                        \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_STORE(stack_off, local_off)
+#endif
 
       CASE(_astore):
           astore(topOfStack, -1, locals, pc[1]);
@@ -1170,14 +1183,17 @@ run:
 
       CASE(_istore):
       CASE(_fstore):
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]);
           SET_LOCALS_SLOT(STACK_SLOT(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -1);
 
       CASE(_lstore):
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]);
           SET_LOCALS_LONG(STACK_LONG(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
       CASE(_dstore):
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, pc[1]);
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), pc[1]);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
@@ -1251,6 +1267,7 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                        \
       CASE(_istore_##num):                                              \
       CASE(_fstore_##num):                                              \
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, num);                      \
           SET_LOCALS_SLOT(STACK_SLOT(-1), num);                         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
 
@@ -1262,9 +1279,11 @@ run:
 #undef  OPC_DSTORE_n
 #define OPC_DSTORE_n(num)                                               \
       CASE(_dstore_##num):                                              \
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, num);                      \
           SET_LOCALS_DOUBLE(STACK_DOUBLE(-1), num);                     \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);                        \
       CASE(_lstore_##num):                                              \
+          CONCOLIC_STORE(GET_STACK_OFFSET-1, num);                      \
           SET_LOCALS_LONG(STACK_LONG(-1), num);                         \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -2);
 

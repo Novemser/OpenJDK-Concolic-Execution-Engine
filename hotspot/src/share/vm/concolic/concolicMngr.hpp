@@ -16,6 +16,10 @@ public:
   static jlong endConcolic();
   static void symbolize(Handle handle);
 
+  /**
+   * this will generate a new tmp_id; use it when `sym_exp` is newly 
+   * calculated, which doesn't have `sym_oid` and `index`
+   */
   inline static void set_stack_slot(int offset, Expression *sym_exp) {
     assert(offset >= 0, "offset >= 0");
     sym_tmp_id_t sym_tmp_id = ctx->get_next_sym_tmp_id(sym_exp);
@@ -71,6 +75,25 @@ public:
     ShadowTable &opr_stack =
         ctx->get_shadow_stack().get_last_frame().get_opr_stack();
     opr_stack.swap_two_entries(off1, off2);
+  }
+
+
+  inline static void set_local_slot(int offset, Expression *sym_exp) {
+    assert(offset >= 0, "offset >= 0");
+    sym_tmp_id_t sym_tmp_id = ctx->get_next_sym_tmp_id(sym_exp);
+    ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
+        offset, sym_exp, NULL_SYM_OID, sym_tmp_id);
+  }
+
+  inline static void set_local_slot(int offset, Expression *sym_exp,
+                                    sym_oid_t sym_oid, int index) {
+    ShadowTable &local_tbl =
+        ctx->get_shadow_stack().get_last_frame().get_local_tbl();
+    if (sym_exp) {
+      local_tbl.set_slot(offset, sym_exp, sym_oid, index);
+    } else {
+      local_tbl.clear_slot(offset);
+    }
   }
 
   inline static void record_path_condition(Expression *sym_exp) {
