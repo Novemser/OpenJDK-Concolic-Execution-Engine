@@ -1844,6 +1844,9 @@ run:
       /* Goto pc at specified offset in switch table. */
 
       CASE(_tableswitch): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("tableswitch");
+#endif
           jint* lpc  = (jint*)VMalignWordUp(pc+1);
           int32_t  key  = STACK_INT(-1);
           int32_t  low  = Bytes::get_Java_u4((address)&lpc[1]);
@@ -1868,6 +1871,9 @@ run:
       /* Goto pc whose table entry matches specified key. */
 
       CASE(_lookupswitch): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("lookupswitch");
+#endif
           jint* lpc  = (jint*)VMalignWordUp(pc+1);
           int32_t  key  = STACK_INT(-1);
           int32_t  skip = Bytes::get_Java_u4((address) lpc); /* default amount */
