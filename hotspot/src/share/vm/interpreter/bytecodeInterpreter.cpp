@@ -1210,6 +1210,9 @@ run:
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, -2);
 
       CASE(_wide): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("wide");
+#endif
           uint16_t reg = Bytes::get_Java_u2(pc + 2);
 
           opcode = pc[1];
@@ -2145,6 +2148,9 @@ run:
       /* monitorenter and monitorexit for locking/unlocking an object */
 
       CASE(_monitorenter): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("monitorenter");
+#endif
         oop lockee = STACK_OBJECT(-1);
         // derefing's lockee ought to provoke implicit null check
         CHECK_NULL(lockee);
@@ -2252,6 +2258,9 @@ run:
       }
 
       CASE(_monitorexit): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("monitorexit");
+#endif
         oop lockee = STACK_OBJECT(-1);
         CHECK_NULL(lockee);
         // derefing's lockee ought to provoke implicit null check
@@ -2655,6 +2664,9 @@ run:
         UPDATE_PC_AND_TOS_AND_CONTINUE(4, -(dims-1));
       }
       CASE(_checkcast):
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("checkcast");
+#endif
           if (STACK_OBJECT(-1) != NULL) {
             VERIFY_OOP(STACK_OBJECT(-1));
             u2 index = Bytes::get_Java_u2(pc+1);
@@ -2688,6 +2700,9 @@ run:
           UPDATE_PC_AND_CONTINUE(3);
 
       CASE(_instanceof):
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("instanceof");
+#endif
           if (STACK_OBJECT(-1) == NULL) {
             SET_STACK_INT(0, -1);
             // Profile instanceof with null_seen and receiver.
@@ -3125,6 +3140,9 @@ run:
       /* Throw an exception. */
 
       CASE(_athrow): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("athrow");
+#endif
           oop except_oop = STACK_OBJECT(-1);
           CHECK_NULL(except_oop);
           // set pending_exception so we use common code
@@ -3189,6 +3207,9 @@ run:
       /* debugger breakpoint */
 
       CASE(_breakpoint): {
+#ifdef ENABLE_CONCOLIC
+          ConcolicMngr::warning_reach_unhandled_bytecode("breakpoint");
+#endif
           Bytecodes::Code original_bytecode;
           DECACHE_STATE();
           SET_LAST_JAVA_FRAME();
