@@ -94,6 +94,44 @@ class outputStream : public ResourceObj {
    void sp(int count = 1);
    void cr();
    void bol() { if (_position > 0)  cr(); }
+#ifdef ENABLE_CONCOLIC
+   /**
+    * Color or highlight. 
+    * Format: C[L_]<font color>[_<Background Color>]
+    *   - C: to mark as color macro
+    *   - [L_]: optional highlight
+    *   - <font color>: font color
+    *   - [_<Background Color>]: optional background color
+    * color code:
+    *   0: black
+    *   1: red
+    *   2: green
+    *   3: yellow
+    *   4: blue
+    *   5: magenta
+    *   6: cyan
+    *   7: white
+    */
+   #define CNONE           "\e[0m"
+   #define CBLACK          "\e[0;30m"
+   #define CL_BLACK        "\e[1;30m"
+   #define CRED            "\e[0;31m"
+   #define CL_RED          "\e[1;31m"
+   #define CGREEN          "\e[0;32m"
+   #define CL_GREEN        "\e[1;32m"
+   #define CYELLOW         "\e[0;33m"
+   #define CL_YELLOW       "\e[1;33m"
+   #define CBLUE           "\e[0;34m"
+   #define CL_BLUE         "\e[1;34m"
+   #define CPURPLE         "\e[0;35m"
+   #define CL_PURPLE       "\e[1;35m"
+   #define CCYAN           "\e[0;36m"
+   #define CL_CYAN         "\e[1;36m"
+   #define CWHITE          "\e[0;37m"
+   #define CL_WHITE        "\e[1;37m"
+   #define CL_RED_GREEN    "\e[1;31;42m"
+   #define CL_WHITE_CYAN   "\e[1;37;46m"
+#endif
 
    // Time stamp
    TimeStamp& time_stamp() { return _stamp; }

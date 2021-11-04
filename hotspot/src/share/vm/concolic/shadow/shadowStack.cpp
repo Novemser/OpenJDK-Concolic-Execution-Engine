@@ -111,7 +111,7 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
    */
   if (!callee_method->is_native()) {
     next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, 1);
-    tty->print("\033[1;32m copy from %d to %d with size=%d\033[0m\n", callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+    // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
   }
 
   delete s_frame;

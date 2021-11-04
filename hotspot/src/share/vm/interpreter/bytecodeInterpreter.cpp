@@ -1024,7 +1024,7 @@ run:
         char* name_and_sig = method->name_and_sig_as_C_string();
         // mark if reach main (use main to avoid printing instructions when running javac)
         if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
-          tty->print("\033[1;33m=================================================================\033[0m\n");
+          tty->print_cr(CL_YELLOW"================================================================="CNONE);
           tty->print_cr("%s", name_and_sig);
           is_reach_main = true;
         }
@@ -1035,7 +1035,7 @@ run:
 
         // print instruction if main is reached
         if (is_reach_main) {
-          tty->print("\033[1;33m=================================================================\033[0m\n");
+          tty->print_cr(CL_YELLOW"================================================================="CNONE);
           tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
           ConcolicMngr::ctx->print_stack_trace();
           ConcolicMngr::ctx->get_shadow_stack().print();
@@ -3023,7 +3023,7 @@ run:
           cache = cp->entry_at(index);
         }
         // if (ConcolicMngr::is_doing_concolic) {
-        //   tty->print("\033[1;31mparameter_size: %d\033[0m\n", cache->parameter_size());
+        //   tty->print_cr(CL_RED"parameter_size: %d"CNONE, cache->parameter_size());
         // }
 
         istate->set_msg(call_method);
@@ -3079,7 +3079,7 @@ run:
 
           istate->set_callee(callee);
           // if (ConcolicMngr::is_doing_concolic) {
-          //   tty->print("\033[1;31mcallee: max_local=%d, size_of_parameters=%d\033[0m\n", callee->max_locals(), callee->size_of_parameters());
+          //   tty->print(CL_RED"callee: max_local=%d, size_of_parameters=%d"CNONE, callee->max_locals(), callee->size_of_parameters());
           // }
           istate->set_callee_entry_point(callee->from_interpreted_entry());
 #ifdef VM_JVMTI

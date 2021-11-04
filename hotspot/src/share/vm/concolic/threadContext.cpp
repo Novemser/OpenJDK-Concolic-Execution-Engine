@@ -69,9 +69,9 @@ void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
   FieldSymbolizer field_symbolzier(obj, *this);
   field_symbolzier.do_recursive();
   // OopTraverser oop_traverser;
-  // tty->print("\033[1;36m===============================================\033[0m\n");
+  // tty->print_cr(CL_CYAN"================================================================="CNONE);
   // obj->oop_iterate(&oop_traverser);
-  // tty->print("\033[1;36m===============================================\033[0m\n");
+  // tty->print_cr(CL_CYAN"================================================================="CNONE);
 }
 
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {

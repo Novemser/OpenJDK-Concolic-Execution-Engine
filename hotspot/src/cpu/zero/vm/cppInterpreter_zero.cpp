@@ -82,7 +82,7 @@ int CppInterpreter::normal_entry(Method* method, intptr_t UNUSED, TRAPS) {
   //   ResourceMark rm;
   //   char* name_and_sig = method->name_and_sig_as_C_string();
   //   if (strstr(name_and_sig, "main([Ljava/lang/String;)V")) {
-  //     tty->print("\033[1;33m=================================================================\033[0m\n");
+  //     tty->print_cr(CL_YELLOW"================================================================="CNONE);
   //     Symbol* method_holder_name = method->method_holder()->name();
   //     Symbol* method_name = method->name();
   //     tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
