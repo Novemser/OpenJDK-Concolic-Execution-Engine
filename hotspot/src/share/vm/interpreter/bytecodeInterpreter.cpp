@@ -1473,12 +1473,16 @@ run:
 #undef  OPC_SHIFT_BINARY
 #define OPC_SHIFT_BINARY(opcname, opname)                               \
       CASE(_i##opcname):                                                \
+         CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_INT(-2), STACK_INT(-1),  \
+                             op_##opcname);                             \
          SET_STACK_INT(VMint##opname(STACK_INT(-2),                     \
                                      STACK_INT(-1)),                    \
                                      -2);                               \
          UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);                         \
       CASE(_l##opcname):                                                \
       {                                                                 \
+         CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_LONG(-2), STACK_INT(-1), \
+                             op_##opcname);                             \
          SET_STACK_LONG(VMlong##opname(STACK_LONG(-2),                  \
                                        STACK_INT(-1)),                  \
                                        -2);                             \

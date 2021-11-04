@@ -22,17 +22,21 @@ enum SymbolicOp {
   op_cmp = 15,
   op_cmpl = 16,
   op_cmpg = 17,
+  op_shl = 18,
+  op_shr = 19,
+  op_ushr = 20,
   op_num,
   op_null
 };
 static const SymbolicOp NotSymbolicOp[op_num] = {
     op_null, op_null, op_null, op_null, op_null, op_null,
     op_null, op_null, op_ge,   op_le,   op_gt,   op_lt,
-    op_ne,   op_eq,   op_null, op_null, op_null, op_null};
+    op_ne,   op_eq,   op_null, op_null, op_null, op_null,
+    op_null, op_null, op_null};
 
 static const char *SymbolicOpStr[op_num] = {
     "+", "-",  "*",  "&",  "|",  "^", "/",   "%",    "<",
-    ">", "<=", ">=", "==", "!=", "-", "cmp", "cmpl", "cmpg"};
+    ">", "<=", ">=", "==", "!=", "-", "cmp", "cmpl", "cmpg","<<",">>",">>u"};
 
 #endif
 

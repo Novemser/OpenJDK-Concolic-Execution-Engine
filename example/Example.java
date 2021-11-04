@@ -46,13 +46,28 @@ public class Example {
         public MyLong(long v) { value = v; }
     }
 
+    static class Myfloat {
+        public float value;
+
+        public Myfloat(float v) { value = v; }
+    }
+
+    static class MyDouble {
+        public double value;
+
+        public MyDouble(double v) { value = v; }
+    }
+
     public static void main(String[] args) {
-        // MyInteger obj1 = new MyInteger(1000);
-        // MyInteger obj2 = new MyInteger(20);
-        // MyInteger obj3 = new MyInteger(30);
-        MyLong obj1 = new MyLong(1000);
-        MyLong obj2 = new MyLong(20);
-        MyLong obj3 = new MyLong(30);
+        MyInteger obj1 = new MyInteger(1);
+        MyInteger obj2 = new MyInteger(2);
+        MyInteger obj3 = new MyInteger(3);
+        // MyLong obj1 = new MyLong(1000);
+        // MyLong obj2 = new MyLong(20);
+        // MyLong obj3 = new MyLong(30);
+        // Myfloat obj1 = new MyLong(1);
+        // Myfloat obj2 = new MyLong(2);
+        // Myfloat obj3 = new MyLong(3);
 
         System.startConcolic();
         System.symbolize(obj1);
@@ -64,6 +79,7 @@ public class Example {
         if (obj3.value < obj2.value) {
             obj3.value = obj1.value;
         }
+        // obj3.value = obj1.value << obj2.value;
 
         System.endConcolic();
         System.out.println(obj3.value);
