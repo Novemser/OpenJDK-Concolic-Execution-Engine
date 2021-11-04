@@ -61,18 +61,6 @@ public:
     return ret;
   }
 
-  sym_oid_t get_slot_oid(int offset) {
-    sym_oid_t ret = _tbl[offset].sym_oid;
-    // assert(ret, "not null");
-    return ret;
-  }
-
-  int get_slot_index(int offset) {
-    int ret = _tbl[offset].index;
-    // assert(ret, "not null");
-    return ret;
-  }
-
   inline Entry &get_entry(int offset) { return _tbl[offset]; }
 
   void copy_entries(ShadowTable &last_opr_stack, int src_begin, int dst_begin,
