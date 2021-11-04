@@ -28,7 +28,7 @@ public:
     assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
   }
 
-  Expression *get(int field_index) { return _sym_exps[field_index]; }
+  Expression *get(int field_index);
 
   char *get_sym_name() { return _sym_name; }
 
