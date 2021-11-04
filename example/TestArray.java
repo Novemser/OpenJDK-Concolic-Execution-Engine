@@ -15,7 +15,7 @@ public class TestArray {
     a[5] = i.value;
     long b = a[3] + a[5];
     long d = b + 7;
-    int c = a.length;
+    int c = a.length + 9;
 
     System.endConcolic();
     System.out.println(b);
