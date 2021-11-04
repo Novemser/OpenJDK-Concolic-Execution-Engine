@@ -2132,6 +2132,18 @@ run:
       {
           arrayOop ary = (arrayOop) STACK_OBJECT(-1);
           CHECK_NULL(ary);
+#ifdef ENABLE_CONCOLIC
+          if (ConcolicMngr::is_doing_concolic) {
+            if (ary->is_symbolic()) {
+              sym_oid_t sym_oid = ary->get_sym_oid();
+
+              SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
+              Expression* sym_exp = sym_obj->get(ARRAY_LENGTH_FIELD_INDEX);
+              ConcolicMngr::set_stack_slot(
+                GET_STACK_OFFSET - 1, sym_exp, sym_oid, ARRAY_LENGTH_FIELD_INDEX);
+            } 
+          }
+#endif
           SET_STACK_INT(ary->length(), -1);
           UPDATE_PC_AND_CONTINUE(1);
       }

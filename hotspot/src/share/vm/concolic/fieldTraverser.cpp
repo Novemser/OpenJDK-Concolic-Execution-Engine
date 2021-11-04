@@ -151,8 +151,7 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
     assert(false, "element won't be array(it will be object)");
     return false;
   default:
-    // the element_type is primitive
-    assert(array_obj->is_typeArray(), "It shall be typeArrayOop here");
+    // the element_type is primitives
     sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
     sym_obj->init_sym_exp(index);
     return false;

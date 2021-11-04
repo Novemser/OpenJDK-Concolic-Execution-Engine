@@ -18,7 +18,8 @@ public class TestMultiArray {
     System.symbolize(i);
 
     a[1][0] = i.value + a[2][2];
-
+    int l = a.length + 11;
+    int l1 = a[1].length + 9;
     System.endConcolic();
   }
 }

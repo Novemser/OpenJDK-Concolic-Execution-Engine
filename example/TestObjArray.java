@@ -25,7 +25,7 @@ public class TestObjArray {
 
     a[5].value = i.value;
     long b = a[3].value + a[5].value;
-    int c = a.length;
+    int c = a.length + 9;
 
     System.endConcolic();
     System.out.println(b);
