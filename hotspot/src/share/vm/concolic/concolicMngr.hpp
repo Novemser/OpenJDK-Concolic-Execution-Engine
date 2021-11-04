@@ -73,20 +73,15 @@ public:
     opr_stack.swap_two_entries(off1, off2);
   }
 
+  inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
+    if (is_doing_concolic) {
+      tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
+    }
+  }
+
   inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }
 };
-
-/**
- * Macro for CONCOLIC_DEBUG_BLOCK
- */
-#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-#define CONCOLIC_DEBUG_BLOCK_BEGIN if (ConcolicMngr::is_doing_concolic) {
-#else
-#define CONCOLIC_DEBUG_BLOCK_BEGIN if (false) {
-#endif
-
-#define CONCOLIC_DEBUG_BLOCK_END }
 
 #endif // SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
