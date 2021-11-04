@@ -3100,6 +3100,8 @@ run:
        */
 
       CASE(_jsr): {
+          CONCOLIC_CONST(0);
+        
           /* push bytecode index on stack */
           SET_STACK_ADDR(((address)pc - (intptr_t)(istate->method()->code_base()) + 3), 0);
           MORE_STACK(1);
@@ -3118,6 +3120,8 @@ run:
       }
 
       CASE(_jsr_w): {
+          CONCOLIC_CONST(0);
+          
           /* push return address on the stack */
           SET_STACK_ADDR(((address)pc - (intptr_t)(istate->method()->code_base()) + 5), 0);
           MORE_STACK(1);
