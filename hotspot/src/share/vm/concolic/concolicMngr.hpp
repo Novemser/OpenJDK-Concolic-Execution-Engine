@@ -92,6 +92,18 @@ public:
     ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
         local_offset, entry);
   }
+
+  inline static Expression *get_local_slot(int offset) {
+    return ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_slot(
+        offset);
+  }
+
+  inline static void set_local_slot(int offset, Expression *sym_exp) {
+    assert(offset >= 0, "offset >= 0");
+    ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(offset, sym_exp);
+  }
+
+
         
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
     if (is_doing_concolic) {

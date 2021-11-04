@@ -1530,6 +1530,17 @@ run:
      /* Increment local variable by constant */
       CASE(_iinc):
       {
+#ifdef ENABLE_CONCOLIC
+          if (ConcolicMngr::is_doing_concolic) {                                       
+                                                   
+            Expression *left = ConcolicMngr::get_local_slot(pc[1]);
+            if(left){
+              Expression *right = new ConExpression(pc[2]);
+              Expression *new_exp = new OpSymExpression(left, right, op_add);
+              ConcolicMngr::set_local_slot(pc[1], new_exp);
+            }                                                                                         
+          }
+#endif
           // locals[pc[1]].j.i += (jbyte)(pc[2]);
           SET_LOCALS_INT(LOCALS_INT(pc[1]) + (jbyte)(pc[2]), pc[1]);
           UPDATE_PC_AND_CONTINUE(3);

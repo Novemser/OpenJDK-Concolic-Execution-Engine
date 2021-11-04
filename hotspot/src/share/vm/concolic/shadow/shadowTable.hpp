@@ -48,10 +48,27 @@ public:
     entry.index = index;
   }
 
+  void set_slot(int offset, Expression *sym_exp) {
+    Entry &entry = _tbl[offset];
+    entry.sym_exp = sym_exp;
+  }
+
   void clear_slot(int offset) { _tbl[offset].reset(); }
 
   Expression *get_slot(int offset) {
     Expression *ret = _tbl[offset].sym_exp;
+    // assert(ret, "not null");
+    return ret;
+  }
+
+  sym_oid_t get_slot_oid(int offset) {
+    sym_oid_t ret = _tbl[offset].sym_oid;
+    // assert(ret, "not null");
+    return ret;
+  }
+
+  int get_slot_index(int offset) {
+    int ret = _tbl[offset].index;
     // assert(ret, "not null");
     return ret;
   }
