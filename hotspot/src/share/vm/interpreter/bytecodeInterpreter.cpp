@@ -2626,7 +2626,7 @@ run:
                * This is where an object created
                * We can set the default sym_oid here
                */
-              result->set_sym_oid(0);
+              result->set_sym_oid(NULL_SYM_OID);
 #endif
               // Must prevent reordering of stores for object initialization
               // with stores that publish the new object.
@@ -2642,6 +2642,13 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
+#ifdef ENABLE_CONCOLIC
+        /**
+         * This is where an object created
+         * We can set the default sym_oid here
+         */
+        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
+#endif
         SET_STACK_OBJECT(THREAD->vm_result(), 0);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(3, 1);
@@ -2654,11 +2661,21 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
+#ifdef ENABLE_CONCOLIC
+        /**
+         * This is where an object created
+         * We can set the default sym_oid here
+         */
+        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
+#endif
         SET_STACK_OBJECT(THREAD->vm_result(), -1);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_CONTINUE(3);
       }
       CASE(_multianewarray): {
+#ifdef ENABLE_CONCOLIC
+        ConcolicMngr::warning_reach_unhandled_bytecode("checkcast");
+#endif
         jint dims = *(pc+3);
         jint size = STACK_INT(-1);
         // stack grows down, dimensions are up!
@@ -2671,6 +2688,13 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
+#ifdef ENABLE_CONCOLIC
+        /**
+         * This is where an object created
+         * We can set the default sym_oid here
+         */
+        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
+#endif
         SET_STACK_OBJECT(THREAD->vm_result(), -dims);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(4, -(dims-1));
@@ -3138,7 +3162,7 @@ run:
          * This is where an object created
          * We can set the default sym_oid here
          */
-        THREAD->vm_result()->set_sym_oid(0);
+        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
 #endif
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
