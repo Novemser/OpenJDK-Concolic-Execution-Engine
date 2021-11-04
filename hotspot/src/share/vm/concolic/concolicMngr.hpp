@@ -93,6 +93,7 @@ public:
         ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(stack_offset);
     ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
         local_offset, entry);
+  }
         
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
     if (is_doing_concolic) {
