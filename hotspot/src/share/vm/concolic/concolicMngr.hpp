@@ -50,8 +50,6 @@ public:
     if (entry.sym_exp) {
       if (entry.sym_oid == NULL_SYM_OID) {
         ctx->detach_tmp_exp(entry.index);
-      } else {
-        assert(false, "not tmp sym obj");
       }
     }
     return entry.sym_exp;
