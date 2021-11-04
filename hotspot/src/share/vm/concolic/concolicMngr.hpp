@@ -48,10 +48,10 @@ public:
         ctx->get_shadow_stack().get_last_frame().get_opr_stack();
     ShadowTable::Entry &entry = opr_stack.get_entry(offset);
     if (entry.sym_exp) {
-      if (entry.sym_oid != NULL_SYM_OID) {
+      if (entry.sym_oid == NULL_SYM_OID) {
         ctx->detach_tmp_exp(entry.index);
       } else {
-        assert(false, "not sym obj");
+        assert(false, "not tmp sym obj");
       }
     }
     return entry.sym_exp;
@@ -93,22 +93,16 @@ public:
         ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(stack_offset);
     ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
         local_offset, entry);
+        
+  inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
+    if (is_doing_concolic) {
+      tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
+    }
   }
 
   inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }
 };
-
-/**
- * Macro for CONCOLIC_DEBUG_BLOCK
- */
-#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-#define CONCOLIC_DEBUG_BLOCK_BEGIN if (ConcolicMngr::is_doing_concolic) {
-#else
-#define CONCOLIC_DEBUG_BLOCK_BEGIN if (false) {
-#endif
-
-#define CONCOLIC_DEBUG_BLOCK_END }
 
 #endif // SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP

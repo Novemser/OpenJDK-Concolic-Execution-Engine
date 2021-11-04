@@ -1535,7 +1535,7 @@ run:
      /* negate the value on the top of the stack */
 
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)                      \
+#define CONCOLIC_OPC_UNARY(input_offset, output_offset, op)                    \
   if (ConcolicMngr::is_doing_concolic) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *old_exp =                                                      \
@@ -1546,140 +1546,184 @@ run:
     }                                                                          \
   }
 #else
-#define CONCOLIC_OPC_NEG(input_offset, output_offset, op)
+#define CONCOLIC_OPC_UNARY(input_offset, output_offset, op)
 #endif
       CASE(_ineg):
-        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        CONCOLIC_OPC_UNARY(-1, -1, op_neg);
         SET_STACK_INT(VMintNeg(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_fneg):
-        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        CONCOLIC_OPC_UNARY(-1, -1, op_neg);
         SET_STACK_FLOAT(VMfloatNeg(STACK_FLOAT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
 
       CASE(_lneg):
       {
-        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        CONCOLIC_OPC_UNARY(-1, -1, op_neg);
         SET_STACK_LONG(VMlongNeg(STACK_LONG(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
 
       CASE(_dneg):
       {
-        CONCOLIC_OPC_NEG(-1, -1, op_neg);
+        CONCOLIC_OPC_UNARY(-1, -1, op_neg);
         SET_STACK_DOUBLE(VMdoubleNeg(STACK_DOUBLE(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
 
+
       /* Conversion operations */
-
-      CASE(_i2f):       /* convert top of stack int to float */
-         SET_STACK_FLOAT(VMint2Float(STACK_INT(-1)), -1);
-         UPDATE_PC_AND_CONTINUE(1);
-
-      CASE(_i2l):       /* convert top of stack int to long */
+      CASE(_i2f)
+          : /* convert top of stack int to float */
       {
-          // this is ugly QQQ
-          jlong r = VMint2Long(STACK_INT(-1));
-          MORE_STACK(-1); // Pop
-          SET_STACK_LONG(r, 1);
-
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        CONCOLIC_OPC_UNARY(-1, -1, op_2f);
+        SET_STACK_FLOAT(VMint2Float(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
-      CASE(_i2d):       /* convert top of stack int to double */
+      CASE(_i2l)
+          : /* convert top of stack int to long */
       {
-          // this is ugly QQQ (why cast to jlong?? )
-          jdouble r = (jlong)STACK_INT(-1);
-          MORE_STACK(-1); // Pop
-          SET_STACK_DOUBLE(r, 1);
+        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
 
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        // this is ugly QQQ
+        jlong r = VMint2Long(STACK_INT(-1));
+        MORE_STACK(-1); // Pop
+        SET_STACK_LONG(r, 1);
+
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
       }
 
-      CASE(_l2i):       /* convert top of stack long to int */
+      CASE(_i2d)
+          : /* convert top of stack int to double */
       {
-          jint r = VMlong2Int(STACK_LONG(-1));
-          MORE_STACK(-2); // Pop
-          SET_STACK_INT(r, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        CONCOLIC_OPC_UNARY(-1, 0, op_2d);
+
+        // this is ugly QQQ (why cast to jlong?? )
+        jdouble r = (jlong)STACK_INT(-1);
+        MORE_STACK(-1); // Pop
+        SET_STACK_DOUBLE(r, 1);
+
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
       }
 
-      CASE(_l2f):   /* convert top of stack long to float */
+      CASE(_l2i)
+          : /* convert top of stack long to int */
       {
-          jlong r = STACK_LONG(-1);
-          MORE_STACK(-2); // Pop
-          SET_STACK_FLOAT(VMlong2Float(r), 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        CONCOLIC_OPC_UNARY(-1, -2, op_2i);
+
+        jint r = VMlong2Int(STACK_LONG(-1));
+        MORE_STACK(-2); // Pop
+        SET_STACK_INT(r, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
 
-      CASE(_l2d):       /* convert top of stack long to double */
+      CASE(_l2f)
+          : /* convert top of stack long to float */
       {
-          jlong r = STACK_LONG(-1);
-          MORE_STACK(-2); // Pop
-          SET_STACK_DOUBLE(VMlong2Double(r), 1);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        CONCOLIC_OPC_UNARY(-1, -2, op_2f);
+
+        jlong r = STACK_LONG(-1);
+        MORE_STACK(-2); // Pop
+        SET_STACK_FLOAT(VMlong2Float(r), 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
 
-      CASE(_f2i):  /* Convert top of stack float to int */
-          SET_STACK_INT(SharedRuntime::f2i(STACK_FLOAT(-1)), -1);
-          UPDATE_PC_AND_CONTINUE(1);
-
-      CASE(_f2l):  /* convert top of stack float to long */
+      CASE(_l2d)
+          : /* convert top of stack long to double */
       {
-          jlong r = SharedRuntime::f2l(STACK_FLOAT(-1));
-          MORE_STACK(-1); // POP
-          SET_STACK_LONG(r, 1);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        CONCOLIC_OPC_UNARY(-1, -1, op_2d);
+
+        jlong r = STACK_LONG(-1);
+        MORE_STACK(-2); // Pop
+        SET_STACK_DOUBLE(VMlong2Double(r), 1);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
       }
 
-      CASE(_f2d):  /* convert top of stack float to double */
+      CASE(_f2i)
+          : /* Convert top of stack float to int */
       {
-          jfloat f;
-          jdouble r;
-          f = STACK_FLOAT(-1);
-          r = (jdouble) f;
-          MORE_STACK(-1); // POP
-          SET_STACK_DOUBLE(r, 1);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        CONCOLIC_OPC_UNARY(-1, -1, op_2i);
+        SET_STACK_INT(SharedRuntime::f2i(STACK_FLOAT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
       }
 
-      CASE(_d2i): /* convert top of stack double to int */
+      CASE(_f2l)
+          : /* convert top of stack float to long */
       {
-          jint r1 = SharedRuntime::d2i(STACK_DOUBLE(-1));
-          MORE_STACK(-2);
-          SET_STACK_INT(r1, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
+
+        jlong r = SharedRuntime::f2l(STACK_FLOAT(-1));
+        MORE_STACK(-1); // POP
+        SET_STACK_LONG(r, 1);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
       }
 
-      CASE(_d2f): /* convert top of stack double to float */
+      CASE(_f2d)
+          : /* convert top of stack float to double */
       {
-          jfloat r1 = VMdouble2Float(STACK_DOUBLE(-1));
-          MORE_STACK(-2);
-          SET_STACK_FLOAT(r1, 0);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+        CONCOLIC_OPC_UNARY(-1, 0, op_2d);
+
+        jfloat f;
+        jdouble r;
+        f = STACK_FLOAT(-1);
+        r = (jdouble)f;
+        MORE_STACK(-1); // POP
+        SET_STACK_DOUBLE(r, 1);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
       }
 
-      CASE(_d2l): /* convert top of stack double to long */
+      CASE(_d2i)
+          : /* convert top of stack double to int */
       {
-          jlong r1 = SharedRuntime::d2l(STACK_DOUBLE(-1));
-          MORE_STACK(-2);
-          SET_STACK_LONG(r1, 1);
-          UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+        CONCOLIC_OPC_UNARY(-1, -2, op_2i);
+
+        jint r1 = SharedRuntime::d2i(STACK_DOUBLE(-1));
+        MORE_STACK(-2);
+        SET_STACK_INT(r1, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
       }
 
-      CASE(_i2b):
-          SET_STACK_INT(VMint2Byte(STACK_INT(-1)), -1);
-          UPDATE_PC_AND_CONTINUE(1);
+      CASE(_d2f)
+          : /* convert top of stack double to float */
+      {
+        CONCOLIC_OPC_UNARY(-1, -2, op_2f);
 
-      CASE(_i2c):
-          SET_STACK_INT(VMint2Char(STACK_INT(-1)), -1);
-          UPDATE_PC_AND_CONTINUE(1);
+        jfloat r1 = VMdouble2Float(STACK_DOUBLE(-1));
+        MORE_STACK(-2);
+        SET_STACK_FLOAT(r1, 0);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
+      }
 
-      CASE(_i2s):
-          SET_STACK_INT(VMint2Short(STACK_INT(-1)), -1);
-          UPDATE_PC_AND_CONTINUE(1);
+      CASE(_d2l)
+          : /* convert top of stack double to long */
+      {
+        CONCOLIC_OPC_UNARY(-1, -1, op_2l);
+
+        jlong r1 = SharedRuntime::d2l(STACK_DOUBLE(-1));
+        MORE_STACK(-2);
+        SET_STACK_LONG(r1, 1);
+        UPDATE_PC_AND_TOS_AND_CONTINUE(1, 2);
+      }
+
+      CASE(_i2b) : {
+        CONCOLIC_OPC_UNARY(-1, -1, op_2b);
+        SET_STACK_INT(VMint2Byte(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
+      }
+
+      CASE(_i2c) : {
+        CONCOLIC_OPC_UNARY(-1, -1, op_2c);
+        SET_STACK_INT(VMint2Char(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
+      }
+
+      CASE(_i2s) : {
+        CONCOLIC_OPC_UNARY(-1, -1, op_2s);
+        SET_STACK_INT(VMint2Short(STACK_INT(-1)), -1);
+        UPDATE_PC_AND_CONTINUE(1);
+      }
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)            \
@@ -3087,6 +3131,8 @@ run:
        */
 
       CASE(_jsr): {
+          CONCOLIC_CONST(0);
+        
           /* push bytecode index on stack */
           SET_STACK_ADDR(((address)pc - (intptr_t)(istate->method()->code_base()) + 3), 0);
           MORE_STACK(1);
@@ -3105,6 +3151,8 @@ run:
       }
 
       CASE(_jsr_w): {
+          CONCOLIC_CONST(0);
+          
           /* push return address on the stack */
           SET_STACK_ADDR(((address)pc - (intptr_t)(istate->method()->code_base()) + 5), 0);
           MORE_STACK(1);
