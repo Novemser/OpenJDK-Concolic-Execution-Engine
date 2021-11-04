@@ -38,6 +38,17 @@ public:
     }
   }
 
+  inline static void set_stack_entry(int offset, ShadowTable::Entry &entry) {
+    assert(offset >= 0, "offset >= 0");
+    ctx->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
+        offset, entry);
+  }
+
+  inline static ShadowTable::Entry &get_stack_entry(int offset) {
+    ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(
+        offset);
+  }
+
   inline static Expression *get_stack_slot(int offset) {
     return ctx->get_shadow_stack().get_last_frame().get_opr_stack().get_slot(
         offset);
@@ -78,26 +89,15 @@ public:
   }
 
 
-  inline static void set_local_slot(int offset, Expression *sym_exp) {
+  inline static void set_local_entry(int offset, ShadowTable::Entry &entry) {
     assert(offset >= 0, "offset >= 0");
-    sym_tmp_id_t sym_tmp_id = ctx->get_next_sym_tmp_id(sym_exp);
     ctx->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
-        offset, sym_exp, NULL_SYM_OID, sym_tmp_id);
+        offset, entry);
   }
 
-  inline static void set_local_slot(int offset, Expression *sym_exp,
-                                    sym_oid_t sym_oid, int index) {
-    ShadowTable &local_tbl =
-        ctx->get_shadow_stack().get_last_frame().get_local_tbl();
-    if (sym_exp) {
-      local_tbl.set_slot(offset, sym_exp, sym_oid, index);
-    } else {
-      local_tbl.clear_slot(offset);
-    }
-  }
-
-  inline static Expression *get_local_slot(int offset) {
-    return ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_slot(
+  inline static ShadowTable::Entry &get_local_entry(int offset) {
+    assert(offset >= 0, "offset >= 0");
+    ctx->get_shadow_stack().get_last_frame().get_local_tbl().get_entry(
         offset);
   }
 

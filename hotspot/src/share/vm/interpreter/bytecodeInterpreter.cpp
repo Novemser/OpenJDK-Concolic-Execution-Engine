@@ -1121,16 +1121,11 @@ run:
 
           /* load from local variable */
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_LOAD(local_off, stack_off)                                    \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
-    tty->print("\033[1;32mload from %d to %d\033[0m\n", local_off, stack_off); \
-    Expression *sym_exp =                                                      \
-        ConcolicMngr::get_local_slot(local_off);                               \
-    if (sym_exp) {                                                             \
-      ConcolicMngr::set_stack_slot(stack_off, sym_exp);                        \
-    } else {                                                                   \
-      ConcolicMngr::clear_stack_slot(stack_off);                               \
-    }                                                                          \
+#define CONCOLIC_LOAD(local_off, stack_off)                                     \
+  if (ConcolicMngr::is_doing_concolic) {                                        \
+    tty->print("\033[1;32mload from %d to %d\033[0m\n", local_off, stack_off);  \
+    ShadowTable::Entry &entry = ConcolicMngr::get_local_entry(local_off);       \
+    ConcolicMngr::set_stack_entry(stack_off, entry);                            \
   }
 #else
 #define CONCOLIC_LOAD(stack_off, local_off)
@@ -1189,14 +1184,11 @@ run:
 
           /* store to a local variable */
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_STORE(stack_off, local_off)                                   \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
-    tty->print("\033[1;32mstore from %d to %d\033[0m\n", stack_off, local_off);\
-    Expression *sym_exp =                                                      \
-        ConcolicMngr::get_stack_slot(stack_off);                               \
-    if (sym_exp) {                                                             \
-      ConcolicMngr::set_local_slot(local_off, sym_exp);                        \
-    }                                                                          \
+#define CONCOLIC_STORE(stack_off, local_off)                                    \
+  if (ConcolicMngr::is_doing_concolic) {                                        \
+    tty->print("\033[1;32mstore from %d to %d\033[0m\n", stack_off, local_off); \
+    ShadowTable::Entry &entry = ConcolicMngr::get_stack_entry(stack_off);       \
+    ConcolicMngr::set_local_entry(local_off, entry);                            \
   }
 #else
 #define CONCOLIC_STORE(stack_off, local_off)
