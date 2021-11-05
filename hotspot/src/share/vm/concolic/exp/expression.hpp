@@ -3,8 +3,8 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/defs.hpp"
 #include "concolic/SymbolicOp.hpp"
+#include "concolic/defs.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
@@ -71,6 +71,22 @@ public:
   ConExpression(jfloat f);
   ConExpression(jdouble d);
 
+public:
+  void print();
+};
+
+class SelectExpression : public Expression {
+  static const int EXP_NAME_LENGTH = 8;
+
+private:
+  char _arr_str[EXP_NAME_LENGTH];
+  Expression *_index_exp;
+  Expression *_value_exp;
+
+public:
+  SelectExpression(sym_oid_t array_id, Expression *index_exp,
+                   Expression *value_exp);
+  ~SelectExpression();
 public:
   void print();
 };

@@ -38,6 +38,7 @@ public:
 
   SymbolicObject *get_or_alloc_sym_obj(oop obj);
   SymbolicObject *alloc_sym_obj(oop obj);
+  SymbolicObject *alloc_sym_array(arrayOop array);
   SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);

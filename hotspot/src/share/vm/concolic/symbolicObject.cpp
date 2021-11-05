@@ -29,6 +29,11 @@ void SymbolicObject::init_sym_exp(int field_index) {
   _sym_exps[field_index] = sym_exp;
 }
 
+void SymbolicObject::init_sym_exp(int field_index, Expression *exp) {
+  exp->inc_ref();
+  _sym_exps[field_index] = exp;
+}
+
 void SymbolicObject::set_sym_exp(int field_index, Expression *sym_exp) {
   SymExpStore::iterator iter = _sym_exps.find(field_index);
   if (iter != _sym_exps.end()) {

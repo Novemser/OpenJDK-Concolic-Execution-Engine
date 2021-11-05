@@ -60,6 +60,13 @@ SymbolicObject *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
   return ret;
 }
 
+SymbolicObject *ThreadContext::alloc_sym_array(arrayOop array) {
+  SymbolicObject *sym_arr = alloc_sym_obj(array);
+  sym_arr->init_sym_exp(ARRAY_LENGTH_FIELD_INDEX,
+                        new ConExpression(array->length()));
+  return sym_arr;
+}
+
 void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
   tty->print("ThreadContext::symbolize_recursive\n");
 

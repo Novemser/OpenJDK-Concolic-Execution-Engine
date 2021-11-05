@@ -2003,26 +2003,48 @@ run:
                         message, note_rangeCheck_trap);                        \
       }
 
+/**
+ * TODO: Refine this macro, it's too complex...
+ */
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_ALOAD(res_off)                                                    \
-  if (ConcolicMngr::is_doing_concolic) {                                           \
-    if (arrObj->is_symbolic()) {                                                   \
-      int stack_offset = GET_STACK_OFFSET;                                         \
-      SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj);  \
-      sym_oid_t sym_oid = arrObj->get_sym_oid();                                   \
-      Expression* sym_exp = sym_obj->get(index);                                   \
-      ConcolicMngr::set_stack_slot(stack_offset+res_off, sym_exp, sym_oid, index); \
-    }                                                                              \
+#define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)                               \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *index_exp =                                                    \
+        ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
+    if (arrObj->is_symbolic()) {                                               \
+      sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
+      SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
+      Expression *value_exp = sym_arr->get(index);                             \
+      ConcolicMngr::set_stack_slot(stack_offset + res_off, value_exp, sym_oid, \
+                                   index);                                     \
+                                                                               \
+      if (!index_exp) {                                                        \
+        index_exp = new ConExpression(index);                                  \
+      }                                                                        \
+      if (!value_exp) {                                                        \
+        value_exp = new ConExpression(                                         \
+            *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));         \
+      }                                                                        \
+      ConcolicMngr::record_path_condition(                                     \
+          new SelectExpression(sym_oid, index_exp, value_exp));                \
+    } else if (index_exp) {                                                    \
+      SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      Expression *value_exp = new ConExpression(                               \
+          *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));           \
+      ConcolicMngr::record_path_condition(                                     \
+          new SelectExpression(arrObj->get_sym_oid(), index_exp, value_exp));  \
+    }                                                                          \
   }
 #else
-#define CONCOLIC_ALOAD(res_off)
+#define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)
 #endif
 
       /* 32-bit loads. These handle conversion from < 32-bit types */
 #define ARRAY_LOADTO32(T, T2, format, stackRes, extra)                                \
       {                                                                               \
           ARRAY_INTRO(-2);                                                            \
-          CONCOLIC_ALOAD(-2);                                                         \
+          CONCOLIC_ALOAD(T, T2, -2, -2);                                              \
           (void)extra;                                                                \
           SET_ ## stackRes(*(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)), \
                            -2);                                                       \
@@ -2033,7 +2055,7 @@ run:
 #define ARRAY_LOADTO64(T,T2, stackRes, extra)                                              \
       {                                                                                    \
           ARRAY_INTRO(-2);                                                                 \
-          CONCOLIC_ALOAD(-1);                                                              \
+          CONCOLIC_ALOAD(T, T2, -2, -1);                                                   \
           SET_ ## stackRes(*(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)), -1); \
           (void)extra;                                                                     \
           UPDATE_PC_AND_CONTINUE(1);                                                       \

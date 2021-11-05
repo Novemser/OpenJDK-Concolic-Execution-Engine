@@ -24,6 +24,7 @@ public:
   Expression *get(int field_index);
 
   void init_sym_exp(int field_index);
+  void init_sym_exp(int field_index, Expression *exp);
   void set_sym_exp(int field_index, Expression *sym_exp);
 
   inline sym_oid_t get_sym_oid() { return _sym_oid; }
