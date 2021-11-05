@@ -9,6 +9,9 @@
 
 class ConcolicMngr {
 public:
+
+#ifdef ENABLE_CONCOLIC
+
   static bool is_doing_concolic;
   static ThreadContext *ctx;
 
@@ -114,6 +117,11 @@ public:
   inline static void record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }
+#else
+  static jlong startConcolic();
+  static jlong endConcolic();
+  static void symbolize(Handle handle);
+#endif // ENABLE_CONCOLIC
 };
 
 #endif // SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP

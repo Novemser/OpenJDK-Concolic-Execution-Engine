@@ -1040,8 +1040,10 @@ run:
           ConcolicMngr::ctx->print_stack_trace();
           ConcolicMngr::ctx->get_shadow_stack().print();
           methodHandle mh (thread, (Method*)method);
+#ifndef PRODUCT
           BytecodeTracer::set_closure(BytecodeTracer::std_closure());
           BytecodeTracer::trace(mh, pc, tty);
+#endif
         }
 
         last_method = method;

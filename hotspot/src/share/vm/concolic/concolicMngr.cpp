@@ -3,10 +3,11 @@
 #include "utilities/ostream.hpp"
 #include "utilities/vmError.hpp"
 
+#ifdef ENABLE_CONCOLIC
+
 bool ConcolicMngr::is_doing_concolic = false;
 ThreadContext *ConcolicMngr::ctx = NULL;
 
-#ifdef ENABLE_CONCOLIC
 
 jlong ConcolicMngr::startConcolic(JavaThread *thread) {
   tty->print("Start concolic!\n");

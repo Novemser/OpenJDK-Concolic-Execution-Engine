@@ -1,6 +1,8 @@
 #ifndef SHARE_VM_CONCOLIC_DEFS_HPP
 #define SHARE_VM_CONCOLIC_DEFS_HPP
 
+#ifdef ENABLE_CONCOLIC
+
 #include <sys/types.h>
 
 // Symbolioc Object ID related
@@ -13,4 +15,5 @@ typedef int sym_tmp_id_t;
 
 #define ARRAY_LENGTH_FIELD_INDEX -1
 
+#endif
 #endif // SHARE_VM_CONCOLIC_DEFS_HPP
