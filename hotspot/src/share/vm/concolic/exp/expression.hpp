@@ -3,6 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/defs.hpp"
 #include "concolic/SymbolicOp.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
@@ -34,7 +35,7 @@ private:
   char _str[EXP_NAME_LENGTH];
 
 public:
-  FieldSymExpression(char *sym_name, int field_index);
+  FieldSymExpression(sym_oid_t sym_oid, int field_index);
   ~FieldSymExpression();
 
 public:

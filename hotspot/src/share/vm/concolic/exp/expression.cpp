@@ -7,8 +7,8 @@ ulong Expression::total_count = 0;
 
 void Expression::print() { tty->print_cr("ref_count: %u", _ref_count); };
 
-FieldSymExpression::FieldSymExpression(char *sym_name, int field_index) {
-  int ret = sprintf(_str, "%s.%d", sym_name, field_index);
+FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
+  int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
