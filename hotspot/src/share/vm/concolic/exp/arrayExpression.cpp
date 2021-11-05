@@ -3,9 +3,9 @@
 #include "concolic/exp/expression.hpp"
 #include "utilities/ostream.hpp"
 
-SelectExpression::SelectExpression(sym_oid_t array_id, Expression *index_exp,
-                                   Expression *value_exp)
-    : _index_exp(index_exp), _value_exp(value_exp) {
+ArrayExpression::ArrayExpression(sym_oid_t array_id, Expression *index_exp,
+                                 Expression *value_exp, bool is_load)
+    : _index_exp(index_exp), _value_exp(value_exp), _is_load(is_load) {
   int ret = sprintf(_arr_str, "A_%lu", array_id);
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 
@@ -17,7 +17,7 @@ SelectExpression::SelectExpression(sym_oid_t array_id, Expression *index_exp,
   }
 }
 
-SelectExpression::~SelectExpression() {
+ArrayExpression::~ArrayExpression() {
   if (_index_exp && _index_exp->dec_ref()) {
     delete _index_exp;
   }
@@ -26,10 +26,10 @@ SelectExpression::~SelectExpression() {
   }
 }
 
-void SelectExpression::print() {
+void ArrayExpression::print() {
   tty->print("%s[", _arr_str);
   _index_exp->print();
-  tty->print("] == ");
+  tty->print(_is_load ? "] -> " : "] <- ");
   _value_exp->print();
 }
 

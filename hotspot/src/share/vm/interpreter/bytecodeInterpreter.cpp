@@ -2052,13 +2052,13 @@ run:
             *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));         \
       }                                                                        \
       ConcolicMngr::record_path_condition(                                     \
-          new SelectExpression(sym_oid, index_exp, value_exp));                \
+          new ArrayExpression(sym_oid, index_exp, value_exp, true));           \
     } else if (index_exp) {                                                    \
       SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
       Expression *value_exp = new ConExpression(                               \
           *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));           \
-      ConcolicMngr::record_path_condition(                                     \
-          new SelectExpression(arrObj->get_sym_oid(), index_exp, value_exp));  \
+      ConcolicMngr::record_path_condition(new ArrayExpression(                 \
+          arrObj->get_sym_oid(), index_exp, value_exp, true));                 \
     }                                                                          \
   }
 #else
@@ -2127,7 +2127,7 @@ run:
         index_exp = new ConExpression(index);                                  \
       }                                                                        \
       ConcolicMngr::record_path_condition(                                     \
-          new SelectExpression(sym_oid, index_exp, value_exp));                \
+          new ArrayExpression(sym_oid, index_exp, value_exp, false));          \
     } else if (index_exp) {                                                    \
       SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
       Expression *value_exp =                                                  \
@@ -2135,8 +2135,8 @@ run:
       if (!value_exp) {                                                        \
         value_exp = new ConExpression(value);                                  \
       }                                                                        \
-      ConcolicMngr::record_path_condition(                                     \
-          new SelectExpression(arrObj->get_sym_oid(), index_exp, value_exp));  \
+      ConcolicMngr::record_path_condition(new ArrayExpression(                 \
+          arrObj->get_sym_oid(), index_exp, value_exp, false));                \
     }                                                                          \
   }
 #else

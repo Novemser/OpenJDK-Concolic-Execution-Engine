@@ -76,18 +76,19 @@ public:
   void print();
 };
 
-class SelectExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 8;
+class ArrayExpression : public Expression {
+  static const int EXP_NAME_LENGTH = 7;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
+  bool _is_load;
   Expression *_index_exp;
   Expression *_value_exp;
 
 public:
-  SelectExpression(sym_oid_t array_id, Expression *index_exp,
-                   Expression *value_exp);
-  ~SelectExpression();
+  ArrayExpression(sym_oid_t array_id, Expression *index_exp,
+                   Expression *value_exp, bool is_load);
+  ~ArrayExpression();
 public:
   void print();
 };
