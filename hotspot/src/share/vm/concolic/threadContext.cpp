@@ -98,7 +98,11 @@ void ThreadContext::print() {
     Expression *sym_exp = _sym_tmp_exps[i];
     if (sym_exp) {
       tty->print_cr("<< sym_tmp_exp[%d]:", i);
+#ifndef Z3PRINT
       sym_exp->print();
+#else
+      sym_exp->print_cr();
+#endif
     }
   }
 

@@ -5,7 +5,21 @@
 
 ulong Expression::total_count = 0;
 
-void Expression::print() { tty->print_cr("ref_count: %u", _ref_count); };
+void Expression::print() {
+#ifndef Z3PRINT
+  tty->indent().print_cr("ref_count: %u", _ref_count);
+#else
+  // TODO: check what shall be output
+  tty->indent().print("ref_count: %u", _ref_count);
+#endif
+}
+
+#ifdef Z3PRINT
+void Expression::print_cr() {
+  print();
+  tty->cr();
+}
+#endif
 
 FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
   int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
@@ -14,7 +28,13 @@ FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
 
 FieldSymExpression::~FieldSymExpression() {}
 
-void FieldSymExpression::print() { tty->print("%s\n", _str); }
+void FieldSymExpression::print() {
+#ifndef Z3PRINT
+  tty->indent().print_cr("%s", _str);
+#else
+  tty->indent().print("%s", _str);
+#endif
+}
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
                                  bool cmp)
@@ -46,11 +66,28 @@ OpSymExpression::~OpSymExpression() {
 }
 
 void OpSymExpression::print() {
+#ifndef Z3PRINT
   if (_left) {
     _left->print();
   }
   tty->print_cr("%s", SymbolicOpStr[(int)_op]);
   _right->print();
+#else
+  int pos = tty->indentation();
+  tty->indent().print("(");
+  // tty->set_indentation(tty->position());
+  // tty->indent().print("%s ", SymbolicOpStr[(int)_op]);
+  tty->indent().print_cr(SymbolicOpStr[(int)_op]);
+  tty->inc(2);
+  if (_left) {
+    _left->print();
+    tty->cr();
+  }
+  _right->print();
+  tty->cr();
+  tty->set_indentation(pos);
+  tty->indent().print(")");
+#endif
 }
 
 ConExpression::ConExpression(jint i) {
@@ -73,6 +110,13 @@ ConExpression::ConExpression(jdouble d) {
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
-void ConExpression::print() { tty->print("C_%s\n", _str); }
+void ConExpression::print() {
+#ifndef Z3PRINT
+  tty->indent().print_cr("C_%s", _str);
+#else
+  // TODO: include primiteive type
+  tty->indent().print("C_%s", _str);
+#endif
+}
 
 #endif
