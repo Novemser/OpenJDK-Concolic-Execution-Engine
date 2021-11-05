@@ -1855,6 +1855,20 @@ run:
       NULL_COMPARISON_OP(null);
       NULL_COMPARISON_NOT_OP(nonnull);
 
+#ifdef ENABLE_CONCOLIC
+#define CONCOLIC_OPC_BINARY_SWITCH(off, key, op)                                 \
+  if (ConcolicMngr::is_doing_concolic) {                                         \
+    int stack_offset = GET_STACK_OFFSET;                                         \
+    Expression *sym_exp = ConcolicMngr::get_stack_slot(stack_offset + off);      \
+    if (sym_exp) {                                                               \
+      Expression *key_sym_exp = new ConExpression(key);                          \
+      Expression *new_exp = new OpSymExpression(sym_exp, key_sym_exp, op, true); \
+      ConcolicMngr::record_path_condition(new_exp);                              \
+    }                                                                            \
+  }
+#else
+#define CONCOLIC_OPC_BINARY_SWITCH(off, key, op)
+#endif
       /* Goto pc at specified offset in switch table. */
 
       CASE(_tableswitch): {
@@ -1870,8 +1884,18 @@ run:
           if (((uint32_t) key > (uint32_t)(high - low))) {
             key = -1;
             skip = Bytes::get_Java_u4((address)&lpc[0]);
+#ifdef ENABLE_CONCOLIC
+            const bool cmp = true;
+            CONCOLIC_OPC_BINARY_SWITCH(-1, high, op_gt);
+            CONCOLIC_OPC_BINARY_SWITCH(-1, low, op_lt);
+#endif
           } else {
             skip = Bytes::get_Java_u4((address)&lpc[key + 3]);
+#ifdef ENABLE_CONCOLIC
+            const bool cmp = true;
+            int32_t real_key = STACK_INT(-1);
+            CONCOLIC_OPC_BINARY_SWITCH(-1, real_key, op_eq);
+#endif
           }
           // Profile switch.
           BI_PROFILE_UPDATE_SWITCH(/*switch_index=*/key);
