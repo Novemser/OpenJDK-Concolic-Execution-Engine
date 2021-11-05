@@ -58,7 +58,7 @@ void SymbolicObject::print() {
   for (sym_exp_iter = _sym_exps.begin(); sym_exp_iter != _sym_exps.end();
        ++sym_exp_iter) {
     tty->print_cr("Field(%d): ", sym_exp_iter->first);
-    sym_exp_iter->second->print();
+    sym_exp_iter->second->print_cr();
   }
 }
 

@@ -23,7 +23,7 @@ void PathCondition::print() {
   int size = _exps.size();
   for (int i = 0; i < size; ++i) {
     tty->print_cr("- exp[%d]:", i);
-    _exps[i]->print();
+    _exps[i]->print_cr();
   }
 }
 

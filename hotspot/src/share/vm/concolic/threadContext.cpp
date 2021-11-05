@@ -105,7 +105,7 @@ void ThreadContext::print() {
     Expression *sym_exp = _sym_tmp_exps[i];
     if (sym_exp) {
       tty->print_cr("<< sym_tmp_exp[%d]:", i);
-      sym_exp->print();
+      sym_exp->print_cr();
     }
   }
 
