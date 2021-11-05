@@ -18,23 +18,20 @@ void FieldSymExpression::print() { tty->print("%s\n", _str); }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
                                  bool cmp)
-    : _op(cmp ? op : NotSymbolicOp[op]) {
-  if (l) {
-    l->inc_ref();
-    _left = l;
+    : _left(l), _right(r), _op(cmp ? op : NotSymbolicOp[op]) {
+  if (_left) {
+    _left->inc_ref();
   }
-  if (r) {
-    r->inc_ref();
-    _right = r;
+  if (_right) {
+    _right->inc_ref();
   }
   // tty->print_cr("Create: %p -> %p, %p", this, _left, _right);
 }
 
 OpSymExpression::OpSymExpression(Expression *r, SymbolicOp op)
-    : _left(NULL), _op(op) {
-  if (r) {
-    r->inc_ref();
-    _right = r;
+    : _left(NULL), _right(r), _op(op) {
+  if (_right) {
+    _right->inc_ref();
   }
   // tty->print_cr("Create: %p -> %p, %p", this, _left, _right);
 }
