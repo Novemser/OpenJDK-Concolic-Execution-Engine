@@ -6,20 +6,13 @@
 ulong Expression::total_count = 0;
 
 void Expression::print() {
-#ifndef Z3PRINT
-  tty->indent().print_cr("ref_count: %u", _ref_count);
-#else
-  // TODO: check what shall be output
   tty->indent().print("ref_count: %u", _ref_count);
-#endif
 }
 
-#ifdef Z3PRINT
 void Expression::print_cr() {
   print();
   tty->cr();
 }
-#endif
 
 FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
   int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
@@ -29,11 +22,7 @@ FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
 FieldSymExpression::~FieldSymExpression() {}
 
 void FieldSymExpression::print() {
-#ifndef Z3PRINT
-  tty->indent().print_cr("%s", _str);
-#else
   tty->indent().print("%s", _str);
-#endif
 }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
@@ -66,12 +55,14 @@ OpSymExpression::~OpSymExpression() {
 }
 
 void OpSymExpression::print() {
-#ifndef Z3PRINT
+#ifdef ONELINE
+  tty->print("(%s ", SymbolicOpStr[(int)_op]);
   if (_left) {
     _left->print();
+    tty->print(" ");
   }
-  tty->print_cr("%s", SymbolicOpStr[(int)_op]);
   _right->print();
+  tty->print(")");
 #else
   int pos = tty->indentation();
   tty->indent().print("(");
@@ -111,12 +102,8 @@ ConExpression::ConExpression(jdouble d) {
 }
 
 void ConExpression::print() {
-#ifndef Z3PRINT
-  tty->indent().print_cr("C_%s", _str);
-#else
   // TODO: include primiteive type
   tty->indent().print("C_%s", _str);
-#endif
 }
 
 #endif

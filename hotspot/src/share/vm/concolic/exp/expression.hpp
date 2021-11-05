@@ -19,9 +19,7 @@ public:
 
   virtual ~Expression() { total_count--; }
   virtual void print();
-#ifdef Z3PRINT  
   void print_cr();
-#endif
 
   inline void inc_ref() { _ref_count += 1; }
   inline bool dec_ref() { return --_ref_count == 0; }
