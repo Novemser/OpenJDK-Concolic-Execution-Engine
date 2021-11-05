@@ -2107,23 +2107,47 @@ run:
           ARRAY_LOADTO64(T_DOUBLE, jdouble, STACK_DOUBLE, 0);
 
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_ASTORE(delta)                                                \
-  if (ConcolicMngr::is_doing_concolic) {                                        \
-    int stack_offset = GET_STACK_OFFSET;                                        \
-    Expression *sym_exp =                                                       \
-        ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);        \
-    SymbolicObject * sym_obj = ConcolicMngr::ctx->get_or_alloc_sym_obj(arrObj); \
-    sym_obj->set_sym_exp(index, sym_exp);                                       \
+#define CONCOLIC_ASTORE(arrayOff, delta, value)                                \
+  if (ConcolicMngr::is_doing_concolic) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *index_exp =                                                    \
+        ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
+    if (arrObj->is_symbolic()) {                                               \
+      Expression *value_exp =                                                  \
+          ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);       \
+      if (!value_exp) {                                                        \
+        value_exp = new ConExpression(value);                                  \
+      }                                                                        \
+                                                                               \
+      sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
+      SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
+      sym_arr->set_sym_exp(index, value_exp);                                  \
+                                                                               \
+      if (!index_exp) {                                                        \
+        index_exp = new ConExpression(index);                                  \
+      }                                                                        \
+      ConcolicMngr::record_path_condition(                                     \
+          new SelectExpression(sym_oid, index_exp, value_exp));                \
+    } else if (index_exp) {                                                    \
+      SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      Expression *value_exp =                                                  \
+          ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);       \
+      if (!value_exp) {                                                        \
+        value_exp = new ConExpression(value);                                  \
+      }                                                                        \
+      ConcolicMngr::record_path_condition(                                     \
+          new SelectExpression(arrObj->get_sym_oid(), index_exp, value_exp));  \
+    }                                                                          \
   }
 #else
-#define CONCOLIC_ASTORE(delta)
+#define CONCOLIC_ASTORE(arrayOff, delta, value)
 #endif
 
       /* 32-bit stores. These handle conversion to < 32-bit types */
 #define ARRAY_STOREFROM32(T, T2, format, stackSrc, extra)                               \
       {                                                                                 \
           ARRAY_INTRO(-3);                                                              \
-          CONCOLIC_ASTORE(-1);                                                          \
+          CONCOLIC_ASTORE(-3, -1, stackSrc( -1));                                       \
           (void)extra;                                                                  \
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);                                        \
@@ -2133,7 +2157,7 @@ run:
 #define ARRAY_STOREFROM64(T, T2, stackSrc, extra)                                       \
       {                                                                                 \
           ARRAY_INTRO(-4);                                                              \
-          CONCOLIC_ASTORE(-1);                                                          \
+          CONCOLIC_ASTORE(-4, -1, stackSrc( -1));                                       \
           (void)extra;                                                                  \
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -4);                                        \

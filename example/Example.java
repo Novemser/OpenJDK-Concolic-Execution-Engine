@@ -59,41 +59,45 @@ public class Example {
     }
 
     public static void main(String[] args) {
-        MyInteger obj1 = new MyInteger(1);
-        MyInteger obj2 = new MyInteger(2);
-        MyInteger obj3 = new MyInteger(3);
-        // MyLong obj1 = new MyLong(1000);
-        // MyLong obj2 = new MyLong(20);
-        // MyLong obj3 = new MyLong(30);
-        // Myfloat obj1 = new MyLong(1);
-        // Myfloat obj2 = new MyLong(2);
-        // Myfloat obj3 = new MyLong(3);
-
+        MyInteger obj1 = new MyInteger(4);
+     
         System.startConcolic();
         System.symbolize(obj1);
-        System.symbolize(obj2);
-        
-        obj3.value = obj1.value + 2;
-        obj3.value = -obj3.value;
 
-        if (obj3.value < obj2.value) {
-            obj3.value = obj1.value;
-        }
-        // obj3.value = obj1.value << obj2.value;
+        int[] array = new int[4];
+        array[obj1.value - 2] += 3;
+        // array[2] = obj1.value;
+        // array[2] += obj1.value;
+        
 
         System.endConcolic();
-        System.out.println(obj3.value);
+        System.out.println(array[1]);
     }
 
     // public static void main(String[] args) {
-    //     TestClass test = new TestClass();
+    //     MyInteger obj1 = new MyInteger(1);
+    //     MyInteger obj2 = new MyInteger(2);
+    //     MyInteger obj3 = new MyInteger(3);
+    //     // MyLong obj1 = new MyLong(1000);
+    //     // MyLong obj2 = new MyLong(20);
+    //     // MyLong obj3 = new MyLong(30);
+    //     // Myfloat obj1 = new MyLong(1);
+    //     // Myfloat obj2 = new MyLong(2);
+    //     // Myfloat obj3 = new MyLong(3);
+
     //     System.startConcolic();
-    //     System.symbolize(test);
-    //     int a = 1000;
-    //     int b = test.i;
-    //     int c = a + b;
+    //     System.symbolize(obj1);
+    //     System.symbolize(obj2);
+        
+    //     obj3.value = obj1.value + 2;
+    //     obj3.value = -obj3.value;
+
+    //     if (obj3.value < obj2.value) {
+    //         obj3.value = obj1.value;
+    //     }
+    //     // obj3.value = obj1.value << obj2.value;
+
     //     System.endConcolic();
-    //     // System.out.println(Integer.MIN_VALUE);
-    //     // System.out.println((new Integer(0)).MIN_VALUE);
+    //     System.out.println(obj3.value);
     // }
 }
