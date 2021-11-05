@@ -1872,9 +1872,6 @@ run:
       /* Goto pc at specified offset in switch table. */
 
       CASE(_tableswitch): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("tableswitch");
-#endif
           jint* lpc  = (jint*)VMalignWordUp(pc+1);
           int32_t  key  = STACK_INT(-1);
           int32_t  low  = Bytes::get_Java_u4((address)&lpc[1]);
@@ -1885,14 +1882,12 @@ run:
             key = -1;
             skip = Bytes::get_Java_u4((address)&lpc[0]);
 #ifdef ENABLE_CONCOLIC
-            const bool cmp = true;
             CONCOLIC_OPC_BINARY_SWITCH(-1, high, op_gt);
             CONCOLIC_OPC_BINARY_SWITCH(-1, low, op_lt);
 #endif
           } else {
             skip = Bytes::get_Java_u4((address)&lpc[key + 3]);
 #ifdef ENABLE_CONCOLIC
-            const bool cmp = true;
             int32_t real_key = STACK_INT(-1);
             CONCOLIC_OPC_BINARY_SWITCH(-1, real_key, op_eq);
 #endif
@@ -1922,10 +1917,16 @@ run:
           while (--npairs >= 0) {
             lpc += 2;
             if (key == (int32_t)Bytes::get_Java_u4((address)lpc)) {
+#ifdef ENABLE_CONCOLIC
+              CONCOLIC_OPC_BINARY_SWITCH(-1, key, op_eq);
+#endif
               skip = Bytes::get_Java_u4((address)&lpc[1]);
               index = newindex;
               break;
             }
+#ifdef ENABLE_CONCOLIC
+            CONCOLIC_OPC_BINARY_SWITCH(-1, (int32_t)Bytes::get_Java_u4((address)lpc), op_ne);
+#endif
             newindex += 1;
           }
           // Profile switch.
