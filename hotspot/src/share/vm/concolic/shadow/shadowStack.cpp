@@ -57,20 +57,24 @@ void ShadowStack::push(ZeroFrame *callee_zero_frame, ZeroFrame *caller_zero_fram
   ShadowTable &last_opr_stack = last_s_frame.get_opr_stack();
   ShadowFrame *s_frame = new ShadowFrame(callee_zero_frame, sp, 8);
   s_frame->copy();
-  /**
-   * TODO: skip native here. Need to confirm correctness
-   */
-  interpreterState callee_istate = callee_zero_frame->as_interpreter_frame()->interpreter_state();
-  Method *callee_method = callee_istate->method();
-  if (!callee_method->is_native()) {
-    interpreterState caller_istate = caller_zero_frame->as_interpreter_frame()->interpreter_state();
-    /**
-     * At this time, `istate->locals()` points to the start of locals,
-     * while `caller_istate->stack()` points to end of locals
-     */
-    int begin_offset = caller_istate->stack_base() - callee_istate->locals() - 1;
-    int end_offset = caller_istate->stack_base() - caller_istate->stack() - 1;
-    s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0, end_offset - begin_offset);
+  if (callee_zero_frame->is_interpreter_frame()) {
+    interpreterState callee_istate = callee_zero_frame->as_interpreter_frame()->interpreter_state();
+    Method *callee_method = callee_istate->method();
+    if (caller_zero_frame->is_interpreter_frame()){
+      /**
+       * TODO: skip native here. Need to confirm correctness
+       */
+      if (!callee_method->is_native()) {
+        interpreterState caller_istate = caller_zero_frame->as_interpreter_frame()->interpreter_state();
+        /**
+         * At this time, `istate->locals()` points to the start of locals,
+         * while `caller_istate->stack()` points to end of locals
+         */
+        int begin_offset = caller_istate->stack_base() - callee_istate->locals() - 1;
+        int end_offset = caller_istate->stack_base() - caller_istate->stack() - 1;
+        s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0, end_offset - begin_offset);
+      }
+    }
   }
   _s_frames.push_back(s_frame);
 }
