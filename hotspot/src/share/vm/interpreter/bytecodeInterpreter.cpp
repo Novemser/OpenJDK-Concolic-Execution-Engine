@@ -2209,6 +2209,7 @@ run:
             assert(arrObj->klass() == Universe::byteArrayKlassObj(),
                    "should be byte array otherwise");
           }
+          CONCOLIC_ASTORE(-3, -1, item);
           ((typeArrayOop)arrObj)->byte_at_put(index, item);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);
       }
