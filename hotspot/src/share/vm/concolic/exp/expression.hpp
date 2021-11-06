@@ -29,15 +29,15 @@ protected:
   Expression() : _ref_count(0) { total_count++; }
 };
 
-class FieldSymExpression : public Expression {
+class SymbolExpression : public Expression {
   static const int EXP_NAME_LENGTH = 16;
 
 private:
   char _str[EXP_NAME_LENGTH];
 
 public:
-  FieldSymExpression(sym_oid_t sym_oid, int field_index);
-  ~FieldSymExpression();
+  SymbolExpression(sym_oid_t sym_oid, int field_index = 0);
+  ~SymbolExpression();
 
 public:
   void print();
@@ -92,6 +92,8 @@ public:
 public:
   void print();
 };
+
+
 
 #endif
 

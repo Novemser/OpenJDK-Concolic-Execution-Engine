@@ -2196,6 +2196,32 @@ run:
             // Profile checkcast with null_seen and receiver.
             BI_PROFILE_UPDATE_CHECKCAST(/*null_seen=*/true, NULL);
           }
+#ifdef ENABLE_CONCOLIC
+          if (ConcolicMngr::is_doing_concolic) {
+            int stack_offset = GET_STACK_OFFSET;
+            Expression *index_exp = ConcolicMngr::get_stack_slot_and_detach(
+                stack_offset + (-3) + 1);
+            if (arrObj->is_symbolic()) {
+              if (rhsObject->is_symbolic()) {
+                sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
+                SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
+                if (!index_exp) {
+                  index_exp = new ConExpression(index);
+                }
+                SymbolExpression* value_exp = new SymbolExpression(rhsObject->get_sym_oid());
+                ConcolicMngr::record_path_condition(
+                    new ArrayExpression(sym_arr_oid, index_exp, value_exp, false));
+              }
+            } else if (index_exp) {
+              SymbolicObject *sym_arr =
+                  ConcolicMngr::ctx->alloc_sym_array(arrObj);
+              ConcolicMngr::ctx->get_or_alloc_sym_obj(rhsObject);
+              SymbolExpression* value_exp = new SymbolExpression(rhsObject->get_sym_oid());
+              ConcolicMngr::record_path_condition(new ArrayExpression(
+                  arrObj->get_sym_oid(), index_exp, value_exp, false));
+            }
+          }
+#endif
           ((objArrayOop) arrObj)->obj_at_put(index, rhsObject);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);
       }

@@ -14,14 +14,14 @@ void Expression::print_cr() {
   tty->cr();
 }
 
-FieldSymExpression::FieldSymExpression(sym_oid_t sym_oid, int field_index) {
+SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
   int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
-FieldSymExpression::~FieldSymExpression() {}
+SymbolExpression::~SymbolExpression() {}
 
-void FieldSymExpression::print() {
+void SymbolExpression::print() {
   tty->indent().print("%s", _str);
 }
 

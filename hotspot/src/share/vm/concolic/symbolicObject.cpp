@@ -23,7 +23,7 @@ Expression *SymbolicObject::get(int field_index) {
 
 void SymbolicObject::init_sym_exp(int field_index) {
   Expression *sym_exp =
-      new FieldSymExpression(this->get_sym_oid(), field_index);
+      new SymbolExpression(this->get_sym_oid(), field_index);
 
   sym_exp->inc_ref();
   _sym_exps[field_index] = sym_exp;
