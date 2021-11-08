@@ -2649,12 +2649,14 @@ run:
             int stack_offset = GET_STACK_OFFSET;
             int field_index = cache->field_index();
 
-            Expression *sym_exp =
-                ConcolicMngr::get_stack_slot_and_detach(stack_offset - 1);
-            if (sym_exp) {
-              SymbolicObject *sym_obj =
-                  ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-              sym_obj->set_sym_exp(field_index, sym_exp);
+            if (tos_type != atos) {
+              Expression *sym_exp =
+                  ConcolicMngr::get_stack_slot_and_detach(stack_offset - 1);
+              if (sym_exp) {
+                SymbolicObject *sym_obj =
+                    ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+                sym_obj->set_sym_exp(field_index, sym_exp);
+              }
             }
           }
 #endif
