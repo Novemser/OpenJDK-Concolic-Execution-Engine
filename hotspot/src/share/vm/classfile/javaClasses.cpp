@@ -584,6 +584,10 @@ void java_lang_Class::create_mirror(KlassHandle k, Handle class_loader,
     // Allocate mirror (java.lang.Class instance)
     Handle mirror = InstanceMirrorKlass::cast(SystemDictionary::Class_klass())->allocate_instance(k, CHECK);
 
+#ifdef ENABLE_CONCOLIC
+    mirror()->set_sym_oid(NULL_SYM_OID);
+#endif
+
     // Setup indirection from mirror->klass
     if (!k.is_null()) {
       java_lang_Class::set_klass(mirror(), k());
