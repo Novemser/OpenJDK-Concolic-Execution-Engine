@@ -1,11 +1,19 @@
 #!/bin/sh
 
+# !!!!! run this script in root directory of openjdk
+
+rm -rf build
+
 FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG -DONELINE"
 # FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG"
 # FLAGS="-DENABLE_CONCOLIC"
 
 bash ./configure                    \
     --with-jvm-variants=zero        \
-    --with-debug-level=slowdebug    \
+    --with-debug-level=release    \
     --with-extra-cflags="$FLAGS"    \
     --with-extra-cxxflags="$FLAGS"
+
+make -j
+
+bash ./scripts/unzipDebugInfo.sh

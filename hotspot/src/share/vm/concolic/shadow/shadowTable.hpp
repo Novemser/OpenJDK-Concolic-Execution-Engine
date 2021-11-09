@@ -39,7 +39,12 @@ public:
 
   void init(int max_slot_size);
 
-  void set_slot(int offset, const Entry &other) { _tbl[offset] = other; }
+  void set_slot(int offset, const Entry &other) {
+    // _tbl[offset] = other;
+    _tbl[offset].sym_oid = other.sym_oid;
+    _tbl[offset].index = other.index;
+    _tbl[offset].sym_exp = other.sym_exp;
+  }
 
   void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid, int index) {
     Entry &entry = _tbl[offset];
