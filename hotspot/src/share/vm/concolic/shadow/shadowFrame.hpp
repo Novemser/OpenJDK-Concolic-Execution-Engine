@@ -4,7 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadow/shadowTable.hpp"
-#include "runtime/frame.hpp"
+#include "runtime/frame.inline.hpp"
 
 class ShadowFrame {
 

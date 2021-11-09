@@ -35,7 +35,7 @@
 #include "runtime/timer.hpp"
 
 
-#ifndef PRODUCT
+#if not defined(PRODUCT) || defined(ENABLE_CONCOLIC)
 
 // Standard closure for BytecodeTracer: prints the current bytecode
 // and its attributes using bytecode-specific information.

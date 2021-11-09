@@ -5,6 +5,7 @@
 
 #include "concolic/SymbolicOp.hpp"
 #include "concolic/defs.hpp"
+#include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 

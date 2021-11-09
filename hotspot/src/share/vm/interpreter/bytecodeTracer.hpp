@@ -34,7 +34,7 @@
 // By specialising the BytecodeClosure, all kinds of bytecode traces can
 // be done.
 
-#ifndef PRODUCT
+#if not defined(PRODUCT) || defined(ENABLE_CONCOLIC)
 // class BytecodeTracer is only used by TraceBytecodes option
 
 class BytecodeClosure;

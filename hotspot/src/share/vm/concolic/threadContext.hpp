@@ -6,6 +6,7 @@
 #include "concolic/shadow/shadowStack.hpp"
 #include "concolic/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
+#include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
 
 #include <map>

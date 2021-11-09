@@ -7,6 +7,7 @@
 #include "concolic/threadContext.hpp"
 #include "memory/resourceArea.hpp"
 #include "oops/instanceKlass.hpp"
+#include "oops/oop.inline.hpp"
 #include "runtime/fieldDescriptor.hpp"
 #include "runtime/handles.hpp"
 #include "utilities/debug.hpp"

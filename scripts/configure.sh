@@ -6,6 +6,6 @@ FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG -DONELINE"
 
 bash ./configure                    \
     --with-jvm-variants=zero        \
-    --with-debug-level=slowdebug    \
+    --with-debug-level=fastdebug    \
     --with-extra-cflags="$FLAGS"    \
     --with-extra-cxxflags="$FLAGS"

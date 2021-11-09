@@ -5,6 +5,7 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
+#include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>

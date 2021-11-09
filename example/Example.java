@@ -64,14 +64,15 @@ public class Example {
         System.startConcolic();
         System.symbolize(obj1);
 
-        int[] array = new int[4];
-        array[obj1.value - 2] += 3;
+        int a = obj1.value;
+        // int[] array = new int[4];
+        // array[obj1.value - 2] += 3;
         // array[2] = obj1.value;
         // array[2] += obj1.value;
         
 
         System.endConcolic();
-        System.out.println(array[1]);
+        // System.out.println(array[1]);
     }
 
     // public static void main(String[] args) {

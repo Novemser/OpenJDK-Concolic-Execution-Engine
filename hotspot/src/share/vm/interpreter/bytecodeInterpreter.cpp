@@ -1035,15 +1035,14 @@ run:
 
         // print instruction if main is reached
         if (is_reach_main) {
+          tty->print_cr(CL_GREEN"%p %p %p"CNONE, (intptr_t*)pc, (intptr_t*)istate->bcp(), (intptr_t*)(pc - istate->bcp()));
           tty->print_cr(CL_YELLOW"================================================================="CNONE);
           tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
           ConcolicMngr::ctx->print_stack_trace();
           ConcolicMngr::ctx->get_shadow_stack().print();
           methodHandle mh (thread, (Method*)method);
-#ifndef PRODUCT
           BytecodeTracer::set_closure(BytecodeTracer::std_closure());
           BytecodeTracer::trace(mh, pc, tty);
-#endif
         }
 
         last_method = method;
