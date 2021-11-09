@@ -667,7 +667,20 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
       ShouldNotReachHere();
     }
   }
+#ifdef ENABLE_CONCOLIC
+  if (ConcolicMngr::is_doing_concolic) {
+    if (object->is_symbolic()) {
+      interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
+      int stack_offset = istate->stack_base() - locals - 1;
+      int field_index = entry->field_index();
+      sym_oid_t sym_oid = object->get_sym_oid();
 
+      SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
+      Expression* sym_exp = sym_obj->get(field_index);
+      ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
+    }
+  }
+#endif
   // No deoptimized frames on the stack
   return 0;
 }
