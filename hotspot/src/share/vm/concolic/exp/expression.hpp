@@ -38,6 +38,7 @@ private:
 
 public:
   SymbolExpression(sym_oid_t sym_oid, int field_index = 0);
+  SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int element_index);
   ~SymbolExpression();
 
 public:

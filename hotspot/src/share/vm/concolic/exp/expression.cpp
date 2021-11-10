@@ -19,6 +19,12 @@ SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
   assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
 }
 
+SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int element_index) {
+  int ret = sprintf(_str, "A_%lu-%d[%d]", sym_arr_oid, arr_version, element_index);
+  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+}
+
+
 SymbolExpression::~SymbolExpression() {}
 
 void SymbolExpression::print() {
