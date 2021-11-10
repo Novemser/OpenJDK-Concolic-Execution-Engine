@@ -589,7 +589,7 @@ void print();
 #endif // PRODUCT
 
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-static void print_debug_info(interpreterState istate);
+static void print_debug_info(interpreterState istate, address pc, intptr_t *topOfStack);
 #endif
 
     // Platform fields/methods

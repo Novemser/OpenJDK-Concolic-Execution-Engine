@@ -196,7 +196,7 @@
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
 #else
 #define DISPATCH(opcode)\
-  BytecodeInterpreter::print_debug_info(istate); \
+  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
   goto *(void*)dispatch_table[opcode]
 #endif
 #define CONTINUE {                              \
@@ -1015,7 +1015,7 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if not defined(USELABELS) && defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-      BytecodeInterpreter::print_debug_info(istate);
+      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
 #endif
 
 #ifdef USELABELS
@@ -4069,10 +4069,8 @@ extern "C" {
  * DEBUG INFO: this is a concolic debug info printer
  */
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-void BytecodeInterpreter::print_debug_info(interpreterState istate)
+void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, intptr_t *topOfStack)
 {
-  register intptr_t *topOfStack = (intptr_t *)istate->stack(); /* access with STACK macros */
-  register address pc = istate->bcp();
   if (ConcolicMngr::is_doing_concolic)
   {
     static Method *last_method = NULL;
