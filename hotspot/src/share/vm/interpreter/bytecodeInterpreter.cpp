@@ -192,7 +192,13 @@
 #ifdef USELABELS
 // Have to do this dispatch this way in C++ because otherwise gcc complains about crossing an
 // initialization (which is is the initialization of the table pointer...)
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
+#else
+#define DISPATCH(opcode)\
+  BytecodeInterpreter::print_debug_info(istate); \
+  goto *(void*)dispatch_table[opcode]
+#endif
 #define CONTINUE {                              \
         opcode = *pc;                           \
         DO_UPDATE_INSTRUCTION_COUNT(opcode);    \
@@ -1008,45 +1014,8 @@ run:
       assert(topOfStack >= istate->stack_limit(), "Stack overrun");
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
-#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-    if (ConcolicMngr::is_doing_concolic) {
-      // FIXME: these static variables may face problem when multithreading
-      static Method* last_method = NULL;
-      static Method* last_callee = NULL;
-      static bool is_reach_main = false;
-      Thread* thread = istate->thread();
-      Method* method = istate->method();
-      Method* callee = istate->callee();
-      if (method != NULL) {
-        ResourceMark rm;
-        Symbol* method_holder_name = method->method_holder()->name();
-        Symbol* method_name = method->name();
-        char* name_and_sig = method->name_and_sig_as_C_string();
-        // mark if reach main (use main to avoid printing instructions when running javac)
-        if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main) {
-          tty->print_cr(CL_YELLOW"================================================================="CNONE);
-          tty->print_cr("%s", name_and_sig);
-          is_reach_main = true;
-        }
-        // print if it is new callee
-        // if (method != last_method) {
-        //   tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
-        // }
-
-        // print instruction if main is reached
-        if (is_reach_main) {
-          tty->print_cr(CL_YELLOW"================================================================="CNONE);
-          tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
-          ConcolicMngr::ctx->print_stack_trace();
-          ConcolicMngr::ctx->get_shadow_stack().print();
-          methodHandle mh (thread, (Method*)method);
-          BytecodeTracer::set_closure(BytecodeTracer::std_closure());
-          BytecodeTracer::trace(mh, pc, tty);
-        }
-
-        last_method = method;
-      }
-    }
+#if not defined(USELABELS) && defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
+      BytecodeInterpreter::print_debug_info(istate);
 #endif
 
 #ifdef USELABELS
@@ -4095,6 +4064,51 @@ extern "C" {
   }
 }
 #endif // PRODUCT
+
+/**
+ * DEBUG INFO: this is a concolic debug info printer
+ */
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
+void BytecodeInterpreter::print_debug_info(interpreterState istate)
+{
+  register intptr_t *topOfStack = (intptr_t *)istate->stack(); /* access with STACK macros */
+  register address pc = istate->bcp();
+  if (ConcolicMngr::is_doing_concolic)
+  {
+    static Method *last_method = NULL;
+    static Method *last_callee = NULL;
+    static bool is_reach_main = false;
+    Thread *thread = istate->thread();
+    Method *method = istate->method();
+    Method *callee = istate->callee();
+    if (method != NULL)
+    {
+      ResourceMark rm;
+      Symbol *method_holder_name = method->method_holder()->name();
+      Symbol *method_name = method->name();
+      char *name_and_sig = method->name_and_sig_as_C_string();
+      if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main)
+      {
+        tty->print_cr(CL_YELLOW "=================================================================" CNONE);
+        tty->print_cr("%s", name_and_sig);
+        is_reach_main = true;
+      }
+      if (is_reach_main)
+      {
+        tty->print_cr(CL_YELLOW "=================================================================" CNONE);
+        tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
+        ConcolicMngr::ctx->print_stack_trace();
+        ConcolicMngr::ctx->get_shadow_stack().print();
+        methodHandle mh(thread, (Method *)method);
+        BytecodeTracer::set_closure(BytecodeTracer::std_closure());
+        BytecodeTracer::trace(mh, pc, tty);
+      }
+
+      last_method = method;
+    }
+  }
+}
+#endif
 
 #endif // JVMTI
 #endif // CC_INTERP
