@@ -16,11 +16,6 @@ SymArr::~SymArr() {
   }
 }
 
-void SymArr::store() {
-  ++_version;
-  _load_count = 0;
-}
-
 void SymArr::print() {
   tty->print_cr("SymArr: ");
   if (_length_exp) {
