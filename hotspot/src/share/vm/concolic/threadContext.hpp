@@ -4,7 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadow/shadowStack.hpp"
-#include "concolic/instance/symbolicInstance.hpp"
+#include "concolic/instance/symbolicArray.hpp"
 #include "concolic/instance/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
 #include "oops/oop.inline.hpp"
@@ -23,7 +23,7 @@ class ThreadContext {
 private:
   JavaThread *_thread;
   ShadowStack _s_stack;
-  SymStore _sym_objs;
+  SymStore _sym_instances;
   SymTmpExpStore _sym_tmp_exps;
   PathCondition _path_condition;
 
@@ -40,9 +40,10 @@ public:
 
   SymObj *get_or_alloc_sym_obj(oop obj);
   SymObj *alloc_sym_obj(oop obj);
-  SymObj *alloc_sym_array(arrayOop array);
   SymObj *get_sym_obj(sym_oid_t sym_oid);
-  SymObj *get_sym_arr(sym_oid_t sym_oid);
+
+  SymArr *alloc_sym_array(arrayOop array, Expression* length_exp = NULL);
+  SymArr *get_sym_arr(sym_oid_t sym_oid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
@@ -51,10 +52,10 @@ public:
     _path_condition.add(sym_exp);
   }
 private:
-  void symbolize_recursive(SymObj *sym_obj, oop obj);
+  void symbolize_recursive(oop obj);
 
-  void set_sym_obj(sym_oid_t sym_oid, SymObj *sym_obj) {
-    _sym_objs.insert(std::make_pair(sym_oid, sym_obj));
+  void set_sym_instance(sym_oid_t sym_oid, SymInstance *sym_instance) {
+    _sym_instances.insert(std::make_pair(sym_oid, sym_instance));
   }
 
   sym_oid_t get_next_sym_oid() {

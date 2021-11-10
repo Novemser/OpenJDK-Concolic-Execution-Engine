@@ -13,7 +13,7 @@ typedef ulong sym_oid_t;
 #define MAX_SYM_TMP_ID 10000
 typedef int sym_tmp_id_t;
 
-#define ARRAY_LENGTH_FIELD_INDEX -1
+#define FIELD_INDEX_ARRAY_LENGTH -1
 
 #endif
 #endif // SHARE_VM_CONCOLIC_DEFS_HPP

@@ -11,11 +11,11 @@ ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
 }
 
 ThreadContext::~ThreadContext() {
-  for (SymStore::iterator iter = _sym_objs.begin(); iter != _sym_objs.end();
-       ++iter) {
+  for (SymStore::iterator iter = _sym_instances.begin();
+       iter != _sym_instances.end(); ++iter) {
     delete iter->second;
   }
-  _sym_objs.clear();
+  _sym_instances.clear();
 
   int size = _sym_tmp_exps.size();
   for (int i = 1; i != size; ++i) {
@@ -30,9 +30,20 @@ ThreadContext::~ThreadContext() {
 }
 
 void ThreadContext::symbolize(Handle handle) {
-  oop obj = handle();
-  SymObj *sym_obj = this->alloc_sym_obj(handle());
-  this->symbolize_recursive(sym_obj, handle());
+  if (handle()->is_instance()) {
+    this->alloc_sym_obj(handle());
+    this->symbolize_recursive(handle());
+  } else if (handle()->is_array()) {
+    SymArr *sym_arr = this->alloc_sym_array((arrayOop)handle());
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0,
+                                                 FIELD_INDEX_ARRAY_LENGTH));
+    /**
+     * Currently, we do not call symbolize_recursive for array
+     * Because symbolic array always return a new symbolic expression. 
+     */
+  } else {
+    assert(false, "unhandled");
+  }
 }
 
 SymObj *ThreadContext::get_or_alloc_sym_obj(oop obj) {
@@ -45,29 +56,41 @@ SymObj *ThreadContext::get_or_alloc_sym_obj(oop obj) {
 
 SymObj *ThreadContext::alloc_sym_obj(oop obj) {
   sym_oid_t sym_oid = get_next_sym_oid();
-
   obj->set_sym_oid(sym_oid);
 
   SymObj *sym_obj = new SymObj(sym_oid);
-  this->set_sym_obj(sym_oid, sym_obj);
+  this->set_sym_instance(sym_oid, sym_obj);
 
   return sym_obj;
 }
 
 SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
-  SymObj *ret = (SymObj *)_sym_objs[sym_oid];
+  SymObj *ret = (SymObj *)_sym_instances[sym_oid];
   assert(ret != NULL, "null sym obj?");
   return ret;
 }
 
-SymObj *ThreadContext::alloc_sym_array(arrayOop array) {
-  SymObj *sym_arr = alloc_sym_obj(array);
-  sym_arr->init_sym_exp(ARRAY_LENGTH_FIELD_INDEX,
-                        new ConExpression(array->length()));
+SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
+  sym_oid_t sym_oid = get_next_sym_oid();
+  array->set_sym_oid(sym_oid);
+
+  // if (length_exp == NULL) {
+  //   length_exp = new ConExpression(array->length());
+  // }
+
+  SymArr *sym_arr = new SymArr(sym_oid, length_exp);
+  this->set_sym_instance(sym_oid, sym_arr);
+
   return sym_arr;
 }
 
-void ThreadContext::symbolize_recursive(SymObj *sym_obj, oop obj) {
+SymArr *ThreadContext::get_sym_arr(sym_oid_t sym_oid) {
+  SymArr *ret = (SymArr *)_sym_instances[sym_oid];
+  assert(ret != NULL, "null sym obj?");
+  return ret;
+}
+
+void ThreadContext::symbolize_recursive(oop obj) {
   tty->print("ThreadContext::symbolize_recursive\n");
 
   // SimpleFieldPrinter field_printer(obj);
@@ -94,8 +117,8 @@ void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
 }
 
 void ThreadContext::print() {
-  for (SymStore::iterator sym_iter = _sym_objs.begin();
-       sym_iter != _sym_objs.end(); ++sym_iter) {
+  for (SymStore::iterator sym_iter = _sym_instances.begin();
+       sym_iter != _sym_instances.end(); ++sym_iter) {
     tty->print_cr("- sym_obj[%lu]:", sym_iter->first);
     sym_iter->second->print();
   }

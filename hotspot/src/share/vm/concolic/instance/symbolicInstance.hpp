@@ -17,6 +17,7 @@ protected:
 
 public:
   SymInstance(sym_oid_t sym_oid) : _sym_oid(sym_oid) {}
+  virtual ~SymInstance() {}
 
   inline sym_oid_t get_sym_oid() { return _sym_oid; }
 

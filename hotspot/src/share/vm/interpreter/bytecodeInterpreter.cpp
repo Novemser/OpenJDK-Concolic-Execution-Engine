@@ -2039,7 +2039,7 @@ run:
         ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
     if (arrObj->is_symbolic()) {                                               \
       sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
-      SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
+      SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);               \
       Expression *value_exp = sym_arr->get(index);                             \
       ConcolicMngr::set_stack_slot(stack_offset + res_off, value_exp, sym_oid, \
                                    index);                                     \
@@ -2054,7 +2054,7 @@ run:
       ConcolicMngr::record_path_condition(                                     \
           new ArrayExpression(sym_oid, index_exp, value_exp, true));           \
     } else if (index_exp) {                                                    \
-      SymObj *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      ConcolicMngr::ctx->alloc_sym_array(arrObj);                              \
       Expression *value_exp = new ConExpression(                               \
           *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));           \
       ConcolicMngr::record_path_condition(new ArrayExpression(                 \
@@ -2099,7 +2099,7 @@ run:
                 stack_offset + (-2) + 1);
             if (arrObj->is_symbolic()) {
               sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
-              SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
+              ConcolicMngr::ctx->get_sym_arr(sym_arr_oid);
               if (!index_exp) {
                 index_exp = new ConExpression(index);
               }
@@ -2110,8 +2110,7 @@ run:
               ConcolicMngr::record_path_condition(new ArrayExpression(
                   arrObj->get_sym_oid(), index_exp, value_exp, true));
             } else if (index_exp) {
-              SymObj *sym_arr =
-                  ConcolicMngr::ctx->alloc_sym_array(arrObj);
+              ConcolicMngr::ctx->alloc_sym_array(arrObj);
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
@@ -2147,18 +2146,17 @@ run:
       if (!value_exp) {                                                        \
         value_exp = new ConExpression(value);                                  \
       }                                                                        \
-                                                                               \
-      sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
-      SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
-      sym_arr->set_sym_exp(index, value_exp);                                  \
-                                                                               \
       if (!index_exp) {                                                        \
         index_exp = new ConExpression(index);                                  \
       }                                                                        \
+                                                                               \
+      sym_oid_t sym_arr_oid = arrObj->get_sym_oid();                           \
       ConcolicMngr::record_path_condition(                                     \
-          new ArrayExpression(sym_oid, index_exp, value_exp, false));          \
+          new ArrayExpression(sym_arr_oid, index_exp, value_exp, false));      \
+                                                                               \
+      ConcolicMngr::ctx->get_sym_arr(sym_arr_oid)->store();                    \
     } else if (index_exp) {                                                    \
-      SymObj *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      SymArr *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);            \
       Expression *value_exp =                                                  \
           ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);       \
       if (!value_exp) {                                                        \
@@ -2240,8 +2238,7 @@ run:
                     new ArrayExpression(sym_arr_oid, index_exp, value_exp, false));
               }
             } else if (index_exp) {
-              SymObj *sym_arr =
-                  ConcolicMngr::ctx->alloc_sym_array(arrObj);
+              ConcolicMngr::ctx->alloc_sym_array(arrObj);
               ConcolicMngr::ctx->get_or_alloc_sym_obj(rhsObject);
               SymbolExpression* value_exp = new SymbolExpression(rhsObject->get_sym_oid());
               ConcolicMngr::record_path_condition(new ArrayExpression(
@@ -2282,12 +2279,12 @@ run:
 #ifdef ENABLE_CONCOLIC
           if (ConcolicMngr::is_doing_concolic) {
             if (ary->is_symbolic()) {
-              sym_oid_t sym_oid = ary->get_sym_oid();
+              sym_oid_t sym_arr_oid = ary->get_sym_oid();
 
-              SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-              Expression* sym_exp = sym_obj->get(ARRAY_LENGTH_FIELD_INDEX);
+              SymArr* sym_arr = ConcolicMngr::ctx->get_sym_arr(sym_arr_oid);
+              Expression *length_exp = sym_arr->get_length_exp();
               ConcolicMngr::set_stack_slot(
-                GET_STACK_OFFSET - 1, sym_exp, sym_oid, ARRAY_LENGTH_FIELD_INDEX);
+                GET_STACK_OFFSET - 1, length_exp, sym_arr_oid, FIELD_INDEX_ARRAY_LENGTH);
             } 
           }
 #endif
@@ -2800,9 +2797,7 @@ run:
   if (ConcolicMngr::is_doing_concolic) {                                       \
     Expression *exp = ConcolicMngr::get_stack_slot(GET_STACK_OFFSET - 1);      \
     if (exp) {                                                                 \
-      SymObj *sym_obj =                                                \
-          ConcolicMngr::ctx->get_or_alloc_sym_obj(THREAD->vm_result());        \
-      sym_obj->set_sym_exp(ARRAY_LENGTH_FIELD_INDEX, exp);                     \
+      ConcolicMngr::ctx->alloc_sym_array((arrayOop)THREAD->vm_result(), exp);  \
     }                                                                          \
   }
 #else

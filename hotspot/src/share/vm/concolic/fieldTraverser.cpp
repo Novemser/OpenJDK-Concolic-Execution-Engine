@@ -70,8 +70,6 @@ void FieldTraverser::do_array_elements(FieldTraverser* field_traverser) {
   for (int index = 0; index < length; index++) {
     field_traverser->do_array_element(index);
   }
-  // we also symbolize the array itself, and give it a `length` field.
-  field_traverser->do_array_element(ARRAY_LENGTH_FIELD_INDEX);
 }
 
 void FieldTraverser::do_array_element(int index) {
@@ -137,11 +135,7 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
 
   SymObj *sym_obj;
   BasicType element_type;
-  if (index == ARRAY_LENGTH_FIELD_INDEX) {
-    element_type = T_INT;
-  } else {
-    element_type = array_klass->element_type();
-  }
+  element_type = array_klass->element_type();
 
   switch (element_type)
   {
