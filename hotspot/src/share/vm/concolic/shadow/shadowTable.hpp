@@ -24,11 +24,9 @@ public:
     }
 
     Entry &operator=(const Entry &other) {
-      tty->print_cr(CL_CYAN"enter override=: (%ld, %d, %p)"CNONE, other.sym_oid, other.index, other.sym_exp);
       this->sym_oid = other.sym_oid;
       this->index = other.index;
       this->sym_exp = other.sym_exp;
-      tty->print_cr(CL_CYAN"ready to exit override="CNONE);
       return *this;
     }
   };
