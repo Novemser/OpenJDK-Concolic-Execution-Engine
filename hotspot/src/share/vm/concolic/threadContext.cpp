@@ -31,11 +31,11 @@ ThreadContext::~ThreadContext() {
 
 void ThreadContext::symbolize(Handle handle) {
   oop obj = handle();
-  SymbolicObject *sym_obj = this->alloc_sym_obj(handle());
+  SymObj *sym_obj = this->alloc_sym_obj(handle());
   this->symbolize_recursive(sym_obj, handle());
 }
 
-SymbolicObject *ThreadContext::get_or_alloc_sym_obj(oop obj) {
+SymObj *ThreadContext::get_or_alloc_sym_obj(oop obj) {
   if (obj->is_symbolic()) {
     return this->get_sym_obj(obj->get_sym_oid());
   } else {
@@ -43,31 +43,31 @@ SymbolicObject *ThreadContext::get_or_alloc_sym_obj(oop obj) {
   }
 }
 
-SymbolicObject *ThreadContext::alloc_sym_obj(oop obj) {
+SymObj *ThreadContext::alloc_sym_obj(oop obj) {
   sym_oid_t sym_oid = get_next_sym_oid();
 
   obj->set_sym_oid(sym_oid);
 
-  SymbolicObject *sym_obj = new SymbolicObject(sym_oid);
+  SymObj *sym_obj = new SymObj(sym_oid);
   this->set_sym_obj(sym_oid, sym_obj);
 
   return sym_obj;
 }
 
-SymbolicObject *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
-  SymbolicObject *ret = _sym_objs[sym_oid];
+SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
+  SymObj *ret = (SymObj *)_sym_objs[sym_oid];
   assert(ret != NULL, "null sym obj?");
   return ret;
 }
 
-SymbolicObject *ThreadContext::alloc_sym_array(arrayOop array) {
-  SymbolicObject *sym_arr = alloc_sym_obj(array);
+SymObj *ThreadContext::alloc_sym_array(arrayOop array) {
+  SymObj *sym_arr = alloc_sym_obj(array);
   sym_arr->init_sym_exp(ARRAY_LENGTH_FIELD_INDEX,
                         new ConExpression(array->length()));
   return sym_arr;
 }
 
-void ThreadContext::symbolize_recursive(SymbolicObject *sym_obj, oop obj) {
+void ThreadContext::symbolize_recursive(SymObj *sym_obj, oop obj) {
   tty->print("ThreadContext::symbolize_recursive\n");
 
   // SimpleFieldPrinter field_printer(obj);

@@ -4,7 +4,8 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/shadow/shadowStack.hpp"
-#include "concolic/symbolicObject.hpp"
+#include "concolic/instance/symbolicInstance.hpp"
+#include "concolic/instance/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
@@ -16,7 +17,7 @@ class ThreadContext {
   /**
    * TODO: make this hashtable!
    */
-  typedef std::map<sym_oid_t, SymbolicObject *> SymStore;
+  typedef std::map<sym_oid_t, SymInstance *> SymStore;
   typedef std::vector<Expression *> SymTmpExpStore;
 
 private:
@@ -37,10 +38,11 @@ public:
 
   void symbolize(Handle handle);
 
-  SymbolicObject *get_or_alloc_sym_obj(oop obj);
-  SymbolicObject *alloc_sym_obj(oop obj);
-  SymbolicObject *alloc_sym_array(arrayOop array);
-  SymbolicObject *get_sym_obj(sym_oid_t sym_oid);
+  SymObj *get_or_alloc_sym_obj(oop obj);
+  SymObj *alloc_sym_obj(oop obj);
+  SymObj *alloc_sym_array(arrayOop array);
+  SymObj *get_sym_obj(sym_oid_t sym_oid);
+  SymObj *get_sym_arr(sym_oid_t sym_oid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
@@ -49,9 +51,9 @@ public:
     _path_condition.add(sym_exp);
   }
 private:
-  void symbolize_recursive(SymbolicObject *sym_obj, oop obj);
+  void symbolize_recursive(SymObj *sym_obj, oop obj);
 
-  void set_sym_obj(sym_oid_t sym_oid, SymbolicObject *sym_obj) {
+  void set_sym_obj(sym_oid_t sym_oid, SymObj *sym_obj) {
     _sym_objs.insert(std::make_pair(sym_oid, sym_obj));
   }
 

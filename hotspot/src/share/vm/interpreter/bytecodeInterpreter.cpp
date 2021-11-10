@@ -2039,7 +2039,7 @@ run:
         ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
     if (arrObj->is_symbolic()) {                                               \
       sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
-      SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
+      SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
       Expression *value_exp = sym_arr->get(index);                             \
       ConcolicMngr::set_stack_slot(stack_offset + res_off, value_exp, sym_oid, \
                                    index);                                     \
@@ -2054,7 +2054,7 @@ run:
       ConcolicMngr::record_path_condition(                                     \
           new ArrayExpression(sym_oid, index_exp, value_exp, true));           \
     } else if (index_exp) {                                                    \
-      SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      SymObj *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
       Expression *value_exp = new ConExpression(                               \
           *(T2 *)(((address)arrObj->base(T)) + index * sizeof(T2)));           \
       ConcolicMngr::record_path_condition(new ArrayExpression(                 \
@@ -2099,7 +2099,7 @@ run:
                 stack_offset + (-2) + 1);
             if (arrObj->is_symbolic()) {
               sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
-              SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
+              SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
               if (!index_exp) {
                 index_exp = new ConExpression(index);
               }
@@ -2110,7 +2110,7 @@ run:
               ConcolicMngr::record_path_condition(new ArrayExpression(
                   arrObj->get_sym_oid(), index_exp, value_exp, true));
             } else if (index_exp) {
-              SymbolicObject *sym_arr =
+              SymObj *sym_arr =
                   ConcolicMngr::ctx->alloc_sym_array(arrObj);
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
@@ -2149,7 +2149,7 @@ run:
       }                                                                        \
                                                                                \
       sym_oid_t sym_oid = arrObj->get_sym_oid();                               \
-      SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
+      SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_oid);       \
       sym_arr->set_sym_exp(index, value_exp);                                  \
                                                                                \
       if (!index_exp) {                                                        \
@@ -2158,7 +2158,7 @@ run:
       ConcolicMngr::record_path_condition(                                     \
           new ArrayExpression(sym_oid, index_exp, value_exp, false));          \
     } else if (index_exp) {                                                    \
-      SymbolicObject *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
+      SymObj *sym_arr = ConcolicMngr::ctx->alloc_sym_array(arrObj);    \
       Expression *value_exp =                                                  \
           ConcolicMngr::get_stack_slot_and_detach(stack_offset + delta);       \
       if (!value_exp) {                                                        \
@@ -2231,7 +2231,7 @@ run:
             if (arrObj->is_symbolic()) {
               if (rhsObject->is_symbolic()) {
                 sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
-                SymbolicObject *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
+                SymObj *sym_arr = ConcolicMngr::ctx->get_sym_obj(sym_arr_oid);
                 if (!index_exp) {
                   index_exp = new ConExpression(index);
                 }
@@ -2240,7 +2240,7 @@ run:
                     new ArrayExpression(sym_arr_oid, index_exp, value_exp, false));
               }
             } else if (index_exp) {
-              SymbolicObject *sym_arr =
+              SymObj *sym_arr =
                   ConcolicMngr::ctx->alloc_sym_array(arrObj);
               ConcolicMngr::ctx->get_or_alloc_sym_obj(rhsObject);
               SymbolExpression* value_exp = new SymbolExpression(rhsObject->get_sym_oid());
@@ -2284,7 +2284,7 @@ run:
             if (ary->is_symbolic()) {
               sym_oid_t sym_oid = ary->get_sym_oid();
 
-              SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
+              SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
               Expression* sym_exp = sym_obj->get(ARRAY_LENGTH_FIELD_INDEX);
               ConcolicMngr::set_stack_slot(
                 GET_STACK_OFFSET - 1, sym_exp, sym_oid, ARRAY_LENGTH_FIELD_INDEX);
@@ -2519,7 +2519,7 @@ run:
                   stack_offset -= 1;
                 }
 
-                SymbolicObject* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
+                SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
                 Expression* sym_exp = sym_obj->get(field_index);
                 ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
               }
@@ -2651,7 +2651,7 @@ run:
               Expression *sym_exp =
                   ConcolicMngr::get_stack_slot_and_detach(stack_offset - 1);
               if (sym_exp) {
-                SymbolicObject *sym_obj =
+                SymObj *sym_obj =
                     ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
                 sym_obj->set_sym_exp(field_index, sym_exp);
               }
@@ -2800,7 +2800,7 @@ run:
   if (ConcolicMngr::is_doing_concolic) {                                       \
     Expression *exp = ConcolicMngr::get_stack_slot(GET_STACK_OFFSET - 1);      \
     if (exp) {                                                                 \
-      SymbolicObject *sym_obj =                                                \
+      SymObj *sym_obj =                                                \
           ConcolicMngr::ctx->get_or_alloc_sym_obj(THREAD->vm_result());        \
       sym_obj->set_sym_exp(ARRAY_LENGTH_FIELD_INDEX, exp);                     \
     }                                                                          \

@@ -114,8 +114,8 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   // print_indent();
   // tty->print("---- %d\n", fd->index());
 
-  // TODO: directly transfer SymbolicObject*
-  SymbolicObject *sym_obj;
+  // TODO: directly transfer SymObj*
+  SymObj *sym_obj;
 
   switch (fd->field_type()) {
   case T_OBJECT:
@@ -135,7 +135,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
 bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   ArrayKlass* array_klass = ArrayKlass::cast(array_obj->klass());
 
-  SymbolicObject *sym_obj;
+  SymObj *sym_obj;
   BasicType element_type;
   if (index == ARRAY_LENGTH_FIELD_INDEX) {
     element_type = T_INT;
