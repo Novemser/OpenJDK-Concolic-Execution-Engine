@@ -70,6 +70,14 @@ SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
   return ret;
 }
 
+SymArr *ThreadContext::get_or_alloc_sym_array(arrayOop array, Expression *length_exp) {
+  if (array->is_symbolic()) {
+    return this->get_sym_array(array->get_sym_oid());
+  } else {
+    return this->alloc_sym_array(array, length_exp);
+  }
+}
+
 SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
   sym_oid_t sym_oid = get_next_sym_oid();
   array->set_sym_oid(sym_oid);
@@ -84,7 +92,7 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
   return sym_arr;
 }
 
-SymArr *ThreadContext::get_sym_arr(sym_oid_t sym_oid) {
+SymArr *ThreadContext::get_sym_array(sym_oid_t sym_oid) {
   SymArr *ret = (SymArr *)_sym_instances[sym_oid];
   assert(ret != NULL, "null sym obj?");
   return ret;

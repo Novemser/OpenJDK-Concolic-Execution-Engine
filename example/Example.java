@@ -65,8 +65,9 @@ public class Example {
         System.symbolize(obj1);
 
         int a = obj1.value;
-        // int[] array = new int[4];
-        // array[obj1.value - 2] += 3;
+        int[] array = new int[4];
+        array[obj1.value - 2] += 2;
+        a = array[obj1.value - 2];
         // array[2] = obj1.value;
         // array[2] += obj1.value;
         

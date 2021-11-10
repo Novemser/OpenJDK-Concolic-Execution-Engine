@@ -22,7 +22,10 @@ public:
   SymArr(sym_oid_t sym_oid, Expression *length_exp);
   ~SymArr();
 
-  void store();
+  inline void store() {
+    ++_version;
+    _load_count = 0;
+  }
 
   inline void set_length_exp(Expression *length_exp) {
     assert(_length_exp == NULL, "not override old one");
@@ -30,7 +33,10 @@ public:
     _length_exp = length_exp;
     _length_exp->inc_ref();
   }
+
   inline Expression *get_length_exp() { return _length_exp; }
+  inline int get_version() { return _version; }
+  inline int get_and_inc_load_count() { return _load_count++; }
 
 public:
   void print();
