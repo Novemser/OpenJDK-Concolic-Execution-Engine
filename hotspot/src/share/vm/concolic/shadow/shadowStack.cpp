@@ -108,7 +108,7 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
   int callee_opr_stack_offset = callee_istate->stack_base() - callee_result - 1;
 
   interpreterState caller_istate = zero_frame->next()->as_interpreter_frame()->interpreter_state();
-  intptr_t *caller_result = caller_istate->stack() + callee_method->max_locals();
+  intptr_t *caller_result = callee_istate->locals();
   int caller_opr_stack_offset = caller_istate->stack_base() - caller_result - 1;
   /**
    * TODO: skip native here. Need to confirm correctness
