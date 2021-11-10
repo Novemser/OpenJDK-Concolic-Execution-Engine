@@ -588,6 +588,10 @@ static const char* C_msg(BytecodeInterpreter::messages msg);
 void print();
 #endif // PRODUCT
 
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
+static void print_debug_info(interpreterState istate);
+#endif
+
     // Platform fields/methods
 #ifdef TARGET_ARCH_x86
 # include "bytecodeInterpreter_x86.hpp"
@@ -607,7 +611,6 @@ void print();
 #ifdef TARGET_ARCH_ppc
 # include "bytecodeInterpreter_ppc.hpp"
 #endif
-
 
 }; // BytecodeInterpreter
 
