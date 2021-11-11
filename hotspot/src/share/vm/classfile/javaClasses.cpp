@@ -52,6 +52,8 @@
 #include "runtime/vframe.hpp"
 #include "utilities/preserveException.hpp"
 
+#include "concolic/defs.hpp"
+
 PRAGMA_FORMAT_MUTE_WARNINGS_FOR_GCC
 
 #define INJECTED_FIELD_COMPUTE_OFFSET(klass, name, signature, may_be_java)    \
@@ -173,7 +175,9 @@ Handle java_lang_String::basic_create(int length, TRAPS) {
   Handle h_obj(THREAD, obj);
   typeArrayOop buffer;
     buffer = oopFactory::new_charArray(length, CHECK_NH);
-
+#ifdef ENABLE_CONCOLIC
+    buffer->set_sym_oid(NULL_SYM_OID);
+#endif
   // Point the String at the char array
   obj = h_obj();
   set_value(obj, buffer);
