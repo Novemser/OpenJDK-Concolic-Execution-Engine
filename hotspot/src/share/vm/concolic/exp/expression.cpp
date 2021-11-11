@@ -16,12 +16,12 @@ void Expression::print_cr() {
 
 SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
   int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int element_index) {
   int ret = sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, arr_version, element_index);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 
@@ -89,22 +89,22 @@ void OpSymExpression::print() {
 
 ConExpression::ConExpression(jint i) {
   int ret = sprintf(_str, "%d", i);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jlong l) {
   int ret = sprintf(_str, "%ld", l);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jfloat f) {
-  int ret = sprintf(_str, "%f", f);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  int ret = sprintf(_str, "%e", f);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jdouble d) {
-  int ret = sprintf(_str, "%lf", d);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  int ret = sprintf(_str, "%e", d);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 void ConExpression::print() {
