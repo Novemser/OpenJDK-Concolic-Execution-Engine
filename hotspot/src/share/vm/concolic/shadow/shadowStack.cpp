@@ -114,7 +114,7 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
    * TODO: skip native here. Need to confirm correctness
    */
   if (!callee_method->is_native()) {
-    next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, 1);
+    next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
     // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
   }
 
