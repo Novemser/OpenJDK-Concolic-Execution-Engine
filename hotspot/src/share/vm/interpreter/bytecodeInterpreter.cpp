@@ -2733,13 +2733,6 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
-#ifdef ENABLE_CONCOLIC
-        /**
-         * This is where an object created
-         * We can set the default sym_oid here
-         */
-        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
-#endif
         SET_STACK_OBJECT(THREAD->vm_result(), 0);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(3, 1);
@@ -2747,7 +2740,6 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_NEW_ARRAY()                                                   \
-  THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);                              \
   if (ConcolicMngr::is_doing_concolic) {                                       \
     Expression *exp = ConcolicMngr::get_stack_slot(GET_STACK_OFFSET - 1);      \
     if (exp) {                                                                 \
@@ -2789,13 +2781,6 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
-#ifdef ENABLE_CONCOLIC
-        /**
-         * This is where an object created
-         * We can set the default sym_oid here
-         */
-        THREAD->vm_result()->set_sym_oid(NULL_SYM_OID);
-#endif
         SET_STACK_OBJECT(THREAD->vm_result(), -dims);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(4, -(dims-1));
@@ -2970,6 +2955,9 @@ run:
                   handle_exception);
           result = THREAD->vm_result();
         }
+#ifdef ENABLE_CONCOLIC
+        result->set_sym_oid(NULL_SYM_OID);
+#endif
 
         VERIFY_OOP(result);
         SET_STACK_OBJECT(result, 0);

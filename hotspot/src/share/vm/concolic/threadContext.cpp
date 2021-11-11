@@ -66,6 +66,10 @@ SymObj *ThreadContext::alloc_sym_obj(oop obj) {
 
 SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
   SymObj *ret = (SymObj *)_sym_instances[sym_oid];
+  /**
+   * When this assertion is broken, 
+   * it means that the target object is not initialized with NULL_SYM_OID 
+   */
   assert(ret != NULL, "null sym obj?");
   return ret;
 }
@@ -94,6 +98,10 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 
 SymArr *ThreadContext::get_sym_array(sym_oid_t sym_oid) {
   SymArr *ret = (SymArr *)_sym_instances[sym_oid];
+  /**
+   * When this assertion is broken, 
+   * it means that the target object is not initialized with NULL_SYM_OID 
+   */
   assert(ret != NULL, "null sym obj?");
   return ret;
 }

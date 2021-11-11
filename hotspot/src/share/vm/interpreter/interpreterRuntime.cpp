@@ -175,13 +175,6 @@ IRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* thread, ConstantPool* pool,
   //       If we have a breakpoint, then we don't rewrite
   //       because the _breakpoint bytecode would be lost.
   oop obj = klass->allocate_instance(CHECK);
-#ifdef ENABLE_CONCOLIC
-  /**
-   * This is where an object created
-   * We can set the default sym_oid here
-   */
-  obj->set_sym_oid(0);
-#endif
   thread->set_vm_result(obj);
 IRT_END
 
@@ -225,6 +218,13 @@ IRT_ENTRY(void, InterpreterRuntime::multianewarray(JavaThread* thread, jint* fir
     dims[index] = first_size_address[n];
   }
   oop obj = ArrayKlass::cast(klass)->multi_allocate(nof_dims, dims, CHECK);
+#ifdef ENABLE_CONCOLIC
+  /**
+    * This is where an object created
+    * We can set the default sym_oid here
+    */
+  obj->set_sym_oid(NULL_SYM_OID);
+#endif
   thread->set_vm_result(obj);
 IRT_END
 

@@ -150,6 +150,13 @@ objArrayOop ArrayKlass::allocate_arrayArray(int n, int length, TRAPS) {
   objArrayOop o =
     (objArrayOop)CollectedHeap::array_allocate(ak, size, length, CHECK_0);
   // initialization to NULL not necessary, area already cleared
+#ifdef ENABLE_CONCOLIC
+  /**
+    * This is where an object created
+    * We can set the default sym_oid here
+    */
+  o->set_sym_oid(NULL_SYM_OID);
+#endif
   return o;
 }
 

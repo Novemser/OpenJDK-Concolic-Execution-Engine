@@ -54,6 +54,13 @@ typeArrayOop oopFactory::new_typeArray(BasicType type, int length, TRAPS) {
   Klass* type_asKlassOop = Universe::typeArrayKlassObj(type);
   TypeArrayKlass* type_asArrayKlass = TypeArrayKlass::cast(type_asKlassOop);
   typeArrayOop result = type_asArrayKlass->allocate(length, THREAD);
+#ifdef ENABLE_CONCOLIC
+  /**
+    * This is where an object created
+    * We can set the default sym_oid here
+    */
+  result->set_sym_oid(NULL_SYM_OID);
+#endif
   return result;
 }
 

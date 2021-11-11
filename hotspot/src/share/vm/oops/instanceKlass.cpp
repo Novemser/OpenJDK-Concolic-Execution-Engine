@@ -1128,6 +1128,13 @@ objArrayOop InstanceKlass::allocate_objArray(int n, int length, TRAPS) {
   KlassHandle h_ak (THREAD, ak);
   objArrayOop o =
     (objArrayOop)CollectedHeap::array_allocate(h_ak, size, length, CHECK_NULL);
+#ifdef ENABLE_CONCOLIC
+  /**
+    * This is where an object created
+    * We can set the default sym_oid here
+    */
+  o->set_sym_oid(NULL_SYM_OID);
+#endif
   return o;
 }
 
@@ -1158,6 +1165,9 @@ instanceOop InstanceKlass::allocate_instance(TRAPS) {
   if (has_finalizer_flag && !RegisterFinalizersAtInit) {
     i = register_finalizer(i, CHECK_NULL);
   }
+#ifdef ENABLE_CONCOLIC
+  i->set_sym_oid(NULL_SYM_OID);
+#endif
   return i;
 }
 
