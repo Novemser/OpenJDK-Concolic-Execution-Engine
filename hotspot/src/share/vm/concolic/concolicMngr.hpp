@@ -5,6 +5,7 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/threadContext.hpp"
+#include "concolic/methodSymbolizer.hpp"
 #include "runtime/handles.hpp"
 
 class ConcolicMngr {
@@ -14,6 +15,7 @@ public:
 
   static bool is_doing_concolic;
   static ThreadContext *ctx;
+  static MethodSymbolizer *method_sym;
 
   static jlong startConcolic(JavaThread *thread);
   static jlong endConcolic();
