@@ -88,12 +88,12 @@ void OpSymExpression::print() {
 }
 
 ConExpression::ConExpression(jint i) {
-  int ret = sprintf(_str, "%d", i);
+  int ret = sprintf(_str, "0x%x", i);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jlong l) {
-  int ret = sprintf(_str, "%ld", l);
+  int ret = sprintf(_str, "0x%lx", l);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 

@@ -63,7 +63,7 @@ public:
 };
 
 class ConExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 16;
+  static const int EXP_NAME_LENGTH = 32;
 
 private:
   char _str[EXP_NAME_LENGTH];
