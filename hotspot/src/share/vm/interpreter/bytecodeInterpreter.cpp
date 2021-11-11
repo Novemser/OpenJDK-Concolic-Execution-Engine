@@ -4054,40 +4054,18 @@ extern "C" {
  * DEBUG INFO: this is a concolic debug info printer
  */
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, intptr_t *topOfStack)
-{
-  if (ConcolicMngr::is_doing_concolic)
-  {
-    static Method *last_method = NULL;
-    static Method *last_callee = NULL;
-    static bool is_reach_main = false;
-    Thread *thread = istate->thread();
+void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, intptr_t *topOfStack) {
+  if (ConcolicMngr::is_doing_concolic) {
     Method *method = istate->method();
-    Method *callee = istate->callee();
-    if (method != NULL)
-    {
+    if (method != NULL) {
       ResourceMark rm;
-      Symbol *method_holder_name = method->method_holder()->name();
-      Symbol *method_name = method->name();
-      char *name_and_sig = method->name_and_sig_as_C_string();
-      if (strstr(name_and_sig, "main([Ljava/lang/String;)V") && !is_reach_main)
-      {
-        tty->print_cr(CL_YELLOW "=================================================================" CNONE);
-        tty->print_cr("%s", name_and_sig);
-        is_reach_main = true;
-      }
-      if (is_reach_main)
-      {
-        tty->print_cr(CL_YELLOW "=================================================================" CNONE);
-        tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
-        ConcolicMngr::ctx->print_stack_trace();
-        ConcolicMngr::ctx->get_shadow_stack().print();
-        methodHandle mh(thread, (Method *)method);
-        BytecodeTracer::set_closure(BytecodeTracer::std_closure());
-        BytecodeTracer::trace(mh, pc, tty);
-      }
-
-      last_method = method;
+      tty->print_cr(CL_YELLOW "=================================================================" CNONE);
+      tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
+      ConcolicMngr::ctx->print_stack_trace();
+      ConcolicMngr::ctx->get_shadow_stack().print();
+      methodHandle mh(THREAD, (Method *)method);
+      BytecodeTracer::set_closure(BytecodeTracer::std_closure());
+      BytecodeTracer::trace(mh, pc, tty);
     }
   }
 }
