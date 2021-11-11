@@ -97,25 +97,28 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
 
   /**
    * return result from current opr_stack to locals
+   * TODO: we skip processing of `entry_frame` for now
    */
-  interpreterState callee_istate = zero_frame->as_interpreter_frame()->interpreter_state();
-  Method* callee_method = callee_istate->method();
-  // here `result` describes whatever returned
-  int result_slots = type2size[callee_method->result_type()];
-  assert(result_slots >= 0 && result_slots <= 2, "what?");
-  
-  intptr_t *callee_result = callee_istate->stack() + result_slots;
-  int callee_opr_stack_offset = callee_istate->stack_base() - callee_result - 1;
+  if (zero_frame->is_interpreter_frame() && zero_frame->next()->is_interpreter_frame()) {
+    interpreterState callee_istate = zero_frame->as_interpreter_frame()->interpreter_state();
+    Method* callee_method = callee_istate->method();
+    // here `result` describes whatever returned
+    int result_slots = type2size[callee_method->result_type()];
+    assert(result_slots >= 0 && result_slots <= 2, "what?");
+    
+    intptr_t *callee_result = callee_istate->stack() + result_slots;
+    int callee_opr_stack_offset = callee_istate->stack_base() - callee_result - 1;
 
-  interpreterState caller_istate = zero_frame->next()->as_interpreter_frame()->interpreter_state();
-  intptr_t *caller_result = callee_istate->locals();
-  int caller_opr_stack_offset = caller_istate->stack_base() - caller_result - 1;
-  /**
-   * TODO: skip native here. Need to confirm correctness
-   */
-  if (!callee_method->is_native()) {
-    next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
-    // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+    interpreterState caller_istate = zero_frame->next()->as_interpreter_frame()->interpreter_state();
+    intptr_t *caller_result = callee_istate->locals();
+    int caller_opr_stack_offset = caller_istate->stack_base() - caller_result - 1;
+    /**
+     * TODO: skip native here. Need to confirm correctness
+     */
+    if (!callee_method->is_native()) {
+      next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+      // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+    }
   }
 
   delete s_frame;
