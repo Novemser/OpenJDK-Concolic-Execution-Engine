@@ -1029,7 +1029,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_CONST(off)                                                    \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     ConcolicMngr::clear_stack_slot(GET_STACK_OFFSET + off);                    \
   }
 #else
@@ -1091,7 +1091,7 @@ run:
           /* load from local variable */
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_LOAD(local_off, delta_stack_off)       \
-  if (ConcolicMngr::is_doing_concolic) {                \
+  if (ConcolicMngr::can_do_concolic()) {                \
     ConcolicMngr::copy_entry_from_local_to_stack(       \
         local_off, GET_STACK_OFFSET + delta_stack_off); \
   }
@@ -1150,7 +1150,7 @@ run:
           /* store to a local variable */
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_STORE(delta_stack_off, local_off)      \
-  if (ConcolicMngr::is_doing_concolic) {                \
+  if (ConcolicMngr::can_do_concolic()) {                \
     ConcolicMngr::copy_entry_from_stack_to_local(       \
         GET_STACK_OFFSET + delta_stack_off, local_off); \
   }
@@ -1288,7 +1288,7 @@ run:
 
       CASE(_dup): { /* Duplicate the top item on the stack */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
         }
@@ -1299,7 +1299,7 @@ run:
 
       CASE(_dup2) : { /* Duplicate the top 2 items on the stack */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset, 2);
         }
@@ -1310,7 +1310,7 @@ run:
 
       CASE(_dup_x1) : { /* insert top word two down */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
           ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 1, 1);
@@ -1323,7 +1323,7 @@ run:
 
       CASE(_dup_x2) : { /* insert top word three down  */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset, 1);
           ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 1, 1);
@@ -1337,7 +1337,7 @@ run:
 
       CASE(_dup2_x1) : { /* insert top 2 slots three down */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset + 1, 1);
           ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 0, 1);
@@ -1352,7 +1352,7 @@ run:
 
       CASE(_dup2_x2) : { /* insert top 2 slots four down */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::copy_stack_slot(stack_offset - 1, stack_offset + 1, 1);
           ConcolicMngr::copy_stack_slot(stack_offset - 2, stack_offset - 0, 1);
@@ -1368,7 +1368,7 @@ run:
 
       CASE(_swap) : { /* swap top two elements on the stack */
 #ifdef ENABLE_CONCOLIC
-        if (ConcolicMngr::is_doing_concolic) {
+        if (ConcolicMngr::can_do_concolic()) {
           int stack_offset = GET_STACK_OFFSET;
           ConcolicMngr::swap_two_stack_slot(stack_offset - 1, stack_offset - 2);
         }
@@ -1379,7 +1379,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)       \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
     Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
@@ -1500,7 +1500,7 @@ run:
       CASE(_iinc):
       {
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {                                       
+          if (ConcolicMngr::can_do_concolic()) {                                       
                                                    
             Expression *left = ConcolicMngr::get_local_slot(pc[1]);
             if(left){
@@ -1519,7 +1519,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_UNARY(input_offset, output_offset, op)                    \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *old_exp =                                                      \
         ConcolicMngr::get_stack_slot(stack_offset + input_offset);             \
@@ -1710,7 +1710,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_BINARY_CMP(l_off, r_off, l_value, r_value, op)            \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *left = ConcolicMngr::get_stack_slot(stack_offset + l_off);     \
     Expression *right = ConcolicMngr::get_stack_slot(stack_offset + r_off);    \
@@ -1734,7 +1734,7 @@ run:
 */
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_UNARY_CMP(off, value, op)                                 \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *old_exp = ConcolicMngr::get_stack_slot(stack_offset + off);    \
     if (old_exp) {                                                             \
@@ -1826,7 +1826,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_BINARY_SWITCH(off, key, op)                                 \
-  if (ConcolicMngr::is_doing_concolic) {                                         \
+  if (ConcolicMngr::can_do_concolic()) {                                         \
     int stack_offset = GET_STACK_OFFSET;                                         \
     Expression *sym_exp = ConcolicMngr::get_stack_slot(stack_offset + off);      \
     if (sym_exp) {                                                               \
@@ -2002,7 +2002,7 @@ run:
  */
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)                               \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *index_exp =                                                    \
         ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
@@ -2056,7 +2056,7 @@ run:
       CASE(_aaload): {
           ARRAY_INTRO(-2);
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {
+          if (ConcolicMngr::can_do_concolic()) {
             int stack_offset = GET_STACK_OFFSET;
             Expression *index_exp = ConcolicMngr::get_stack_slot_and_detach(
                 stack_offset + (-2) + 1);
@@ -2094,7 +2094,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_ASTORE(arrayOff, delta, value)                                \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *index_exp =                                                    \
         ConcolicMngr::get_stack_slot_and_detach(stack_offset + arrayOff + 1);  \
@@ -2175,7 +2175,7 @@ run:
             BI_PROFILE_UPDATE_CHECKCAST(/*null_seen=*/true, NULL);
           }
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {
+          if (ConcolicMngr::can_do_concolic()) {
             int stack_offset = GET_STACK_OFFSET;
             Expression *index_exp = ConcolicMngr::get_stack_slot_and_detach(
                 stack_offset + (-3) + 1);
@@ -2231,7 +2231,7 @@ run:
           arrayOop ary = (arrayOop) STACK_OBJECT(-1);
           CHECK_NULL(ary);
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {
+          if (ConcolicMngr::can_do_concolic()) {
             if (ary->is_symbolic()) {
               sym_oid_t sym_arr_oid = ary->get_sym_oid();
 
@@ -2455,7 +2455,7 @@ run:
           int field_offset = cache->f2_as_index();
 
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {
+          if (ConcolicMngr::can_do_concolic()) {
             if (obj->is_symbolic()) {
               /**
                * It seems that we do not need to handle Object (atos)
@@ -2594,7 +2594,7 @@ run:
           int field_offset = cache->f2_as_index();
 
 #ifdef ENABLE_CONCOLIC
-          if (ConcolicMngr::is_doing_concolic) {
+          if (ConcolicMngr::can_do_concolic()) {
             int stack_offset = GET_STACK_OFFSET;
             int field_index = cache->field_index();
 
@@ -2740,7 +2740,7 @@ run:
 
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_NEW_ARRAY()                                                   \
-  if (ConcolicMngr::is_doing_concolic) {                                       \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
     Expression *exp = ConcolicMngr::get_stack_slot(GET_STACK_OFFSET - 1);      \
     if (exp) {                                                                 \
       ConcolicMngr::ctx->alloc_sym_array((arrayOop)THREAD->vm_result(), exp);  \
@@ -3168,7 +3168,7 @@ run:
                   handle_exception);
           cache = cp->entry_at(index);
         }
-        // if (ConcolicMngr::is_doing_concolic) {
+        // if (ConcolicMngr::can_do_concolic()) {
         //   tty->print_cr(CL_RED"parameter_size: %d"CNONE, cache->parameter_size());
         // }
 
@@ -3214,7 +3214,7 @@ run:
               BI_PROFILE_UPDATE_VIRTUALCALL(rcvr->klass());
             }
 #ifdef ENABLE_CONCOLIC
-              if (ConcolicMngr::is_doing_concolic) {
+              if (ConcolicMngr::can_do_concolic()) {
                 ConcolicMngr::method_sym->invoke_method(callee);
               }
 #endif
@@ -3229,9 +3229,7 @@ run:
           }
 
           istate->set_callee(callee);
-          // if (ConcolicMngr::is_doing_concolic) {
-          //   tty->print(CL_RED"callee: max_local=%d, size_of_parameters=%d"CNONE, callee->max_locals(), callee->size_of_parameters());
-          // }
+
           istate->set_callee_entry_point(callee->from_interpreted_entry());
 #ifdef VM_JVMTI
           if (JvmtiExport::can_post_interpreter_events() && THREAD->is_interp_only_mode()) {
@@ -4048,7 +4046,7 @@ extern "C" {
  */
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
 void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, intptr_t *topOfStack) {
-  if (ConcolicMngr::is_doing_concolic) {
+  if (ConcolicMngr::can_do_concolic()) {
     Method *method = istate->method();
     if (method != NULL) {
       ResourceMark rm;

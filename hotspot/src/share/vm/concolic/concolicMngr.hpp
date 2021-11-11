@@ -9,17 +9,22 @@
 #include "runtime/handles.hpp"
 
 class ConcolicMngr {
-public:
-
 #ifdef ENABLE_CONCOLIC
-
+private:
   static bool is_doing_concolic;
+
+public:
+  static bool is_symbolizing_method;
   static ThreadContext *ctx;
   static MethodSymbolizer *method_sym;
 
   static jlong startConcolic(JavaThread *thread);
   static jlong endConcolic();
   static void symbolize(Handle handle);
+
+  inline static bool can_do_concolic() {
+    return is_doing_concolic && !is_symbolizing_method;
+  }
 
   /**
    * this will generate a new tmp_id; use it when `sym_exp` is newly 
@@ -111,7 +116,7 @@ public:
 
         
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
-    if (is_doing_concolic) {
+    if (can_do_concolic()) {
       tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
     }
   }

@@ -6,6 +6,7 @@
 #ifdef ENABLE_CONCOLIC
 
 bool ConcolicMngr::is_doing_concolic = false;
+bool ConcolicMngr::is_symbolizing_method = false;
 ThreadContext *ConcolicMngr::ctx = NULL;
 MethodSymbolizer *ConcolicMngr::method_sym = NULL;
 
