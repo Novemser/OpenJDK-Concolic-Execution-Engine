@@ -7,7 +7,7 @@ ArrayExpression::ArrayExpression(sym_oid_t array_id, Expression *index_exp,
                                  Expression *value_exp, bool is_load)
     : _index_exp(index_exp), _value_exp(value_exp), _is_load(is_load) {
   int ret = sprintf(_arr_str, "A_%lu", array_id);
-  assert(ret > 0, "SYM_NAME_LENGTH exceeded!");
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 
   if (_index_exp) {
     _index_exp->inc_ref();
