@@ -1,4 +1,3 @@
-
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/threadContext.hpp"

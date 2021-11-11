@@ -666,7 +666,7 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
 
       SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
       Expression* sym_exp = sym_obj->get(field_index);
-      ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
+      ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
     }
   }
 #endif
