@@ -175,26 +175,12 @@ IRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* thread, ConstantPool* pool,
   //       If we have a breakpoint, then we don't rewrite
   //       because the _breakpoint bytecode would be lost.
   oop obj = klass->allocate_instance(CHECK);
-#ifdef ENABLE_CONCOLIC
-  /**
-   * This is where an object created
-   * We can set the default sym_oid here
-   */
-  obj->set_sym_oid(0);
-#endif
   thread->set_vm_result(obj);
 IRT_END
 
 
 IRT_ENTRY(void, InterpreterRuntime::newarray(JavaThread* thread, BasicType type, jint size))
   oop obj = oopFactory::new_typeArray(type, size, CHECK);
-#ifdef ENABLE_CONCOLIC
-  /**
-    * This is where an object created
-    * We can set the default sym_oid here
-    */
-  obj->set_sym_oid(NULL_SYM_OID);
-#endif
   thread->set_vm_result(obj);
 IRT_END
 
@@ -205,13 +191,6 @@ IRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* thread, ConstantPool* 
   //       (This may have to change if this code changes!)
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
-#ifdef ENABLE_CONCOLIC
-  /**
-    * This is where an object created
-    * We can set the default sym_oid here
-    */
-  obj->set_sym_oid(NULL_SYM_OID);
-#endif
   thread->set_vm_result(obj);
 IRT_END
 
