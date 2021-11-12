@@ -16,26 +16,30 @@ SymObj::~SymObj() {
   }
 }
 
-Expression *SymObj::get(int field_index) {
-  ExpStore::iterator iter = _exps.find(field_index);
+Expression *SymObj::get(int field_offset) {
+  assert(field_offset % 8 == 0, "we are turning to field_offset, this should be true");
+  ExpStore::iterator iter = _exps.find(field_offset);
   return iter == _exps.end() ? NULL : iter->second;
 }
 
-void SymObj::init_sym_exp(int field_index) {
+void SymObj::init_sym_exp(int field_offset) {
+  assert(field_offset % 8 == 0, "we are turning to field_offset, this should be true");
   Expression *sym_exp =
-      new SymbolExpression(this->get_sym_oid(), field_index);
+      new SymbolExpression(this->get_sym_oid(), field_offset);
 
   sym_exp->inc_ref();
-  _exps[field_index] = sym_exp;
+  _exps[field_offset] = sym_exp;
 }
 
-void SymObj::init_sym_exp(int field_index, Expression *exp) {
+void SymObj::init_sym_exp(int field_offset, Expression *exp) {
+  assert(field_offset % 8 == 0, "we are turning to field_offset, this should be true");
   exp->inc_ref();
-  _exps[field_index] = exp;
+  _exps[field_offset] = exp;
 }
 
-void SymObj::set_sym_exp(int field_index, Expression *exp) {
-  ExpStore::iterator iter = _exps.find(field_index);
+void SymObj::set_sym_exp(int field_offset, Expression *exp) {
+  assert(field_offset % 8 == 0, "we are turning to field_offset, this should be true");
+  ExpStore::iterator iter = _exps.find(field_offset);
   if (iter != _exps.end()) {
     Expression *old_exp = iter->second;
     if (old_exp && old_exp->dec_ref()) {
@@ -49,7 +53,7 @@ void SymObj::set_sym_exp(int field_index, Expression *exp) {
     }
   } else if (exp) {
     exp->inc_ref();
-    _exps[field_index] = exp;
+    _exps[field_offset] = exp;
   }
 }
 

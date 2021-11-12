@@ -110,7 +110,7 @@ void FieldTraverser::print_indent() {
 
 bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   // print_indent();
-  // tty->print("---- %d\n", fd->index());
+  // tty->print("---- %d\n", fd->offset());
 
   // TODO: directly transfer SymObj*
   SymObj *sym_obj;
@@ -125,7 +125,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     return false;
   default:
     sym_obj = this->_ctx.get_or_alloc_sym_obj(obj);
-    sym_obj->init_sym_exp(fd->index());
+    sym_obj->init_sym_exp(fd->offset());
     return false;
   }
 }
@@ -159,7 +159,7 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
 
   // print `signature` and `name`
-  tty->print("'%d' '%s' '%s' ", fd->index(), fd->signature()->as_C_string(),
+  tty->print("'%d' '%s' '%s' ", fd->offset(), fd->signature()->as_C_string(),
              fd->name()->as_C_string());
 
   switch (fd->field_type()) {

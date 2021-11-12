@@ -22,11 +22,11 @@ public:
   SymObj(sym_oid_t sym_oid);
   ~SymObj();
 
-  Expression *get(int field_index);
+  Expression *get(int field_offset);
 
-  void init_sym_exp(int field_index);
-  void init_sym_exp(int field_index, Expression *exp);
-  void set_sym_exp(int field_index, Expression *exp);
+  void init_sym_exp(int field_offset);
+  void init_sym_exp(int field_offset, Expression *exp);
+  void set_sym_exp(int field_offset, Expression *exp);
 
 public:
   void print();

@@ -672,12 +672,12 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
     if (object->is_symbolic()) {
       interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
       int stack_offset = istate->stack_base() - locals - 1;
-      int field_index = entry->field_index();
+      int field_offset = entry->f2_as_index();
       sym_oid_t sym_oid = object->get_sym_oid();
 
       SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-      Expression* sym_exp = sym_obj->get(field_index);
-      ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
+      Expression* sym_exp = sym_obj->get(field_offset);
+      ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
     }
   }
 #endif

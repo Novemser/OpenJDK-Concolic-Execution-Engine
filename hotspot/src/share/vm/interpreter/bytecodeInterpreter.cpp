@@ -2463,7 +2463,6 @@ run:
                */
               if (tos_type != atos) {
                 int stack_offset = GET_STACK_OFFSET;
-                int field_index = cache->field_index();
                 sym_oid_t sym_oid = obj->get_sym_oid();
 
                 if (tos_type != ltos && tos_type != dtos) {
@@ -2471,8 +2470,8 @@ run:
                 }
 
                 SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-                Expression* sym_exp = sym_obj->get(field_index);
-                ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_index);
+                Expression* sym_exp = sym_obj->get(field_offset);
+                ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
               }
             }
           }
@@ -2596,7 +2595,6 @@ run:
 #ifdef ENABLE_CONCOLIC
           if (ConcolicMngr::is_doing_concolic) {
             int stack_offset = GET_STACK_OFFSET;
-            int field_index = cache->field_index();
 
             if (tos_type != atos) {
               Expression *sym_exp =
@@ -2604,7 +2602,7 @@ run:
               if (sym_exp) {
                 SymObj *sym_obj =
                     ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-                sym_obj->set_sym_exp(field_index, sym_exp);
+                sym_obj->set_sym_exp(field_offset, sym_exp);
               }
             }
           }

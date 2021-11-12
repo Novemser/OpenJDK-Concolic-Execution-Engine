@@ -14,6 +14,11 @@ public:
     Entry() { reset(); }
 
     sym_oid_t sym_oid; // for comparison
+    /**
+     * TODO: shall we still use the name `index`? Although we changed to offset 
+     * for symbolic object, this field (`index`) is also used for tmp_sym's index. 
+     * So I didn't change its name.
+     */
     int index;
     Expression *sym_exp;
 
