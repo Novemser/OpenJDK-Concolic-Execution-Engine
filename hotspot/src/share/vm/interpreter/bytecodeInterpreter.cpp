@@ -3239,11 +3239,6 @@ run:
               // Profile virtual call.
               BI_PROFILE_UPDATE_VIRTUALCALL(rcvr->klass());
             }
-#ifdef ENABLE_CONCOLIC
-              if (ConcolicMngr::can_do_concolic()) {
-                ConcolicMngr::method_sym->invoke_method(callee);
-              }
-#endif
           } else {
             if ((Bytecodes::Code)opcode == Bytecodes::_invokespecial) {
               CHECK_NULL(STACK_OBJECT(-(cache->parameter_size())));

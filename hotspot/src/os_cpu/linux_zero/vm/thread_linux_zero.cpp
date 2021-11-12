@@ -37,7 +37,10 @@ void JavaThread::push_zero_frame(ZeroFrame *zframe) {
   _top_zero_frame = zframe;
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
-    ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame, *(ZeroFrame **) zframe,
+    ConcolicMngr::method_sym->invoke_method(*(ZeroFrame **) zframe);
+  }
+  if (ConcolicMngr::can_do_concolic()) {
+    ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame,*(ZeroFrame **) zframe,
                                               zero_stack()->sp());
   }
 #endif
@@ -53,6 +56,9 @@ void JavaThread::pop_zero_frame() {
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
     ConcolicMngr::ctx->get_shadow_stack().pop(temp_frame);
+  }
+  if (ConcolicMngr::has_symbolized_method()) {
+    ConcolicMngr::method_sym->finish_method(temp_frame);
   }
 #endif
 }

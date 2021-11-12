@@ -3,11 +3,12 @@
 
 #ifdef ENABLE_CONCOLIC
 
-class Method;
+class ZeroFrame;
 
 class MethodSymbolizer {
 public:
-  void invoke_method(Method *method);
+  void invoke_method(ZeroFrame* caller_frame);
+  void finish_method(ZeroFrame* caller_frame);
 };
 
 #endif

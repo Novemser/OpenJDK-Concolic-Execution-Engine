@@ -22,6 +22,10 @@ public:
   static jlong endConcolic();
   static void symbolize(Handle handle);
 
+  inline static bool has_symbolized_method() {
+    return is_doing_concolic && is_symbolizing_method;
+  }
+
   inline static bool can_do_concolic() {
     return is_doing_concolic && !is_symbolizing_method;
   }
