@@ -1,6 +1,8 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/threadContext.hpp"
+#include "concolic/exp/arrayInitExpression.hpp"
+#include "concolic/exp/expression.hpp"
 #include "concolic/fieldTraverser.hpp"
 #include "utilities/vmError.hpp"
 
@@ -38,7 +40,7 @@ void ThreadContext::symbolize(Handle handle) {
                                                  FIELD_INDEX_ARRAY_LENGTH));
     /**
      * Currently, we do not call symbolize_recursive for array
-     * Because symbolic array always return a new symbolic expression. 
+     * Because symbolic array always return a new symbolic expression.
      */
   } else {
     assert(false, "unhandled");
@@ -73,7 +75,8 @@ SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
   return ret;
 }
 
-SymArr *ThreadContext::get_or_alloc_sym_array(arrayOop array, Expression *length_exp) {
+SymArr *ThreadContext::get_or_alloc_sym_array(arrayOop array,
+                                              Expression *length_exp) {
   if (array->is_symbolic()) {
     return this->get_sym_array(array->get_sym_oid());
   } else {
@@ -91,6 +94,9 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 
   SymArr *sym_arr = new SymArr(sym_oid, length_exp);
   this->set_sym_instance(sym_oid, sym_arr);
+
+  this->record_path_condition(
+      new ArrayInitExpression(sym_arr->get_sym_oid(), array));
 
   return sym_arr;
 }
