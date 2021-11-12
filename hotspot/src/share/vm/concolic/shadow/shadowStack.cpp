@@ -46,40 +46,45 @@ ShadowStack::~ShadowStack() {
   _s_frames.clear();
 }
 
-void ShadowStack::push(ZeroFrame *callee_zero_frame, ZeroFrame *caller_zero_frame,
+void ShadowStack::push(ZeroFrame *callee_frame, ZeroFrame *caller_frame,
                        intptr_t *sp) {
   // ConcolicMngr::ctx->print_stack_trace();
   // ConcolicMngr::ctx->get_shadow_stack().print();
 
-  _s_frames.back()->check(caller_zero_frame);
+  _s_frames.back()->check(caller_frame);
 
   ShadowFrame &last_s_frame = get_frame(0);
   ShadowTable &last_opr_stack = last_s_frame.get_opr_stack();
-  ShadowFrame *s_frame = new ShadowFrame(callee_zero_frame, sp, 8);
+  ShadowFrame *s_frame = new ShadowFrame(callee_frame, sp, 8);
   s_frame->copy();
-  if (callee_zero_frame->is_interpreter_frame()) {
-    interpreterState callee_istate = callee_zero_frame->as_interpreter_frame()->interpreter_state();
+  if (callee_frame->is_interpreter_frame()) {
+    interpreterState callee_istate =
+        callee_frame->as_interpreter_frame()->interpreter_state();
     Method *callee_method = callee_istate->method();
-    if (caller_zero_frame->is_interpreter_frame()){
+    if (caller_frame->is_interpreter_frame()) {
       /**
        * TODO: skip native here. Need to confirm correctness
        */
       if (!callee_method->is_native()) {
-        interpreterState caller_istate = caller_zero_frame->as_interpreter_frame()->interpreter_state();
+        interpreterState caller_istate =
+            caller_frame->as_interpreter_frame()->interpreter_state();
         /**
          * At this time, `istate->locals()` points to the start of locals,
          * while `caller_istate->stack()` points to end of locals
          */
-        int begin_offset = caller_istate->stack_base() - callee_istate->locals() - 1;
-        int end_offset = caller_istate->stack_base() - caller_istate->stack() - 1;
-        s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0, end_offset - begin_offset);
+        int begin_offset =
+            caller_istate->stack_base() - callee_istate->locals() - 1;
+        int end_offset =
+            caller_istate->stack_base() - caller_istate->stack() - 1;
+        s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0,
+                                              end_offset - begin_offset);
       }
     }
   }
   _s_frames.push_back(s_frame);
 }
 
-void ShadowStack::pop(ZeroFrame *zero_frame) {
+void ShadowStack::pop(ZeroFrame *callee_frame) {
   /**
    * This is a workaround when we do not suppot shadow stack completely
    */
@@ -89,7 +94,7 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
    * do pop
    */
   ShadowFrame *s_frame = _s_frames.back();
-  s_frame->check(zero_frame);
+  s_frame->check(callee_frame);
   _s_frames.pop_back();
 
   ShadowTable &opr_stack = s_frame->get_opr_stack();
@@ -99,25 +104,32 @@ void ShadowStack::pop(ZeroFrame *zero_frame) {
    * return result from current opr_stack to locals
    * TODO: we skip processing of `entry_frame` for now
    */
-  if (zero_frame->is_interpreter_frame() && zero_frame->next()->is_interpreter_frame()) {
-    interpreterState callee_istate = zero_frame->as_interpreter_frame()->interpreter_state();
-    Method* callee_method = callee_istate->method();
+  if (callee_frame->is_interpreter_frame() &&
+      callee_frame->next()->is_interpreter_frame()) {
+    interpreterState callee_istate =
+        callee_frame->as_interpreter_frame()->interpreter_state();
+    Method *callee_method = callee_istate->method();
     // here `result` describes whatever returned
     int result_slots = type2size[callee_method->result_type()];
     assert(result_slots >= 0 && result_slots <= 2, "what?");
-    
-    intptr_t *callee_result = callee_istate->stack() + result_slots;
-    int callee_opr_stack_offset = callee_istate->stack_base() - callee_result - 1;
 
-    interpreterState caller_istate = zero_frame->next()->as_interpreter_frame()->interpreter_state();
+    intptr_t *callee_result = callee_istate->stack() + result_slots;
+    int callee_opr_stack_offset =
+        callee_istate->stack_base() - callee_result - 1;
+
+    interpreterState caller_istate =
+        callee_frame->next()->as_interpreter_frame()->interpreter_state();
     intptr_t *caller_result = callee_istate->locals();
-    int caller_opr_stack_offset = caller_istate->stack_base() - caller_result - 1;
+    int caller_opr_stack_offset =
+        caller_istate->stack_base() - caller_result - 1;
     /**
      * TODO: skip native here. Need to confirm correctness
      */
     if (!callee_method->is_native()) {
-      next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
-      // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE, callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+      next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset,
+                                  caller_opr_stack_offset, result_slots);
+      // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE,
+      // callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
     }
   }
 

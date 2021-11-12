@@ -3,10 +3,10 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/shadow/shadowStack.hpp"
 #include "concolic/instance/symbolicArray.hpp"
 #include "concolic/instance/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
+#include "concolic/shadow/shadowStack.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
 
@@ -42,8 +42,8 @@ public:
   SymObj *alloc_sym_obj(oop obj);
   SymObj *get_sym_obj(sym_oid_t sym_oid);
 
-  SymArr *get_or_alloc_sym_array(arrayOop array, Expression* length_exp = NULL);
-  SymArr *alloc_sym_array(arrayOop array, Expression* length_exp = NULL);
+  SymArr *get_or_alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
+  SymArr *alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
   SymArr *get_sym_array(sym_oid_t sym_oid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
@@ -52,6 +52,30 @@ public:
   inline void record_path_condition(Expression *sym_exp) {
     _path_condition.add(sym_exp);
   }
+
+public:
+  /**
+   * this will generate a new tmp_id; use it when `sym_exp` is newly
+   * calculated, which doesn't have `sym_oid` and `index`
+   */
+  void set_stack_slot(int offset, Expression *sym_exp);
+  void set_stack_slot(int offset, Expression *sym_exp,
+                                    sym_oid_t sym_oid, int index);
+  Expression *get_stack_slot(int offset);
+  Expression *get_stack_slot_and_detach(int offset);
+  /**
+   * TODO: document when to clear the stack
+   */
+  void clear_stack_slot(int offset);
+  void copy_stack_slot(int src_off, int dst_off, int size);
+  void swap_two_stack_slot(int off1, int off2);
+  void copy_entry_from_local_to_stack(int local_offset,
+                                                    int stack_offset);
+  void copy_entry_from_stack_to_local(int stack_offset,
+                                                    int local_offset);
+  Expression *get_local_slot(int offset);
+  void set_local_slot(int offset, Expression *sym_exp);
+
 private:
   void symbolize_recursive(oop obj);
 
@@ -67,8 +91,8 @@ private:
 
   inline void init_sym_oid_counter() { _sym_oid_counter = 1; }
   inline void init_sym_tmp_id_counter() {
-    /** 
-     * tmp_id start from 1. 
+    /**
+     * tmp_id start from 1.
      * Therefore, we push a placeholder.
      */
     _sym_tmp_exps.push_back(NULL);

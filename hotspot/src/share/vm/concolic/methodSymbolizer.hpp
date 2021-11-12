@@ -3,11 +3,23 @@
 
 #ifdef ENABLE_CONCOLIC
 
-class Method;
+#include "concolic/exp/expression.hpp"
+
+#include <vector>
+
+class ZeroFrame;
 
 class MethodSymbolizer {
+  typedef std::vector<Expression *> ParamList;
+private:
+	ZeroFrame* _frame;
+	ParamList _param_list;
 public:
-  void invoke_method(Method *method);
+  void invoke_method(ZeroFrame *caller_frame);
+  void finish_method(ZeroFrame *caller_frame);
+
+private:
+	void reset();
 };
 
 #endif

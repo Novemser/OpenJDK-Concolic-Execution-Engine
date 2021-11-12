@@ -29,10 +29,10 @@ public:
   ShadowFrame &get_frame(int index) {
     int size = _s_frames.size();
     assert(index < size, "invalid index");
-    return *_s_frames.at(size - 1 - index); 
+    return *_s_frames.at(size - 1 - index);
   }
 
-  void push(ZeroFrame *new_zero_frame, ZeroFrame *old_zero_frame, intptr_t *sp);
+  void push(ZeroFrame *callee_frame, ZeroFrame *caller_frame, intptr_t *sp);
   void pop(ZeroFrame *zero_frame);
 
   void print_origin();

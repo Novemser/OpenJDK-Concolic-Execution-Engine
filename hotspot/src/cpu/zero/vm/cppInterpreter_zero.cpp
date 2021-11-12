@@ -527,17 +527,6 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
     }
   }
 
-// #ifdef ENABLE_CONCOLIC
-//   if (ConcolicMngr::is_doing_concolic) {
-//     ResourceMark rm;
-//     char* name_and_sig = method->name_and_sig_as_C_string();
-//     tty->print_cr("<<<<<<<<<<<<<<<<<<<<<<<==>>>>>>>>>>>>>>>>>>>>>>>");
-//     tty->print_cr("native_call of %s !", name_and_sig);
-//     //ConcolicMngr::ctx->print_stack_trace();
-//     //ConcolicMngr::ctx->get_shadow_stack().print();
-//   }
-// #endif
-
   // No deoptimized frames on the stack
   return 0;
 }
@@ -668,7 +657,7 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
     }
   }
 #ifdef ENABLE_CONCOLIC
-  if (ConcolicMngr::is_doing_concolic) {
+  if (ConcolicMngr::can_do_concolic()) {
     if (object->is_symbolic()) {
       interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
       int stack_offset = istate->stack_base() - locals - 1;
@@ -677,7 +666,7 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
 
       SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
       Expression* sym_exp = sym_obj->get(field_offset);
-      ConcolicMngr::set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
+      ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
     }
   }
 #endif
