@@ -25,12 +25,12 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame) {
 }
 
 void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
-  assert(caller_frame == _frame, "the same frame");
-  tty->print_cr(CL_RED "======================" CNONE);
-  ConcolicMngr::record_path_condition(new MethodExpression(
-      "Example", "func", _param_list, new ConExpression(1)));
-  this->reset();
-	ConcolicMngr::is_symbolizing_method = false;
+  if (caller_frame == _frame) {
+    ConcolicMngr::record_path_condition(new MethodExpression(
+        "Example", "func", _param_list, new ConExpression(1)));
+    this->reset();
+    ConcolicMngr::is_symbolizing_method = false;
+  }
 }
 
 void MethodSymbolizer::reset() {
