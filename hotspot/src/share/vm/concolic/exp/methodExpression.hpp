@@ -11,7 +11,6 @@
 #include <vector>
 
 class MethodExpression : public Expression {
-public:
   typedef std::vector<Expression *> ParamList;
 
 private:
