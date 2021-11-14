@@ -36,6 +36,7 @@ public:
 
   inline Expression *get_length_exp() { return _length_exp; }
   inline int get_version() { return _version; }
+  inline int get_load_count() { return _load_count; }
   inline int get_and_inc_load_count() { return _load_count++; }
 
 public:

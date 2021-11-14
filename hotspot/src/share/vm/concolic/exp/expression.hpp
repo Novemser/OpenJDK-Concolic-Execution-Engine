@@ -31,14 +31,17 @@ protected:
 };
 
 class SymbolExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 16;
+public:
+  static const int NULL_INDEX = -1;
 
 private:
+  static const int EXP_NAME_LENGTH = 16;
+
   char _str[EXP_NAME_LENGTH];
 
 public:
-  SymbolExpression(sym_oid_t sym_oid, int field_index = 0);
-  SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int element_index);
+  SymbolExpression(sym_oid_t sym_oid, int field_index);
+  SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int load_count);
   ~SymbolExpression();
 
 public:
@@ -89,13 +92,12 @@ private:
 
 public:
   ArrayExpression(sym_oid_t array_id, Expression *index_exp,
-                   Expression *value_exp, bool is_load);
+                  Expression *value_exp, bool is_load);
   ~ArrayExpression();
+
 public:
   void print();
 };
-
-
 
 #endif
 

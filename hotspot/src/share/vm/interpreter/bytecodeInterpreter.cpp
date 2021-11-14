@@ -2094,7 +2094,8 @@ run:
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-              SymbolExpression* value_exp = new SymbolExpression(obj->get_sym_oid());
+              SymbolExpression *value_exp = new SymbolExpression(
+                  obj->get_sym_oid(), SymbolExpression::NULL_INDEX);
               ConcolicMngr::record_path_condition(new ArrayExpression(
                   arrObj->get_sym_oid(), index_exp, value_exp, true));
             }
@@ -2216,8 +2217,8 @@ run:
                 ConcolicMngr::ctx->get_or_alloc_sym_obj(rhsObject);
               }
 
-              SymbolExpression *value_exp =
-                  new SymbolExpression(rhsObject->get_sym_oid());
+              SymbolExpression *value_exp = new SymbolExpression(
+                  rhsObject->get_sym_oid(), SymbolExpression::NULL_INDEX);
               ConcolicMngr::record_path_condition(new ArrayExpression(
                   sym_arr_oid, index_exp, value_exp, false));
             }

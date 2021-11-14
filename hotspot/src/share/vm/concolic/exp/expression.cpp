@@ -5,9 +5,7 @@
 
 ulong Expression::total_count = 0;
 
-void Expression::print() {
-  tty->indent().print("ref_count: %u", _ref_count);
-}
+void Expression::print() { tty->indent().print("ref_count: %u", _ref_count); }
 
 void Expression::print_cr() {
   print();
@@ -15,21 +13,24 @@ void Expression::print_cr() {
 }
 
 SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
-  int ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
+  int ret;
+  if (field_index == NULL_INDEX) {
+    ret = sprintf(_str, "S_%lu", sym_oid);
+  } else {
+    ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
+  }
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
-SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int element_index) {
-  int ret = sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, arr_version, element_index);
+SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int version,
+                                   int load_count) {
+  int ret= sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, version, load_count);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
-
 
 SymbolExpression::~SymbolExpression() {}
 
-void SymbolExpression::print() {
-  tty->indent().print("%s", _str);
-}
+void SymbolExpression::print() { tty->indent().print("%s", _str); }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
                                  bool cmp)

@@ -23,36 +23,37 @@
  *
  */
 
+#include "concolic/concolicMngr.hpp"
 #include "precompiled.hpp"
 #include "runtime/frame.inline.hpp"
 #include "runtime/thread.inline.hpp"
-#include "concolic/concolicMngr.hpp"
 
 void JavaThread::cache_global_variables() {
   // nothing to do
 }
 
 void JavaThread::push_zero_frame(ZeroFrame *zframe) {
-  *(ZeroFrame **) zframe = _top_zero_frame;
+  *(ZeroFrame **)zframe = _top_zero_frame;
   _top_zero_frame = zframe;
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
-    ConcolicMngr::method_sym->invoke_method(*(ZeroFrame **) zframe);
+    ConcolicMngr::method_sym->invoke_method(*(ZeroFrame **)zframe,
+                                            _top_zero_frame);
   }
   if (ConcolicMngr::can_do_concolic()) {
-    ConcolicMngr::ctx->get_shadow_stack().push(_top_zero_frame,*(ZeroFrame **) zframe,
-                                              zero_stack()->sp());
+    ConcolicMngr::ctx->get_shadow_stack().push(
+        _top_zero_frame, *(ZeroFrame **)zframe, zero_stack()->sp());
   }
 #endif
 }
 
 void JavaThread::pop_zero_frame() {
 #ifdef ENABLE_CONCOLIC
-  ZeroFrame* temp_frame = _top_zero_frame;
+  ZeroFrame *temp_frame = _top_zero_frame;
 #endif
 
-  zero_stack()->set_sp((intptr_t *) _top_zero_frame + 1);
-  _top_zero_frame = *(ZeroFrame **) _top_zero_frame;
+  zero_stack()->set_sp((intptr_t *)_top_zero_frame + 1);
+  _top_zero_frame = *(ZeroFrame **)_top_zero_frame;
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
     ConcolicMngr::ctx->get_shadow_stack().pop(temp_frame);

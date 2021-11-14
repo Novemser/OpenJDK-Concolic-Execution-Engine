@@ -31,6 +31,9 @@ private:
   sym_tmp_id_t _sym_tmp_id_counter;
 
 public:
+  inline JavaThread *get_thread() { return _thread; }
+
+public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();
 
@@ -59,8 +62,8 @@ public:
    * calculated, which doesn't have `sym_oid` and `index`
    */
   void set_stack_slot(int offset, Expression *sym_exp);
-  void set_stack_slot(int offset, Expression *sym_exp,
-                                    sym_oid_t sym_oid, int index);
+  void set_stack_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid,
+                      int index);
   Expression *get_stack_slot(int offset);
   Expression *get_stack_slot_and_detach(int offset);
   /**
@@ -69,10 +72,8 @@ public:
   void clear_stack_slot(int offset);
   void copy_stack_slot(int src_off, int dst_off, int size);
   void swap_two_stack_slot(int off1, int off2);
-  void copy_entry_from_local_to_stack(int local_offset,
-                                                    int stack_offset);
-  void copy_entry_from_stack_to_local(int stack_offset,
-                                                    int local_offset);
+  void copy_entry_from_local_to_stack(int local_offset, int stack_offset);
+  void copy_entry_from_stack_to_local(int stack_offset, int local_offset);
   Expression *get_local_slot(int offset);
   void set_local_slot(int offset, Expression *sym_exp);
 
