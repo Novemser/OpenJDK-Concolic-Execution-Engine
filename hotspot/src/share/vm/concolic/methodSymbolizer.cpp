@@ -56,6 +56,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                                        sym_arr->get_version(),
                                        sym_arr->get_load_count());
           } else {
+            begin_offset += type2size[type] - 1;
+
             exp = ConcolicMngr::ctx->get_stack_slot(begin_offset);
             if (!exp) {
               switch (type) {
@@ -67,7 +69,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                 break;
               case T_DOUBLE:
                 exp = new ConExpression(
-                    ((VMJavaVal64 *)(locals - begin_offset - 1))->d);
+                    ((VMJavaVal64 *)(locals - begin_offset))->d);
                 break;
               case T_FLOAT:
                 exp = new ConExpression(*(jfloat *)(locals - begin_offset));
@@ -77,7 +79,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                 break;
               case T_LONG:
                 exp = new ConExpression(
-                    ((VMJavaVal64 *)(locals - begin_offset - 1))->l);
+                    ((VMJavaVal64 *)(locals - begin_offset))->l);
                 break;
               case T_SHORT:
                 exp = new ConExpression(*(jshort *)(locals - begin_offset));
@@ -94,7 +96,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
           _param_list.push_back(exp);
           ss.next();
-          begin_offset += type2size[type];
+          ++begin_offset;
         }
         assert(begin_offset == end_offset, "equal");
 
@@ -125,7 +127,9 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
       ShouldNotReachHere();
     } else {
       exp = new SymbolExpression();
-      ConcolicMngr::ctx->set_stack_slot(offset, exp);
+      int delta = type2size[type] - 1;
+      assert(delta >= 0, "should be");
+      ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
     }
 
     ConcolicMngr::record_path_condition(

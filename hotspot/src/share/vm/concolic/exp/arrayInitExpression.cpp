@@ -10,9 +10,9 @@ ArrayInitExpression::ArrayInitExpression(sym_oid_t array_id, arrayOop array) {
 
   ArrayKlass *ak = (ArrayKlass *)array->klass();
   BasicType T = ak->element_type();
-  Expression *value_exp;
 
   for (int i = 0; i < array->length(); i++) {
+    Expression *value_exp = NULL;
     switch (T) {
     case T_INT:
       value_exp = new ConExpression(
@@ -43,10 +43,14 @@ ArrayInitExpression::ArrayInitExpression(sym_oid_t array_id, arrayOop array) {
           *(jdouble *)(((address)array->base(T)) + i * sizeof(jdouble)));
       break;
     default:
+      /**
+       * TODO: add AALOAD && AASTORE support.
+       */
       break;
     }
-
-    value_exp->inc_ref();
+    if (value_exp) {
+      value_exp->inc_ref();
+    }
     _arr_exps.push_back(value_exp);
   }
 }
@@ -55,7 +59,7 @@ ArrayInitExpression::~ArrayInitExpression() {
   int size = _arr_exps.size();
   for (int i = 0; i < size; ++i) {
     Expression *exp = _arr_exps[i];
-    if (exp->dec_ref()) {
+    if (exp && exp->dec_ref()) {
       delete exp;
     }
   }
@@ -65,7 +69,12 @@ void ArrayInitExpression::print() {
   tty->print("%s{", _arr_str);
   int size = _arr_exps.size();
   for (int i = 0; i < size; ++i) {
-    _arr_exps[i]->print();
+    Expression *exp = _arr_exps[i];
+    if (exp) {
+      exp->print();
+    } else {
+      tty->print("NULL");
+    }
     if (i < size - 1) {
       tty->print(",");
     }
