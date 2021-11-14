@@ -15,7 +15,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     interpreterState caller_istate =
         caller_frame->as_interpreter_frame()->interpreter_state();
     Method *callee = caller_istate->callee();
-    if (callee->method_holder()->name()->equals("Example")) {
+    if (callee && callee->method_holder()->name()->equals("Example")) {
       tty->print_cr("Calling function name: %s",
                     callee->name_and_sig_as_C_string());
       if (callee->name()->equals("func")) {

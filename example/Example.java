@@ -29,77 +29,29 @@ public class Example {
         }
     }
 
-    static class MyInteger {
-        public int value;
-
-        public MyInteger(int v) { value = v; }
-    }
-
-    static int test_add(MyInteger a, MyInteger b) {
-        int c = a.value + b.value;
-        return c;
-    }
-
-    static class MyLong {
-        public long value;
-
-        public MyLong(long v) { value = v; }
-    }
-
-    static class Myfloat {
-        public float value;
-
-        public Myfloat(float v) { value = v; }
-    }
-
-    static class MyDouble {
-        public double value;
-
-        public MyDouble(double v) { value = v; }
+    public long func(Long input) {
+        if (input > 10) {
+            return 1;
+        } else {
+            return 2;
+        }
     }
 
     public static void main(String[] args) {
-        MyInteger obj1 = new MyInteger(4);
-     
+        Long obj1 = new Long(4);
+        Example e = new Example();
+
         System.startConcolic();
         System.symbolize(obj1);
 
-        int a = obj1.value;
-        int[] array = new int[4];
-        array[obj1.value - 2] += 2;
-        a = array[obj1.value - 2];
-        // array[2] = obj1.value;
-        // array[2] += obj1.value;
+        long input = obj1;
+        input = e.func(input);
+        if (input > 0) {
+
+        }
         
 
         System.endConcolic();
-        // System.out.println(array[1]);
+        System.out.println(input);
     }
-
-    // public static void main(String[] args) {
-    //     MyInteger obj1 = new MyInteger(1);
-    //     MyInteger obj2 = new MyInteger(2);
-    //     MyInteger obj3 = new MyInteger(3);
-    //     // MyLong obj1 = new MyLong(1000);
-    //     // MyLong obj2 = new MyLong(20);
-    //     // MyLong obj3 = new MyLong(30);
-    //     // Myfloat obj1 = new MyLong(1);
-    //     // Myfloat obj2 = new MyLong(2);
-    //     // Myfloat obj3 = new MyLong(3);
-
-    //     System.startConcolic();
-    //     System.symbolize(obj1);
-    //     System.symbolize(obj2);
-        
-    //     obj3.value = obj1.value + 2;
-    //     obj3.value = -obj3.value;
-
-    //     if (obj3.value < obj2.value) {
-    //         obj3.value = obj1.value;
-    //     }
-    //     // obj3.value = obj1.value << obj2.value;
-
-    //     System.endConcolic();
-    //     System.out.println(obj3.value);
-    // }
 }
