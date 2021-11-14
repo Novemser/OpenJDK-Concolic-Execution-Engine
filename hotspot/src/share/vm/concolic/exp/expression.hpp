@@ -33,6 +33,7 @@ protected:
 class SymbolExpression : public Expression {
 public:
   static const int NULL_INDEX = -1;
+  static int sym_method_count;
 
 private:
   static const int EXP_NAME_LENGTH = 16;
@@ -42,6 +43,7 @@ private:
 public:
   SymbolExpression(sym_oid_t sym_oid, int field_index);
   SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int load_count);
+  SymbolExpression();
   ~SymbolExpression();
 
 public:

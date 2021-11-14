@@ -98,28 +98,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
         }
         assert(begin_offset == end_offset, "equal");
 
-        // JavaThread *__the_thread__ = ConcolicMngr::ctx->get_thread();
-        // oop method_mirror =
-        //     Reflection::new_method(callee, true, true, CHECK);
-        // objArrayHandle ptypes(
-        //     THREAD, objArrayOop(java_lang_reflect_Method::parameter_types(
-        //                 method_mirror)));
-
-        // int param_length = callee->method_parameters_length();
-        // MethodParametersElement *params = callee->method_parameters_start();
-        // methodHandle mh (ConcolicMngr::ctx->get_thread(), callee);
-
-        // tty->print_cr("method_parameters_length: %d", param_length);
-        // for (int i = 0; i < param_length; ++i) {
-        //   Symbol *sym =
-        //       0 != params[i].name_cp_index
-        //           ? mh->constants()->symbol_at(params[i].name_cp_index)
-        //           : NULL;
-        //   if (sym) {
-        //     tty->print_cr("param: %s", sym->as_C_string());
-        //   }
-        // }
-
         _frame = caller_frame;
         ConcolicMngr::is_symbolizing_method = true;
       }
@@ -127,10 +105,47 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   }
 }
 
-void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
+void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
+                                     ZeroFrame *callee_frame) {
   if (caller_frame == _frame) {
-    ConcolicMngr::record_path_condition(new MethodExpression(
-        "Example", "func", _param_list, new ConExpression(1)));
+    interpreterState caller_istate =
+        caller_frame->as_interpreter_frame()->interpreter_state();
+    interpreterState callee_istate =
+        callee_frame->as_interpreter_frame()->interpreter_state();
+    Method *callee = caller_istate->callee();
+
+    int offset = caller_istate->stack_base() - callee_istate->locals() - 1;
+
+    BasicType type = callee->result_type();
+    Expression *exp;
+
+    if (type == T_OBJECT) {
+      ShouldNotReachHere();
+    } else if (type == T_ARRAY) {
+      ShouldNotReachHere();
+    } else {
+      exp = new SymbolExpression();
+
+      // switch (type) {
+      // case T_BYTE:
+      // case T_CHAR:
+      // case T_FLOAT:
+      // case T_INT:
+      // case T_SHORT:
+      // case T_BOOLEAN:
+      //   break;
+      // case T_LONG:
+      // case T_DOUBLE:
+      //   break;
+      // default:
+      //   ShouldNotReachHere();
+      //   break;
+      // }
+      ConcolicMngr::ctx->set_local_slot(offset, exp);
+    }
+
+    ConcolicMngr::record_path_condition(
+        new MethodExpression("Example", "func", _param_list, exp));
     this->reset();
     ConcolicMngr::is_symbolizing_method = false;
   }

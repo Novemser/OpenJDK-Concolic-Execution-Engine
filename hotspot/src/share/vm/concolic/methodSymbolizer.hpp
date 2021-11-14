@@ -18,7 +18,7 @@ private:
 
 public:
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
-  void finish_method(ZeroFrame *caller_frame);
+  void finish_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
 
 private:
   void reset();

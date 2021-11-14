@@ -4,6 +4,7 @@
 #include "utilities/ostream.hpp"
 
 ulong Expression::total_count = 0;
+int SymbolExpression::sym_method_count = 0;
 
 void Expression::print() { tty->indent().print("ref_count: %u", _ref_count); }
 
@@ -24,7 +25,12 @@ SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
 
 SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int version,
                                    int load_count) {
-  int ret= sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, version, load_count);
+  int ret = sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, version, load_count);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
+}
+
+SymbolExpression::SymbolExpression() {
+  int ret = sprintf(_str, "M_%d", sym_method_count++);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 

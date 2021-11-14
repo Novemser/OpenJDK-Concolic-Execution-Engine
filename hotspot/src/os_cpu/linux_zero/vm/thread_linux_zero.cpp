@@ -59,7 +59,7 @@ void JavaThread::pop_zero_frame() {
     ConcolicMngr::ctx->get_shadow_stack().pop(temp_frame);
   }
   if (ConcolicMngr::has_symbolized_method()) {
-    ConcolicMngr::method_sym->finish_method(_top_zero_frame);
+    ConcolicMngr::method_sym->finish_method(_top_zero_frame, temp_frame);
   }
 #endif
 }
