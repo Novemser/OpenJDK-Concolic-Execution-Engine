@@ -125,23 +125,7 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
       ShouldNotReachHere();
     } else {
       exp = new SymbolExpression();
-
-      // switch (type) {
-      // case T_BYTE:
-      // case T_CHAR:
-      // case T_FLOAT:
-      // case T_INT:
-      // case T_SHORT:
-      // case T_BOOLEAN:
-      //   break;
-      // case T_LONG:
-      // case T_DOUBLE:
-      //   break;
-      // default:
-      //   ShouldNotReachHere();
-      //   break;
-      // }
-      ConcolicMngr::ctx->set_local_slot(offset, exp);
+      ConcolicMngr::ctx->set_stack_slot(offset, exp);
     }
 
     ConcolicMngr::record_path_condition(

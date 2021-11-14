@@ -15,23 +15,23 @@ public:
 
     sym_oid_t sym_oid; // for comparison
     /**
-     * TODO: shall we still use the name `index`? Although we changed to offset 
-     * for symbolic object, this field (`index`) is also used for tmp_sym's index. 
-     * So I didn't change its name.
+     * TODO: shall we still use the name `index`? Although we changed to offset
+     * for symbolic object, this field (`index`) is also used for tmp_sym's
+     * index. So I didn't change its name.
      */
     int index;
-    Expression *sym_exp;
+    Expression *exp;
 
     inline void reset() {
       sym_oid = 0;
       index = -1;
-      sym_exp = NULL;
+      exp = NULL;
     }
 
     Entry &operator=(const Entry &other) {
       this->sym_oid = other.sym_oid;
       this->index = other.index;
-      this->sym_exp = other.sym_exp;
+      this->exp = other.exp;
       return *this;
     }
   };
@@ -45,26 +45,24 @@ public:
 
   void init(int max_slot_size);
 
-  void set_slot(int offset, const Entry &other) {
-    _tbl[offset] = other;
-  }
+  void set_slot(int offset, const Entry &other) { _tbl[offset] = other; }
 
-  void set_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid, int index) {
+  void set_slot(int offset, Expression *exp, sym_oid_t sym_oid, int index) {
     Entry &entry = _tbl[offset];
-    entry.sym_exp = sym_exp;
+    entry.exp = exp;
     entry.sym_oid = sym_oid;
     entry.index = index;
   }
 
-  void set_slot(int offset, Expression *sym_exp) {
+  void set_slot(int offset, Expression *exp) {
     Entry &entry = _tbl[offset];
-    entry.sym_exp = sym_exp;
+    entry.exp = exp;
   }
 
   void clear_slot(int offset) { _tbl[offset].reset(); }
 
   Expression *get_slot(int offset) {
-    Expression *ret = _tbl[offset].sym_exp;
+    Expression *ret = _tbl[offset].exp;
     // assert(ret, "not null");
     return ret;
   }
