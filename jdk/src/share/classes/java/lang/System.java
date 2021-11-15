@@ -416,6 +416,11 @@ public final class System {
     public static native void symbolize(Object obj);
 
     /**
+     * make an method symbolic
+     */
+    public static native void symbolizeMethod(Object holder_name, Object callee_name);
+
+    /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.
      * A subsequence of array components are copied from the source

@@ -8,6 +8,38 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
+void MethodSymbolizer::add_symbolic_method(std::string class_name, 
+                                           std::string method_name) {
+  ClassMapIt class_map_it = _symbolicMethods.insert(std::make_pair(class_name, (MethodSet*)NULL)).first;
+  if (class_map_it->second == NULL) {
+    class_map_it->second = new MethodSet();
+  }
+  class_map_it->second->insert(method_name);
+}
+
+bool MethodSymbolizer::is_symbolic_method(std::string class_name, 
+                                          std::string method_name) {
+  ClassMapIt class_map_it = _symbolicMethods.find(class_name); 
+  if (class_map_it != _symbolicMethods.end()) {
+    MethodSet *method_set = class_map_it->second;
+    return method_set->find(method_name) != method_set->end();
+  }
+  return false;
+}
+
+void MethodSymbolizer::print() {
+  tty->print_cr("symbolic methods:");
+  for (ClassMapIt class_map_it = _symbolicMethods.begin(); class_map_it != _symbolicMethods.end(); ++class_map_it) {
+    tty->print_cr("%s", class_map_it->first.c_str());
+    if (class_map_it->second) {
+      MethodSet *method_set = class_map_it->second;
+      for (MethodSetIt method_set_it = method_set->begin(); method_set_it != method_set->end(); ++method_set_it) {
+        tty->print_cr("  %s", method_set_it->c_str());
+      }
+    }
+  }
+}
+
 void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
                                             ZeroFrame *callee_frame) {
   assert(callee_frame->is_interpreter_frame(), "should be");
@@ -105,17 +137,15 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
   ResourceMark rm;
 
-  Symbol *callee_holder_name = callee->method_holder()->name();
-  Symbol *callee_name = callee->name();
+  _callee_holder_name_string = std::string(callee->method_holder()->name()->as_C_string());
+  _callee_name_string = std::string(callee->name()->as_C_string());
 
-  if (callee_holder_name->equals("Example")) {
+  if (is_symbolic_method(_callee_holder_name_string, _callee_name_string)) {
     tty->print_cr("Calling function name: %s", 
                   callee->name_and_sig_as_C_string());
-    if (callee_name->equals("func")) {
-      invoke_method_helper(caller_frame, callee_frame);
-      _frame = caller_frame;
-      ConcolicMngr::is_symbolizing_method = true;
-    }
+    invoke_method_helper(caller_frame, callee_frame);
+    _frame = caller_frame;
+    ConcolicMngr::is_symbolizing_method = true;
   }
 }
 
@@ -145,7 +175,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
     }
 
     ConcolicMngr::record_path_condition(
-        new MethodExpression("Example", "func", _param_list, exp));
+        new MethodExpression(_callee_holder_name_string.c_str(), 
+                             _callee_name_string.c_str(), _param_list, exp));
     this->reset();
     ConcolicMngr::is_symbolizing_method = false;
   }

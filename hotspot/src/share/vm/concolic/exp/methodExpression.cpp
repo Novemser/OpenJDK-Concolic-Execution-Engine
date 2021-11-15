@@ -39,6 +39,7 @@ void MethodExpression::print() {
   tty->print_cr("%s(", _method_str);
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
+    tty->print("  ");
     _param_list[i]->print();
   }
   tty->print(") -> ");
