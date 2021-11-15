@@ -114,14 +114,15 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
 
   // TODO: directly transfer SymObj*
   SymObj *sym_obj;
+  SymArr *sym_arr;
 
   switch (fd->field_type()) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
-    // we treat elements in an array as `field`
-    assert(false, "unhandled!");
-    // TODO: return true;
+    sym_arr = this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0,
+                                                 FIELD_INDEX_ARRAY_LENGTH));
     return false;
   default:
     sym_obj = this->_ctx.get_or_alloc_sym_obj(obj);
