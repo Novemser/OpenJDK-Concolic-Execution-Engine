@@ -121,8 +121,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
     sym_arr = this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0,
-                                                 FIELD_INDEX_ARRAY_LENGTH));
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0, 0));
     return false;
   default:
     sym_obj = this->_ctx.get_or_alloc_sym_obj(obj);

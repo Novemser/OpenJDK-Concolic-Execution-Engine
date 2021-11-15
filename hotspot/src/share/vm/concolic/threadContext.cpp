@@ -36,8 +36,7 @@ void ThreadContext::symbolize(Handle handle) {
     this->symbolize_recursive(handle());
   } else if (handle()->is_array()) {
     SymArr *sym_arr = this->alloc_sym_array((arrayOop)handle());
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0,
-                                                 FIELD_INDEX_ARRAY_LENGTH));
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0, 0));
     /**
      * Currently, we do not call symbolize_recursive for array
      * Because symbolic array always return a new symbolic expression.
