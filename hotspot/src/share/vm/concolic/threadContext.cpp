@@ -4,6 +4,7 @@
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/exp/expression.hpp"
 #include "concolic/fieldTraverser.hpp"
+#include "concolic/reference/symbolicString.hpp"
 #include "utilities/vmError.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
@@ -12,11 +13,11 @@ ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
 }
 
 ThreadContext::~ThreadContext() {
-  for (SymStore::iterator iter = _sym_instances.begin();
-       iter != _sym_instances.end(); ++iter) {
+  for (SymStore::iterator iter = _sym_refs.begin(); iter != _sym_refs.end();
+       ++iter) {
     delete iter->second;
   }
-  _sym_instances.clear();
+  _sym_refs.clear();
 
   int size = _sym_tmp_exps.size();
   for (int i = 1; i != size; ++i) {
@@ -57,18 +58,25 @@ SymObj *ThreadContext::get_or_alloc_sym_obj(oop obj) {
 SymObj *ThreadContext::alloc_sym_obj(oop obj) {
   sym_oid_t sym_oid = get_next_sym_oid();
   obj->set_sym_oid(sym_oid);
+  SymObj *sym_obj;
 
-  SymObj *sym_obj = new SymObj(sym_oid);
-  this->set_sym_instance(sym_oid, sym_obj);
+  Klass *klass = obj->klass();
+  if (klass->name()->equals("java/lang/String")) {
+    sym_obj = new SymObj(sym_oid);
+  } else {
+    sym_obj = new SymObj(sym_oid);
+  }
+
+  this->set_sym_ref(sym_oid, sym_obj);
 
   return sym_obj;
 }
 
 SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
-  SymObj *ret = (SymObj *)_sym_instances[sym_oid];
+  SymObj *ret = (SymObj *)_sym_refs[sym_oid];
   /**
-   * When this assertion is broken, 
-   * it means that the target object is not initialized with NULL_SYM_OID 
+   * When this assertion is broken,
+   * it means that the target object is not initialized with NULL_SYM_OID
    */
   assert(ret != NULL, "null sym obj?");
   return ret;
@@ -92,7 +100,7 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
   // }
 
   SymArr *sym_arr = new SymArr(sym_oid, length_exp);
-  this->set_sym_instance(sym_oid, sym_arr);
+  this->set_sym_ref(sym_oid, sym_arr);
 
   this->record_path_condition(
       new ArrayInitExpression(sym_arr->get_sym_oid(), array));
@@ -101,10 +109,10 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 }
 
 SymArr *ThreadContext::get_sym_array(sym_oid_t sym_oid) {
-  SymArr *ret = (SymArr *)_sym_instances[sym_oid];
+  SymArr *ret = (SymArr *)_sym_refs[sym_oid];
   /**
-   * When this assertion is broken, 
-   * it means that the target object is not initialized with NULL_SYM_OID 
+   * When this assertion is broken,
+   * it means that the target object is not initialized with NULL_SYM_OID
    */
   assert(ret != NULL, "null sym obj?");
   return ret;
@@ -137,8 +145,8 @@ void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
 }
 
 void ThreadContext::print() {
-  for (SymStore::iterator sym_iter = _sym_instances.begin();
-       sym_iter != _sym_instances.end(); ++sym_iter) {
+  for (SymStore::iterator sym_iter = _sym_refs.begin();
+       sym_iter != _sym_refs.end(); ++sym_iter) {
     tty->print_cr("- sym_obj[%lu]:", sym_iter->first);
     sym_iter->second->print();
   }

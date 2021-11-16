@@ -3,9 +3,9 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/instance/symbolicArray.hpp"
-#include "concolic/instance/symbolicObject.hpp"
 #include "concolic/pathCondition.hpp"
+#include "concolic/reference/symbolicArray.hpp"
+#include "concolic/reference/symbolicObject.hpp"
 #include "concolic/shadow/shadowStack.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
@@ -17,13 +17,13 @@ class ThreadContext {
   /**
    * TODO: make this hashtable!
    */
-  typedef std::map<sym_oid_t, SymInstance *> SymStore;
+  typedef std::map<sym_oid_t, SymRef *> SymStore;
   typedef std::vector<Expression *> SymTmpExpStore;
 
 private:
   JavaThread *_thread;
   ShadowStack _s_stack;
-  SymStore _sym_instances;
+  SymStore _sym_refs;
   SymTmpExpStore _sym_tmp_exps;
   PathCondition _path_condition;
 
@@ -80,8 +80,8 @@ public:
 private:
   void symbolize_recursive(oop obj);
 
-  void set_sym_instance(sym_oid_t sym_oid, SymInstance *sym_instance) {
-    _sym_instances.insert(std::make_pair(sym_oid, sym_instance));
+  void set_sym_ref(sym_oid_t sym_oid, SymRef *sym_ref) {
+    _sym_refs.insert(std::make_pair(sym_oid, sym_ref));
   }
 
   sym_oid_t get_next_sym_oid() {

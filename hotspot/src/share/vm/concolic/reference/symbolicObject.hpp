@@ -1,18 +1,18 @@
-#ifndef SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICOBJECT_HPP
-#define SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICOBJECT_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
 
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
-#include "concolic/instance/symbolicInstance.hpp"
+#include "concolic/reference/symbolicReference.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>
 #include <stdio.h>
 
-class SymObj : public SymInstance{
+class SymObj : public SymRef{
   typedef std::map<int, Expression *> ExpStore;
 
 private:
@@ -33,4 +33,4 @@ public:
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICOBJECT_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
