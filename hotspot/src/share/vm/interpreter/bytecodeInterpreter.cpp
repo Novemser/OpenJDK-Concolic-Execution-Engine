@@ -2029,7 +2029,7 @@ run:
         stack_offset + arrayOff + 1);                                          \
     if (arrObj->is_symbolic() || index_exp) {                                  \
       SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);     \
-      sym_oid_t sym_arr_oid = arrObj->get_sym_oid();                           \
+      sym_rid_t sym_arr_oid = arrObj->get_sym_rid();                           \
                                                                                \
       if (!index_exp) {                                                        \
         index_exp = new ConExpression(index);                                  \
@@ -2086,7 +2086,7 @@ run:
               if (!arrObj->is_symbolic()) {
                 ConcolicMngr::ctx->alloc_sym_array(arrObj);
               }
-              sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
+              sym_rid_t sym_arr_oid = arrObj->get_sym_rid();
 
               if (!index_exp) {
                 index_exp = new ConExpression(index);
@@ -2095,9 +2095,9 @@ run:
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
               SymbolExpression *value_exp = new SymbolExpression(
-                  obj->get_sym_oid(), SymbolExpression::NULL_INDEX);
+                  obj->get_sym_rid(), SymbolExpression::NULL_INDEX);
               ConcolicMngr::record_path_condition(new ArrayExpression(
-                  arrObj->get_sym_oid(), index_exp, value_exp, true));
+                  arrObj->get_sym_rid(), index_exp, value_exp, true));
             }
           }
 #endif
@@ -2127,7 +2127,7 @@ run:
       if (!arrObj->is_symbolic()) {                                            \
         ConcolicMngr::ctx->alloc_sym_array(arrObj);                            \
       }                                                                        \
-      sym_oid_t sym_arr_oid = arrObj->get_sym_oid();                           \
+      sym_rid_t sym_arr_oid = arrObj->get_sym_rid();                           \
                                                                                \
       if (!value_exp) {                                                        \
         value_exp = new ConExpression(value);                                  \
@@ -2207,7 +2207,7 @@ run:
               if (!arrObj->is_symbolic()) {
                 ConcolicMngr::ctx->alloc_sym_array(arrObj);
               }
-              sym_oid_t sym_arr_oid = arrObj->get_sym_oid();
+              sym_rid_t sym_arr_oid = arrObj->get_sym_rid();
 
               if (!index_exp) {
                 index_exp = new ConExpression(index);
@@ -2218,7 +2218,7 @@ run:
               }
 
               SymbolExpression *value_exp = new SymbolExpression(
-                  rhsObject->get_sym_oid(), SymbolExpression::NULL_INDEX);
+                  rhsObject->get_sym_rid(), SymbolExpression::NULL_INDEX);
               ConcolicMngr::record_path_condition(new ArrayExpression(
                   sym_arr_oid, index_exp, value_exp, false));
             }
@@ -2257,7 +2257,7 @@ run:
 #ifdef ENABLE_CONCOLIC
           if (ConcolicMngr::can_do_concolic()) {
             if (ary->is_symbolic()) {
-              sym_oid_t sym_arr_oid = ary->get_sym_oid();
+              sym_rid_t sym_arr_oid = ary->get_sym_rid();
 
               SymArr* sym_arr = ConcolicMngr::ctx->get_sym_array(sym_arr_oid);
               Expression *length_exp = sym_arr->get_length_exp();
@@ -2488,16 +2488,16 @@ run:
                */
               if (tos_type != atos) {
                 int stack_offset = GET_STACK_OFFSET;
-                sym_oid_t sym_oid = obj->get_sym_oid();
+                sym_rid_t sym_rid = obj->get_sym_rid();
 
                 if (tos_type != ltos && tos_type != dtos) {
                   stack_offset -= 1;
                 }
 
-                SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_oid);
+                SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_rid);
                 Expression* sym_exp = sym_inst->get(field_offset);
                 ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, 
-                                                  sym_oid, field_offset);
+                                                  sym_rid, field_offset);
               }
             } else {
               CONCOLIC_CONST(-1);
@@ -2742,9 +2742,9 @@ run:
 #ifdef ENABLE_CONCOLIC
               /**
                * This is where an object created
-               * We can set the default sym_oid here
+               * We can set the default sym_rid here
                */
-              result->set_sym_oid(NULL_SYM_OID);
+              result->set_sym_rid(NULL_SYM_RID);
 #endif
               // Must prevent reordering of stores for object initialization
               // with stores that publish the new object.
@@ -2983,7 +2983,7 @@ run:
           result = THREAD->vm_result();
         }
 #ifdef ENABLE_CONCOLIC
-        result->set_sym_oid(NULL_SYM_OID);
+        result->set_sym_rid(NULL_SYM_RID);
 #endif
 
         VERIFY_OOP(result);

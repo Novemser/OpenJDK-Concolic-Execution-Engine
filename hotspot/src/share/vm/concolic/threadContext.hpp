@@ -17,7 +17,7 @@ class ThreadContext {
   /**
    * TODO: make this hashtable!
    */
-  typedef std::map<sym_oid_t, SymRef *> SymStore;
+  typedef std::map<sym_rid_t, SymRef *> SymStore;
   typedef std::vector<Expression *> SymTmpExpStore;
 
 private:
@@ -27,7 +27,7 @@ private:
   SymTmpExpStore _sym_tmp_exps;
   PathCondition _path_condition;
 
-  sym_oid_t _sym_oid_counter;
+  sym_rid_t _sym_rid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
 
 public:
@@ -43,11 +43,15 @@ public:
 
   SymInstance *get_or_alloc_sym_inst(oop obj);
   SymInstance *alloc_sym_inst(oop obj);
-  SymInstance *get_sym_inst(sym_oid_t sym_oid);
+  inline SymInstance *get_sym_inst(oop obj) {
+    return get_sym_inst(obj->get_sym_rid());
+  }
+
+  SymInstance *get_sym_inst(sym_rid_t sym_rid);
 
   SymArr *get_or_alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
   SymArr *alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
-  SymArr *get_sym_array(sym_oid_t sym_oid);
+  SymArr *get_sym_array(sym_rid_t sym_rid);
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
@@ -59,10 +63,10 @@ public:
 public:
   /**
    * this will generate a new tmp_id; use it when `sym_exp` is newly
-   * calculated, which doesn't have `sym_oid` and `index`
+   * calculated, which doesn't have `sym_rid` and `index`
    */
   void set_stack_slot(int offset, Expression *sym_exp);
-  void set_stack_slot(int offset, Expression *sym_exp, sym_oid_t sym_oid,
+  void set_stack_slot(int offset, Expression *sym_exp, sym_rid_t sym_rid,
                       int index);
   Expression *get_stack_slot(int offset);
   Expression *get_stack_slot_and_detach(int offset);
@@ -80,17 +84,17 @@ public:
 private:
   void symbolize_recursive(oop obj);
 
-  void set_sym_ref(sym_oid_t sym_oid, SymRef *sym_ref) {
-    _sym_refs.insert(std::make_pair(sym_oid, sym_ref));
+  void set_sym_ref(sym_rid_t sym_rid, SymRef *sym_ref) {
+    _sym_refs.insert(std::make_pair(sym_rid, sym_ref));
   }
 
-  sym_oid_t get_next_sym_oid() {
-    sym_oid_t ret = _sym_oid_counter++;
-    assert(ret < MAX_SYM_OID, "sym_oid limitted");
+  sym_rid_t get_next_sym_rid() {
+    sym_rid_t ret = _sym_rid_counter++;
+    assert(ret < MAX_SYM_RID, "sym_rid limitted");
     return ret;
   }
 
-  inline void init_sym_oid_counter() { _sym_oid_counter = 1; }
+  inline void init_sym_rid_counter() { _sym_rid_counter = 1; }
   inline void init_sym_tmp_id_counter() {
     /**
      * tmp_id start from 1.

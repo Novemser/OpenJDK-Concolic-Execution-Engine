@@ -176,7 +176,7 @@ Handle java_lang_String::basic_create(int length, TRAPS) {
   typeArrayOop buffer;
     buffer = oopFactory::new_charArray(length, CHECK_NH);
 #ifdef ENABLE_CONCOLIC
-    buffer->set_sym_oid(NULL_SYM_OID);
+    buffer->set_sym_rid(NULL_SYM_RID);
 #endif
   // Point the String at the char array
   obj = h_obj();
@@ -589,7 +589,7 @@ void java_lang_Class::create_mirror(KlassHandle k, Handle class_loader,
     Handle mirror = InstanceMirrorKlass::cast(SystemDictionary::Class_klass())->allocate_instance(k, CHECK);
 
 #ifdef ENABLE_CONCOLIC
-    mirror()->set_sym_oid(NULL_SYM_OID);
+    mirror()->set_sym_rid(NULL_SYM_RID);
 #endif
 
     // Setup indirection from mirror->klass

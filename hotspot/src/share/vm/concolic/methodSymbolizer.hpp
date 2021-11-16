@@ -5,42 +5,47 @@
 
 #include "concolic/exp/expression.hpp"
 
-#include <vector>
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 class ZeroFrame;
 
 class MethodSymbolizer {
-  typedef std::vector<Expression *> ParamList;
   typedef std::set<std::string> SymMethodSet;
   typedef SymMethodSet::iterator SymMethodSetIt;
-  typedef std::map<std::string, SymMethodSet*> SymClassMap;
+  typedef std::map<std::string, SymMethodSet *> SymClassMap;
   typedef SymClassMap::iterator SymClassMapIt;
 
-private:
   SymClassMap _symbolicMethods;
-  ZeroFrame *_frame;
-  ParamList _param_list;
-
-  std::string _callee_holder_name_string;
-  std::string _callee_name_string;
 
 public:
-  ~MethodSymbolizer();
-  
-  void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
-  void finish_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
+  struct Handle {
+    ZeroFrame *caller_frame;
+    ZeroFrame *callee_frame;
+    exp_list_t param_list;
+    std::string callee_holder_name;
+    std::string callee_name;
 
-  void add_symbolic_method(std::string class_name, std::string method_name);
-  bool is_symbolic_method(std::string class_name, std::string method_name);
+    void reset();
+  } _handle;
+
+  ~MethodSymbolizer();
+
+  void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
+  void finish_method(ZeroFrame *caller_frame);
+
+  void add_symbolic_method(const std::string &class_name,
+                           const std::string &method_name);
 
   void print();
 
 private:
   void invoke_method_helper(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
-  void reset();
+  void finish_method_helper(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
+
+  SymMethodSet *get_sym_methods(const std::string class_name);
 };
 
 #endif

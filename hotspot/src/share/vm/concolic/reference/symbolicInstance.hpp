@@ -12,24 +12,20 @@
 #include <map>
 #include <stdio.h>
 
-class SymInstance : public SymRef{
-  typedef std::map<int, Expression *> ExpStore;
+class SymInstance : public SymRef {
+public:
+  SymInstance(sym_rid_t sym_rid) : SymRef(sym_rid) {}
+  ~SymInstance() {}
 
-private:
-  ExpStore _exps;
+  virtual Expression *get(int field_offset) = 0;
+  virtual Expression *get_ref_exp() = 0;
+
+  virtual void init_sym_exp(int field_offset) = 0;
+  virtual void init_sym_exp(int field_offset, Expression *exp) = 0;
+  virtual void set_sym_exp(int field_offset, Expression *exp) = 0;
 
 public:
-  SymInstance(sym_oid_t sym_oid);
-  ~SymInstance();
-
-  Expression *get(int field_offset);
-
-  void init_sym_exp(int field_offset);
-  void init_sym_exp(int field_offset, Expression *exp);
-  void set_sym_exp(int field_offset, Expression *exp);
-
-public:
-  void print();
+  virtual void print() = 0;
 };
 
 #endif // ENABLE_CONCOLIC

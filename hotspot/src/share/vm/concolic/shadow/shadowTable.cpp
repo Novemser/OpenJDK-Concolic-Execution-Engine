@@ -24,8 +24,8 @@ void ShadowTable::print() {
   for (int i = 0; i < size; ++i) {
     int offset = size - i - 1;
     Entry &entry = _tbl[offset];
-    tty->print_cr("     [%d] SymExpression: %p, sym_oid: %lu, index %d", offset,
-                  entry.exp, entry.sym_oid, entry.index);
+    tty->print_cr("     [%d] SymExpression: %p, sym_rid: %lu, index %d", offset,
+                  entry.exp, entry.sym_rid, entry.index);
   }
 }
 

@@ -3,12 +3,10 @@
 #include "concolic/exp/methodExpression.hpp"
 #include "utilities/ostream.hpp"
 
-MethodExpression::MethodExpression(const char *holder, const char *method,
-                                   ParamList &param_list, Expression *res_exp)
-    : _res_exp(res_exp) {
-
-  int ret = sprintf(_method_str, "%s.%s", holder, method);
-  assert(ret <= METHOD_NAME_LENGTH, "METHOD_NAME_LENGTH exceeded!");
+MethodExpression::MethodExpression(const std::string &holder,
+                                   const std::string &method,
+                                   exp_list_t &param_list, Expression *res_exp)
+    : _name(holder + '.' + method), _res_exp(res_exp) {
 
   // all exp must be not null
 
@@ -18,6 +16,10 @@ MethodExpression::MethodExpression(const char *holder, const char *method,
     _param_list[i]->inc_ref();
   }
 
+  /**
+   * It seems that methods returning void does not need to be symbolized?
+   */
+  assert(_res_exp != NULL, "not null");
   _res_exp->inc_ref();
 }
 
@@ -36,7 +38,7 @@ MethodExpression::~MethodExpression() {
 }
 
 void MethodExpression::print() {
-  tty->print_cr("%s(", _method_str);
+  tty->print_cr("%s(", _name.c_str());
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
     tty->print("  ");

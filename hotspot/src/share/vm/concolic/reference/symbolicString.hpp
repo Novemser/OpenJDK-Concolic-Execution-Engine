@@ -3,16 +3,36 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/methodSymbolizer.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
 #include <string>
 
 class SymString : public SymInstance {
 private:
-  std::string str;
+  static sym_rid_t sym_string_count;
+
+  Expression *_ref_exp;
+  Expression *_exp;
 
 public:
-  SymString(sym_oid_t sym_oid);
+  SymString(sym_rid_t sym_rid);
   ~SymString();
+
+  Expression *get(int field_offset);
+  Expression *get_ref_exp() { return _ref_exp; };
+
+  void init_sym_exp(int field_offset);
+  void init_sym_exp(int field_offset, Expression *exp);
+  void set_sym_exp(int field_offset, Expression *exp);
+
+public:
+  void print();
+
+public:
+  static bool invoke_method(MethodSymbolizer::Handle &handle);
+  static int prepare_param(MethodSymbolizer::Handle &handle, BasicType type,
+                           intptr_t *locals, int locals_offset);
+  static void finish_method(MethodSymbolizer::Handle &handle);
 };
 
 #endif // ENABLE_CONCOLIC

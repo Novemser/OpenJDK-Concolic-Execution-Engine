@@ -13,7 +13,7 @@ public:
   struct Entry {
     Entry() { reset(); }
 
-    sym_oid_t sym_oid; // for comparison
+    sym_rid_t sym_rid; // for comparison
     /**
      * TODO: shall we still use the name `index`? Although we changed to offset
      * for symbolic object, this field (`index`) is also used for tmp_sym's
@@ -23,13 +23,13 @@ public:
     Expression *exp;
 
     inline void reset() {
-      sym_oid = 0;
+      sym_rid = 0;
       index = -1;
       exp = NULL;
     }
 
     Entry &operator=(const Entry &other) {
-      this->sym_oid = other.sym_oid;
+      this->sym_rid = other.sym_rid;
       this->index = other.index;
       this->exp = other.exp;
       return *this;
@@ -47,10 +47,10 @@ public:
 
   void set_slot(int offset, const Entry &other) { _tbl[offset] = other; }
 
-  void set_slot(int offset, Expression *exp, sym_oid_t sym_oid, int index) {
+  void set_slot(int offset, Expression *exp, sym_rid_t sym_rid, int index) {
     Entry &entry = _tbl[offset];
     entry.exp = exp;
-    entry.sym_oid = sym_oid;
+    entry.sym_rid = sym_rid;
     entry.index = index;
   }
 

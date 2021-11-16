@@ -14,15 +14,14 @@
 #include <vector>
 
 class ArrayInitExpression : public Expression {
-  typedef std::vector<Expression *> SymExpList;
   static const int EXP_NAME_LENGTH = 16;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
-  SymExpList _arr_exps;
+  exp_list_t _arr_exps;
 
 public:
-  ArrayInitExpression(sym_oid_t array_id, arrayOop array);
+  ArrayInitExpression(sym_rid_t array_id, arrayOop array);
   ~ArrayInitExpression();
 
 public:

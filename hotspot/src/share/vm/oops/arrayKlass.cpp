@@ -153,9 +153,9 @@ objArrayOop ArrayKlass::allocate_arrayArray(int n, int length, TRAPS) {
 #ifdef ENABLE_CONCOLIC
   /**
     * This is where an object created
-    * We can set the default sym_oid here
+    * We can set the default sym_rid here
     */
-  o->set_sym_oid(NULL_SYM_OID);
+  o->set_sym_rid(NULL_SYM_RID);
 #endif
   return o;
 }

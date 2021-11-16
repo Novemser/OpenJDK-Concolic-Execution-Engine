@@ -8,22 +8,17 @@
 #include "oops/oop.inline.hpp"
 
 #include <stdio.h>
+#include <string>
 #include <vector>
 
 class MethodExpression : public Expression {
-  typedef std::vector<Expression *> ParamList;
-
-private:
-  static const int METHOD_NAME_LENGTH = 16;
-
-private:
-  char _method_str[METHOD_NAME_LENGTH];
-  ParamList _param_list;
+  std::string _name;
+  exp_list_t _param_list;
   Expression *_res_exp;
 
 public:
-  MethodExpression(const char *holder, const char *method,
-                   ParamList &param_list, Expression *res_exp);
+  MethodExpression(const std::string &holder, const std::string &method,
+                   exp_list_t &param_list, Expression *res_exp);
   ~MethodExpression();
 
 public:

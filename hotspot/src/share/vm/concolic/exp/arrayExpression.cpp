@@ -3,7 +3,7 @@
 #include "concolic/exp/expression.hpp"
 #include "utilities/ostream.hpp"
 
-ArrayExpression::ArrayExpression(sym_oid_t array_id, Expression *index_exp,
+ArrayExpression::ArrayExpression(sym_rid_t array_id, Expression *index_exp,
                                  Expression *value_exp, bool is_load)
     : _index_exp(index_exp), _value_exp(value_exp), _is_load(is_load) {
   int ret = sprintf(_arr_str, "A_%lu", array_id);

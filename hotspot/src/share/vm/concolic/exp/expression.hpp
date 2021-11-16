@@ -10,6 +10,7 @@
 #include "utilities/ostream.hpp"
 
 #include <stdio.h>
+#include <vector>
 
 class Expression {
 private:
@@ -33,7 +34,7 @@ protected:
 class SymbolExpression : public Expression {
 public:
   static const int NULL_INDEX = -1;
-  static int sym_method_count;
+  static sym_rid_t sym_method_count;
 
 private:
   static const int EXP_NAME_LENGTH = 16;
@@ -41,8 +42,9 @@ private:
   char _str[EXP_NAME_LENGTH];
 
 public:
-  SymbolExpression(sym_oid_t sym_oid, int field_index);
-  SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int load_count);
+  SymbolExpression(sym_rid_t sym_rid, int field_index);
+  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count);
+  SymbolExpression(const char* prefix, sym_rid_t id);
   SymbolExpression();
   ~SymbolExpression();
 
@@ -93,13 +95,15 @@ private:
   Expression *_value_exp;
 
 public:
-  ArrayExpression(sym_oid_t array_id, Expression *index_exp,
+  ArrayExpression(sym_rid_t array_id, Expression *index_exp,
                   Expression *value_exp, bool is_load);
   ~ArrayExpression();
 
 public:
   void print();
 };
+
+typedef std::vector<Expression *> exp_list_t;
 
 #endif
 
