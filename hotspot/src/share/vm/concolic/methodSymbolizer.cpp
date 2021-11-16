@@ -78,7 +78,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
 
     if (type == T_OBJECT) {
       oop obj = *(oop *)(locals - begin_offset);
-      ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+      ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       /**
        *  TODO: May be this symbol expression can be used
        */
