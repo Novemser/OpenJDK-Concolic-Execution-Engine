@@ -43,6 +43,7 @@ public class Example {
 
         System.startConcolic();
         System.symbolize(obj1);
+        System.symbolizeMethod("Example", "func");
 
         long input = obj1;
         input = e.func(input);
