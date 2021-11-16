@@ -61,54 +61,45 @@ void SymString::print() {
   _ref_exp->print();
 }
 
-bool SymString::invoke_method(MethodSymbolizer::Handle &handle) {
-  if (handle.callee_name == "startsWith") {
-    interpreterState callee_istate =
-        handle.callee_frame->as_interpreter_frame()->interpreter_state();
-    interpreterState caller_istate =
-        handle.caller_frame->as_interpreter_frame()->interpreter_state();
-    Method *callee = callee_istate->method();
-
-    int begin_offset =
-        caller_istate->stack_base() - callee_istate->locals() - 1;
-    int end_offset = caller_istate->stack_base() - caller_istate->stack() - 1;
-    intptr_t *locals = ((intptr_t *)callee_istate->locals());
+bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "startsWith") {
+    int offset = handle.get_begin_offset();
+    register intptr_t *locals = handle.get_locals_ptr();
 
     // this
-    SymString::prepare_param(handle, T_OBJECT, locals, begin_offset);
-    ++begin_offset;
+    SymString::prepare_param(handle, T_OBJECT, locals, offset);
+    ++offset;
 
     ResourceMark rm;
-    SignatureStream ss(callee->signature());
+  SignatureStream ss(handle.get_callee_method()->signature());
     while (!ss.at_return_type()) {
-      begin_offset =
-          SymString::prepare_param(handle, ss.type(), locals, begin_offset);
+      offset = SymString::prepare_param(handle, ss.type(), locals, offset);
 
       ss.next();
-      ++begin_offset;
+      ++offset;
     }
-    assert(begin_offset == end_offset, "equal");
+    assert(offset == handle.get_end_offset(), "equal");
 
     return true;
   }
   return false;
 }
 
-int SymString::prepare_param(MethodSymbolizer::Handle &handle, BasicType type,
-                             intptr_t *locals, int locals_offset) {
+int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
+                             intptr_t *locals, int offset) {
   Expression *exp;
 
   if (type == T_OBJECT) {
-    oop obj = *(oop *)(locals - locals_offset);
+    oop obj = *(oop *)(locals - offset);
     exp = SymString::get_exp_of(obj);
   } else {
-    locals_offset += type2size[type] - 1;
+    offset += type2size[type] - 1;
 
-    exp = ConcolicMngr::ctx->get_stack_slot(locals_offset);
+    exp = ConcolicMngr::ctx->get_stack_slot(offset);
     if (!exp) {
       switch (type) {
       case T_INT:
-        exp = new ConExpression(*(jint *)(locals - locals_offset));
+        exp = new ConExpression(*(jint *)(locals - offset));
         break;
       default:
         ShouldNotReachHere();
@@ -117,28 +108,18 @@ int SymString::prepare_param(MethodSymbolizer::Handle &handle, BasicType type,
     }
   }
 
-  handle.param_list.push_back(exp);
-  return locals_offset;
+  handle.get_param_list().push_back(exp);
+  return offset;
 }
 
-void SymString::finish_method(MethodSymbolizer::Handle &handle) {
-  interpreterState caller_istate =
-      handle.caller_frame->as_interpreter_frame()->interpreter_state();
-  interpreterState callee_istate =
-      handle.callee_frame->as_interpreter_frame()->interpreter_state();
-  Method *callee = caller_istate->callee();
-  int offset = caller_istate->stack_base() - callee_istate->locals() - 1;
+void SymString::finish_method(MethodSymbolizerHandle &handle) {
+  BasicType type = handle.get_result_type();
 
-  BasicType type = callee->result_type();
-  Expression *exp;
-
-  if (handle.callee_name == "startsWith") {
+  if (handle.get_callee_name() == "startsWith") {
     assert(type == T_BOOLEAN, "should be");
-    ConcolicMngr::ctx->set_stack_slot(offset, new SymbolExpression());
   }
 
-  ConcolicMngr::record_path_condition(new MethodExpression(
-      handle.callee_holder_name, handle.callee_name, handle.param_list, exp));
+  MethodSymbolizer::finish_method_helper(handle);
 }
 
 Expression *SymString::get_exp_of(oop obj) {

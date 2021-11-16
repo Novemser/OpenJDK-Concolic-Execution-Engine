@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/methodSymbolizer.hpp"
+#include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
 #include <string>
 
@@ -32,10 +32,10 @@ public:
   void print();
 
 public:
-  static bool invoke_method(MethodSymbolizer::Handle &handle);
-  static void finish_method(MethodSymbolizer::Handle &handle);
+  static bool invoke_method(MethodSymbolizerHandle &handle);
+  static void finish_method(MethodSymbolizerHandle &handle);
 
-  static int prepare_param(MethodSymbolizer::Handle &handle, BasicType type,
+  static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset);
   static Expression *get_exp_of(oop obj);
 };
