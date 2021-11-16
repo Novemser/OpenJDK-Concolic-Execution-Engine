@@ -3,7 +3,10 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/exp/stringExpression.hpp"
+#include "concolic/utils.hpp"
 
+const char *SymString::TYPE_NAME = "java/lang/String";
 sym_rid_t SymString::sym_string_count = 0;
 
 SymString::SymString(sym_rid_t sym_rid)
@@ -53,7 +56,10 @@ void SymString::set_sym_exp(int field_offset, Expression *exp) {
   }
 }
 
-void SymString::print() {}
+void SymString::print() {
+  tty->print_cr("SymString: ");
+  _ref_exp->print();
+}
 
 bool SymString::invoke_method(MethodSymbolizer::Handle &handle) {
   if (handle.callee_name == "startsWith") {
@@ -94,15 +100,7 @@ int SymString::prepare_param(MethodSymbolizer::Handle &handle, BasicType type,
 
   if (type == T_OBJECT) {
     oop obj = *(oop *)(locals - locals_offset);
-    if (obj->is_symbolic()) {
-      SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-      assert(exp != NULL, "NOT NULL");
-    } else {
-      ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = new SymbolExpression(obj->get_sym_rid(),
-                                 SymbolExpression::NULL_INDEX);
-    }
+    exp = SymString::get_exp_of(obj);
   } else {
     locals_offset += type2size[type] - 1;
 
@@ -135,20 +133,26 @@ void SymString::finish_method(MethodSymbolizer::Handle &handle) {
   Expression *exp;
 
   if (handle.callee_name == "startsWith") {
-    if (type == T_OBJECT) {
-      ShouldNotReachHere();
-    } else if (type == T_ARRAY) {
-      ShouldNotReachHere();
-    } else {
-      exp = new SymbolExpression();
-      int delta = type2size[type] - 1;
-      assert(delta >= 0, "should be");
-      ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
-    }
+    assert(type == T_BOOLEAN, "should be");
+    ConcolicMngr::ctx->set_stack_slot(offset, new SymbolExpression());
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(
       handle.callee_holder_name, handle.callee_name, handle.param_list, exp));
+}
+
+Expression *SymString::get_exp_of(oop obj) {
+  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
+  Expression *exp;
+  if (obj->is_symbolic()) {
+    SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+    exp = sym_inst->get_ref_exp();
+    assert(exp != NULL, "NOT NULL");
+  } else {
+    ResourceMark rm;
+    exp = new StringExpression(OopUtils::java_string_to_c(obj));
+  }
+  return exp;
 }
 
 #endif

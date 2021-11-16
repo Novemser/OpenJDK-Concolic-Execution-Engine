@@ -8,8 +8,11 @@
 
 namespace OopUtils {
 
-typeArrayOop charArrayObjFromJavaString(oop str_obj);
-char* javaStringToC(oop str_obj);
+typeArrayOop java_string_to_char_array(oop str_obj);
+/**
+ * Do not forget to use ResourceMark before this function call!
+ */
+char* java_string_to_c(oop str_obj);
 
 } // namespace ConcolicUtils
 
