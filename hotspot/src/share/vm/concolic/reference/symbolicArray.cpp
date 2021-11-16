@@ -1,10 +1,10 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/instance/symbolicArray.hpp"
+#include "concolic/reference/symbolicArray.hpp"
 #include "utilities/ostream.hpp"
 
 SymArr::SymArr(sym_oid_t sym_oid, Expression *length_exp)
-    : SymInstance(sym_oid), _version(0), _load_count(0),
+    : SymRef(sym_oid), _version(0), _load_count(0),
       _length_exp(length_exp) {
   if (_length_exp) {
     _length_exp->inc_ref();

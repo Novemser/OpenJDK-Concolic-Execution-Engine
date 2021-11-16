@@ -1,5 +1,5 @@
-#ifndef SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICINSTANCE_HPP
-#define SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICINSTANCE_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICREFERENCE_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICREFERENCE_HPP
 
 #ifdef ENABLE_CONCOLIC
 
@@ -11,13 +11,13 @@
 #include <map>
 #include <stdio.h>
 
-class SymInstance {
+class SymRef {
 protected:
   sym_oid_t _sym_oid;
 
 public:
-  SymInstance(sym_oid_t sym_oid) : _sym_oid(sym_oid) {}
-  virtual ~SymInstance() {}
+  SymRef(sym_oid_t sym_oid) : _sym_oid(sym_oid) {}
+  virtual ~SymRef() {}
 
   inline sym_oid_t get_sym_oid() { return _sym_oid; }
 
@@ -25,4 +25,4 @@ public:
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICINSTANCE_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICREFERENCE_HPP

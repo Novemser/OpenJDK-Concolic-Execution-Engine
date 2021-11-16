@@ -664,8 +664,8 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
       int field_offset = entry->f2_as_index();
       sym_oid_t sym_oid = object->get_sym_oid();
 
-      SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-      Expression* sym_exp = sym_obj->get(field_offset);
+      SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_oid);
+      Expression* sym_exp = sym_inst->get(field_offset);
       ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
     }
   }

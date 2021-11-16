@@ -1,7 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/arrayInitExpression.hpp"
-#include "concolic/instance/symbolicArray.hpp"
 #include "utilities/ostream.hpp"
 
 ArrayInitExpression::ArrayInitExpression(sym_oid_t array_id, arrayOop array) {

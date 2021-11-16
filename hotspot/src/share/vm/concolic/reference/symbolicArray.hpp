@@ -1,18 +1,18 @@
-#ifndef SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICARRAY_HPP
-#define SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICARRAY_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICARRAY_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICARRAY_HPP
 
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
-#include "concolic/instance/symbolicInstance.hpp"
+#include "concolic/reference/symbolicReference.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
 #include <map>
 #include <stdio.h>
 
-class SymArr : public SymInstance {
+class SymArr : public SymRef {
 private:
   int _version;
   int _load_count;
@@ -44,4 +44,4 @@ public:
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_INSTANCE_SYMBOLICARRAY_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICARRAY_HPP
