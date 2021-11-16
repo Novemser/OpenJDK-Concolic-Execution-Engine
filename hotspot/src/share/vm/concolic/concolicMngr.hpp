@@ -13,8 +13,6 @@ class ConcolicMngr {
 #ifdef ENABLE_CONCOLIC
 private:
   static bool is_doing_concolic;
-  static typeArrayOop charArrayObjFromJavaString(oop str_obj);
-  static char* javaStringToC(oop str);
 
 public:
   static bool is_symbolizing_method;
