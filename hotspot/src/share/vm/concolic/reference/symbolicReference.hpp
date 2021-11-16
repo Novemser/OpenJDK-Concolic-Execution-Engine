@@ -21,7 +21,7 @@ public:
 
   inline sym_rid_t get_sym_rid() { return _sym_rid; }
 
-  virtual void print() {}
+  virtual void print() = 0;
 };
 
 #endif // ENABLE_CONCOLIC
