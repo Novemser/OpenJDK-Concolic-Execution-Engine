@@ -36,12 +36,13 @@
 
 /* Only register the performance-critical methods */
 static JNINativeMethod methods[] = {
-    {"currentTimeMillis", "()J",              (void *)&JVM_CurrentTimeMillis},
-    {"nanoTime",          "()J",              (void *)&JVM_NanoTime},
-    {"startConcolic",     "()J",              (void *)&JVM_StartConcolic},
-    {"endConcolic",     "()J",                (void *)&JVM_EndConcolic},
-    {"symbolize",         "(" OBJ ")V",       (void *)&JVM_Symbolize},
-    {"arraycopy",     "(" OBJ "I" OBJ "II)V", (void *)&JVM_ArrayCopy},
+    {"currentTimeMillis", "()J",                     (void *)&JVM_CurrentTimeMillis},
+    {"nanoTime",          "()J",                     (void *)&JVM_NanoTime},
+    {"startConcolic",     "()J",                     (void *)&JVM_StartConcolic},
+    {"endConcolic",       "()J",                     (void *)&JVM_EndConcolic},
+    {"symbolize",         "(" OBJ ")V",              (void *)&JVM_Symbolize},
+    {"symbolizeMethod",   "(" OBJ OBJ ")V",          (void *)&JVM_SymbolizeMethod},
+    {"arraycopy",         "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
 };
 
 #undef OBJ

@@ -8,6 +8,50 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
+MethodSymbolizer::~MethodSymbolizer() {
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
+    if (sym_class_map_it->second) {
+      delete sym_class_map_it->second;
+    }
+  }
+}
+
+void MethodSymbolizer::add_symbolic_method(std::string class_name, 
+                                           std::string method_name) {
+  SymClassMapIt sym_class_map_it = _symbolicMethods.insert(
+    std::make_pair(class_name, (SymMethodSet*)NULL)).first;
+  if (sym_class_map_it->second == NULL) {
+    sym_class_map_it->second = new SymMethodSet();
+  }
+  sym_class_map_it->second->insert(method_name);
+}
+
+bool MethodSymbolizer::is_symbolic_method(std::string class_name, 
+                                          std::string method_name) {
+  SymClassMapIt sym_class_map_it = _symbolicMethods.find(class_name); 
+  if (sym_class_map_it != _symbolicMethods.end()) {
+    SymMethodSet *sym_method_set = sym_class_map_it->second;
+    return sym_method_set->find(method_name) != sym_method_set->end();
+  }
+  return false;
+}
+
+void MethodSymbolizer::print() {
+  tty->print_cr("symbolic methods:");
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
+    tty->print_cr("%s", sym_class_map_it->first.c_str());
+    if (sym_class_map_it->second) {
+      SymMethodSet *sym_method_set = sym_class_map_it->second;
+      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin(); 
+           sym_method_set_it != sym_method_set->end(); ++sym_method_set_it) {
+        tty->print_cr("  %s", sym_method_set_it->c_str());
+      }
+    }
+  }
+}
+
 void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
                                             ZeroFrame *callee_frame) {
   assert(callee_frame->is_interpreter_frame(), "should be");
@@ -105,17 +149,15 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
   ResourceMark rm;
 
-  Symbol *callee_holder_name = callee->method_holder()->name();
-  Symbol *callee_name = callee->name();
+  _callee_holder_name_string = std::string(callee->method_holder()->name()->as_C_string());
+  _callee_name_string = std::string(callee->name()->as_C_string());
 
-  if (callee_holder_name->equals("Example")) {
+  if (is_symbolic_method(_callee_holder_name_string, _callee_name_string)) {
     tty->print_cr("Calling function name: %s", 
                   callee->name_and_sig_as_C_string());
-    if (callee_name->equals("func")) {
-      invoke_method_helper(caller_frame, callee_frame);
-      _frame = caller_frame;
-      ConcolicMngr::is_symbolizing_method = true;
-    }
+    invoke_method_helper(caller_frame, callee_frame);
+    _frame = caller_frame;
+    ConcolicMngr::is_symbolizing_method = true;
   }
 }
 
@@ -145,7 +187,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
     }
 
     ConcolicMngr::record_path_condition(
-        new MethodExpression("Example", "func", _param_list, exp));
+        new MethodExpression(_callee_holder_name_string.c_str(), 
+                             _callee_name_string.c_str(), _param_list, exp));
     this->reset();
     ConcolicMngr::is_symbolizing_method = false;
   }

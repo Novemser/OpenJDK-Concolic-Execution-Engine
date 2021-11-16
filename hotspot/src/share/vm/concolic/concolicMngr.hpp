@@ -4,6 +4,7 @@
 #include "jni_zero.h"
 
 #include "concolic/defs.hpp"
+#include "concolic/methodSymbolizer.hpp"
 #include "concolic/threadContext.hpp"
 #include "concolic/methodSymbolizer.hpp"
 #include "runtime/handles.hpp"
@@ -12,6 +13,8 @@ class ConcolicMngr {
 #ifdef ENABLE_CONCOLIC
 private:
   static bool is_doing_concolic;
+  static typeArrayOop charArrayObjFromJavaString(oop str_obj);
+  static char* javaStringToC(oop str);
 
 public:
   static bool is_symbolizing_method;
@@ -21,6 +24,7 @@ public:
   static jlong startConcolic(JavaThread *thread);
   static jlong endConcolic();
   static void symbolize(Handle handle);
+  static void symbolizeMethod(Handle holder_name_handle, Handle callee_name_handle);
 
   inline static bool has_symbolized_method() {
     return is_doing_concolic && is_symbolizing_method;
@@ -43,6 +47,7 @@ public:
   static jlong startConcolic();
   static jlong endConcolic();
   static void symbolize(Handle handle);
+  static void symbolizeMethod(Handle holder_name_handle, Handle callee_name_handle);
 #endif // ENABLE_CONCOLIC
 };
 
