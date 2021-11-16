@@ -8,6 +8,15 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
+MethodSymbolizer::~MethodSymbolizer() {
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
+    if (sym_class_map_it->second) {
+      delete sym_class_map_it->second;
+    }
+  }
+}
+
 void MethodSymbolizer::add_symbolic_method(std::string class_name, 
                                            std::string method_name) {
   SymClassMapIt sym_class_map_it = _symbolicMethods.insert(

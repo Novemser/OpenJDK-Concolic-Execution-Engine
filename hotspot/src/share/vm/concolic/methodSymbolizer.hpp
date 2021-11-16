@@ -28,7 +28,8 @@ private:
   std::string _callee_name_string;
 
 public:
-  // TODO: deconstructor to release memory
+  ~MethodSymbolizer();
+  
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
   void finish_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
 
