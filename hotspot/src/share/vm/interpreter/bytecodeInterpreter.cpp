@@ -2499,6 +2499,8 @@ run:
                 ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, 
                                                   sym_oid, field_offset);
               }
+            } else {
+              CONCOLIC_CONST(-1);
             }
           }
 #endif
