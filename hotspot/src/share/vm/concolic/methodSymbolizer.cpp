@@ -10,31 +10,34 @@
 
 void MethodSymbolizer::add_symbolic_method(std::string class_name, 
                                            std::string method_name) {
-  ClassMapIt class_map_it = _symbolicMethods.insert(std::make_pair(class_name, (MethodSet*)NULL)).first;
-  if (class_map_it->second == NULL) {
-    class_map_it->second = new MethodSet();
+  SymClassMapIt sym_class_map_it = _symbolicMethods.insert(
+    std::make_pair(class_name, (SymMethodSet*)NULL)).first;
+  if (sym_class_map_it->second == NULL) {
+    sym_class_map_it->second = new SymMethodSet();
   }
-  class_map_it->second->insert(method_name);
+  sym_class_map_it->second->insert(method_name);
 }
 
 bool MethodSymbolizer::is_symbolic_method(std::string class_name, 
                                           std::string method_name) {
-  ClassMapIt class_map_it = _symbolicMethods.find(class_name); 
-  if (class_map_it != _symbolicMethods.end()) {
-    MethodSet *method_set = class_map_it->second;
-    return method_set->find(method_name) != method_set->end();
+  SymClassMapIt sym_class_map_it = _symbolicMethods.find(class_name); 
+  if (sym_class_map_it != _symbolicMethods.end()) {
+    SymMethodSet *sym_method_set = sym_class_map_it->second;
+    return sym_method_set->find(method_name) != sym_method_set->end();
   }
   return false;
 }
 
 void MethodSymbolizer::print() {
   tty->print_cr("symbolic methods:");
-  for (ClassMapIt class_map_it = _symbolicMethods.begin(); class_map_it != _symbolicMethods.end(); ++class_map_it) {
-    tty->print_cr("%s", class_map_it->first.c_str());
-    if (class_map_it->second) {
-      MethodSet *method_set = class_map_it->second;
-      for (MethodSetIt method_set_it = method_set->begin(); method_set_it != method_set->end(); ++method_set_it) {
-        tty->print_cr("  %s", method_set_it->c_str());
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
+    tty->print_cr("%s", sym_class_map_it->first.c_str());
+    if (sym_class_map_it->second) {
+      SymMethodSet *sym_method_set = sym_class_map_it->second;
+      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin(); 
+           sym_method_set_it != sym_method_set->end(); ++sym_method_set_it) {
+        tty->print_cr("  %s", sym_method_set_it->c_str());
       }
     }
   }

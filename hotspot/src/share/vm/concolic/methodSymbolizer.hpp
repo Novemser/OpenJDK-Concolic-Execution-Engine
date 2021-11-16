@@ -14,13 +14,13 @@ class ZeroFrame;
 
 class MethodSymbolizer {
   typedef std::vector<Expression *> ParamList;
-  typedef std::set<std::string> MethodSet;
-  typedef MethodSet::iterator MethodSetIt;
-  typedef std::map<std::string, MethodSet*> ClassMap;
-  typedef ClassMap::iterator ClassMapIt;
+  typedef std::set<std::string> SymMethodSet;
+  typedef SymMethodSet::iterator SymMethodSetIt;
+  typedef std::map<std::string, SymMethodSet*> SymClassMap;
+  typedef SymClassMap::iterator SymClassMapIt;
 
 private:
-  ClassMap _symbolicMethods;
+  SymClassMap _symbolicMethods;
   ZeroFrame *_frame;
   ParamList _param_list;
 
