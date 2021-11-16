@@ -3,13 +3,14 @@
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/reference/symbolicString.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
 MethodSymbolizer::~MethodSymbolizer() {
-  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin();
        sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
     if (sym_class_map_it->second) {
       delete sym_class_map_it->second;
@@ -17,34 +18,25 @@ MethodSymbolizer::~MethodSymbolizer() {
   }
 }
 
-void MethodSymbolizer::add_symbolic_method(std::string class_name, 
-                                           std::string method_name) {
-  SymClassMapIt sym_class_map_it = _symbolicMethods.insert(
-    std::make_pair(class_name, (SymMethodSet*)NULL)).first;
+void MethodSymbolizer::add_symbolic_method(const std::string &class_name,
+                                           const std::string &method_name) {
+  SymClassMapIt sym_class_map_it =
+      _symbolicMethods.insert(std::make_pair(class_name, (SymMethodSet *)NULL))
+          .first;
   if (sym_class_map_it->second == NULL) {
     sym_class_map_it->second = new SymMethodSet();
   }
   sym_class_map_it->second->insert(method_name);
 }
 
-bool MethodSymbolizer::is_symbolic_method(std::string class_name, 
-                                          std::string method_name) {
-  SymClassMapIt sym_class_map_it = _symbolicMethods.find(class_name); 
-  if (sym_class_map_it != _symbolicMethods.end()) {
-    SymMethodSet *sym_method_set = sym_class_map_it->second;
-    return sym_method_set->find(method_name) != sym_method_set->end();
-  }
-  return false;
-}
-
 void MethodSymbolizer::print() {
   tty->print_cr("symbolic methods:");
-  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin(); 
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin();
        sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
     tty->print_cr("%s", sym_class_map_it->first.c_str());
     if (sym_class_map_it->second) {
       SymMethodSet *sym_method_set = sym_class_map_it->second;
-      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin(); 
+      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin();
            sym_method_set_it != sym_method_set->end(); ++sym_method_set_it) {
         tty->print_cr("  %s", sym_method_set_it->c_str());
       }
@@ -61,10 +53,8 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
       caller_frame->as_interpreter_frame()->interpreter_state();
   Method *callee = callee_istate->method();
 
-  int begin_offset =
-      caller_istate->stack_base() - callee_istate->locals() - 1;
-  int end_offset =
-      caller_istate->stack_base() - caller_istate->stack() - 1;
+  int begin_offset = caller_istate->stack_base() - callee_istate->locals() - 1;
+  int end_offset = caller_istate->stack_base() - caller_istate->stack() - 1;
   register intptr_t *locals = ((intptr_t *)callee_istate->locals());
 
   // Currently, we do not consider "this" object
@@ -90,8 +80,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
       /**
        *  TODO: May be this symbol expression can be used
        */
-      exp = new SymbolExpression(arrObj->get_sym_rid(),
-                                 sym_arr->get_version(),
+      exp = new SymbolExpression(arrObj->get_sym_rid(), sym_arr->get_version(),
                                  sym_arr->get_load_count());
     } else {
       begin_offset += type2size[type] - 1;
@@ -106,8 +95,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
           exp = new ConExpression(*(jchar *)(locals - begin_offset));
           break;
         case T_DOUBLE:
-          exp = new ConExpression(
-              ((VMJavaVal64 *)(locals - begin_offset))->d);
+          exp = new ConExpression(((VMJavaVal64 *)(locals - begin_offset))->d);
           break;
         case T_FLOAT:
           exp = new ConExpression(*(jfloat *)(locals - begin_offset));
@@ -116,8 +104,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
           exp = new ConExpression(*(jint *)(locals - begin_offset));
           break;
         case T_LONG:
-          exp = new ConExpression(
-              ((VMJavaVal64 *)(locals - begin_offset))->l);
+          exp = new ConExpression(((VMJavaVal64 *)(locals - begin_offset))->l);
           break;
         case T_SHORT:
           exp = new ConExpression(*(jshort *)(locals - begin_offset));
@@ -132,7 +119,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
       }
     }
 
-    _param_list.push_back(exp);
+    _handle.param_list.push_back(exp);
     ss.next();
     ++begin_offset;
   }
@@ -141,61 +128,93 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
 
 void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                                      ZeroFrame *callee_frame) {
-  if (!caller_frame->is_interpreter_frame()) return;
+  if (!caller_frame->is_interpreter_frame())
+    return;
   interpreterState caller_istate =
       caller_frame->as_interpreter_frame()->interpreter_state();
   Method *callee = caller_istate->callee();
-  if (callee == NULL) return;
+  if (callee == NULL)
+    return;
 
   ResourceMark rm;
 
-  _callee_holder_name_string = std::string(callee->method_holder()->name()->as_C_string());
-  _callee_name_string = std::string(callee->name()->as_C_string());
+  _handle.callee_holder_name =
+      std::string(callee->method_holder()->name()->as_C_string());
+  _handle.callee_name = std::string(callee->name()->as_C_string());
 
-  if (is_symbolic_method(_callee_holder_name_string, _callee_name_string)) {
-    tty->print_cr("Calling function name: %s", 
+  bool need_symbolize;
+  SymMethodSet *sym_methods = this->get_sym_methods(_handle.callee_holder_name);
+  if (sym_methods != NULL &&
+      sym_methods->find(_handle.callee_name) == sym_methods->end()) {
+    tty->print_cr("Calling function name: %s",
                   callee->name_and_sig_as_C_string());
     invoke_method_helper(caller_frame, callee_frame);
-    _frame = caller_frame;
+    need_symbolize = true;
+  } else if (_handle.callee_holder_name == "java/lang/String") {
+    need_symbolize = SymString::invoke_method(_handle);
+  }
+
+  if (need_symbolize) {
+    _handle.caller_frame = caller_frame;
+    _handle.callee_frame = callee_frame;
     ConcolicMngr::is_symbolizing_method = true;
   }
 }
 
-void MethodSymbolizer::finish_method(ZeroFrame *caller_frame,
-                                     ZeroFrame *callee_frame) {
-  if (caller_frame == _frame) {
-    interpreterState caller_istate =
-        caller_frame->as_interpreter_frame()->interpreter_state();
-    interpreterState callee_istate =
-        callee_frame->as_interpreter_frame()->interpreter_state();
-    Method *callee = caller_istate->callee();
-
-    int offset = caller_istate->stack_base() - callee_istate->locals() - 1;
-
-    BasicType type = callee->result_type();
-    Expression *exp;
-
-    if (type == T_OBJECT) {
-      ShouldNotReachHere();
-    } else if (type == T_ARRAY) {
-      ShouldNotReachHere();
+void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
+  if (caller_frame == _handle.caller_frame) {
+    if (_handle.callee_holder_name == "java/lang/String") {
+      SymString::finish_method(_handle);
     } else {
-      exp = new SymbolExpression();
-      int delta = type2size[type] - 1;
-      assert(delta >= 0, "should be");
-      ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
+      finish_method_helper(_handle.caller_frame, _handle.callee_frame);
     }
-
-    ConcolicMngr::record_path_condition(
-        new MethodExpression(_callee_holder_name_string.c_str(), 
-                             _callee_name_string.c_str(), _param_list, exp));
-    this->reset();
+    this->_handle.reset();
     ConcolicMngr::is_symbolizing_method = false;
   }
 }
 
-void MethodSymbolizer::reset() {
-  _frame = NULL;
-  _param_list.clear();
+MethodSymbolizer::SymMethodSet *
+MethodSymbolizer::get_sym_methods(const std::string class_name) {
+  SymClassMapIt sym_class_map_it = _symbolicMethods.find(class_name);
+  return sym_class_map_it != _symbolicMethods.end() ? sym_class_map_it->second
+                                                    : NULL;
 }
+
+void MethodSymbolizer::finish_method_helper(ZeroFrame *caller_frame,
+                                            ZeroFrame *callee_frame) {
+  interpreterState caller_istate =
+      caller_frame->as_interpreter_frame()->interpreter_state();
+  interpreterState callee_istate =
+      callee_frame->as_interpreter_frame()->interpreter_state();
+  Method *callee = caller_istate->callee();
+
+  int offset = caller_istate->stack_base() - callee_istate->locals() - 1;
+
+  BasicType type = callee->result_type();
+  Expression *exp;
+
+  if (type == T_OBJECT) {
+    ShouldNotReachHere();
+  } else if (type == T_ARRAY) {
+    ShouldNotReachHere();
+  } else {
+    exp = new SymbolExpression();
+    int delta = type2size[type] - 1;
+    assert(delta >= 0, "should be");
+    ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
+  }
+
+  ConcolicMngr::record_path_condition(
+      new MethodExpression(_handle.callee_holder_name, _handle.callee_name,
+                           _handle.param_list, exp));
+}
+
+void MethodSymbolizer::Handle::reset() {
+  caller_frame = NULL;
+  callee_frame = NULL;
+  param_list.clear();
+  callee_holder_name.clear();
+  callee_name.clear();
+}
+
 #endif

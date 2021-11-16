@@ -10,6 +10,7 @@
 #include "utilities/ostream.hpp"
 
 #include <stdio.h>
+#include <vector>
 
 class Expression {
 private:
@@ -100,6 +101,8 @@ public:
 public:
   void print();
 };
+
+typedef std::vector<Expression *> exp_list_t;
 
 #endif
 

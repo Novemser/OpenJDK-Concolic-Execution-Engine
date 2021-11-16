@@ -4,6 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/methodSymbolizer.hpp"
 #include <string>
 
 class SymString : public SymInstance {
@@ -22,6 +23,10 @@ public:
 
 public:
   void print();
+
+public:
+  static bool invoke_method(MethodSymbolizer::Handle& handle);
+  static void finish_method(MethodSymbolizer::Handle& handle);
 };
 
 #endif // ENABLE_CONCOLIC
