@@ -4,6 +4,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/expression.hpp"
+#include "concolic/methodSymbolizerHandle.hpp"
 
 #include <map>
 #include <set>
@@ -21,15 +22,7 @@ class MethodSymbolizer {
   SymClassMap _symbolicMethods;
 
 public:
-  struct Handle {
-    ZeroFrame *caller_frame;
-    ZeroFrame *callee_frame;
-    exp_list_t param_list;
-    std::string callee_holder_name;
-    std::string callee_name;
-
-    void reset();
-  } _handle;
+  MethodSymbolizerHandle _handle;
 
   ~MethodSymbolizer();
 
@@ -42,10 +35,14 @@ public:
   void print();
 
 private:
-  void invoke_method_helper(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
-  void finish_method_helper(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
+  SymMethodSet *get_sym_methods(const std::string& class_name);
 
-  SymMethodSet *get_sym_methods(const std::string class_name);
+public:
+  static void invoke_method_helper(MethodSymbolizerHandle &handle);
+  static void finish_method_helper(MethodSymbolizerHandle &handle);
+
+  static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
+                           intptr_t *locals, int locals_offset);
 };
 
 #endif
