@@ -4,21 +4,21 @@
 
 /**
  * this will generate a new tmp_id; use it when `exp` is newly
- * calculated, which doesn't have `sym_oid` and `index`
+ * calculated, which doesn't have `sym_rid` and `index`
  */
 void ThreadContext::set_stack_slot(int offset, Expression *exp) {
   assert(offset >= 0, "offset >= 0");
   sym_tmp_id_t sym_tmp_id = this->get_next_sym_tmp_id(exp);
   this->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-      offset, exp, NULL_SYM_OID, sym_tmp_id);
+      offset, exp, NULL_SYM_RID, sym_tmp_id);
 }
 
 void ThreadContext::set_stack_slot(int offset, Expression *exp,
-                                   sym_oid_t sym_oid, int index) {
+                                   sym_rid_t sym_rid, int index) {
   ShadowTable &opr_stack =
       this->get_shadow_stack().get_last_frame().get_opr_stack();
   if (exp) {
-    opr_stack.set_slot(offset, exp, sym_oid, index);
+    opr_stack.set_slot(offset, exp, sym_rid, index);
   } else {
     opr_stack.clear_slot(offset);
   }
@@ -34,7 +34,7 @@ Expression *ThreadContext::get_stack_slot_and_detach(int offset) {
       this->get_shadow_stack().get_last_frame().get_opr_stack();
   ShadowTable::Entry &entry = opr_stack.get_entry(offset);
   if (entry.exp) {
-    if (entry.sym_oid == NULL_SYM_OID) {
+    if (entry.sym_rid == NULL_SYM_RID) {
       this->detach_tmp_exp(entry.index);
     }
   }

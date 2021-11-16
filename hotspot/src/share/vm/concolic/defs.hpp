@@ -5,10 +5,10 @@
 
 #include <sys/types.h>
 
-// Symbolioc Object ID related
-#define NULL_SYM_OID 0
-#define MAX_SYM_OID 10000
-typedef ulong sym_oid_t;
+// Symbolioc Reference ID related
+#define NULL_SYM_RID 0
+#define MAX_SYM_RID 10000
+typedef ulong sym_rid_t;
 
 #define MAX_SYM_TMP_ID 10000
 typedef int sym_tmp_id_t;

@@ -8,7 +8,7 @@
 #include "utilities/vmError.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
-  init_sym_oid_counter();
+  init_sym_rid_counter();
   init_sym_tmp_id_counter();
 }
 
@@ -37,7 +37,7 @@ void ThreadContext::symbolize(Handle handle) {
     this->symbolize_recursive(handle());
   } else if (handle()->is_array()) {
     SymArr *sym_arr = this->alloc_sym_array((arrayOop)handle());
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0, 0));
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), 0, 0));
     /**
      * Currently, we do not call symbolize_recursive for array
      * Because symbolic array always return a new symbolic expression.
@@ -49,34 +49,34 @@ void ThreadContext::symbolize(Handle handle) {
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
   if (obj->is_symbolic()) {
-    return this->get_sym_inst(obj->get_sym_oid());
+    return this->get_sym_inst(obj->get_sym_rid());
   } else {
     return this->alloc_sym_inst(obj);
   }
 }
 
 SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
-  sym_oid_t sym_oid = get_next_sym_oid();
-  obj->set_sym_oid(sym_oid);
+  sym_rid_t sym_rid = get_next_sym_rid();
+  obj->set_sym_rid(sym_rid);
   SymInstance *sym_inst;
 
   Klass *klass = obj->klass();
   if (klass->name()->equals("java/lang/String")) {
-    sym_inst = new SymInstance(sym_oid);
+    sym_inst = new SymInstance(sym_rid);
   } else {
-    sym_inst = new SymInstance(sym_oid);
+    sym_inst = new SymInstance(sym_rid);
   }
 
-  this->set_sym_ref(sym_oid, sym_inst);
+  this->set_sym_ref(sym_rid, sym_inst);
 
   return sym_inst;
 }
 
-SymInstance *ThreadContext::get_sym_inst(sym_oid_t sym_oid) {
-  SymInstance *ret = (SymInstance *)_sym_refs[sym_oid];
+SymInstance *ThreadContext::get_sym_inst(sym_rid_t sym_rid) {
+  SymInstance *ret = (SymInstance *)_sym_refs[sym_rid];
   /**
    * When this assertion is broken,
-   * it means that the target object is not initialized with NULL_SYM_OID
+   * it means that the target object is not initialized with NULL_SYM_RID
    */
   assert(ret != NULL, "null sym obj?");
   return ret;
@@ -85,34 +85,34 @@ SymInstance *ThreadContext::get_sym_inst(sym_oid_t sym_oid) {
 SymArr *ThreadContext::get_or_alloc_sym_array(arrayOop array,
                                               Expression *length_exp) {
   if (array->is_symbolic()) {
-    return this->get_sym_array(array->get_sym_oid());
+    return this->get_sym_array(array->get_sym_rid());
   } else {
     return this->alloc_sym_array(array, length_exp);
   }
 }
 
 SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
-  sym_oid_t sym_oid = get_next_sym_oid();
-  array->set_sym_oid(sym_oid);
+  sym_rid_t sym_rid = get_next_sym_rid();
+  array->set_sym_rid(sym_rid);
 
   // if (length_exp == NULL) {
   //   length_exp = new ConExpression(array->length());
   // }
 
-  SymArr *sym_arr = new SymArr(sym_oid, length_exp);
-  this->set_sym_ref(sym_oid, sym_arr);
+  SymArr *sym_arr = new SymArr(sym_rid, length_exp);
+  this->set_sym_ref(sym_rid, sym_arr);
 
   this->record_path_condition(
-      new ArrayInitExpression(sym_arr->get_sym_oid(), array));
+      new ArrayInitExpression(sym_arr->get_sym_rid(), array));
 
   return sym_arr;
 }
 
-SymArr *ThreadContext::get_sym_array(sym_oid_t sym_oid) {
-  SymArr *ret = (SymArr *)_sym_refs[sym_oid];
+SymArr *ThreadContext::get_sym_array(sym_rid_t sym_rid) {
+  SymArr *ret = (SymArr *)_sym_refs[sym_rid];
   /**
    * When this assertion is broken,
-   * it means that the target object is not initialized with NULL_SYM_OID
+   * it means that the target object is not initialized with NULL_SYM_RID
    */
   assert(ret != NULL, "null sym obj?");
   return ret;
@@ -133,10 +133,10 @@ void ThreadContext::symbolize_recursive(oop obj) {
 }
 
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
-  sym_oid_t sym_tmp_id = _sym_tmp_id_counter++;
+  sym_rid_t sym_tmp_id = _sym_tmp_id_counter++;
   _sym_tmp_exps.push_back(sym_exp);
   assert(_sym_tmp_exps.size() == sym_tmp_id + 1, "sanity check");
-  assert(sym_tmp_id < MAX_SYM_OID, "sym_tmp_id limitted");
+  assert(sym_tmp_id < MAX_SYM_RID, "sym_tmp_id limitted");
   return sym_tmp_id;
 }
 

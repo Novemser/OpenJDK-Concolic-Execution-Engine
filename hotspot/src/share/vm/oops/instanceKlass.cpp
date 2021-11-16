@@ -1131,9 +1131,9 @@ objArrayOop InstanceKlass::allocate_objArray(int n, int length, TRAPS) {
 #ifdef ENABLE_CONCOLIC
   /**
     * This is where an object created
-    * We can set the default sym_oid here
+    * We can set the default sym_rid here
     */
-  o->set_sym_oid(NULL_SYM_OID);
+  o->set_sym_rid(NULL_SYM_RID);
 #endif
   return o;
 }
@@ -1166,7 +1166,7 @@ instanceOop InstanceKlass::allocate_instance(TRAPS) {
     i = register_finalizer(i, CHECK_NULL);
   }
 #ifdef ENABLE_CONCOLIC
-  i->set_sym_oid(NULL_SYM_OID);
+  i->set_sym_rid(NULL_SYM_RID);
 #endif
   return i;
 }

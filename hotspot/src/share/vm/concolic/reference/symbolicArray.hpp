@@ -19,7 +19,7 @@ private:
   Expression *_length_exp;
 
 public:
-  SymArr(sym_oid_t sym_oid, Expression *length_exp);
+  SymArr(sym_rid_t sym_rid, Expression *length_exp);
   ~SymArr();
 
   inline void store() {

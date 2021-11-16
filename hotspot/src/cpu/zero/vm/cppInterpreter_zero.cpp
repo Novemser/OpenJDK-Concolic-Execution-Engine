@@ -662,11 +662,11 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
       interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
       int stack_offset = istate->stack_base() - locals - 1;
       int field_offset = entry->f2_as_index();
-      sym_oid_t sym_oid = object->get_sym_oid();
+      sym_rid_t sym_rid = object->get_sym_rid();
 
-      SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_oid);
+      SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_rid);
       Expression* sym_exp = sym_inst->get(field_offset);
-      ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_oid, field_offset);
+      ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_rid, field_offset);
     }
   }
 #endif

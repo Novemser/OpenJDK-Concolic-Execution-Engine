@@ -13,13 +13,13 @@
 
 class SymRef {
 protected:
-  sym_oid_t _sym_oid;
+  sym_rid_t _sym_rid;
 
 public:
-  SymRef(sym_oid_t sym_oid) : _sym_oid(sym_oid) {}
+  SymRef(sym_rid_t sym_rid) : _sym_rid(sym_rid) {}
   virtual ~SymRef() {}
 
-  inline sym_oid_t get_sym_oid() { return _sym_oid; }
+  inline sym_rid_t get_sym_rid() { return _sym_rid; }
 
   virtual void print() {}
 };

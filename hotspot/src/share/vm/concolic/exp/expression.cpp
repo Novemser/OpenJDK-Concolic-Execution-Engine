@@ -13,17 +13,17 @@ void Expression::print_cr() {
   tty->cr();
 }
 
-SymbolExpression::SymbolExpression(sym_oid_t sym_oid, int field_index) {
+SymbolExpression::SymbolExpression(sym_rid_t sym_rid, int field_index) {
   int ret;
   if (field_index == NULL_INDEX) {
-    ret = sprintf(_str, "S_%lu", sym_oid);
+    ret = sprintf(_str, "S_%lu", sym_rid);
   } else {
-    ret = sprintf(_str, "S_%lu.%d", sym_oid, field_index);
+    ret = sprintf(_str, "S_%lu.%d", sym_rid, field_index);
   }
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
-SymbolExpression::SymbolExpression(sym_oid_t sym_arr_oid, int version,
+SymbolExpression::SymbolExpression(sym_rid_t sym_arr_oid, int version,
                                    int load_count) {
   int ret = sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, version, load_count);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");

@@ -41,8 +41,8 @@ private:
   char _str[EXP_NAME_LENGTH];
 
 public:
-  SymbolExpression(sym_oid_t sym_oid, int field_index);
-  SymbolExpression(sym_oid_t sym_arr_oid, int arr_version, int load_count);
+  SymbolExpression(sym_rid_t sym_rid, int field_index);
+  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count);
   SymbolExpression();
   ~SymbolExpression();
 
@@ -93,7 +93,7 @@ private:
   Expression *_value_exp;
 
 public:
-  ArrayExpression(sym_oid_t array_id, Expression *index_exp,
+  ArrayExpression(sym_rid_t array_id, Expression *index_exp,
                   Expression *value_exp, bool is_load);
   ~ArrayExpression();
 

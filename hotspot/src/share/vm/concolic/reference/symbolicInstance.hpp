@@ -19,7 +19,7 @@ private:
   ExpStore _exps;
 
 public:
-  SymInstance(sym_oid_t sym_oid);
+  SymInstance(sym_rid_t sym_rid);
   ~SymInstance();
 
   Expression *get(int field_offset);

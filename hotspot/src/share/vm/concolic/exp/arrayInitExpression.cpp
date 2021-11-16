@@ -3,7 +3,7 @@
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "utilities/ostream.hpp"
 
-ArrayInitExpression::ArrayInitExpression(sym_oid_t array_id, arrayOop array) {
+ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
   int ret = sprintf(_arr_str, "A_%lu_init", array_id);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 

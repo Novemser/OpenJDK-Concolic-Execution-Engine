@@ -68,7 +68,7 @@ private:
   } _metadata;
 
 #ifdef ENABLE_CONCOLIC
-  sym_oid_t _sym_oid;
+  sym_rid_t _sym_rid;
 #endif
 
   // Fast access to barrier set.  Must be initialized.
@@ -76,9 +76,9 @@ private:
 
 public:
 #ifdef ENABLE_CONCOLIC
-  void set_sym_oid(sym_oid_t sym_oid) { _sym_oid = sym_oid; }
-  sym_oid_t get_sym_oid() const { return _sym_oid; }
-  bool is_symbolic() const { return _sym_oid != NULL_SYM_OID; }
+  void set_sym_rid(sym_rid_t sym_rid) { _sym_rid = sym_rid; }
+  sym_rid_t get_sym_rid() const { return _sym_rid; }
+  bool is_symbolic() const { return _sym_rid != NULL_SYM_RID; }
 #endif
 
   markOop mark() const { return _mark; }

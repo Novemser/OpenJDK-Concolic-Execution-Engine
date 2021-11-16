@@ -82,7 +82,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
       /**
        *  TODO: May be this symbol expression can be used
        */
-      exp = new SymbolExpression(obj->get_sym_oid(),
+      exp = new SymbolExpression(obj->get_sym_rid(),
                                  SymbolExpression::NULL_INDEX);
     } else if (type == T_ARRAY) {
       arrayOop arrObj = *(arrayOop *)(locals - begin_offset);
@@ -90,7 +90,7 @@ void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
       /**
        *  TODO: May be this symbol expression can be used
        */
-      exp = new SymbolExpression(arrObj->get_sym_oid(),
+      exp = new SymbolExpression(arrObj->get_sym_rid(),
                                  sym_arr->get_version(),
                                  sym_arr->get_load_count());
     } else {

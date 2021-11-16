@@ -22,7 +22,7 @@ private:
   SymExpList _arr_exps;
 
 public:
-  ArrayInitExpression(sym_oid_t array_id, arrayOop array);
+  ArrayInitExpression(sym_rid_t array_id, arrayOop array);
   ~ArrayInitExpression();
 
 public:

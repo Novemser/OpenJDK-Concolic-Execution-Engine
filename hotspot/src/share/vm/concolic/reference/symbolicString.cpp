@@ -2,7 +2,7 @@
 
 #include "concolic/reference/symbolicString.hpp"
 
-SymString::SymString(sym_oid_t sym_oid) : SymInstance(sym_oid) {}
+SymString::SymString(sym_rid_t sym_rid) : SymInstance(sym_rid) {}
 
 SymString::~SymString() {}
 

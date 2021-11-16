@@ -11,7 +11,7 @@ private:
   std::string str;
 
 public:
-  SymString(sym_oid_t sym_oid);
+  SymString(sym_rid_t sym_rid);
   ~SymString();
 };
 

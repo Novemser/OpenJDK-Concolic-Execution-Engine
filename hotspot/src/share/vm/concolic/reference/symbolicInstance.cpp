@@ -4,7 +4,7 @@
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
-SymInstance::SymInstance(sym_oid_t sym_oid) : SymRef(sym_oid) {}
+SymInstance::SymInstance(sym_rid_t sym_rid) : SymRef(sym_rid) {}
 
 SymInstance::~SymInstance() {
   ExpStore::iterator iter;
@@ -26,7 +26,7 @@ Expression *SymInstance::get(int field_offset) {
 void SymInstance::init_sym_exp(int field_offset) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
-  Expression *sym_exp = new SymbolExpression(this->get_sym_oid(), field_offset);
+  Expression *sym_exp = new SymbolExpression(this->get_sym_rid(), field_offset);
 
   sym_exp->inc_ref();
   _exps[field_offset] = sym_exp;
