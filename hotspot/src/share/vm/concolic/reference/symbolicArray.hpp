@@ -22,6 +22,8 @@ public:
   SymArr(sym_rid_t sym_rid, Expression *length_exp);
   ~SymArr();
 
+  Expression *get_ref_exp() { return NULL; };
+
   inline void store() {
     ++_version;
     _load_count = 0;

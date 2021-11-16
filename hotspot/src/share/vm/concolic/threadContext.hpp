@@ -43,6 +43,10 @@ public:
 
   SymInstance *get_or_alloc_sym_inst(oop obj);
   SymInstance *alloc_sym_inst(oop obj);
+  inline SymInstance *get_sym_inst(oop obj) {
+    return get_sym_inst(obj->get_sym_rid());
+  }
+
   SymInstance *get_sym_inst(sym_rid_t sym_rid);
 
   SymArr *get_or_alloc_sym_array(arrayOop array, Expression *length_exp = NULL);

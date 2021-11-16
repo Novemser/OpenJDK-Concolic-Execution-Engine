@@ -46,7 +46,6 @@ void MethodSymbolizer::print() {
 
 void MethodSymbolizer::invoke_method_helper(ZeroFrame *caller_frame,
                                             ZeroFrame *callee_frame) {
-  assert(callee_frame->is_interpreter_frame(), "should be");
   interpreterState callee_istate =
       callee_frame->as_interpreter_frame()->interpreter_state();
   interpreterState caller_istate =
@@ -138,12 +137,15 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
   ResourceMark rm;
 
+  _handle.caller_frame = caller_frame;
+  _handle.callee_frame = callee_frame;
   _handle.callee_holder_name =
       std::string(callee->method_holder()->name()->as_C_string());
   _handle.callee_name = std::string(callee->name()->as_C_string());
 
   bool need_symbolize;
   SymMethodSet *sym_methods = this->get_sym_methods(_handle.callee_holder_name);
+  assert(callee_frame->is_interpreter_frame(), "should be");
   if (sym_methods != NULL &&
       sym_methods->find(_handle.callee_name) == sym_methods->end()) {
     tty->print_cr("Calling function name: %s",
@@ -155,8 +157,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   }
 
   if (need_symbolize) {
-    _handle.caller_frame = caller_frame;
-    _handle.callee_frame = callee_frame;
     ConcolicMngr::is_symbolizing_method = true;
   }
 }

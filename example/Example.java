@@ -1,58 +1,54 @@
 public class Example {
-    static class TestInnerClass {
-        Integer inner_i;
-        Double inner_d;
-        TestInnerClass(Integer i) {
-            inner_i = i;
-            inner_d = Double.valueOf(i);
-        }
+
+  public int foo(Integer input) {
+    if (input > 10) {
+      return input - 10;
+    } else {
+      return input + 10;
     }
-    static class TestClass {
-        public Byte b;
-        public Character c;
-        public Double d;
-        public Float f;
-        public Integer i;
-        public Short s;
-        public TestInnerClass tic;
-        // Boolean bo;
-        // String s;
-        TestClass() {
-            b = 1;
-            c = new Character('2');
-            d = new Double(3.0);
-            f = new Float(4.0);
-            i = new Integer(5);
-            s = 6;
-            // bo = false;
-            tic = new TestInnerClass(i);
-        }
+  }
+
+  public static void main(String[] args) {
+    String a = new String("abcd");
+    String b = new String("ab");
+
+    System.startConcolic();
+    // System.symbolizeMethod("Example", "func");
+    System.symbolize(a);
+
+    if (a.startsWith(b)) {
     }
 
-    public long func(Long input) {
-        if (input > 10) {
-            return 1;
-        } else {
-            return 2;
-        }
+    System.endConcolic();
+  }
+
+  static class TestInnerClass {
+    Integer inner_i;
+    Double inner_d;
+    TestInnerClass(Integer i) {
+      inner_i = i;
+      inner_d = Double.valueOf(i);
     }
-
-    public static void main(String[] args) {
-        Long obj1 = new Long(4);
-        Example e = new Example();
-
-        System.startConcolic();
-        System.symbolize(obj1);
-        System.symbolizeMethod("Example", "func");
-
-        long input = obj1;
-        input = e.func(input);
-        if (input > 0) {
-
-        }
-        
-
-        System.endConcolic();
-        System.out.println(input);
+  }
+  static class TestClass {
+    public Byte b;
+    public Character c;
+    public Double d;
+    public Float f;
+    public Integer i;
+    public Short s;
+    public TestInnerClass tic;
+    // Boolean bo;
+    // String s;
+    TestClass() {
+      b = 1;
+      c = new Character('2');
+      d = new Double(3.0);
+      f = new Float(4.0);
+      i = new Integer(5);
+      s = 6;
+      // bo = false;
+      tic = new TestInnerClass(i);
     }
+  }
 }

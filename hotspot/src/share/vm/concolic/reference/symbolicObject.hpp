@@ -23,6 +23,7 @@ public:
   ~SymObj();
 
   Expression *get(int field_offset);
+  Expression *get_ref_exp() { return NULL; };
 
   void init_sym_exp(int field_offset);
   void init_sym_exp(int field_offset, Expression *exp);

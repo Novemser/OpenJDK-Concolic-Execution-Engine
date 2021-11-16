@@ -6,9 +6,7 @@
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
 #include "oops/oop.inline.hpp"
-#include "utilities/debug.hpp"
 
-#include <map>
 #include <stdio.h>
 
 class SymRef {
@@ -20,6 +18,8 @@ public:
   virtual ~SymRef() {}
 
   inline sym_rid_t get_sym_rid() { return _sym_rid; }
+
+  virtual Expression* get_ref_exp() = 0;
 
   virtual void print() = 0;
 };
