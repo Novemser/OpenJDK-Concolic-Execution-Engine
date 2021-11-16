@@ -5,7 +5,7 @@
 
 #include "concolic/pathCondition.hpp"
 #include "concolic/reference/symbolicArray.hpp"
-#include "concolic/reference/symbolicObject.hpp"
+#include "concolic/reference/symbolicInstance.hpp"
 #include "concolic/shadow/shadowStack.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
@@ -41,9 +41,9 @@ public:
 
   void symbolize(Handle handle);
 
-  SymObj *get_or_alloc_sym_obj(oop obj);
-  SymObj *alloc_sym_obj(oop obj);
-  SymObj *get_sym_obj(sym_oid_t sym_oid);
+  SymInstance *get_or_alloc_sym_inst(oop obj);
+  SymInstance *alloc_sym_inst(oop obj);
+  SymInstance *get_sym_inst(sym_oid_t sym_oid);
 
   SymArr *get_or_alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
   SymArr *alloc_sym_array(arrayOop array, Expression *length_exp = NULL);

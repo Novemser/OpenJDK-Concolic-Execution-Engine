@@ -1,12 +1,12 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/reference/symbolicObject.hpp"
+#include "concolic/reference/symbolicInstance.hpp"
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
-SymObj::SymObj(sym_oid_t sym_oid) : SymRef(sym_oid) {}
+SymInstance::SymInstance(sym_oid_t sym_oid) : SymRef(sym_oid) {}
 
-SymObj::~SymObj() {
+SymInstance::~SymInstance() {
   ExpStore::iterator iter;
   for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
     Expression *sym_exp = iter->second;
@@ -16,14 +16,14 @@ SymObj::~SymObj() {
   }
 }
 
-Expression *SymObj::get(int field_offset) {
+Expression *SymInstance::get(int field_offset) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   ExpStore::iterator iter = _exps.find(field_offset);
   return iter == _exps.end() ? NULL : iter->second;
 }
 
-void SymObj::init_sym_exp(int field_offset) {
+void SymInstance::init_sym_exp(int field_offset) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   Expression *sym_exp = new SymbolExpression(this->get_sym_oid(), field_offset);
@@ -32,14 +32,14 @@ void SymObj::init_sym_exp(int field_offset) {
   _exps[field_offset] = sym_exp;
 }
 
-void SymObj::init_sym_exp(int field_offset, Expression *exp) {
+void SymInstance::init_sym_exp(int field_offset, Expression *exp) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   exp->inc_ref();
   _exps[field_offset] = exp;
 }
 
-void SymObj::set_sym_exp(int field_offset, Expression *exp) {
+void SymInstance::set_sym_exp(int field_offset, Expression *exp) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   ExpStore::iterator iter = _exps.find(field_offset);
@@ -60,7 +60,7 @@ void SymObj::set_sym_exp(int field_offset, Expression *exp) {
   }
 }
 
-void SymObj::print() {
+void SymInstance::print() {
   ExpStore::iterator iter;
   for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
     tty->print_cr("Field(%d): ", iter->first);

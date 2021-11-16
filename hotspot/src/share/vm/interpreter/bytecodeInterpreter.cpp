@@ -2093,7 +2093,7 @@ run:
               }
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
-              ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
+              ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
               SymbolExpression *value_exp = new SymbolExpression(
                   obj->get_sym_oid(), SymbolExpression::NULL_INDEX);
               ConcolicMngr::record_path_condition(new ArrayExpression(
@@ -2214,7 +2214,7 @@ run:
               }
 
               if (!rhsObject->is_symbolic()) {
-                ConcolicMngr::ctx->get_or_alloc_sym_obj(rhsObject);
+                ConcolicMngr::ctx->get_or_alloc_sym_inst(rhsObject);
               }
 
               SymbolExpression *value_exp = new SymbolExpression(
@@ -2494,8 +2494,8 @@ run:
                   stack_offset -= 1;
                 }
 
-                SymObj* sym_obj = ConcolicMngr::ctx->get_sym_obj(sym_oid);
-                Expression* sym_exp = sym_obj->get(field_offset);
+                SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_oid);
+                Expression* sym_exp = sym_inst->get(field_offset);
                 ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, 
                                                   sym_oid, field_offset);
               }
@@ -2627,9 +2627,9 @@ run:
                   ConcolicMngr::ctx->get_stack_slot_and_detach(stack_offset -
                                                                1);
               if (sym_exp) {
-                SymObj *sym_obj =
-                    ConcolicMngr::ctx->get_or_alloc_sym_obj(obj);
-                sym_obj->set_sym_exp(field_offset, sym_exp);
+                SymInstance *sym_inst =
+                    ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+                sym_inst->set_sym_exp(field_offset, sym_exp);
               }
             }
           }

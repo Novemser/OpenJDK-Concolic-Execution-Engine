@@ -1,5 +1,5 @@
-#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
-#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINSTANCE_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINSTANCE_HPP
 
 #ifdef ENABLE_CONCOLIC
 
@@ -12,15 +12,15 @@
 #include <map>
 #include <stdio.h>
 
-class SymObj : public SymRef{
+class SymInstance : public SymRef{
   typedef std::map<int, Expression *> ExpStore;
 
 private:
   ExpStore _exps;
 
 public:
-  SymObj(sym_oid_t sym_oid);
-  ~SymObj();
+  SymInstance(sym_oid_t sym_oid);
+  ~SymInstance();
 
   Expression *get(int field_offset);
 
@@ -33,4 +33,4 @@ public:
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICOBJECT_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINSTANCE_HPP

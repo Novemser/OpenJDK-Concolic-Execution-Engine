@@ -3,10 +3,10 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/reference/symbolicObject.hpp"
+#include "concolic/reference/symbolicInstance.hpp"
 #include <string>
 
-class SymString : public SymObj {
+class SymString : public SymInstance {
 private:
   std::string str;
 

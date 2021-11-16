@@ -33,7 +33,7 @@ ThreadContext::~ThreadContext() {
 
 void ThreadContext::symbolize(Handle handle) {
   if (handle()->is_instance()) {
-    this->alloc_sym_obj(handle());
+    this->alloc_sym_inst(handle());
     this->symbolize_recursive(handle());
   } else if (handle()->is_array()) {
     SymArr *sym_arr = this->alloc_sym_array((arrayOop)handle());
@@ -47,33 +47,33 @@ void ThreadContext::symbolize(Handle handle) {
   }
 }
 
-SymObj *ThreadContext::get_or_alloc_sym_obj(oop obj) {
+SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
   if (obj->is_symbolic()) {
-    return this->get_sym_obj(obj->get_sym_oid());
+    return this->get_sym_inst(obj->get_sym_oid());
   } else {
-    return this->alloc_sym_obj(obj);
+    return this->alloc_sym_inst(obj);
   }
 }
 
-SymObj *ThreadContext::alloc_sym_obj(oop obj) {
+SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   sym_oid_t sym_oid = get_next_sym_oid();
   obj->set_sym_oid(sym_oid);
-  SymObj *sym_obj;
+  SymInstance *sym_inst;
 
   Klass *klass = obj->klass();
   if (klass->name()->equals("java/lang/String")) {
-    sym_obj = new SymObj(sym_oid);
+    sym_inst = new SymInstance(sym_oid);
   } else {
-    sym_obj = new SymObj(sym_oid);
+    sym_inst = new SymInstance(sym_oid);
   }
 
-  this->set_sym_ref(sym_oid, sym_obj);
+  this->set_sym_ref(sym_oid, sym_inst);
 
-  return sym_obj;
+  return sym_inst;
 }
 
-SymObj *ThreadContext::get_sym_obj(sym_oid_t sym_oid) {
-  SymObj *ret = (SymObj *)_sym_refs[sym_oid];
+SymInstance *ThreadContext::get_sym_inst(sym_oid_t sym_oid) {
+  SymInstance *ret = (SymInstance *)_sym_refs[sym_oid];
   /**
    * When this assertion is broken,
    * it means that the target object is not initialized with NULL_SYM_OID
@@ -147,7 +147,7 @@ void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
 void ThreadContext::print() {
   for (SymStore::iterator sym_iter = _sym_refs.begin();
        sym_iter != _sym_refs.end(); ++sym_iter) {
-    tty->print_cr("- sym_obj[%lu]:", sym_iter->first);
+    tty->print_cr("- sym_inst[%lu]:", sym_iter->first);
     sym_iter->second->print();
   }
 

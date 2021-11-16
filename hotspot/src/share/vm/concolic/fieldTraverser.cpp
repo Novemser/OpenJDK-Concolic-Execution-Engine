@@ -112,8 +112,8 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   // print_indent();
   // tty->print("---- %d\n", fd->offset());
 
-  // TODO: directly transfer SymObj*
-  SymObj *sym_obj;
+  // TODO: directly transfer SymInstance*
+  SymInstance *sym_inst;
   SymArr *sym_arr;
 
   switch (fd->field_type()) {
@@ -124,8 +124,8 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_oid(), 0, 0));
     return false;
   default:
-    sym_obj = this->_ctx.get_or_alloc_sym_obj(obj);
-    sym_obj->init_sym_exp(fd->offset());
+    sym_inst = this->_ctx.get_or_alloc_sym_inst(obj);
+    sym_inst->init_sym_exp(fd->offset());
     return false;
   }
 }
@@ -133,7 +133,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
 bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   ArrayKlass* array_klass = ArrayKlass::cast(array_obj->klass());
 
-  SymObj *sym_obj;
+  SymInstance *sym_inst;
   BasicType element_type;
   element_type = array_klass->element_type();
 
@@ -146,8 +146,8 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
     return false;
   default:
     // the element_type is primitives
-    sym_obj = this->_ctx.get_or_alloc_sym_obj(array_obj);
-    sym_obj->init_sym_exp(index);
+    sym_inst = this->_ctx.get_or_alloc_sym_inst(array_obj);
+    sym_inst->init_sym_exp(index);
     return false;
   }
 }
