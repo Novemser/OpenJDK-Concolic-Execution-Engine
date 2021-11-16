@@ -2043,8 +2043,10 @@ run:
                                                                                \
       ConcolicMngr::record_path_condition(                                     \
           new ArrayExpression(sym_arr_oid, index_exp, value_exp, true));       \
+    } else {                                                                   \
+      ConcolicMngr::ctx->clear_stack_slot(GET_STACK_OFFSET + res_off);         \
     }                                                                          \
-  }
+  }                                                                             
 #else
 #define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)
 #endif
