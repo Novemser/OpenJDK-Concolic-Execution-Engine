@@ -19,6 +19,7 @@ public:
 
   virtual Expression *get(int field_offset) = 0;
   virtual Expression *get_ref_exp() = 0;
+  virtual void set_ref_exp(Expression *) = 0;
 
   virtual void init_sym_exp(int field_offset) = 0;
   virtual void init_sym_exp(int field_offset, Expression *exp) = 0;

@@ -1,6 +1,8 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/arrayInitExpression.hpp"
+#include "concolic/reference/symbolicInteger.hpp"
+#include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
 ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
@@ -41,11 +43,17 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
       value_exp = new ConExpression(
           *(jdouble *)(((address)array->base(T)) + i * sizeof(jdouble)));
       break;
-    default:
-      /**
-       * TODO: add AALOAD && AASTORE support.
-       */
-      break;
+    default: {
+      assert(T == T_OBJECT, "should be");
+      if (ak->name()->equals(SymInteger::ARRAY_TYPE_NAME)) {
+        value_exp = SymInteger::get_exp_of(
+            *(oop *)(((address)array->base(T)) + i * sizeof(oop)));
+      }
+    }
+    /**
+     * TODO: add AALOAD && AASTORE support.
+     */
+    break;
     }
     if (value_exp) {
       value_exp->inc_ref();
