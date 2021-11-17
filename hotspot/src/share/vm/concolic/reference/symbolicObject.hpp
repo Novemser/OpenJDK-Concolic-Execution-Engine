@@ -24,6 +24,7 @@ public:
 
   Expression *get(int field_offset);
   Expression *get_ref_exp() { return NULL; };
+  void set_ref_exp(Expression *exp) { return; };
 
   void init_sym_exp(int field_offset);
   void init_sym_exp(int field_offset, Expression *exp);

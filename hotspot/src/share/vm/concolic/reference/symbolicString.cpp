@@ -71,7 +71,7 @@ bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
     ++offset;
 
     ResourceMark rm;
-  SignatureStream ss(handle.get_callee_method()->signature());
+    SignatureStream ss(handle.get_callee_method()->signature());
     while (!ss.at_return_type()) {
       offset = SymString::prepare_param(handle, ss.type(), locals, offset);
 

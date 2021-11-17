@@ -4,6 +4,7 @@
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/exp/expression.hpp"
 #include "concolic/fieldTraverser.hpp"
+#include "concolic/reference/symbolicInteger.hpp"
 #include "concolic/reference/symbolicObject.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "utilities/vmError.hpp"
@@ -62,8 +63,10 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   SymInstance *sym_inst;
 
   Klass *klass = obj->klass();
-  if (klass->name()->equals("java/lang/String")) {
+  if (klass->name()->equals(SymString::TYPE_NAME)) {
     sym_inst = new SymString(sym_rid);
+  } else if (klass->name()->equals(SymInteger::TYPE_NAME)) {
+    sym_inst = new SymInteger(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);
   }
