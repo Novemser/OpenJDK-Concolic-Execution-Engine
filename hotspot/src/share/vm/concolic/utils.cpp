@@ -1,8 +1,13 @@
+#ifdef ENABLE_CONCOLIC
+
 #include "concolic/utils.hpp"
+#include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicInteger.hpp"
+#include "concolic/fieldTraverser.hpp"
 
 typeArrayOop OopUtils::java_string_to_char_array(oop str_obj) {
   Klass *klass = str_obj->klass();
-  assert(klass->name()->equals("java/lang/String"), "should be String");
+  assert(klass->name()->equals(SymString::TYPE_NAME), "should be String");
   InstanceKlass *ik = (InstanceKlass *)klass;
 
   const int value_field_index = 0;
@@ -30,4 +35,17 @@ char *OopUtils::java_string_to_c(oop str_obj) {
   return char_array;
 }
 
-jint OopUtils::java_int_to_c(oop int_obj) { return 0; }
+jint OopUtils::java_int_to_c(oop int_obj) {
+  Klass *klass = int_obj->klass();
+  assert(klass->name()->equals(SymInteger::TYPE_NAME), "should be Integer");
+  InstanceKlass *ik = (InstanceKlass *)klass;
+
+  const int value_field_index = 7;
+  assert(ik->field_name(value_field_index)->equals("value"),
+         "this field should be value");
+  int field_offset = ik->field_offset(value_field_index);
+
+  return int_obj->int_field(field_offset);
+}
+
+#endif

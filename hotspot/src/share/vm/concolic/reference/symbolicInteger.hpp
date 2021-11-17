@@ -10,6 +10,7 @@
 
 class SymInteger : public SymInstance {
 public:
+  static const char *ARRAY_TYPE_NAME;
   static const char *TYPE_NAME;
 
 private:

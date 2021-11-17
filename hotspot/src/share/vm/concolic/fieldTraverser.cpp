@@ -158,8 +158,8 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
 
   // print `signature` and `name`
-  tty->print("'%d' '%s' '%s' ", fd->offset(), fd->signature()->as_C_string(),
-             fd->name()->as_C_string());
+  tty->print("'%d' '%s' '%s' '%d'", fd->offset(), fd->signature()->as_C_string(),
+             fd->name()->as_C_string(), fd->index());
 
   switch (fd->field_type()) {
   case T_BYTE:

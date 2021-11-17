@@ -2,6 +2,7 @@
 
 #include "concolic/reference/symbolicInteger.hpp"
 
+const char *SymInteger::ARRAY_TYPE_NAME = "[Ljava/lang/Integer;";
 const char *SymInteger::TYPE_NAME = "java/lang/Integer";
 sym_rid_t SymInteger::sym_int_count = 0;
 

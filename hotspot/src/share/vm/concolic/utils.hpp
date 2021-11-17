@@ -1,6 +1,8 @@
 #ifndef SHARE_VM_CONCOLIC_UTILS_HPP
 #define SHARE_VM_CONCOLIC_UTILS_HPP
 
+#ifdef ENABLE_CONCOLIC
+
 #include "oops/klass.inline.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
@@ -15,4 +17,6 @@ char *java_string_to_c(oop str_obj);
 jint java_int_to_c(oop int_obj);
 } // namespace OopUtils
 
-#endif
+
+#endif // ENABLE_CONCOLIC
+#endif // SHARE_VM_CONCOLIC_UTILS_HPP
