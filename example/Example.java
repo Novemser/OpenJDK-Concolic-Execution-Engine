@@ -37,9 +37,16 @@ public class Example {
   public static void testString() {
     String a = new String("abcd");
     String b = new String("ab");
+    // Example e = new Example();
+    // Integer a = new Integer(5);
 
     System.startConcolic();
     System.symbolize(a);
+    
+    // int input = e.func(a);
+
+    // if (input > 16) {
+    // }
 
     if (a.startsWith(b)) {
     }
