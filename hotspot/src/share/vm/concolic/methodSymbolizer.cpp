@@ -46,9 +46,13 @@ void MethodSymbolizer::print() {
 
 void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                                      ZeroFrame *callee_frame) {
-  if (!caller_frame->is_interpreter_frame())
+  if (!caller_frame->is_interpreter_frame()) {
     return;
-  assert(callee_frame->is_interpreter_frame(), "should be");
+  }
+  if (!callee_frame->is_interpreter_frame()) {
+    return;
+  }
+  // assert(callee_frame->is_interpreter_frame(), "should be");
 
   _handle.set_caller_frame(caller_frame);
   Method *callee = _handle.get_caller_istate()->callee();
