@@ -8,20 +8,38 @@ public class Example {
     }
   }
 
-  public static void main(String[] args) {
-    String a = new String("abcd");
-    String b = new String("ab");
-    // Example e = new Example();
-    // Integer a = new Integer(5);
+  public static void main(String[] args) { testInt(); }
+
+  public static void testInt() {
+    Example e = new Example();
+    Integer a = new Integer(5);
+    Integer b = new Integer(3);
+    Integer[] arr = new Integer[a];
+    for (int i = 0; i < a; ++i) {
+      arr[i] = new Integer(i);
+    }
 
     System.startConcolic();
     // System.symbolizeMethod("Example", "func");
     System.symbolize(a);
-    
-    // int input = e.func(a);
+    System.symbolize(b);
 
-    // if (input > 16) {
-    // }
+    arr[b] = a;
+
+    int input = e.func(arr[1]);
+
+    if (input > 16) {
+    }
+
+    System.endConcolic();
+  }
+
+  public static void testString() {
+    String a = new String("abcd");
+    String b = new String("ab");
+
+    System.startConcolic();
+    System.symbolize(a);
 
     if (a.startsWith(b)) {
     }

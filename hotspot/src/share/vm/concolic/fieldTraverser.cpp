@@ -63,7 +63,7 @@ void FieldTraverser::do_field(fieldDescriptor *fd) {
   }
 }
 
-void FieldTraverser::do_array_elements(FieldTraverser* field_traverser) {
+void FieldTraverser::do_array_elements(FieldTraverser *field_traverser) {
   assert(this->_obj->is_array(), "should be array");
   arrayOop array = (arrayOop)(this->_obj);
   int length = array->length();
@@ -95,7 +95,6 @@ void FieldTraverser::do_array_element(int index) {
       assert(false, "non-objarray won't be recursively done for now");
     }
   }
-  
 }
 
 void FieldTraverser::print_indent() {
@@ -120,7 +119,8 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
-    sym_arr = this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
+    sym_arr =
+        this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
     sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), 0, 0));
     return false;
   default:
@@ -131,19 +131,18 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
 }
 
 bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
-  ArrayKlass* array_klass = ArrayKlass::cast(array_obj->klass());
+  ArrayKlass *array_klass = ArrayKlass::cast(array_obj->klass());
 
   SymInstance *sym_inst;
   BasicType element_type;
   element_type = array_klass->element_type();
 
-  switch (element_type)
-  {
+  switch (element_type) {
+  case T_ARRAY:
+    // element won't be array(it will be object)
+    ShouldNotCallThis();
   case T_OBJECT:
     return true;
-  case T_ARRAY:
-    assert(false, "element won't be array(it will be object)");
-    return false;
   default:
     // the element_type is primitives
     sym_inst = this->_ctx.get_or_alloc_sym_inst(array_obj);
@@ -202,8 +201,9 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
     return false;
   }
 }
-  
-bool SimpleFieldPrinter::do_array_element_helper(int index, arrayOop array_obj) {
+
+bool SimpleFieldPrinter::do_array_element_helper(int index,
+                                                 arrayOop array_obj) {
   /**
    * TODO: complete this
    */

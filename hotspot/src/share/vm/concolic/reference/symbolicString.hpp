@@ -9,7 +9,7 @@
 
 class SymString : public SymInstance {
 public:
-  static const char* TYPE_NAME;
+  static const char *TYPE_NAME;
 
 private:
   static sym_rid_t sym_string_count;
@@ -23,6 +23,13 @@ public:
 
   Expression *get(int field_offset);
   Expression *get_ref_exp() { return _ref_exp; };
+  void set_ref_exp(Expression *exp) {
+    if (_ref_exp && _ref_exp->dec_ref()) {
+      delete _ref_exp;
+    }
+    _ref_exp = exp;
+    _ref_exp->inc_ref();
+  };
 
   void init_sym_exp(int field_offset);
   void init_sym_exp(int field_offset, Expression *exp);
