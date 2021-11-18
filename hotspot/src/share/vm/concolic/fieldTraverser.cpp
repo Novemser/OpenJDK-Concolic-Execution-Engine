@@ -115,17 +115,18 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   SymInstance *sym_inst;
   SymArr *sym_arr;
 
-  switch (fd->field_type()) {
+  BasicType type = fd->field_type();
+  switch (type) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY:
     sym_arr =
         this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), 0, 0));
+    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
     return false;
   default:
-    sym_inst = this->_ctx.get_or_alloc_sym_inst(obj);
-    sym_inst->init_sym_exp(fd->offset());
+    sym_inst = this->_ctx.get_sym_inst(obj);
+    sym_inst->init_sym_base(fd->offset(), type);
     return false;
   }
 }
@@ -146,7 +147,7 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   default:
     // the element_type is primitives
     sym_inst = this->_ctx.get_or_alloc_sym_inst(array_obj);
-    sym_inst->init_sym_exp(index);
+    sym_inst->init_sym_base(index, element_type);
     return false;
   }
 }

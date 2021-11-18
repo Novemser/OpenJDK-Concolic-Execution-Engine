@@ -42,9 +42,9 @@ private:
   char _str[EXP_NAME_LENGTH];
 
 public:
-  SymbolExpression(sym_rid_t sym_rid, int field_index);
-  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count);
-  SymbolExpression(const char* prefix, sym_rid_t id);
+  SymbolExpression(sym_rid_t sym_rid, int field_index, BasicType type);
+  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count, BasicType type);
+  SymbolExpression(const char *prefix, sym_rid_t id);
   SymbolExpression();
   ~SymbolExpression();
 
@@ -96,7 +96,7 @@ private:
 
 public:
   ArrayExpression(sym_rid_t array_id, Expression *index_exp,
-                  Expression *value_exp, bool is_load);
+                  Expression *value_exp, bool is_load, BasicType type);
   ~ArrayExpression();
 
 public:

@@ -158,7 +158,7 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
      *  TODO: May be this symbol expression can be used
      */
     exp =
-        new SymbolExpression(obj->get_sym_rid(), SymbolExpression::NULL_INDEX);
+        new SymbolExpression(obj->get_sym_rid(), SymbolExpression::NULL_INDEX, type);
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *)(locals - offset);
     SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);
@@ -166,7 +166,7 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
      *  TODO: May be this symbol expression can be used
      */
     exp = new SymbolExpression(arrObj->get_sym_rid(), sym_arr->get_version(),
-                               sym_arr->get_load_count());
+                               sym_arr->get_load_count(), type);
   } else {
     offset += type2size[type] - 1;
 

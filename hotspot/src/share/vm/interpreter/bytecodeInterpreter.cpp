@@ -2037,12 +2037,12 @@ run:
                                                                                \
       Expression *value_exp =                                                  \
           new SymbolExpression(sym_arr_oid, sym_arr->get_version(),            \
-                               sym_arr->get_and_inc_load_count());             \
+                               sym_arr->get_and_inc_load_count(), T);          \
       ConcolicMngr::ctx->set_stack_slot(stack_offset + res_off, value_exp,     \
                                         sym_arr_oid, index);                   \
                                                                                \
       ConcolicMngr::record_path_condition(                                     \
-          new ArrayExpression(sym_arr_oid, index_exp, value_exp, true));       \
+          new ArrayExpression(sym_arr_oid, index_exp, value_exp, true, T));    \
     } else {                                                                   \
       ConcolicMngr::ctx->clear_stack_slot(GET_STACK_OFFSET + res_off);         \
     }                                                                          \
@@ -2095,14 +2095,14 @@ run:
 
               SymbolExpression *value_exp =
                   new SymbolExpression(sym_arr_oid, sym_arr->get_version(),
-                                       sym_arr->get_and_inc_load_count());
+                                       sym_arr->get_and_inc_load_count(), T_OBJECT);
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               SymInstance* sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
               sym_inst->set_ref_exp(value_exp);
 
               ConcolicMngr::record_path_condition(new ArrayExpression(
-                  arrObj->get_sym_rid(), index_exp, value_exp, true));
+                  arrObj->get_sym_rid(), index_exp, value_exp, true, T_OBJECT));
             }
           }
 #endif
@@ -2121,7 +2121,7 @@ run:
           ARRAY_LOADTO64(T_DOUBLE, jdouble, STACK_DOUBLE, 0);
 
 #ifdef ENABLE_CONCOLIC
-#define CONCOLIC_ASTORE(arrayOff, delta, value)                                \
+#define CONCOLIC_ASTORE(arrayOff, delta, value, T)                             \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
     Expression *index_exp = ConcolicMngr::ctx->get_stack_slot_and_detach(      \
@@ -2142,20 +2142,20 @@ run:
       }                                                                        \
                                                                                \
       ConcolicMngr::record_path_condition(                                     \
-          new ArrayExpression(sym_arr_oid, index_exp, value_exp, false));      \
+          new ArrayExpression(sym_arr_oid, index_exp, value_exp, false, T));   \
                                                                                \
       ConcolicMngr::ctx->get_sym_array(sym_arr_oid)->store();                  \
     }                                                                          \
   }
 #else
-#define CONCOLIC_ASTORE(arrayOff, delta, value)
+#define CONCOLIC_ASTORE(arrayOff, delta, value, T)
 #endif
 
       /* 32-bit stores. These handle conversion to < 32-bit types */
 #define ARRAY_STOREFROM32(T, T2, format, stackSrc, extra)                               \
       {                                                                                 \
           ARRAY_INTRO(-3);                                                              \
-          CONCOLIC_ASTORE(-3, -1, stackSrc( -1));                                       \
+          CONCOLIC_ASTORE(-3, -1, stackSrc( -1), T);                                    \
           (void)extra;                                                                  \
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);                                        \
@@ -2165,7 +2165,7 @@ run:
 #define ARRAY_STOREFROM64(T, T2, stackSrc, extra)                                       \
       {                                                                                 \
           ARRAY_INTRO(-4);                                                              \
-          CONCOLIC_ASTORE(-4, -1, stackSrc( -1));                                       \
+          CONCOLIC_ASTORE(-4, -1, stackSrc( -1), T);                                    \
           (void)extra;                                                                  \
           *(T2 *)(((address) arrObj->base(T)) + index * sizeof(T2)) = stackSrc( -1);    \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -4);                                        \
@@ -2224,11 +2224,12 @@ run:
 
               if (!value_exp) {
                 value_exp = new SymbolExpression(rhsObject->get_sym_rid(),
-                                                 SymbolExpression::NULL_INDEX);
+                                                 SymbolExpression::NULL_INDEX,
+                                                 T_OBJECT);
               }
 
               ConcolicMngr::record_path_condition(new ArrayExpression(
-                  sym_arr_oid, index_exp, value_exp, false));
+                  sym_arr_oid, index_exp, value_exp, false, T_OBJECT));
             }
           }
 #endif
@@ -2245,7 +2246,7 @@ run:
             assert(arrObj->klass() == Universe::byteArrayKlassObj(),
                    "should be byte array otherwise");
           }
-          CONCOLIC_ASTORE(-3, -1, item);
+          CONCOLIC_ASTORE(-3, -1, item, T_BOOLEAN);
           ((typeArrayOop)arrObj)->byte_at_put(index, item);
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, -3);
       }

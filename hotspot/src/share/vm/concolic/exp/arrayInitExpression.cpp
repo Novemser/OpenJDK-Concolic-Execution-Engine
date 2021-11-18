@@ -6,11 +6,11 @@
 #include "utilities/ostream.hpp"
 
 ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
-  int ret = sprintf(_arr_str, "A_%lu_init", array_id);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-
   ArrayKlass *ak = (ArrayKlass *)array->klass();
   BasicType T = ak->element_type();
+
+  int ret = sprintf(_arr_str, "A%c_%lu", type2char(T), array_id);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 
   for (int i = 0; i < array->length(); i++) {
     Expression *value_exp = NULL;
@@ -73,20 +73,18 @@ ArrayInitExpression::~ArrayInitExpression() {
 }
 
 void ArrayInitExpression::print() {
-  tty->print("%s{", _arr_str);
+  tty->print("(array_init %s", _arr_str);
   int size = _arr_exps.size();
   for (int i = 0; i < size; ++i) {
     Expression *exp = _arr_exps[i];
+    tty->print(" ");
     if (exp) {
       exp->print();
     } else {
       tty->print("NULL");
     }
-    if (i < size - 1) {
-      tty->print(",");
-    }
   }
-  tty->print("}");
+  tty->print(")");
 }
 
 #endif

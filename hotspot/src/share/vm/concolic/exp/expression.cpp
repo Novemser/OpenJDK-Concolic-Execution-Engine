@@ -13,19 +13,23 @@ void Expression::print_cr() {
   tty->cr();
 }
 
-SymbolExpression::SymbolExpression(sym_rid_t sym_rid, int field_index) {
+SymbolExpression::SymbolExpression(sym_rid_t sym_rid, int field_index, 
+                                   BasicType type) {
   int ret;
   if (field_index == NULL_INDEX) {
-    ret = sprintf(_str, "S_%lu", sym_rid);
+    ret = sprintf(_str, "S%c_%lu", type2char(type), sym_rid);
+  } else if (field_index == FIELD_INDEX_ARRAY_LENGTH) {
+    ret = sprintf(_str, "A%c_%lu.length", type2char(type), sym_rid);
   } else {
-    ret = sprintf(_str, "S_%lu.%d", sym_rid, field_index);
+    ret = sprintf(_str, "S%c_%lu.%d", type2char(type), sym_rid, field_index);
   }
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 SymbolExpression::SymbolExpression(sym_rid_t sym_arr_oid, int version,
-                                   int load_count) {
-  int ret = sprintf(_str, "A_%lu-%d-%d", sym_arr_oid, version, load_count);
+                                   int load_count, BasicType type) {
+  
+  int ret = sprintf(_str, "E%c_%lu-%d-%d", type2char(type), sym_arr_oid, version, load_count);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
@@ -100,28 +104,28 @@ void OpSymExpression::print() {
 }
 
 ConExpression::ConExpression(jint i) {
-  int ret = sprintf(_str, "0x%x", i);
+  int ret = sprintf(_str, "CI_0x%x", i);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jlong l) {
-  int ret = sprintf(_str, "0x%lx", l);
+  int ret = sprintf(_str, "CI_0x%lx", l);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jfloat f) {
-  int ret = sprintf(_str, "%e", f);
+  int ret = sprintf(_str, "CF_%e", f);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jdouble d) {
-  int ret = sprintf(_str, "%e", d);
+  int ret = sprintf(_str, "CF_%e", d);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 void ConExpression::print() {
   // TODO: include primiteive type
-  tty->indent().print("C_%s", _str);
+  tty->indent().print("%s", _str);
 }
 
 #endif
