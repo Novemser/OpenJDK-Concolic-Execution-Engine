@@ -26,12 +26,14 @@ public:
    * returns the being/end offset of first parameter in caller's oprand stack
    */
   inline int get_begin_offset() {
-    return _caller_istate->stack_base() - _callee_istate->locals() - 1;
+    return 0;
   }
-
-  inline int get_end_offset() {
-    return _caller_istate->stack_base() - _caller_istate->stack() - 1;
-  }
+  /**
+   *!!the offset returned is error, discard now.
+  */
+  // inline int get_end_offset() {
+  //   return _caller_istate->stack_base() - _caller_istate->stack() - 1;
+  // }
 
   inline Method *get_callee_method() {
     return _callee_istate->method();

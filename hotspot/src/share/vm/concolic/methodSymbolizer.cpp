@@ -122,7 +122,7 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
     ss.next();
     ++offset;
   }
-  assert(offset == handle.get_end_offset(), "equal");
+  //assert(offset == handle.get_end_offset(), "equal");
 }
 
 void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {

@@ -76,7 +76,7 @@ bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
       ss.next();
       ++offset;
     }
-    assert(offset == handle.get_end_offset(), "equal");
+    // assert(offset == handle.get_end_offset(), "equal");
 
     return true;
   }
