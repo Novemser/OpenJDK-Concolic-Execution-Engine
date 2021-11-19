@@ -2991,9 +2991,6 @@ run:
                   handle_exception);
           result = THREAD->vm_result();
         }
-#ifdef ENABLE_CONCOLIC
-        result->set_sym_rid(NULL_SYM_RID);
-#endif
 
         VERIFY_OOP(result);
         SET_STACK_OBJECT(result, 0);

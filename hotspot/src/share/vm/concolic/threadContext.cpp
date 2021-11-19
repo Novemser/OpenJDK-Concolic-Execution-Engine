@@ -52,6 +52,8 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
 
   Symbol *klass_symbol = obj->klass()->name();
   if (klass_symbol->equals(SymString::TYPE_NAME)) {
+    assert(!OopUtils::is_java_string_interned(obj),
+           "we do not support symbolize interned Java string");
     sym_inst = new SymString(sym_rid);
   } else if (klass_symbol->equals(SymInteger::TYPE_NAME)) {
     sym_inst = new SymInteger(sym_rid);

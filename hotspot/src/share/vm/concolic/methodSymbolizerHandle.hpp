@@ -3,13 +3,12 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "runtime/frame.hpp"
-#include "interpreterFrame_zero.hpp"
-#include "interpreter/bytecodeInterpreter.hpp"
 #include "concolic/exp/expression.hpp"
+#include "interpreter/bytecodeInterpreter.hpp"
+#include "interpreterFrame_zero.hpp"
+#include "runtime/frame.hpp"
 
 #include <string>
-
 
 class MethodSymbolizerHandle {
 private:
@@ -25,19 +24,15 @@ public:
   /**
    * returns the being/end offset of first parameter in caller's oprand stack
    */
-  inline int get_begin_offset() {
-    return 0;
-  }
+  inline int get_begin_offset() { return 0; }
   /**
    *!!the offset returned is error, discard now.
-  */
+   */
   // inline int get_end_offset() {
   //   return _caller_istate->stack_base() - _caller_istate->stack() - 1;
   // }
 
-  inline Method *get_callee_method() {
-    return _callee_istate->method();
-  }
+  inline Method *get_callee_method() { return _callee_istate->method(); }
 
   inline intptr_t *get_locals_ptr() {
     return ((intptr_t *)_callee_istate->locals());
@@ -74,16 +69,27 @@ public:
     _callee_name = std::string(c_str);
   }
 
-inline const std::string &get_callee_name() { return _callee_name; }
+  inline const std::string &get_callee_name() { return _callee_name; }
 
   inline exp_list_t &get_param_list() { return _param_list; }
+
+  inline void clear_param_list() {
+    int size = _param_list.size();
+    for (int i = 0; i < size; ++i) {
+      Expression *exp = _param_list[i];
+      if (exp && exp->able_to_gc()) {
+        delete exp;
+      }
+    }
+    _param_list.clear();
+  }
 
   inline void reset() {
     _caller_frame = NULL;
     _callee_frame = NULL;
     _caller_istate = NULL;
     _callee_istate = NULL;
-    _param_list.clear();
+    clear_param_list();
     _callee_holder_name.clear();
     _callee_name.clear();
   }

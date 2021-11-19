@@ -8,7 +8,7 @@ public class Example {
     }
   }
 
-  public static void main(String[] args) { testInt(); }
+  public static void main(String[] args) { testString(); }
 
   public static void testInt() {
     Example e = new Example();
@@ -34,6 +34,12 @@ public class Example {
     System.endConcolic();
   }
 
+  public static void testStartsWith() {
+    String d = "123";
+    if (d.startsWith("1")) {
+    }
+  }
+
   public static void testString() {
     String a = new String("abcd");
     String b = new String("ab");
@@ -41,18 +47,26 @@ public class Example {
     // Integer a = new Integer(5);
 
     System.startConcolic();
-    System.symbolize(a);
-    
+
+    String c = new String("123");
+    // MyString s = new MyString();
+
+    System.symbolize(c);
+
     // int input = e.func(a);
 
-    // if (input > 16) {
+    testStartsWith();
+
+    // if (s.value.startsWith("1")) {
     // }
 
-    if (a.startsWith(b)) {
-    }
+    // if (a.startsWith(b)) {
+    // }
 
     System.endConcolic();
   }
+
+  static class MyString { public String value = "123"; }
 
   static class TestInnerClass {
     Integer inner_i;

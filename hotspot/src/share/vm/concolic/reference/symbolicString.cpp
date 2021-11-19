@@ -55,37 +55,42 @@ void SymString::set_sym_exp(int field_offset, Expression *exp) {
 
 void SymString::print() {
   tty->print_cr("SymString: ");
-  _ref_exp->print();
+  _ref_exp->print_cr();
 }
 
 bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
-  std::string callee_name = handle.get_callee_name();
+  const std::string& callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (string_methods.find(callee_name) != string_methods.end()) {
     int offset = handle.get_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
+    Method *callee_method = handle.get_callee_method();
 
-    // this
-    SymString::prepare_param(handle, T_OBJECT, locals, offset, need_symbolize);
-    ++offset;
+    if (!callee_method->is_static()) {
+      // handle this
+      SymString::prepare_param(handle, T_OBJECT, locals, offset,
+                               need_symbolize);
+      ++offset;
+    }
 
     ResourceMark rm;
-    SignatureStream ss(handle.get_callee_method()->signature());
+    SignatureStream ss(callee_method->signature());
     while (!ss.at_return_type()) {
-      offset = SymString::prepare_param(handle, ss.type(), locals, offset, need_symbolize);
+      offset = SymString::prepare_param(handle, ss.type(), locals, offset,
+                                        need_symbolize);
 
       ss.next();
       ++offset;
     }
     // assert(offset == handle.get_end_offset(), "equal");
-
-    return true;
   }
-  return false;
+
+  return need_symbolize;
 }
 
 int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                             intptr_t *locals, int offset, bool &need_symbolize) {
+                             intptr_t *locals, int offset,
+                             bool &need_symbolize) {
   Expression *exp;
 
   if (type == T_OBJECT) {
@@ -149,7 +154,7 @@ Expression *SymString::get_exp_of(oop obj) {
   return exp;
 }
 
-SymString:: Mset SymString::init_string_methods() {
+SymString::Mset SymString::init_string_methods() {
   SymString::Mset m_set;
   m_set.insert("charAt");
   m_set.insert("compareTo");
@@ -186,6 +191,4 @@ SymString:: Mset SymString::init_string_methods() {
   m_set.insert("<init>");
   return m_set;
 }
-
-
 #endif

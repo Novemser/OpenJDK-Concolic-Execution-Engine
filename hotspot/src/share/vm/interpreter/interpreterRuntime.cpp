@@ -142,6 +142,12 @@ IRT_ENTRY(void, InterpreterRuntime::resolve_ldc(JavaThread* thread, Bytecodes::C
     assert(result == coop, "expected result for assembly code");
   }
 #endif
+
+#ifdef ENABLE_CONCOLIC
+  assert(result->get_sym_rid() == NULL_SYM_RID,
+         "should be");
+  // result->set_sym_rid(NULL_SYM_RID);
+#endif
   thread->set_vm_result(result);
 }
 IRT_END

@@ -84,6 +84,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
   if (need_symbolize) {
     ConcolicMngr::is_symbolizing_method = true;
+  } else {
+    _handle.reset();
   }
 }
 
