@@ -10,7 +10,7 @@ const char *SymString::TYPE_NAME = "java/lang/String";
 sym_rid_t SymString::sym_string_count = 0;
 
 SymString::SymString(sym_rid_t sym_rid)
-    : SymInstance(sym_rid),
+    : SymInstance(sym_rid), _exp(NULL),
       _ref_exp(new SymbolExpression("STR", sym_string_count++)) {
   _ref_exp->inc_ref();
 }
