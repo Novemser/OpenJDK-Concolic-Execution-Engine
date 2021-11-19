@@ -31,7 +31,6 @@ public:
     _ref_exp->inc_ref();
   };
 
-  void init_sym_exp(int field_offset);
   void init_sym_exp(int field_offset, Expression *exp);
   void set_sym_exp(int field_offset, Expression *exp);
 

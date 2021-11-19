@@ -126,7 +126,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     return false;
   default:
     sym_inst = this->_ctx.get_sym_inst(obj);
-    sym_inst->init_sym_base(fd->offset(), type);
+    sym_inst->init_sym_exp(fd->offset(), type);
     return false;
   }
 }
@@ -147,7 +147,7 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
   default:
     // the element_type is primitives
     sym_inst = this->_ctx.get_or_alloc_sym_inst(array_obj);
-    sym_inst->init_sym_base(index, element_type);
+    sym_inst->init_sym_exp(index, element_type);
     return false;
   }
 }

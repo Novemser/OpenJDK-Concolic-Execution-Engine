@@ -23,15 +23,6 @@ Expression *SymObj::get(int field_offset) {
   return iter == _exps.end() ? NULL : iter->second;
 }
 
-void SymObj::init_sym_exp(int field_offset) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  Expression *sym_exp = new SymbolExpression(this->get_sym_rid(), field_offset);
-
-  sym_exp->inc_ref();
-  _exps[field_offset] = sym_exp;
-}
-
 void SymObj::init_sym_exp(int field_offset, Expression *exp) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
