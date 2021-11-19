@@ -39,8 +39,8 @@ void ConcolicMngr::symbolize(Handle handle) {
 
 void ConcolicMngr::symbolizeMethod(Handle holder_name_handle, Handle callee_name_handle) {
   ResourceMark rm;
-  char *holder_name = OopUtils::java_string_to_c(holder_name_handle());
-  char *callee_name = OopUtils::java_string_to_c(callee_name_handle());
+  const char *holder_name = OopUtils::java_string_to_c(holder_name_handle());
+  const char *callee_name = OopUtils::java_string_to_c(callee_name_handle());
 
   method_sym->add_symbolic_method(std::string(holder_name), std::string(callee_name));
 
