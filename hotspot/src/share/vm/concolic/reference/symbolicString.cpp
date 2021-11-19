@@ -8,6 +8,7 @@
 
 const char *SymString::TYPE_NAME = "java/lang/String";
 sym_rid_t SymString::sym_string_count = 0;
+SymString::Mset SymString::string_methods = init_string_methods();
 
 SymString::SymString(sym_rid_t sym_rid)
     : SymInstance(sym_rid),
@@ -57,18 +58,20 @@ void SymString::print() {
 }
 
 bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
-  if (handle.get_callee_name() == "startsWith") {
+  std::string callee_name = handle.get_callee_name();
+  bool need_symbolize = false;
+  if (string_methods.find(callee_name) != string_methods.end()) {
     int offset = handle.get_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
 
     // this
-    SymString::prepare_param(handle, T_OBJECT, locals, offset);
+    SymString::prepare_param(handle, T_OBJECT, locals, offset, need_symbolize);
     ++offset;
 
     ResourceMark rm;
     SignatureStream ss(handle.get_callee_method()->signature());
     while (!ss.at_return_type()) {
-      offset = SymString::prepare_param(handle, ss.type(), locals, offset);
+      offset = SymString::prepare_param(handle, ss.type(), locals, offset, need_symbolize);
 
       ss.next();
       ++offset;
@@ -81,16 +84,22 @@ bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
 }
 
 int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                             intptr_t *locals, int offset) {
+                             intptr_t *locals, int offset, bool &need_symbolize) {
   Expression *exp;
 
   if (type == T_OBJECT) {
+    // only consider the situation that object is a string by now
     oop obj = *(oop *)(locals - offset);
+    if (obj->is_symbolic()) {
+      need_symbolize = true;
+    }
     exp = SymString::get_exp_of(obj);
   } else {
     offset += type2size[type] - 1;
 
     exp = ConcolicMngr::ctx->get_stack_slot(offset);
+    need_symbolize = exp ? true : need_symbolize;
+
     if (!exp) {
       switch (type) {
       case T_INT:
@@ -130,5 +139,44 @@ Expression *SymString::get_exp_of(oop obj) {
   }
   return exp;
 }
+
+SymString:: Mset SymString::init_string_methods() {
+  SymString::Mset m_set;
+  m_set.insert("charAt");
+  m_set.insert("compareTo");
+  m_set.insert("concat");
+  m_set.insert("copyValueOf");
+  m_set.insert("compareToIgnoreCase");
+  m_set.insert("contentEquals");
+  m_set.insert("contains");
+  m_set.insert("endsWith");
+  m_set.insert("equals");
+  m_set.insert("equalsIgnoreCase");
+  m_set.insert("getBytes");
+  m_set.insert("getChars");
+  m_set.insert("hashCode");
+  m_set.insert("isEmpty");
+  m_set.insert("indexOf");
+  m_set.insert("intern");
+  m_set.insert("lastIndexOf");
+  m_set.insert("length");
+  m_set.insert("matches");
+  m_set.insert("regionMatches");
+  m_set.insert("replace");
+  m_set.insert("replaceAll");
+  m_set.insert("replaceFirst");
+  m_set.insert("split");
+  m_set.insert("startsWith");
+  m_set.insert("subSequence");
+  m_set.insert("substring");
+  m_set.insert("toCharArray");
+  m_set.insert("toLowerCase");
+  m_set.insert("toUpperCase");
+  m_set.insert("trim");
+  m_set.insert("valueOf");
+  m_set.insert("<init>");
+  return m_set;
+}
+
 
 #endif
