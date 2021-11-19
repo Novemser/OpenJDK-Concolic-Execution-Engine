@@ -111,6 +111,10 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
     Method *callee_method = callee_istate->method();
     // here `result` describes whatever returned
     int result_slots = type2size[callee_method->result_type()];
+    if(callee_istate->thread()->has_pending_exception())
+    {
+      result_slots = 0;
+    }
     assert(result_slots >= 0 && result_slots <= 2, "what?");
 
     intptr_t *callee_result = callee_istate->stack() + result_slots;
