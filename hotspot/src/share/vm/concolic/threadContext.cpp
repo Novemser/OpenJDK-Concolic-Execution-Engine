@@ -34,16 +34,7 @@ ThreadContext::~ThreadContext() {
 }
 
 void ThreadContext::symbolize(Handle handle) {
-  if (handle()->is_instance()) {
-    this->symbolize_recursive(handle());
-  } else if (handle()->is_array()) {
-    /**
-     * Currently, we do not call symbolize_recursive for array
-     * Because symbolic array always return a new symbolic expression.
-     */
-  } else {
-    assert(false, "unhandled");
-  }
+  this->symbolize_recursive(handle());
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
