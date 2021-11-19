@@ -9,14 +9,12 @@
 void ThreadContext::set_stack_slot(int offset, Expression *exp) {
   assert(offset >= 0, "offset >= 0");
   sym_tmp_id_t sym_tmp_id = this->get_next_sym_tmp_id(exp);
-  this->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-      offset, exp, NULL_SYM_RID, sym_tmp_id);
+  this->get_last_stack().set_slot(offset, exp, NULL_SYM_RID, sym_tmp_id);
 }
 
 void ThreadContext::set_stack_slot(int offset, Expression *exp,
                                    sym_rid_t sym_rid, int index) {
-  ShadowTable &opr_stack =
-      this->get_shadow_stack().get_last_frame().get_opr_stack();
+  ShadowTable &opr_stack = this->get_last_stack();
   if (exp) {
     opr_stack.set_slot(offset, exp, sym_rid, index);
   } else {
@@ -24,40 +22,20 @@ void ThreadContext::set_stack_slot(int offset, Expression *exp,
   }
 }
 
-Expression *ThreadContext::get_stack_slot(int offset) {
-  return this->get_shadow_stack().get_last_frame().get_opr_stack().get_slot(
-      offset);
-}
-
-Expression *ThreadContext::get_stack_slot_and_detach(int offset) {
-  ShadowTable &opr_stack =
-      this->get_shadow_stack().get_last_frame().get_opr_stack();
-  ShadowTable::Entry &entry = opr_stack.get_entry(offset);
-  if (entry.exp) {
-    if (entry.sym_rid == NULL_SYM_RID) {
-      this->detach_tmp_exp(entry.index);
-    }
-  }
-  return entry.exp;
-}
-
 /**
  * TODO: document when to clear the stack
  */
 void ThreadContext::clear_stack_slot(int offset) {
-  return this->get_shadow_stack().get_last_frame().get_opr_stack().clear_slot(
-      offset);
+  return this->get_last_stack().clear_slot(offset);
 }
 
 void ThreadContext::copy_stack_slot(int src_off, int dst_off, int size) {
-  ShadowTable &opr_stack =
-      this->get_shadow_stack().get_last_frame().get_opr_stack();
+  ShadowTable &opr_stack = this->get_last_stack();
   opr_stack.copy_entries(opr_stack, src_off, dst_off, size);
 }
 
 void ThreadContext::swap_two_stack_slot(int off1, int off2) {
-  ShadowTable &opr_stack =
-      this->get_shadow_stack().get_last_frame().get_opr_stack();
+  ShadowTable &opr_stack = this->get_last_stack();
   opr_stack.swap_two_entries(off1, off2);
 }
 
@@ -65,33 +43,18 @@ void ThreadContext::copy_entry_from_local_to_stack(int local_offset,
                                                    int stack_offset) {
   assert(local_offset >= 0, "local_offset >= 0");
   assert(stack_offset >= 0, "stack_offset >= 0");
-  ShadowTable::Entry &entry =
-      this->get_shadow_stack().get_last_frame().get_local_tbl().get_entry(
-          local_offset);
-  this->get_shadow_stack().get_last_frame().get_opr_stack().set_slot(
-      stack_offset, entry);
+  ShadowTable::Entry &entry = this->get_local_entry(local_offset);
+  this->get_last_stack().set_slot(stack_offset, entry);
 }
 
 void ThreadContext::copy_entry_from_stack_to_local(int stack_offset,
                                                    int local_offset) {
   assert(local_offset >= 0, "local_offset >= 0");
   assert(stack_offset >= 0, "stack_offset >= 0");
-  ShadowTable::Entry &entry =
-      this->get_shadow_stack().get_last_frame().get_opr_stack().get_entry(
-          stack_offset);
-  this->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(
-      local_offset, entry);
+  ShadowTable::Entry &entry = this->get_stack_entry(stack_offset);
+  this->get_last_local().set_slot(local_offset, entry);
 }
 
-Expression *ThreadContext::get_local_slot(int offset) {
-  return this->get_shadow_stack().get_last_frame().get_local_tbl().get_slot(
-      offset);
-}
 
-void ThreadContext::set_local_slot(int offset, Expression *exp) {
-  assert(offset >= 0, "offset >= 0");
-  this->get_shadow_stack().get_last_frame().get_local_tbl().set_slot(offset,
-                                                                     exp);
-}
 
 #endif

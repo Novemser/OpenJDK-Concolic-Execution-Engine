@@ -2025,7 +2025,7 @@ run:
 #define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)                               \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
-    Expression *index_exp = ConcolicMngr::ctx->get_stack_slot_and_detach(      \
+    Expression *index_exp = ConcolicMngr::ctx->get_and_detach_stack_slot(      \
         stack_offset + arrayOff + 1);                                          \
     if (arrObj->is_symbolic() || index_exp) {                                  \
       SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);     \
@@ -2082,7 +2082,7 @@ run:
           if (ConcolicMngr::can_do_concolic()) {
             int stack_offset = GET_STACK_OFFSET;
             Expression *index_exp =
-                ConcolicMngr::ctx->get_stack_slot_and_detach(stack_offset +
+                ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset +
                                                              (-2) + 1);
             if (arrObj->is_symbolic() || index_exp) {
               SymArr *sym_arr =
@@ -2124,10 +2124,10 @@ run:
 #define CONCOLIC_ASTORE(arrayOff, delta, value, T)                             \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
-    Expression *index_exp = ConcolicMngr::ctx->get_stack_slot_and_detach(      \
+    Expression *index_exp = ConcolicMngr::ctx->get_and_detach_stack_slot(      \
         stack_offset + arrayOff + 1);                                          \
     Expression *value_exp =                                                    \
-        ConcolicMngr::ctx->get_stack_slot_and_detach(stack_offset + delta);    \
+        ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset + delta);    \
     if (arrObj->is_symbolic() || index_exp || value_exp) {                     \
       if (!arrObj->is_symbolic()) {                                            \
         ConcolicMngr::ctx->alloc_sym_array(arrObj);                            \
@@ -2206,7 +2206,7 @@ run:
           if (ConcolicMngr::can_do_concolic()) {
             int stack_offset = GET_STACK_OFFSET;
             Expression *index_exp =
-                ConcolicMngr::ctx->get_stack_slot_and_detach(stack_offset +
+                ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset +
                                                              (-3) + 1);
             if (arrObj->is_symbolic() || index_exp) {
               if (!arrObj->is_symbolic()) {
@@ -2635,7 +2635,7 @@ run:
 
             if (tos_type != atos) {
               Expression *sym_exp =
-                  ConcolicMngr::ctx->get_stack_slot_and_detach(stack_offset -
+                  ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset -
                                                                1);
               if (sym_exp) {
                 SymInstance *sym_inst =

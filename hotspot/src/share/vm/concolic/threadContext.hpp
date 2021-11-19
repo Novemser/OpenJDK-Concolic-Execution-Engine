@@ -68,8 +68,23 @@ public:
   void set_stack_slot(int offset, Expression *sym_exp);
   void set_stack_slot(int offset, Expression *sym_exp, sym_rid_t sym_rid,
                       int index);
-  Expression *get_stack_slot(int offset);
-  Expression *get_stack_slot_and_detach(int offset);
+
+  inline Expression *get_stack_slot(int offset) {
+    return this->get_stack_entry(offset).exp;
+  }
+
+  inline Expression *get_and_detach_stack_slot(int offset) {
+    return this->get_and_detach_stack_entry(offset).exp;
+  }
+
+  inline Expression *get_local_slot(int offset) {
+    return this->get_last_local().get_slot(offset);
+  }
+
+  inline void set_local_slot(int offset, Expression *exp) {
+    this->get_last_local().set_slot(offset, exp);
+  }
+
   /**
    * TODO: document when to clear the stack
    */
@@ -78,8 +93,33 @@ public:
   void swap_two_stack_slot(int off1, int off2);
   void copy_entry_from_local_to_stack(int local_offset, int stack_offset);
   void copy_entry_from_stack_to_local(int stack_offset, int local_offset);
-  Expression *get_local_slot(int offset);
-  void set_local_slot(int offset, Expression *sym_exp);
+
+private:
+  inline ShadowTable &get_last_stack() {
+    return this->get_shadow_stack().get_last_frame().get_opr_stack();
+  }
+
+  inline ShadowTable &get_last_local() {
+    return this->get_shadow_stack().get_last_frame().get_local_tbl();
+  }
+
+  inline ShadowTable::Entry &get_stack_entry(int offset) {
+    return this->get_last_stack().get_entry(offset);
+  }
+
+  inline ShadowTable::Entry &get_local_entry(int offset) {
+    return this->get_last_local().get_entry(offset);
+  }
+
+  inline ShadowTable::Entry &get_and_detach_stack_entry(int offset) {
+    ShadowTable::Entry &entry = this->get_last_stack().get_entry(offset);
+    if (entry.exp) {
+      if (entry.sym_rid == NULL_SYM_RID) {
+        this->detach_tmp_exp(entry.index);
+      }
+    }
+    return entry;
+  }
 
 private:
   void symbolize_recursive(oop obj);
