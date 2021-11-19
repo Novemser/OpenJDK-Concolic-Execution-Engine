@@ -4,6 +4,7 @@
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/stringExpression.hpp"
+#include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/utils.hpp"
 
 const char *SymString::TYPE_NAME = "java/lang/String";
@@ -94,6 +95,14 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
       need_symbolize = true;
     }
     exp = SymString::get_exp_of(obj);
+  } else if (type == T_ARRAY) {
+    arrayOop obj = *(arrayOop *)(locals - offset);
+    if (obj->is_symbolic()) {
+      exp = new SymbolExpression("A", obj->get_sym_rid());
+      need_symbolize = true;
+    } else {
+      exp = new ArrayInitExpression(NULL_SYM_RID, obj);
+    }
   } else {
     offset += type2size[type] - 1;
 
@@ -102,12 +111,12 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 
     if (!exp) {
       switch (type) {
-      case T_INT:
-        exp = new ConExpression(*(jint *)(locals - offset));
-        break;
-      default:
-        ShouldNotReachHere();
-        break;
+        case T_INT:
+          exp = new ConExpression(*(jint *)(locals - offset));
+          break;
+        default:
+          ShouldNotReachHere();
+          break;
       }
     }
   }

@@ -9,7 +9,12 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
   ArrayKlass *ak = (ArrayKlass *)array->klass();
   BasicType T = ak->element_type();
 
-  int ret = sprintf(_arr_str, "A%c_%lu", type2char(T), array_id);
+  int ret = 0;
+  if (array_id == NULL_SYM_RID) {
+    ret = sprintf(_arr_str, "A%c", type2char(T));
+  } else {
+    ret = sprintf(_arr_str, "A%c_%lu", type2char(T), array_id);
+  }
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 
   for (int i = 0; i < array->length(); i++) {
