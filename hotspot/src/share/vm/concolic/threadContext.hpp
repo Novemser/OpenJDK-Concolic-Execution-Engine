@@ -52,6 +52,9 @@ public:
   SymArr *get_or_alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
   SymArr *alloc_sym_array(arrayOop array, Expression *length_exp = NULL);
   SymArr *get_sym_array(sym_rid_t sym_rid);
+  inline SymArr *get_sym_array(arrayOop array_obj) {
+    return get_sym_array(array_obj->get_sym_rid());
+  }
 
   sym_tmp_id_t get_next_sym_tmp_id(Expression *sym_exp);
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);

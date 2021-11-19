@@ -24,13 +24,15 @@ public:
   virtual void init_sym_exp(int field_offset, Expression *exp) = 0;
   virtual void set_sym_exp(int field_offset, Expression *exp) = 0;
 
+  virtual void print() = 0;
+  virtual bool need_recursive() { return true; }
+
+
   inline void init_sym_exp(int field_offset, BasicType type) {
     return init_sym_exp(field_offset, new SymbolExpression(this->get_sym_rid(),
                                                            field_offset, type));
   }
 
-public:
-  virtual void print() = 0;
 };
 
 #endif // ENABLE_CONCOLIC

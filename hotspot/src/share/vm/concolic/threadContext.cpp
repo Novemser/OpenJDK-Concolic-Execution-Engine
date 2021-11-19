@@ -35,12 +35,8 @@ ThreadContext::~ThreadContext() {
 
 void ThreadContext::symbolize(Handle handle) {
   if (handle()->is_instance()) {
-    this->alloc_sym_inst(handle());
     this->symbolize_recursive(handle());
   } else if (handle()->is_array()) {
-    SymArr *sym_arr = this->alloc_sym_array((arrayOop)handle());
-    BasicType type = ArrayKlass::cast(((arrayOop)handle())->klass())->element_type();
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
     /**
      * Currently, we do not call symbolize_recursive for array
      * Because symbolic array always return a new symbolic expression.
@@ -63,10 +59,10 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   obj->set_sym_rid(sym_rid);
   SymInstance *sym_inst;
 
-  Klass *klass = obj->klass();
-  if (klass->name()->equals(SymString::TYPE_NAME)) {
+  Symbol *klass_symbol = obj->klass()->name();
+  if (klass_symbol->equals(SymString::TYPE_NAME)) {
     sym_inst = new SymString(sym_rid);
-  } else if (klass->name()->equals(SymInteger::TYPE_NAME)) {
+  } else if (klass_symbol->equals(SymInteger::TYPE_NAME)) {
     sym_inst = new SymInteger(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);

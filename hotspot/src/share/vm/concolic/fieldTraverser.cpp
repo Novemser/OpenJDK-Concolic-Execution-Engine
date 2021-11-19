@@ -1,11 +1,12 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/fieldTraverser.hpp"
+#include "concolic/reference/symbolicString.hpp"
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
 void FieldTraverser::do_recursive() {
-  this->_target_depth = 3; // TODO: unlimited
+  this->_target_depth = 5; // TODO: unlimited
   this->do_recursive_helper();
 }
 
@@ -16,15 +17,20 @@ void FieldTraverser::do_once() {
 
 void FieldTraverser::do_recursive_helper() {
   if (_obj->is_instance()) {
-    InstanceKlass *instanceKlass = (InstanceKlass *)_obj->klass();
-    /**
-     * Currently, we do not consider static fields
-     */
-    // instanceKlass->do_local_static_fields(this);
-    instanceKlass->do_nonstatic_fields(this);
+    if (this->before_instance_helper()) {
+      InstanceKlass *instanceKlass = (InstanceKlass *)_obj->klass();
+      /**
+       * Currently, we do not consider static fields
+       */
+      // instanceKlass->do_local_static_fields(this);
+      instanceKlass->do_nonstatic_fields(this);
+      this->after_instance_helper();
+    }
   } else if (_obj->is_array()) {
-    arrayOop array_obj = (arrayOop)_obj;
-    do_array_elements(this);
+    if (this->before_array_helper()) {
+      do_array_elements(this);
+      this->after_array_helper();
+    }
   } else {
     assert(false, "unhandled");
   }
@@ -32,8 +38,9 @@ void FieldTraverser::do_recursive_helper() {
 
 void FieldTraverser::do_field(fieldDescriptor *fd) {
   // FIXME: for some object may refer to it self, resulting endless symbolizing.
-  if (_depth > _target_depth)
+  if (_depth > _target_depth) {
     return;
+  }
 
   bool need_recursive;
   oop obj;
@@ -52,13 +59,16 @@ void FieldTraverser::do_field(fieldDescriptor *fd) {
   }
 
   if (need_recursive) {
+    unsigned offset = fd->offset();
+
     _depth += 1;
-    oop temp_obj = this->_obj;
-    this->_obj = obj->obj_field(fd->offset());
+    oop parent_obj = this->_obj;
+    this->_obj = obj->obj_field(offset);
 
     this->do_recursive_helper();
+    this->after_field_helper(offset, parent_obj);
 
-    this->_obj = temp_obj;
+    this->_obj = parent_obj;
     _depth -= 1;
   }
 }
@@ -79,17 +89,18 @@ void FieldTraverser::do_array_element(int index) {
 
   bool need_recursive;
   arrayOop array_obj = (arrayOop)_obj;
-  need_recursive = this->do_array_element_helper(index, array_obj);
+  need_recursive = this->do_element_helper(index, array_obj);
 
   if (need_recursive) {
     if (_obj->is_objArray()) {
       _depth += 1;
-      oop temp_obj = this->_obj;
+      oop parent_obj = this->_obj;
       this->_obj = ((objArrayOop)_obj)->obj_at(index);
 
       this->do_recursive_helper();
+      this->after_element_helper(index, parent_obj);
 
-      this->_obj = temp_obj;
+      this->_obj = parent_obj;
       _depth -= 1;
     } else {
       assert(false, "non-objarray won't be recursively done for now");
@@ -122,19 +133,42 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   case T_ARRAY:
     sym_arr =
         this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
-    sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
+    sym_arr->set_length_exp(new SymbolExpression(
+        sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
     return false;
   default:
     sym_inst = this->_ctx.get_sym_inst(obj);
+    assert(sym_inst == (SymInstance *)this->_sym_refs.back(),
+           "should be equal");
     sym_inst->init_sym_exp(fd->offset(), type);
     return false;
   }
 }
 
-bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
+void FieldSymbolizer::after_field_helper(unsigned offset, oop parent_obj) {
+  assert(parent_obj->is_symbolic(), "should be");
+  assert(this->_obj->is_symbolic(), "should be");
+}
+
+bool FieldSymbolizer::before_instance_helper() {
+  if (this->_obj->is_symbolic())
+    return false;
+
+  SymInstance *sym_inst = this->_ctx.alloc_sym_inst(this->_obj);
+  if (sym_inst->need_recursive()) {
+    _sym_refs.push_back(sym_inst);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void FieldSymbolizer::after_instance_helper() { _sym_refs.pop_back(); }
+
+bool FieldSymbolizer::do_element_helper(int index, arrayOop array_obj) {
   ArrayKlass *array_klass = ArrayKlass::cast(array_obj->klass());
 
-  SymInstance *sym_inst;
+  SymArr *sym_arr;
   BasicType element_type;
   element_type = array_klass->element_type();
 
@@ -146,11 +180,33 @@ bool FieldSymbolizer::do_array_element_helper(int index, arrayOop array_obj) {
     return true;
   default:
     // the element_type is primitives
-    sym_inst = this->_ctx.get_or_alloc_sym_inst(array_obj);
-    sym_inst->init_sym_exp(index, element_type);
+    sym_arr = this->_ctx.get_sym_array(array_obj);
+    assert(sym_arr == (SymArr *)this->_sym_refs.back(), "should be equal");
     return false;
   }
 }
+
+void FieldSymbolizer::after_element_helper(int index, oop parent_obj) {
+  /**
+   * TODO:
+   */
+}
+
+bool FieldSymbolizer::before_array_helper() {
+  if (this->_obj->is_symbolic())
+    return false;
+
+  arrayOop array_obj = (arrayOop)this->_obj;
+  SymArr *sym_arr = this->_ctx.alloc_sym_array(array_obj);
+
+  BasicType type = ArrayKlass::cast((array_obj)->klass())->element_type();
+  sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(),
+                                               FIELD_INDEX_ARRAY_LENGTH, type));
+
+  _sym_refs.push_back(sym_arr);
+}
+
+void FieldSymbolizer::after_array_helper() { _sym_refs.pop_back(); }
 
 /**************************************************
  * SimpleFieldPrinter
@@ -159,8 +215,9 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
 
   // print `signature` and `name`
-  tty->print("'%d' '%s' '%s' '%d'", fd->offset(), fd->signature()->as_C_string(),
-             fd->name()->as_C_string(), fd->index());
+  tty->print("'%d' '%s' '%s' '%d'", fd->offset(),
+             fd->signature()->as_C_string(), fd->name()->as_C_string(),
+             fd->index());
 
   switch (fd->field_type()) {
   case T_BYTE:
@@ -203,8 +260,7 @@ bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   }
 }
 
-bool SimpleFieldPrinter::do_array_element_helper(int index,
-                                                 arrayOop array_obj) {
+bool SimpleFieldPrinter::do_element_helper(int index, arrayOop array_obj) {
   /**
    * TODO: complete this
    */

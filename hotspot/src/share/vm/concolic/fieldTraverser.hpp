@@ -13,35 +13,43 @@
 #include "utilities/debug.hpp"
 
 #include <stdio.h>
+#include <vector>
 
 class FieldTraverser : public FieldClosure {
 private:
-  oop _obj;
   int _depth, _target_depth;
+
+protected:
+  oop _obj;
+
+  FieldTraverser(oop obj) : _obj(obj), _depth(1) {}
+  void print_indent();
 
 public:
   // recursive functions
   void do_recursive();
   void do_once();
 
-protected:
-  FieldTraverser(oop obj) : _obj(obj), _depth(1) {}
-
-  virtual bool do_field_helper(fieldDescriptor *fd, oop obj) {}
-  virtual bool do_array_element_helper(int index, arrayOop array_obj) {}
-
-  void print_indent();
-
 private:
+  virtual bool do_field_helper(fieldDescriptor *fd, oop obj) {}
+  virtual bool do_element_helper(int index, arrayOop array_obj) {}
+  virtual void after_field_helper(unsigned offset, oop temp_obj) {}
+  virtual void after_element_helper(int index, oop temp_obj) {}
+  virtual bool before_instance_helper() { return true; }
+  virtual void after_instance_helper() {}
+  virtual bool before_array_helper() { return true; }
+  virtual void after_array_helper() {}
+
   void do_field(fieldDescriptor *fd);
   void do_array_element(int index);
   void do_recursive_helper();
-  void do_array_elements(FieldTraverser* field_traverser);
+  void do_array_elements(FieldTraverser *field_traverser);
 };
 
 class FieldSymbolizer : public FieldTraverser {
 private:
   ThreadContext &_ctx;
+  std::vector<SymRef *> _sym_refs;
 
 public:
   FieldSymbolizer(oop obj, ThreadContext &ctx)
@@ -49,7 +57,13 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
-  bool do_array_element_helper(int index, arrayOop array_obj);
+  bool do_element_helper(int index, arrayOop array_obj);
+  void after_field_helper(unsigned offset, oop tem_obj);
+  void after_element_helper(int index, oop tem_obj);
+  virtual bool before_instance_helper();
+  virtual void after_instance_helper();
+  virtual bool before_array_helper();
+  virtual void after_array_helper();
 };
 
 class SimpleFieldPrinter : public FieldTraverser {
@@ -58,7 +72,7 @@ public:
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
-  bool do_array_element_helper(int index, arrayOop array_obj);
+  bool do_element_helper(int index, arrayOop array_obj);
 };
 
 #endif // ENABLE_CONCOLIC

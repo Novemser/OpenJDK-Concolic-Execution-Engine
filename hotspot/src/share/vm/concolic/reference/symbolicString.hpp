@@ -34,7 +34,7 @@ public:
   void init_sym_exp(int field_offset, Expression *exp);
   void set_sym_exp(int field_offset, Expression *exp);
 
-public:
+  bool need_recursive() { return false; }
   void print();
 
 public:
