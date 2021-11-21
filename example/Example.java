@@ -8,7 +8,7 @@ public class Example {
     }
   }
 
-  public static void main(String[] args) { testString(); }
+  public static void main(String[] args) { testInt(); }
 
   public static void testInt() {
     Example e = new Example();
@@ -20,13 +20,14 @@ public class Example {
     }
 
     System.startConcolic();
-    // System.symbolizeMethod("Example", "func");
+    System.symbolizeMethod("Example", "func");
     System.symbolize(a);
     System.symbolize(b);
 
-    arr[b] = a;
+    // arr[b] = a;
 
-    int input = e.func(arr[1]);
+    // int input = e.func(arr[1]);
+    int input = e.func(a);
 
     if (input > 16) {
     }

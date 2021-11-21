@@ -74,7 +74,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   bool need_symbolize = false;
   SymMethodSet *sym_methods =
       this->get_sym_methods(_handle.get_callee_holder_name());
-  
+
   if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
     need_symbolize = SymString::invoke_method(_handle);
   } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
@@ -163,12 +163,15 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
 
   if (type == T_OBJECT) {
     oop obj = *(oop *)(locals - offset);
-    ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-    /**
-     *  TODO: May be this symbol expression can be used
-     */
-    exp = new SymbolExpression(obj->get_sym_rid(), SymbolExpression::NULL_INDEX,
-                               type);
+    SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+    exp = sym_inst->get_ref_exp();
+    if (!exp) {
+      /**
+       *  TODO: May be this symbol expression can be used
+       */
+      exp = new SymbolExpression(obj->get_sym_rid(),
+                                 SymbolExpression::NULL_INDEX, type);
+    }
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *)(locals - offset);
     SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);
