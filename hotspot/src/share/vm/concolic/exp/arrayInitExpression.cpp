@@ -20,6 +20,10 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
   for (int i = 0; i < array->length(); i++) {
     Expression *value_exp = NULL;
     switch (T) {
+    case T_BOOLEAN:
+      value_exp = new ConExpression(
+          *(jboolean *)(((address)array->base(T)) + i * sizeof(jboolean)));
+      break;
     case T_INT:
       value_exp = new ConExpression(
           *(jint *)(((address)array->base(T)) + i * sizeof(jint)));

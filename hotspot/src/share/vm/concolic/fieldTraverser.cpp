@@ -130,12 +130,15 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   switch (type) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
-  case T_ARRAY:
-    sym_arr =
-        this->_ctx.alloc_sym_array((arrayOop)(obj->obj_field(fd->offset())));
-    sym_arr->set_length_exp(new SymbolExpression(
-        sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
+  case T_ARRAY: {
+    arrayOop array_obj = (arrayOop)(obj->obj_field(fd->offset()));
+    if (array_obj) {
+      sym_arr = this->_ctx.alloc_sym_array(array_obj);
+      sym_arr->set_length_exp(new SymbolExpression(
+          sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
+    }
     return false;
+  }
   default:
     sym_inst = this->_ctx.get_sym_inst(obj);
     assert(sym_inst == (SymInstance *)this->_sym_refs.back(),
@@ -155,7 +158,7 @@ bool FieldSymbolizer::before_instance_helper() {
     return false;
 
   SymInstance *sym_inst = this->_ctx.alloc_sym_inst(this->_obj);
-  if (sym_inst->need_recursive()) {
+  if (sym_inst && sym_inst->need_recursive()) {
     _sym_refs.push_back(sym_inst);
     return true;
   } else {
