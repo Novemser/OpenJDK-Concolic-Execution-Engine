@@ -19,23 +19,24 @@ class MethodSymbolizer {
   typedef std::map<std::string, SymMethodSet *> SymClassMap;
   typedef SymClassMap::iterator SymClassMapIt;
 
+  bool _symbolizing_method;
   SymClassMap _symbolicMethods;
-
-public:
   MethodSymbolizerHandle _handle;
 
+public:
+  MethodSymbolizer() : _symbolizing_method(false) {}
   ~MethodSymbolizer();
 
+  inline bool is_symbolizing_method() { return _symbolizing_method; }
+
+  void add_method(const char *class_name, const char *method_name);
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
   void finish_method(ZeroFrame *caller_frame);
-
-  void add_symbolic_method(const std::string &class_name,
-                           const std::string &method_name);
 
   void print();
 
 private:
-  SymMethodSet *get_sym_methods(const std::string& class_name);
+  SymMethodSet *get_sym_methods(const std::string &class_name);
 
 public:
   static void invoke_method_helper(MethodSymbolizerHandle &handle);

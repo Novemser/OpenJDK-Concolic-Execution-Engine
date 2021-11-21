@@ -3,6 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/methodSymbolizer.hpp"
 #include "concolic/pathCondition.hpp"
 #include "concolic/reference/symbolicArray.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
@@ -26,6 +27,7 @@ private:
   SymStore _sym_refs;
   SymTmpExpStore _sym_tmp_exps;
   PathCondition _path_condition;
+  MethodSymbolizer _method_symbolizer;
 
   sym_rid_t _sym_rid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
@@ -37,10 +39,22 @@ public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();
 
-  ShadowStack &get_shadow_stack() { return _s_stack; }
+  inline void symbolize(Handle handle) { this->symbolize_recursive(handle()); }
+  inline void symbolize_method(const char *class_name,
+                               const char *method_name) {
+    _method_symbolizer.add_method(class_name, method_name);
+  }
 
-  void symbolize(Handle handle);
+public:
+  inline MethodSymbolizer &get_method_symbolizer() {
+    return _method_symbolizer;
+  }
 
+  inline bool is_symbolizing_method() {
+    _method_symbolizer.is_symbolizing_method();
+  }
+
+public:
   SymInstance *get_or_alloc_sym_inst(oop obj);
   SymInstance *alloc_sym_inst(oop obj);
   inline SymInstance *get_sym_inst(oop obj) {
@@ -64,6 +78,7 @@ public:
   }
 
 public:
+  inline ShadowStack &get_shadow_stack() { return _s_stack; }
   /**
    * this will generate a new tmp_id; use it when `sym_exp` is newly
    * calculated, which doesn't have `sym_rid` and `index`

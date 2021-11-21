@@ -18,15 +18,16 @@ MethodSymbolizer::~MethodSymbolizer() {
   }
 }
 
-void MethodSymbolizer::add_symbolic_method(const std::string &class_name,
-                                           const std::string &method_name) {
+void MethodSymbolizer::add_method(const char *class_name,
+                                  const char *method_name) {
   SymClassMapIt sym_class_map_it =
-      _symbolicMethods.insert(std::make_pair(class_name, (SymMethodSet *)NULL))
+      _symbolicMethods
+          .insert(std::make_pair(std::string(class_name), (SymMethodSet *)NULL))
           .first;
   if (sym_class_map_it->second == NULL) {
     sym_class_map_it->second = new SymMethodSet();
   }
-  sym_class_map_it->second->insert(method_name);
+  sym_class_map_it->second->insert(std::string(method_name));
 }
 
 void MethodSymbolizer::print() {
@@ -83,7 +84,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   }
 
   if (need_symbolize) {
-    ConcolicMngr::is_symbolizing_method = true;
+    this->_symbolizing_method = true;
   } else {
     _handle.reset();
   }
@@ -97,7 +98,7 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       finish_method_helper(_handle);
     }
     this->_handle.reset();
-    ConcolicMngr::is_symbolizing_method = false;
+    this->_symbolizing_method = false;
   }
 }
 
@@ -124,7 +125,7 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
     ss.next();
     ++offset;
   }
-  //assert(offset == handle.get_end_offset(), "equal");
+  // assert(offset == handle.get_end_offset(), "equal");
 }
 
 void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
@@ -159,8 +160,8 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
     /**
      *  TODO: May be this symbol expression can be used
      */
-    exp =
-        new SymbolExpression(obj->get_sym_rid(), SymbolExpression::NULL_INDEX, type);
+    exp = new SymbolExpression(obj->get_sym_rid(), SymbolExpression::NULL_INDEX,
+                               type);
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *)(locals - offset);
     SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);

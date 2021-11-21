@@ -33,10 +33,6 @@ ThreadContext::~ThreadContext() {
   _path_condition.gc();
 }
 
-void ThreadContext::symbolize(Handle handle) {
-  this->symbolize_recursive(handle());
-}
-
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
   if (obj->is_symbolic()) {
     return this->get_sym_inst(obj->get_sym_rid());
