@@ -22,7 +22,7 @@ private:
 
 public:
   /**
-   * returns the being/end offset of first parameter in caller's oprand stack
+   * returns the being/end offset of first parameter in callee's local variable table
    */
   inline int get_begin_offset() { return 0; }
   /**
