@@ -155,15 +155,17 @@ void ThreadContext::print() {
   }
 
   _path_condition.print();
-
-  tty->print_cr("Checking memory leaks for Expression, %lu remains...",
-                Expression::total_count);
 }
 
 void ThreadContext::print_stack_trace() {
   ZeroStack *stack = _thread->zero_stack();
   static char buf[O_BUFLEN];
   VMError::print_stack_trace(tty, _thread, buf, sizeof(buf));
+}
+
+void ThreadContext::memory_leak_check() {
+  tty->print_cr("Checking memory leaks for Expression, %lu remains...",
+                Expression::total_count);
 }
 
 #endif

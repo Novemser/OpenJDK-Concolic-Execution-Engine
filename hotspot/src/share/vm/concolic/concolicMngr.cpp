@@ -38,6 +38,7 @@ jlong ConcolicMngr::endConcolic() {
   ctx->print();
   delete ctx;
   ctx = NULL;
+  ThreadContext::memory_leak_check();
   pthread_mutex_unlock(&mutex);
   return 0;
 }

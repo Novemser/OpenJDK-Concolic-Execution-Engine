@@ -165,6 +165,7 @@ private:
 public:
   void print();
   void print_stack_trace();
+  static void memory_leak_check();
 };
 
 #endif
