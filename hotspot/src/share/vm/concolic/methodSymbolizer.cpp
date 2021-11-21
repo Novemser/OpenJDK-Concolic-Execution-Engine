@@ -3,6 +3,7 @@
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/jdbc/reference/symbolicConnection.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
@@ -73,14 +74,18 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   bool need_symbolize = false;
   SymMethodSet *sym_methods =
       this->get_sym_methods(_handle.get_callee_holder_name());
-  if (sym_methods != NULL &&
-      sym_methods->find(_handle.get_callee_name()) != sym_methods->end()) {
+  
+  if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
+    need_symbolize = SymString::invoke_method(_handle);
+  } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
+    need_symbolize = SymConn::invoke_method(_handle);
+  } else if (sym_methods != NULL &&
+             sym_methods->find(_handle.get_callee_name()) !=
+                 sym_methods->end()) {
     tty->print_cr("Calling function name: %s",
                   callee->name_and_sig_as_C_string());
     invoke_method_helper(_handle);
     need_symbolize = true;
-  } else if (_handle.get_callee_holder_name() == "java/lang/String") {
-    need_symbolize = SymString::invoke_method(_handle);
   }
 
   if (need_symbolize) {
@@ -92,8 +97,10 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
 void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
   if (caller_frame == _handle.get_caller_frame()) {
-    if (_handle.get_callee_holder_name() == "java/lang/String") {
+    if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
       SymString::finish_method(_handle);
+    } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
+      SymConn::finish_method(_handle);
     } else {
       finish_method_helper(_handle);
     }

@@ -3,6 +3,8 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include <set>
+#include <string>
 #include <sys/types.h>
 
 // Symbolioc Reference ID related
@@ -14,6 +16,8 @@ typedef ulong sym_rid_t;
 typedef int sym_tmp_id_t;
 
 #define FIELD_INDEX_ARRAY_LENGTH -1
+
+typedef std::set<std::string> method_set_t;
 
 #endif
 #endif // SHARE_VM_CONCOLIC_DEFS_HPP

@@ -2,14 +2,52 @@
 
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
+#include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/stringExpression.hpp"
-#include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/utils.hpp"
 
 const char *SymString::TYPE_NAME = "java/lang/String";
 sym_rid_t SymString::sym_string_count = 0;
-SymString::Mset SymString::string_methods = init_string_methods();
+method_set_t SymString::symbolized_methods = init_symbolized_methods();
+
+method_set_t SymString::init_symbolized_methods() {
+  method_set_t m_set;
+  m_set.insert("charAt");
+  m_set.insert("compareTo");
+  m_set.insert("concat");
+  m_set.insert("copyValueOf");
+  m_set.insert("compareToIgnoreCase");
+  m_set.insert("contentEquals");
+  m_set.insert("contains");
+  m_set.insert("endsWith");
+  m_set.insert("equals");
+  m_set.insert("equalsIgnoreCase");
+  m_set.insert("getBytes");
+  m_set.insert("getChars");
+  m_set.insert("hashCode");
+  m_set.insert("isEmpty");
+  m_set.insert("indexOf");
+  m_set.insert("intern");
+  m_set.insert("lastIndexOf");
+  m_set.insert("length");
+  m_set.insert("matches");
+  m_set.insert("regionMatches");
+  m_set.insert("replace");
+  m_set.insert("replaceAll");
+  m_set.insert("replaceFirst");
+  m_set.insert("split");
+  m_set.insert("startsWith");
+  m_set.insert("subSequence");
+  m_set.insert("substring");
+  m_set.insert("toCharArray");
+  m_set.insert("toLowerCase");
+  m_set.insert("toUpperCase");
+  m_set.insert("trim");
+  m_set.insert("valueOf");
+  m_set.insert("<init>");
+  return m_set;
+}
 
 SymString::SymString(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _exp(NULL),
@@ -59,9 +97,9 @@ void SymString::print() {
 }
 
 bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
-  const std::string& callee_name = handle.get_callee_name();
+  const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
-  if (string_methods.find(callee_name) != string_methods.end()) {
+  if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
     int offset = handle.get_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
     Method *callee_method = handle.get_callee_method();
@@ -116,12 +154,12 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 
     if (!exp) {
       switch (type) {
-        case T_INT:
-          exp = new ConExpression(*(jint *)(locals - offset));
-          break;
-        default:
-          ShouldNotReachHere();
-          break;
+      case T_INT:
+        exp = new ConExpression(*(jint *)(locals - offset));
+        break;
+      default:
+        ShouldNotReachHere();
+        break;
       }
     }
   }
@@ -131,12 +169,6 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 }
 
 void SymString::finish_method(MethodSymbolizerHandle &handle) {
-  BasicType type = handle.get_result_type();
-
-  if (handle.get_callee_name() == "startsWith") {
-    assert(type == T_BOOLEAN, "should be");
-  }
-
   MethodSymbolizer::finish_method_helper(handle);
 }
 
@@ -154,41 +186,4 @@ Expression *SymString::get_exp_of(oop obj) {
   return exp;
 }
 
-SymString::Mset SymString::init_string_methods() {
-  SymString::Mset m_set;
-  m_set.insert("charAt");
-  m_set.insert("compareTo");
-  m_set.insert("concat");
-  m_set.insert("copyValueOf");
-  m_set.insert("compareToIgnoreCase");
-  m_set.insert("contentEquals");
-  m_set.insert("contains");
-  m_set.insert("endsWith");
-  m_set.insert("equals");
-  m_set.insert("equalsIgnoreCase");
-  m_set.insert("getBytes");
-  m_set.insert("getChars");
-  m_set.insert("hashCode");
-  m_set.insert("isEmpty");
-  m_set.insert("indexOf");
-  m_set.insert("intern");
-  m_set.insert("lastIndexOf");
-  m_set.insert("length");
-  m_set.insert("matches");
-  m_set.insert("regionMatches");
-  m_set.insert("replace");
-  m_set.insert("replaceAll");
-  m_set.insert("replaceFirst");
-  m_set.insert("split");
-  m_set.insert("startsWith");
-  m_set.insert("subSequence");
-  m_set.insert("substring");
-  m_set.insert("toCharArray");
-  m_set.insert("toLowerCase");
-  m_set.insert("toUpperCase");
-  m_set.insert("trim");
-  m_set.insert("valueOf");
-  m_set.insert("<init>");
-  return m_set;
-}
 #endif

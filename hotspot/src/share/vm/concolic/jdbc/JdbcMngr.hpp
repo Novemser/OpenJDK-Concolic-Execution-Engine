@@ -1,0 +1,15 @@
+#ifndef SHARE_VM_CONCOLIC_JDBC_JDBCMNGR_HPP
+#define SHARE_VM_CONCOLIC_JDBC_JDBCMNGR_HPP
+
+#if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
+
+#include <string>
+class JdbcMngr {
+private:
+
+
+	
+};
+
+#endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
+#endif // SHARE_VM_CONCOLIC_JDBC_JDBCMNGR_HPP

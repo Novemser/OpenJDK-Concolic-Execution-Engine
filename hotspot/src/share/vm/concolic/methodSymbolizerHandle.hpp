@@ -22,7 +22,8 @@ private:
 
 public:
   /**
-   * returns the being/end offset of first parameter in callee's local variable table
+   * returns the being/end offset of first parameter in callee's local variable
+   * table
    */
   inline int get_begin_offset() { return 0; }
   /**
@@ -40,6 +41,12 @@ public:
 
   inline BasicType get_result_type() {
     return _caller_istate->callee()->result_type();
+  }
+
+  inline intptr_t *get_result_ptr() {
+    int result_slots = type2size[get_result_type()];
+    assert(result_slots >= 0 && result_slots <= 2, "what?");
+    return _callee_istate->stack() + result_slots;
   }
 
   inline void set_caller_frame(ZeroFrame *caller_frame) {

@@ -3,6 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/jdbc/JdbcMngr.hpp"
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/pathCondition.hpp"
 #include "concolic/reference/symbolicArray.hpp"
@@ -28,16 +29,16 @@ private:
   SymTmpExpStore _sym_tmp_exps;
   PathCondition _path_condition;
   MethodSymbolizer _method_symbolizer;
+  JdbcMngr _jdbc_mngr;
 
   sym_rid_t _sym_rid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
 
 public:
-  inline JavaThread *get_thread() { return _thread; }
-
-public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();
+
+  inline JavaThread *get_thread() { return _thread; }
 
   inline void symbolize(Handle handle) { this->symbolize_recursive(handle()); }
   inline void symbolize_method(const char *class_name,
@@ -46,6 +47,8 @@ public:
   }
 
 public:
+  inline JdbcMngr &get_jdbc_mngr() { return _jdbc_mngr; }
+
   inline MethodSymbolizer &get_method_symbolizer() {
     return _method_symbolizer;
   }

@@ -12,10 +12,19 @@ class SymStmt : public SymInstance {
 public:
   static const char *TYPE_NAME;
 
+private:
+  std::string _sql_template;
+
 public:
   SymStmt(sym_rid_t sym_rid);
   ~SymStmt();
 
+public:
+  inline void swap_sql_template(std::string &sql_template) {
+    _sql_template.swap(sql_template);
+  }
+
+public:
   Expression *get(int field_offset) {
     ShouldNotCallThis();
     return NULL;

@@ -3,17 +3,14 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
-#include <string>
-#include <set>
 
 class SymString : public SymInstance {
 public:
   static const char *TYPE_NAME;
-  typedef std::set<std::string> Mset;
-  static Mset string_methods;
-
+  static method_set_t symbolized_methods;
 
 private:
   static sym_rid_t sym_string_count;
@@ -48,7 +45,9 @@ public:
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset, bool &need_symbolize);
   static Expression *get_exp_of(oop obj);
-  static Mset init_string_methods();
+
+private:
+  static method_set_t init_symbolized_methods();
 };
 
 #endif // ENABLE_CONCOLIC
