@@ -27,7 +27,7 @@ public class Example {
     // arr[b] = a;
 
     // int input = e.func(arr[1]);
-    int input = e.func(a);
+    int input = 2 + e.func(a);
 
     if (input > 16) {
     }

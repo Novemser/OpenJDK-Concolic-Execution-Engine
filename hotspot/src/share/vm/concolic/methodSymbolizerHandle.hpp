@@ -22,10 +22,15 @@ private:
 
 public:
   /**
-   * returns the being/end offset of first parameter in callee's local variable
+   * returns the being offset of first parameter in callee's local variable
    * table
    */
-  inline int get_begin_offset() { return 0; }
+  inline int get_callee_local_begin_offset() { return 0; }
+
+  inline int get_caller_stack_begin_offset() {
+    return _caller_istate->stack_base() - _callee_istate->locals() - 1;
+  }
+
   /**
    *!!the offset returned is error, discard now.
    */

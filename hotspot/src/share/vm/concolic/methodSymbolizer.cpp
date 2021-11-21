@@ -117,7 +117,7 @@ MethodSymbolizer::get_sym_methods(const std::string &class_name) {
 }
 
 void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
-  int offset = handle.get_begin_offset();
+  int offset = handle.get_callee_local_begin_offset();
   register intptr_t *locals = handle.get_locals_ptr();
 
   // Currently, we do not consider "this" object
@@ -136,7 +136,7 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
-  int offset = handle.get_begin_offset();
+  int offset = handle.get_caller_stack_begin_offset();
   BasicType type = handle.get_result_type();
   Expression *exp;
 

@@ -100,7 +100,7 @@ bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
-    int offset = handle.get_begin_offset();
+    int offset = handle.get_callee_local_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
     Method *callee_method = handle.get_callee_method();
 

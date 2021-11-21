@@ -23,7 +23,7 @@ bool SymConn::invoke_method(MethodSymbolizerHandle &handle) {
     /**
      * Currently, this is only for prepareStatement
      */
-    int offset = handle.get_begin_offset();
+    int offset = handle.get_callee_local_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
     Method *callee_method = handle.get_callee_method();
 
@@ -52,12 +52,8 @@ void SymConn::finish_method(MethodSymbolizerHandle &handle) {
   /**
    * Currently, this is only for prepareStatement
    */
-  int offset = handle.get_begin_offset();
-  register intptr_t *locals = handle.get_locals_ptr();
-
-  assert(handle.get_result_type() == T_OBJECT, "sanity check");
-
   oop res_obj = *(oop*) handle.get_result_ptr();
+  assert(handle.get_result_type() == T_OBJECT, "sanity check");
   assert(res_obj->klass()->name()->equals(SymStmt::TYPE_NAME), "should be");
   assert(!sql_template.empty(), "empty");
 
