@@ -8,10 +8,14 @@
 #include "concolic/threadContext.hpp"
 #include "runtime/handles.hpp"
 
+#include <pthread.h>
+
 class ConcolicMngr {
 #ifdef ENABLE_CONCOLIC
 public:
-  static ThreadContext *ctx;
+  static volatile int _num_threads_in_concolic;
+  static pthread_mutex_t mutex;
+  static __thread ThreadContext *ctx;
 
   static jlong startConcolic(JavaThread *thread);
   static jlong endConcolic();

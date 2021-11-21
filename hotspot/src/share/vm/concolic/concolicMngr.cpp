@@ -6,22 +6,39 @@
 
 #ifdef ENABLE_CONCOLIC
 
-ThreadContext *ConcolicMngr::ctx = NULL;
+volatile int ConcolicMngr::_num_threads_in_concolic = 0;
+pthread_mutex_t ConcolicMngr::mutex = PTHREAD_MUTEX_INITIALIZER;
+__thread ThreadContext *ConcolicMngr::ctx = NULL;
 
 jlong ConcolicMngr::startConcolic(JavaThread *thread) {
-  tty->print("Start concolic!\n");
+  pthread_mutex_lock(&mutex);
+  /**
+   * Although ThreadContext is thread-local, there are some static fields of
+   * other classes, which are still global.
+   *
+   * Therefore, we still assume that only one thread can execute in concolic
+   * model
+   */
+  assert(_num_threads_in_concolic == 0, "should be");
   assert(thread != NULL, "not null java thread");
+
+  ++_num_threads_in_concolic;
+
   ctx = new ThreadContext(thread);
+  pthread_mutex_unlock(&mutex);
   return 0;
 }
 
 jlong ConcolicMngr::endConcolic() {
-  tty->print("End concolic!\n");
+  pthread_mutex_lock(&mutex);
+
+  assert(_num_threads_in_concolic == 1, "should be");
+  --_num_threads_in_concolic;
+
   ctx->print();
   delete ctx;
-  tty->print_cr("Checking memory leaks for Expression, %lu remains...",
-                Expression::total_count);
   ctx = NULL;
+  pthread_mutex_unlock(&mutex);
   return 0;
 }
 

@@ -151,6 +151,9 @@ void ThreadContext::print() {
   }
 
   _path_condition.print();
+
+  tty->print_cr("Checking memory leaks for Expression, %lu remains...",
+                Expression::total_count);
 }
 
 void ThreadContext::print_stack_trace() {
