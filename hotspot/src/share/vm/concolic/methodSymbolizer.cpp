@@ -4,6 +4,7 @@
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
+#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
@@ -79,6 +80,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymString::invoke_method(_handle);
   } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
     need_symbolize = SymConn::invoke_method(_handle);
+  } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
+    need_symbolize = SymStmt::invoke_method(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
                  sym_methods->end()) {
@@ -101,6 +104,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       SymString::finish_method(_handle);
     } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
       SymConn::finish_method(_handle);
+    } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
+      SymStmt::finish_method(_handle);
     } else {
       finish_method_helper(_handle);
     }
@@ -138,17 +143,21 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
 void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   int offset = handle.get_caller_stack_begin_offset();
   BasicType type = handle.get_result_type();
-  Expression *exp;
+  Expression *exp = NULL;
 
-  if (type == T_OBJECT) {
-    ShouldNotReachHere();
-  } else if (type == T_ARRAY) {
-    ShouldNotReachHere();
-  } else {
+  switch (type) {
+  case T_VOID:
+    break;
+  case T_OBJECT:
+  case T_ARRAY:
+    ShouldNotCallThis();
+    break;
+  default: {
     exp = new SymbolExpression();
     int delta = type2size[type] - 1;
     assert(delta >= 0, "should be");
     ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
+  }
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(

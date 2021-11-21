@@ -8,15 +8,9 @@
 #include "concolic/reference/symbolicInstance.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
-
-#include <map>
-#include <stdio.h>
-
 class SymObj : public SymInstance {
-  typedef std::map<int, Expression *> ExpStore;
-
 private:
-  ExpStore _exps;
+  exp_map_t _exps;
 
 public:
   SymObj(sym_rid_t sym_rid);

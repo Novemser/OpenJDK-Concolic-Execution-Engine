@@ -9,9 +9,9 @@
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
+#include <map>
 #include <stdio.h>
 #include <vector>
-
 class Expression {
 private:
   uint _ref_count;
@@ -43,7 +43,8 @@ private:
 
 public:
   SymbolExpression(sym_rid_t sym_rid, int field_index, BasicType type);
-  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count, BasicType type);
+  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count,
+                   BasicType type);
   SymbolExpression(const char *prefix, sym_rid_t id);
   SymbolExpression();
   ~SymbolExpression();
@@ -104,6 +105,7 @@ public:
 };
 
 typedef std::vector<Expression *> exp_list_t;
+typedef std::map<int, Expression *> exp_map_t;
 
 #endif
 

@@ -19,8 +19,10 @@ MethodExpression::MethodExpression(const std::string &holder,
   /**
    * It seems that methods returning void does not need to be symbolized?
    */
-  assert(_res_exp != NULL, "not null");
-  _res_exp->inc_ref();
+
+  if (res_exp) {
+    _res_exp->inc_ref();
+  }
 }
 
 MethodExpression::~MethodExpression() {
@@ -32,7 +34,7 @@ MethodExpression::~MethodExpression() {
     }
   }
 
-  if (_res_exp->dec_ref()) {
+  if (_res_exp && _res_exp->dec_ref()) {
     delete _res_exp;
   }
 }
@@ -45,7 +47,11 @@ void MethodExpression::print() {
     _param_list[i]->print();
   }
   tty->print(") -> ");
-  _res_exp->print();
+  if (_res_exp) {
+    _res_exp->print();
+  } else {
+    tty->print("VOID");
+  }
 }
 
 #endif

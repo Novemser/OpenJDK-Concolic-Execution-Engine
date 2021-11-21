@@ -40,9 +40,7 @@ public:
 
   inline Method *get_callee_method() { return _callee_istate->method(); }
 
-  inline intptr_t *get_locals_ptr() {
-    return ((intptr_t *)_callee_istate->locals());
-  }
+  inline intptr_t *get_locals_ptr() { return _callee_istate->locals(); }
 
   inline BasicType get_result_type() {
     return _caller_istate->callee()->result_type();
@@ -85,6 +83,11 @@ public:
 
   inline exp_list_t &get_param_list() { return _param_list; }
 
+  template <class T> inline T get_param(int offset) {
+    return *(T *)(get_locals_ptr() - offset);
+  }
+
+public:
   inline void clear_param_list() {
     int size = _param_list.size();
     for (int i = 0; i < size; ++i) {
