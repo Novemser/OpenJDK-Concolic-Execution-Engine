@@ -51,7 +51,9 @@ bool SymStmt::invoke_method(MethodSymbolizerHandle &handle) {
     jint index = handle.get_param<jint>(1);
 
     Expression *value_exp = ConcolicMngr::ctx->get_stack_slot(
-        handle.get_caller_stack_begin_offset() + 2);
+        handle.get_caller_stack_begin_offset() +
+        2); // this 2's unit is stack words!
+
     if (!value_exp) {
       value_exp = new ConExpression(handle.get_param<jint>(2));
     }

@@ -16,6 +16,7 @@ public:
 
 private:
   sym_rid_t _sym_stmt_rid;
+  int _row_id;
 
 public:
   SymResSet(sym_rid_t sym_rid);
@@ -25,6 +26,8 @@ public:
   inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
     _sym_stmt_rid = sym_stmt_rid;
   }
+
+  inline void next() { ++_row_id; }
 
 public:
   bool need_recursive() { return false; }

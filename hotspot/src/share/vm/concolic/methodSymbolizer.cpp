@@ -5,6 +5,7 @@
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
+#include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
@@ -82,6 +83,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymConn::invoke_method(_handle);
   } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
     need_symbolize = SymStmt::invoke_method(_handle);
+  } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
+    need_symbolize = SymResSet::invoke_method(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
                  sym_methods->end()) {
@@ -106,6 +109,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       SymConn::finish_method(_handle);
     } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
       SymStmt::finish_method(_handle);
+    } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
+      SymResSet::finish_method(_handle);
     } else {
       finish_method_helper(_handle);
     }
