@@ -239,4 +239,11 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
   return offset;
 }
 
+sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
+
+MethodReturnSymbolExp::MethodReturnSymbolExp() {
+  int length = sprintf(str_buf, "M_%lu", sym_method_count++);
+  set(str_buf, length);
+}
+
 #endif

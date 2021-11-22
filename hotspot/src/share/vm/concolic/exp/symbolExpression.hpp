@@ -49,19 +49,7 @@ public:
                    BasicType type);
 };
 
-class MethodReturnSymbolExp : public SymbolExpression {
-  static sym_rid_t sym_method_count;
 
-public:
-  MethodReturnSymbolExp();
-};
-
-class StringSymbolExp : public SymbolExpression {
-  static sym_rid_t sym_string_count;
-
-public:
-  StringSymbolExp();
-};
 
 #endif
 

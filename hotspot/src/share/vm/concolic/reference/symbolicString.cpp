@@ -49,8 +49,7 @@ method_set_t SymString::init_symbolized_methods() {
 }
 
 SymString::SymString(sym_rid_t sym_rid)
-    : SymInstance(sym_rid), _exp(NULL),
-      _ref_exp(new StringSymbolExp()) {
+    : SymInstance(sym_rid), _exp(NULL), _ref_exp(new StringSymbolExp()) {
   _ref_exp->inc_ref();
 }
 
@@ -188,6 +187,13 @@ Expression *SymString::get_exp_of(oop obj) {
     exp = new StringExpression(OopUtils::java_string_to_c(obj));
   }
   return exp;
+}
+
+sym_rid_t StringSymbolExp::sym_string_count = 0;
+
+StringSymbolExp::StringSymbolExp() {
+  int length = sprintf(str_buf, "STR_%lu", ++sym_string_count);
+  set(str_buf, length);
 }
 
 #endif

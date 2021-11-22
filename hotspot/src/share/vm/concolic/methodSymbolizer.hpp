@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/expression.hpp"
+#include "concolic/exp/symbolExpression.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 
 #include <map>
@@ -44,6 +44,13 @@ public:
 
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset);
+};
+
+class MethodReturnSymbolExp : public SymbolExpression {
+  static sym_rid_t sym_method_count;
+
+public:
+  MethodReturnSymbolExp();
 };
 
 #endif

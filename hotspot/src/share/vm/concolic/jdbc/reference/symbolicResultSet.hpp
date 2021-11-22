@@ -9,13 +9,21 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
+class SymResSet;
+class ResultSetSymbolExp : public SymbolExpression {
+public:
+  ResultSetSymbolExp(SymResSet *sym_res_set, const char *col_name);
+};
 class SymResSet : public SymInstance {
+  friend class ResultSetSymbolExp;
+
 public:
   static const char *TYPE_NAME;
   static const char *BASE_TYPE_NAME;
 
 private:
   sym_rid_t _sym_stmt_rid;
+  int _sql_id;
   int _row_id;
 
 public:
@@ -25,6 +33,7 @@ public:
 public:
   inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
     _sym_stmt_rid = sym_stmt_rid;
+    _sql_id = (int)sym_stmt_rid;
   }
 
   inline void next() { ++_row_id; }

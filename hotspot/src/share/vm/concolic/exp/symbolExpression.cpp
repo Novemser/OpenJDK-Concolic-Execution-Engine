@@ -4,8 +4,6 @@
 #include "utilities/ostream.hpp"
 
 char SymbolExpression::str_buf[SymbolExpression::BUF_SIZE];
-sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
-sym_rid_t StringSymbolExp::sym_string_count = 0;
 
 void SymbolExpression::set(const char *buf, int length) {
   assert(length <= BUF_SIZE, "BUF_SIZE exceeded!");
@@ -43,16 +41,6 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
                                    int load_count, BasicType type) {
   int length = sprintf(str_buf, "E%c_%lu-%d-%d", type2char(type), sym_arr_oid,
                        version, load_count);
-  set(str_buf, length);
-}
-
-MethodReturnSymbolExp::MethodReturnSymbolExp() {
-  int length = sprintf(str_buf, "M_%lu", sym_method_count++);
-  set(str_buf, length);
-}
-
-StringSymbolExp::StringSymbolExp() {
-  int length = sprintf(str_buf, "STR_%lu", ++sym_string_count);
   set(str_buf, length);
 }
 

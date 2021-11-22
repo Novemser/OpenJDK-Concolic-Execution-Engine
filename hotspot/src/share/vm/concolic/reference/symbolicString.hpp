@@ -49,5 +49,12 @@ private:
   static method_set_t init_symbolized_methods();
 };
 
+class StringSymbolExp : public SymbolExpression {
+  static sym_rid_t sym_string_count;
+
+public:
+  StringSymbolExp();
+};
+
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICSTRING_HPP
