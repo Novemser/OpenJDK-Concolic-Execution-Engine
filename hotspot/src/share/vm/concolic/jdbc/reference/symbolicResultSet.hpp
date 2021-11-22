@@ -12,6 +12,7 @@
 class SymResSet;
 class ResultSetSymbolExp : public SymbolExpression {
 public:
+  ResultSetSymbolExp(SymResSet *sym_res_set);
   ResultSetSymbolExp(SymResSet *sym_res_set, const char *col_name);
 };
 class SymResSet : public SymInstance {
@@ -26,6 +27,8 @@ private:
   int _sql_id;
   int _row_id;
 
+  Expression *_size_exp;
+
 public:
   SymResSet(sym_rid_t sym_rid);
   ~SymResSet();
@@ -34,7 +37,13 @@ public:
   inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
     _sym_stmt_rid = sym_stmt_rid;
     _sql_id = (int)sym_stmt_rid;
+    _size_exp = new ResultSetSymbolExp(this);
+    _size_exp->inc_ref();
   }
+
+  inline Expression *get_size_exp() { return _size_exp; }
+
+  inline int get_row_id() { return _row_id; }
 
   inline void next() { ++_row_id; }
 
