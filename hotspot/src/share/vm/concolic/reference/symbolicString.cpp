@@ -96,7 +96,7 @@ void SymString::print() {
   _ref_exp->print_cr();
 }
 
-bool SymString::invoke_method(MethodSymbolizerHandle &handle) {
+bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
@@ -171,8 +171,8 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
   return offset;
 }
 
-void SymString::finish_method(MethodSymbolizerHandle &handle) {
-  MethodSymbolizer::finish_method_helper(handle);
+Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
+  return MethodSymbolizer::finish_method_helper(handle);
 }
 
 Expression *SymString::get_exp_of(oop obj) {

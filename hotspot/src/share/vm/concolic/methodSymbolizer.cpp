@@ -4,8 +4,8 @@
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
-#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
+#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
@@ -78,13 +78,13 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
       this->get_sym_methods(_handle.get_callee_holder_name());
 
   if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
-    need_symbolize = SymString::invoke_method(_handle);
+    need_symbolize = SymString::invoke_method_helper(_handle);
   } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
-    need_symbolize = SymConn::invoke_method(_handle);
+    need_symbolize = SymConn::invoke_method_helper(_handle);
   } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
-    need_symbolize = SymStmt::invoke_method(_handle);
+    need_symbolize = SymStmt::invoke_method_helper(_handle);
   } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
-    need_symbolize = SymResSet::invoke_method(_handle);
+    need_symbolize = SymResSet::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
                  sym_methods->end()) {
@@ -103,17 +103,24 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
 void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
   if (caller_frame == _handle.get_caller_frame()) {
+    Expression *exp = NULL;
     if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
-      SymString::finish_method(_handle);
+      exp = SymString::finish_method_helper(_handle);
     } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
-      SymConn::finish_method(_handle);
+      exp = SymConn::finish_method_helper(_handle);
     } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
-      SymStmt::finish_method(_handle);
+      exp = SymStmt::finish_method_helper(_handle);
     } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
-      SymResSet::finish_method(_handle);
+      exp = SymResSet::finish_method_helper(_handle);
     } else {
-      finish_method_helper(_handle);
+      exp = finish_method_helper(_handle);
     }
+
+    BasicType type = _handle.get_result_type();
+    int delta = type2size[type] > 1; // long and double are 1; 0, otherwise
+    assert(delta >= 0, "should be");
+    ConcolicMngr::ctx->set_stack_slot(
+        _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
     this->_symbolizing_method = false;
   }
@@ -145,8 +152,8 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
   // assert(offset == handle.get_end_offset(), "equal");
 }
 
-void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
-  int offset = handle.get_caller_stack_begin_offset();
+Expression *
+MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   BasicType type = handle.get_result_type();
   Expression *exp = NULL;
 
@@ -157,17 +164,14 @@ void MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   case T_ARRAY:
     ShouldNotCallThis();
     break;
-  default: {
+  default:
     exp = new SymbolExpression();
-    int delta = type2size[type] - 1;
-    assert(delta >= 0, "should be");
-    ConcolicMngr::ctx->set_stack_slot(offset + delta, exp);
-  }
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(
       handle.get_callee_holder_name(), handle.get_callee_name(),
       handle.get_param_list(), exp));
+  return exp;
 }
 
 int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,

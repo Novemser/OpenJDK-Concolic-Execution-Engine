@@ -40,7 +40,7 @@ private:
 
 public:
   static void invoke_method_helper(MethodSymbolizerHandle &handle);
-  static void finish_method_helper(MethodSymbolizerHandle &handle);
+  static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset);

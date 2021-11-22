@@ -39,11 +39,12 @@ public:
   void print();
 
 public:
-  static bool invoke_method(MethodSymbolizerHandle &handle);
-  static void finish_method(MethodSymbolizerHandle &handle);
+  static bool invoke_method_helper(MethodSymbolizerHandle &handle);
+  static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                           intptr_t *locals, int locals_offset, bool &need_symbolize);
+                           intptr_t *locals, int locals_offset,
+                           bool &need_symbolize);
   static Expression *get_exp_of(oop obj);
 
 private:

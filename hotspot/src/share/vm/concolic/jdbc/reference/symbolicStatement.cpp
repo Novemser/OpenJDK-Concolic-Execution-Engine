@@ -42,7 +42,7 @@ void SymStmt::print() {
   }
 }
 
-bool SymStmt::invoke_method(MethodSymbolizerHandle &handle) {
+bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
 
@@ -74,7 +74,7 @@ bool SymStmt::invoke_method(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
-void SymStmt::finish_method(MethodSymbolizerHandle &handle) {
+Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   if (callee_name == "executeQuery") {
     oop res_obj = handle.get_result<oop>();
@@ -89,6 +89,7 @@ void SymStmt::finish_method(MethodSymbolizerHandle &handle) {
     assert(this_obj->is_symbolic(), "should be");
     sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
   }
+  return NULL;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

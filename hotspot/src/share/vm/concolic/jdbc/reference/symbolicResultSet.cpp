@@ -17,7 +17,7 @@ void SymResSet::print() {
   tty->print_cr("SymResSet of SymStmt %lu", _sym_stmt_rid);
 }
 
-bool SymResSet::invoke_method(MethodSymbolizerHandle &handle) {
+bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   // bool need_symbolize = true;
 
@@ -31,7 +31,7 @@ bool SymResSet::invoke_method(MethodSymbolizerHandle &handle) {
   return true;
 }
 
-void SymResSet::finish_method(MethodSymbolizerHandle &handle) {
+Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
   if (strncmp("get", callee_name.c_str(), 3) == 0) {
@@ -48,8 +48,7 @@ void SymResSet::finish_method(MethodSymbolizerHandle &handle) {
     }
   }
 
-  ConcolicMngr::ctx->set_stack_slot(handle.get_caller_stack_begin_offset(),
-                                    exp);
+  return exp;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

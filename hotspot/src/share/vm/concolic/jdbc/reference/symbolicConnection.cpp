@@ -16,7 +16,7 @@ method_set_t SymConn::init_symbolized_methods() {
   return m_set;
 }
 
-bool SymConn::invoke_method(MethodSymbolizerHandle &handle) {
+bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
@@ -44,7 +44,7 @@ bool SymConn::invoke_method(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
-void SymConn::finish_method(MethodSymbolizerHandle &handle) {
+Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   assert(symbolized_methods.find(callee_name) != symbolized_methods.end(),
          "sanity check");
@@ -54,12 +54,14 @@ void SymConn::finish_method(MethodSymbolizerHandle &handle) {
    */
   oop res_obj = handle.get_result<oop>();
   assert(handle.get_result_type() == T_OBJECT, "sanity check");
-  assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!" );
+  assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!");
   assert(res_obj->klass()->name()->equals(SymStmt::TYPE_NAME), "should be");
   assert(!sql_template.empty(), "empty");
 
   SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
   sym_stmt->swap_sql_template(sql_template);
+
+  return NULL;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

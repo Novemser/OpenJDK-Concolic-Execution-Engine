@@ -13,8 +13,8 @@ public:
   static method_set_t symbolized_methods;
 
 public:
-  static bool invoke_method(MethodSymbolizerHandle &handle);
-  static void finish_method(MethodSymbolizerHandle &handle);
+  static bool invoke_method_helper(MethodSymbolizerHandle &handle);
+  static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
 private:
   static method_set_t init_symbolized_methods();
