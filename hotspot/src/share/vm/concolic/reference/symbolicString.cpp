@@ -154,6 +154,9 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 
     if (!exp) {
       switch (type) {
+      case T_BOOLEAN:
+        exp = new ConExpression(*(jboolean *)(locals - offset));
+        break;
       case T_INT:
         exp = new ConExpression(*(jint *)(locals - offset));
         break;
