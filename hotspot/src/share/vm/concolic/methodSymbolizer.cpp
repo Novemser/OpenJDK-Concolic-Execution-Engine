@@ -3,6 +3,7 @@
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/exp/symbolExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
@@ -165,7 +166,7 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
     ShouldNotCallThis();
     break;
   default:
-    exp = new SymbolExpression();
+    exp = new MethodReturnSymbolExp();
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(
@@ -185,19 +186,18 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
     exp = sym_inst->get_ref_exp();
     if (!exp) {
       /**
-       *  TODO: May be this symbol expression can be used
+       *  TODO: May be this symbol expression can be reused
        */
-      exp = new SymbolExpression(obj->get_sym_rid(),
-                                 SymbolExpression::NULL_INDEX, type);
+      exp = new InstanceSymbolExp(obj->get_sym_rid(), type);
     }
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *)(locals - offset);
     SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);
     /**
-     *  TODO: May be this symbol expression can be used
+     *  TODO: May be this symbol expression can be reused
      */
-    exp = new SymbolExpression(arrObj->get_sym_rid(), sym_arr->get_version(),
-                               sym_arr->get_load_count(), type);
+    exp =
+        new ArraySymbolExp(arrObj->get_sym_rid(), sym_arr->get_version(), type);
   } else {
     offset += type2size[type] - 1;
 

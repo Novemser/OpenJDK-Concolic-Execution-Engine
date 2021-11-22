@@ -8,7 +8,6 @@
 #include "concolic/utils.hpp"
 
 const char *SymString::TYPE_NAME = "java/lang/String";
-sym_rid_t SymString::sym_string_count = 0;
 method_set_t SymString::symbolized_methods = init_symbolized_methods();
 
 method_set_t SymString::init_symbolized_methods() {
@@ -51,7 +50,7 @@ method_set_t SymString::init_symbolized_methods() {
 
 SymString::SymString(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _exp(NULL),
-      _ref_exp(new SymbolExpression("STR", sym_string_count++)) {
+      _ref_exp(new StringSymbolExp()) {
   _ref_exp->inc_ref();
 }
 
@@ -139,12 +138,14 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     }
     exp = SymString::get_exp_of(obj);
   } else if (type == T_ARRAY) {
-    arrayOop obj = *(arrayOop *)(locals - offset);
-    if (obj->is_symbolic()) {
-      exp = new SymbolExpression("A", obj->get_sym_rid());
+    arrayOop arr_obj = *(arrayOop *)(locals - offset);
+    if (arr_obj->is_symbolic()) {
+      SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);
+      exp = new ArraySymbolExp(arr_obj->get_sym_rid(), sym_arr->get_version(),
+                               type);
       need_symbolize = true;
     } else {
-      exp = new ArrayInitExpression(NULL_SYM_RID, obj);
+      exp = new ArrayInitExpression(NULL_SYM_RID, arr_obj);
     }
   } else {
     offset += type2size[type] - 1;

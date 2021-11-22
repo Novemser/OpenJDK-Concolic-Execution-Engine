@@ -13,8 +13,6 @@ public:
   static method_set_t symbolized_methods;
 
 private:
-  static sym_rid_t sym_string_count;
-
   Expression *_ref_exp;
   Expression *_exp;
 

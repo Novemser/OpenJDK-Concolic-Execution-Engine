@@ -134,8 +134,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     arrayOop array_obj = (arrayOop)(obj->obj_field(fd->offset()));
     if (array_obj) {
       sym_arr = this->_ctx.alloc_sym_array(array_obj);
-      sym_arr->set_length_exp(new SymbolExpression(
-          sym_arr->get_sym_rid(), FIELD_INDEX_ARRAY_LENGTH, type));
+      sym_arr->set_length_exp(new ArrayLengthExp(sym_arr->get_sym_rid(), type));
     }
     return false;
   }
@@ -203,8 +202,7 @@ bool FieldSymbolizer::before_array_helper() {
   SymArr *sym_arr = this->_ctx.alloc_sym_array(array_obj);
 
   BasicType type = ArrayKlass::cast((array_obj)->klass())->element_type();
-  sym_arr->set_length_exp(new SymbolExpression(sym_arr->get_sym_rid(),
-                                               FIELD_INDEX_ARRAY_LENGTH, type));
+  sym_arr->set_length_exp(new ArrayLengthExp(sym_arr->get_sym_rid(), type));
 
   _sym_refs.push_back(sym_arr);
 }

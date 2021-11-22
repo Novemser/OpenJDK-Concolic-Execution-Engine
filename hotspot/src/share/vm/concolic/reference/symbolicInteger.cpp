@@ -6,10 +6,7 @@ const char *SymInteger::ARRAY_TYPE_NAME = "[Ljava/lang/Integer;";
 const char *SymInteger::TYPE_NAME = "java/lang/Integer";
 sym_rid_t SymInteger::sym_int_count = 0;
 
-SymInteger::SymInteger(sym_rid_t sym_rid) : SymInstance(sym_rid) {
-  // new SymbolExpression("INT", sym_int_count++)
-  // _ref_exp->inc_ref();
-}
+SymInteger::SymInteger(sym_rid_t sym_rid) : SymInstance(sym_rid) {}
 
 SymInteger::~SymInteger() {
   if (_exp && _exp->dec_ref()) {

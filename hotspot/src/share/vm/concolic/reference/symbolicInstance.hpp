@@ -36,8 +36,8 @@ public:
   virtual bool need_recursive() { return true; }
 
   inline void init_sym_exp(int field_offset, BasicType type) {
-    return init_sym_exp(field_offset, new SymbolExpression(this->get_sym_rid(),
-                                                           field_offset, type));
+    return init_sym_exp(field_offset, new FieldSymbolExp(this->get_sym_rid(),
+                                                         field_offset, type));
   }
 };
 

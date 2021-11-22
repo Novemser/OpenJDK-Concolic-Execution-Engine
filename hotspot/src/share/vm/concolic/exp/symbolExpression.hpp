@@ -3,30 +3,64 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/expression.hpp"
 #include "concolic/defs.hpp"
+#include "concolic/exp/expression.hpp"
 #include "oops/oop.inline.hpp"
+
+#include <string>
 
 class SymbolExpression : public Expression {
 public:
-  static const int NULL_INDEX = -1;
-  static sym_rid_t sym_method_count;
+  static const int BUF_SIZE = 1024;
+  static char str_buf[BUF_SIZE];
 
-private:
-  static const int EXP_NAME_LENGTH = 16;
+protected:
+  std::string _str;
 
-  char _str[EXP_NAME_LENGTH];
-
-public:
-  SymbolExpression(sym_rid_t sym_rid, int field_index, BasicType type);
-  SymbolExpression(sym_rid_t sym_arr_oid, int arr_version, int load_count,
-                   BasicType type);
-  SymbolExpression(const char *prefix, sym_rid_t id);
-  SymbolExpression();
-  ~SymbolExpression();
+  void set(const char *buf, int length);
 
 public:
   void print();
+};
+
+class InstanceSymbolExp : public SymbolExpression {
+public:
+  InstanceSymbolExp(sym_rid_t sym_rid, BasicType type);
+};
+
+class FieldSymbolExp : public SymbolExpression {
+public:
+  FieldSymbolExp(sym_rid_t sym_rid, int field_index, BasicType type);
+};
+
+class ArraySymbolExp : public SymbolExpression {
+public:
+  ArraySymbolExp(sym_rid_t sym_arr_oid, int arr_version, BasicType type);
+};
+
+class ArrayLengthExp : public SymbolExpression {
+public:
+  ArrayLengthExp(sym_rid_t sym_arr_oid, BasicType type);
+};
+
+class ElementSymbolExp : public SymbolExpression {
+public:
+  ElementSymbolExp(sym_rid_t sym_arr_oid, int arr_version, int load_count,
+                   BasicType type);
+};
+
+class MethodReturnSymbolExp : public SymbolExpression {
+  static sym_rid_t sym_method_count;
+
+public:
+  MethodReturnSymbolExp();
+};
+
+class StringSymbolExp : public SymbolExpression {
+  static sym_rid_t sym_string_count;
+
+public:
+  StringSymbolExp();
 };
 
 #endif

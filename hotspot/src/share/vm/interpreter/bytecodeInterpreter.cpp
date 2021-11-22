@@ -2036,8 +2036,8 @@ run:
       }                                                                        \
                                                                                \
       Expression *value_exp =                                                  \
-          new SymbolExpression(sym_arr_oid, sym_arr->get_version(),            \
-                               sym_arr->get_and_inc_load_count(), T);          \
+          new ElementSymbolExp(sym_arr_oid, sym_arr->get_version(),       \
+                                    sym_arr->get_and_inc_load_count(), T);     \
       ConcolicMngr::ctx->set_stack_slot(stack_offset + res_off, value_exp,     \
                                         sym_arr_oid, index);                   \
                                                                                \
@@ -2046,7 +2046,7 @@ run:
     } else {                                                                   \
       ConcolicMngr::ctx->clear_stack_slot(GET_STACK_OFFSET + res_off);         \
     }                                                                          \
-  }                                                                             
+  }
 #else
 #define CONCOLIC_ALOAD(T, T2, arrayOff, res_off)
 #endif
@@ -2093,9 +2093,9 @@ run:
                 index_exp = new ConExpression(index);
               }
 
-              SymbolExpression *value_exp =
-                  new SymbolExpression(sym_arr_oid, sym_arr->get_version(),
-                                       sym_arr->get_and_inc_load_count(), T_OBJECT);
+              SymbolExpression *value_exp = new ElementSymbolExp(
+                  sym_arr_oid, sym_arr->get_version(),
+                  sym_arr->get_and_inc_load_count(), T_OBJECT);
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               SymInstance* sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
@@ -2223,9 +2223,8 @@ run:
               Expression *value_exp = sym_inst->get_ref_exp();
 
               if (!value_exp) {
-                value_exp = new SymbolExpression(rhsObject->get_sym_rid(),
-                                                 SymbolExpression::NULL_INDEX,
-                                                 T_OBJECT);
+                value_exp =
+                    new InstanceSymbolExp(rhsObject->get_sym_rid(), T_OBJECT);
               }
 
               ConcolicMngr::record_path_condition(new ArrayExpression(

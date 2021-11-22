@@ -44,7 +44,7 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
       ShouldNotCallThis();
       break;
     default:
-      exp = new SymbolExpression();
+      exp = new MethodReturnSymbolExp();
     }
   }
 
