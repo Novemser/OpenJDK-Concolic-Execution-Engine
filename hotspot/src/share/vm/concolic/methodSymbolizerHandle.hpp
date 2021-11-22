@@ -37,10 +37,6 @@ public:
   // inline int get_end_offset() {
   //   return _caller_istate->stack_base() - _caller_istate->stack() - 1;
   // }
-  inline intptr_t *get_result_ptr() {
-    int offset = type2size[_caller_istate->callee()->result_type()];
-    return _callee_istate->stack() + offset;
-  }
 
   inline Method *get_callee_method() { return _callee_istate->method(); }
 

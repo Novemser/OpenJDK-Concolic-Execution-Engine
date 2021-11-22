@@ -156,7 +156,6 @@ void MethodSymbolizer::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *
 MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   BasicType type = handle.get_result_type();
-  intptr_t *res = handle.get_result_ptr();
   Expression *exp = NULL;
   oop obj = NULL;
 
@@ -164,7 +163,7 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   case T_VOID:
     break;
   case T_OBJECT:
-    obj = *(oop *)(res);
+    obj = handle.get_result<oop>();
     if (!obj->is_symbolic()) {
       ConcolicMngr::ctx->symbolize(obj);
     }
@@ -172,7 +171,7 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
       We hope only symbolize the method whose return value
       is the object we support like SymString and SymInterger.
     */
-    exp = ConcolicMngr::ctx->get_sym_inst(obj->get_sym_rid())->get_ref_exp();
+    exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
     assert(exp != NULL, "should be");
     break;
   case T_ARRAY:
