@@ -4,6 +4,7 @@
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/exp/expression.hpp"
 #include "concolic/fieldTraverser.hpp"
+#include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicInteger.hpp"
 #include "concolic/reference/symbolicObject.hpp"
@@ -60,6 +61,8 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymInteger(sym_rid);
   } else if (klass_symbol->equals(SymStmt::TYPE_NAME)) {
     sym_inst = new SymStmt(sym_rid);
+  } else if (klass_symbol->equals(SymResSet::TYPE_NAME)) {
+    sym_inst = new SymResSet(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);
   }

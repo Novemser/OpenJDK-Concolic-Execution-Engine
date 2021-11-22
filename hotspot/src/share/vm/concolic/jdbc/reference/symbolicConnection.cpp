@@ -52,8 +52,9 @@ void SymConn::finish_method(MethodSymbolizerHandle &handle) {
   /**
    * Currently, this is only for prepareStatement
    */
-  oop res_obj = *(oop*) handle.get_result_ptr();
+  oop res_obj = handle.get_result<oop>();
   assert(handle.get_result_type() == T_OBJECT, "sanity check");
+  assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!" );
   assert(res_obj->klass()->name()->equals(SymStmt::TYPE_NAME), "should be");
   assert(!sql_template.empty(), "empty");
 

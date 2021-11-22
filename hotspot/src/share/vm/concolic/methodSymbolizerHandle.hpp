@@ -46,10 +46,10 @@ public:
     return _caller_istate->callee()->result_type();
   }
 
-  inline intptr_t *get_result_ptr() {
+  template <class T> inline T get_result() {
     int result_slots = type2size[get_result_type()];
     assert(result_slots >= 0 && result_slots <= 2, "what?");
-    return _callee_istate->stack() + result_slots;
+    return *(T *)(_callee_istate->stack() + result_slots);
   }
 
   inline void set_caller_frame(ZeroFrame *caller_frame) {

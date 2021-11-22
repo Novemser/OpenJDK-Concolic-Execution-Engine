@@ -4,6 +4,7 @@
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
+#include "concolic/jdbc/reference/symbolicResultSet.hpp"
 
 // const char *SymStmt::TYPE_NAME = "com/mysql/jdbc/StatementImpl";
 const char *SymStmt::TYPE_NAME = "com/mysql/jdbc/JDBC42PreparedStatement";
@@ -59,6 +60,11 @@ bool SymStmt::invoke_method(MethodSymbolizerHandle &handle) {
     sym_stmt->set_param(index, value_exp);
 
     need_symbolize = true;
+  } else if (callee_name == "executeQuery") {
+    int param_size = handle.get_callee_method()->size_of_parameters();
+    assert(param_size == 1, "currently, we only support stmt.executeQuery()");
+
+    need_symbolize = true;
   } else {
     ShouldNotCallThis();
   }
@@ -66,6 +72,21 @@ bool SymStmt::invoke_method(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
-void SymStmt::finish_method(MethodSymbolizerHandle &handle) {}
+void SymStmt::finish_method(MethodSymbolizerHandle &handle) {
+  const std::string &callee_name = handle.get_callee_name();
+  if (callee_name == "executeQuery") {
+    oop res_obj = handle.get_result<oop>();
+    assert(handle.get_result_type() == T_OBJECT, "sanity check");
+    assert(!res_obj->is_symbolic(), "please return a new resultset, JDBC!");
+    assert(res_obj->klass()->name()->equals(SymResSet::TYPE_NAME), "should be");
+
+    SymResSet *sym_res_set =
+        (SymResSet *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+
+    oop this_obj = handle.get_param<oop>(0);
+    assert(this_obj->is_symbolic(), "should be");
+    sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
+  }
+}
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
