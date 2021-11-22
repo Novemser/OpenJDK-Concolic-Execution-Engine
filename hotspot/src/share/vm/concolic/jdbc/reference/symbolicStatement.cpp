@@ -9,10 +9,6 @@
 const char *SymStmt::TYPE_NAME = "com/mysql/jdbc/JDBC42PreparedStatement";
 const char *SymStmt::BASE_TYPE_NAME = "com/mysql/jdbc/PreparedStatement";
 
-bool SymStmt::is_target_class(const std::string &class_name) {
-  return class_name == TYPE_NAME;
-}
-
 SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template("") {}
 
 SymStmt::~SymStmt() {

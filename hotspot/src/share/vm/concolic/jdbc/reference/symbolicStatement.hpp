@@ -13,7 +13,6 @@ class SymStmt : public SymInstance {
 public:
   static const char *TYPE_NAME;
   static const char *BASE_TYPE_NAME;
-  static bool is_target_class(const std::string &class_name);
 
 private:
   std::string _sql_template;
@@ -31,21 +30,7 @@ public:
   void set_param(int index, Expression *exp);
 
 public:
-  Expression *get(int field_offset) {
-    ShouldNotCallThis();
-    return NULL;
-  }
-  Expression *get_ref_exp() {
-    ShouldNotCallThis();
-    return NULL;
-  }
-  void set_ref_exp(Expression *exp) { ShouldNotCallThis(); }
-
-  void init_sym_exp(int field_offset, Expression *exp) { ShouldNotCallThis(); }
-  void set_sym_exp(int field_offset, Expression *exp) { ShouldNotCallThis(); }
-
   bool need_recursive() { return false; }
-
   void print();
 
 public:
