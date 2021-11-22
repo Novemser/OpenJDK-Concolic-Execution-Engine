@@ -5,6 +5,7 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
+#include "concolic/exp/symbolExpression.hpp"
 #include "concolic/reference/symbolicReference.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
