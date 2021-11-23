@@ -1,5 +1,5 @@
-#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINTEGER_HPP
-#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINTEGER_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICPRIMITIVE_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICPRIMITIVE_HPP
 
 #ifdef ENABLE_CONCOLIC
 
@@ -8,20 +8,19 @@
 #include "concolic/utils.hpp"
 #include <string>
 
-class SymInteger : public SymInstance {
+template <class T> class SymPrimitive : public SymInstance {
 public:
   static const char *ARRAY_TYPE_NAME;
   static const char *TYPE_NAME;
 
 private:
-  static sym_rid_t sym_int_count;
+  static sym_rid_t sym_count;
 
-  // Expression *_ref_exp;
   Expression *_exp;
 
 public:
-  SymInteger(sym_rid_t sym_rid);
-  ~SymInteger();
+  SymPrimitive(sym_rid_t sym_rid);
+  ~SymPrimitive();
 
   Expression *get(int field_offset);
   Expression *get_ref_exp() { return _exp; };
@@ -41,7 +40,8 @@ public:
 
 public:
   static Expression *get_exp_of(oop obj);
+  static Expression *get_exp_of_helper(oop obj);
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICINTEGER_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICPRIMITIVE_HPP

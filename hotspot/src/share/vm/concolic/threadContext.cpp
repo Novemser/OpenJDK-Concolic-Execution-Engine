@@ -6,7 +6,7 @@
 #include "concolic/fieldTraverser.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
-#include "concolic/reference/symbolicInteger.hpp"
+#include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicObject.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "utilities/vmError.hpp"
@@ -57,8 +57,22 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
       return NULL;
     }
     sym_inst = new SymString(sym_rid);
-  } else if (klass_symbol->equals(SymInteger::TYPE_NAME)) {
-    sym_inst = new SymInteger(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jchar>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jchar>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jboolean>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jboolean>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jbyte>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jbyte>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jint>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jint>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jshort>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jshort>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jlong>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jlong>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<jfloat>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jfloat>(sym_rid);
+  } else if (klass_symbol->equals(SymPrimitive<double>::TYPE_NAME)) {
+    sym_inst = new SymPrimitive<jdouble>(sym_rid);
   } else if (klass_symbol->equals(SymStmt::TYPE_NAME)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (klass_symbol->equals(SymResSet::TYPE_NAME)) {
