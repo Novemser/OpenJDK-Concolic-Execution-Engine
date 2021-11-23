@@ -1,7 +1,7 @@
 #ifndef SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 #define SHARE_VM_CONCOLIC_CONCOLICMNGR_HPP
 
-#include "jni_zero.h"
+#include "jni_md.h"
 
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizer.hpp"

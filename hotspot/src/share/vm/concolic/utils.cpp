@@ -34,7 +34,7 @@ typeArrayOop OopUtils::java_string_to_char_array(oop str_obj) {
 
 const char *OopUtils::java_string_to_c(oop str_obj) {
   typeArrayOop char_array_obj = java_string_to_char_array(str_obj);
-  if (char_array_obj) {
+  if (char_array_obj != NULL) {
     int length = char_array_obj->length();
     char *char_array = NEW_RESOURCE_ARRAY(char, length + 1);
     for (int i = 0; i < length; i++) {

@@ -132,7 +132,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     return obj->obj_field(fd->offset()) != NULL;
   case T_ARRAY: {
     arrayOop array_obj = (arrayOop)(obj->obj_field(fd->offset()));
-    if (array_obj) {
+    if (array_obj != NULL) {
       sym_arr = this->_ctx.alloc_sym_array(array_obj);
       sym_arr->set_length_exp(new ArrayLengthExp(sym_arr->get_sym_rid(), type));
     }
