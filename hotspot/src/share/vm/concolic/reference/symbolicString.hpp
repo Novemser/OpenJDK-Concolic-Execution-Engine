@@ -10,6 +10,7 @@
 class SymString : public SymInstance {
 public:
   static const char *TYPE_NAME;
+  static const char *ARRAY_TYPE_NAME;
   static method_set_t symbolized_methods;
 
 private:

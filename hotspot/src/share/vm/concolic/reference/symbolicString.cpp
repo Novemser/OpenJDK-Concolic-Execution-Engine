@@ -7,6 +7,7 @@
 #include "concolic/exp/stringExpression.hpp"
 #include "concolic/utils.hpp"
 
+const char *SymString::ARRAY_TYPE_NAME = "[Ljava/lang/String;";
 const char *SymString::TYPE_NAME = "java/lang/String";
 method_set_t SymString::symbolized_methods = init_symbolized_methods();
 

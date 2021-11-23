@@ -1,7 +1,8 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/arrayInitExpression.hpp"
-#include "concolic/reference/symbolicInteger.hpp"
+#include "concolic/reference/symbolicPrimitive.hpp"
+#include "concolic/reference/symbolicString.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
@@ -54,9 +55,26 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
       break;
     default: {
       assert(T == T_OBJECT, "should be");
-      if (ak->name()->equals(SymInteger::ARRAY_TYPE_NAME)) {
-        value_exp = SymInteger::get_exp_of(
-            *(oop *)(((address)array->base(T)) + i * sizeof(oop)));
+      if (ak->name()->equals(SymPrimitive<jchar>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jchar>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jboolean>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jboolean>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jbyte>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jbyte>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jint>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jint>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jshort>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jshort>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jlong>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jlong>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jfloat>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jfloat>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymPrimitive<jdouble>::ARRAY_TYPE_NAME)) {
+        value_exp = SymPrimitive<jdouble>::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymString::ARRAY_TYPE_NAME)) {
+        value_exp = SymString::get_exp_of(get_obj(array, T, i));
+      } else {
+        ShouldNotReachHere();
       }
     }
     /**
@@ -94,6 +112,10 @@ void ArrayInitExpression::print() {
     }
   }
   tty->print(")");
+}
+
+oop ArrayInitExpression::get_obj(arrayOop array, BasicType T, int i) {
+  return *(oop *)(((address)array->base(T)) + i * sizeof(oop));
 }
 
 #endif

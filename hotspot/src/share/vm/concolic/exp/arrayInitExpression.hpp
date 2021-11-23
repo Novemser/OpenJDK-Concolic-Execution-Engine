@@ -26,6 +26,9 @@ public:
 
 public:
   void print();
+
+private:
+  static oop get_obj(arrayOop array, BasicType type, int i);
 };
 
 #endif // ENABLE_CONCOLIC
