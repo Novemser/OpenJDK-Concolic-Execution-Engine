@@ -2,6 +2,7 @@
 
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/reference/symbolicInteger.hpp"
+#include "concolic/reference/symbolicString.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
@@ -55,8 +56,11 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
     default: {
       assert(T == T_OBJECT, "should be");
       if (ak->name()->equals(SymInteger::ARRAY_TYPE_NAME)) {
-        value_exp = SymInteger::get_exp_of(
-            *(oop *)(((address)array->base(T)) + i * sizeof(oop)));
+        value_exp = SymInteger::get_exp_of(get_obj(array, T, i));
+      } else if (ak->name()->equals(SymString::ARRAY_TYPE_NAME)) {
+        value_exp = SymString::get_exp_of(get_obj(array, T, i));
+      } else {
+        ShouldNotReachHere();
       }
     }
     /**
@@ -94,6 +98,10 @@ void ArrayInitExpression::print() {
     }
   }
   tty->print(")");
+}
+
+oop ArrayInitExpression::get_obj(arrayOop array, BasicType T, int i) {
+  return *(oop *)(((address)array->base(T)) + i * sizeof(oop));
 }
 
 #endif
