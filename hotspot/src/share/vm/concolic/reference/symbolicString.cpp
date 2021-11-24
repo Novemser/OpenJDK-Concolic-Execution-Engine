@@ -136,7 +136,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     if (obj->is_symbolic()) {
       need_symbolize = true;
     }
-    if (obj->klass()->name()->equals("java/lang/String")) {
+    if (obj->klass()->name()->equals(TYPE_NAME)) {
       exp = SymString::get_exp_of(obj);
     }
 
