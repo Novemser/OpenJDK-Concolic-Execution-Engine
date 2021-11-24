@@ -428,6 +428,13 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
     } else {
       jobject handle = reinterpret_cast<jobject>(result[0]);
       istate->set_oop_temp(JNIHandles::resolve(handle));
+
+#ifdef ENABLE_CONCOLIC
+      if (!istate->method()->name()->equals("Symbolize")){
+        istate->oop_temp()->set_sym_rid(NULL_SYM_RID);
+      }
+#endif
+
     }
   }
 
