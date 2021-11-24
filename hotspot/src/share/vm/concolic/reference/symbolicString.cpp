@@ -128,7 +128,7 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
 int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                              intptr_t *locals, int offset,
                              bool &need_symbolize) {
-  Expression *exp;
+  Expression *exp = NULL;
 
   if (type == T_OBJECT) {
     // only consider the situation that object is a string by now
@@ -136,7 +136,10 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     if (obj->is_symbolic()) {
       need_symbolize = true;
     }
-    exp = SymString::get_exp_of(obj);
+    if (obj->klass()->name()->equals("java/lang/String")) {
+      exp = SymString::get_exp_of(obj);
+    }
+
   } else if (type == T_ARRAY) {
     arrayOop arr_obj = *(arrayOop *)(locals - offset);
     if (arr_obj->is_symbolic()) {
@@ -160,6 +163,9 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
         break;
       case T_INT:
         exp = new ConExpression(*(jint *)(locals - offset));
+        break;
+      case T_CHAR:
+        exp = new ConExpression(*(jchar *)(locals - offset));
         break;
       default:
         ShouldNotReachHere();

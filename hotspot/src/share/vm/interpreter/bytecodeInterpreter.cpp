@@ -4084,6 +4084,13 @@ void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, 
       methodHandle mh(THREAD, (Method *)method);
       BytecodeTracer::set_closure(BytecodeTracer::std_closure());
       BytecodeTracer::trace(mh, pc, tty);
+
+      char *method_name = istate->method()->name_and_sig_as_C_string();
+        if (strstr(method_name, "java.lang.String.toLowerCase()Ljava/lang/String") != NULL) {
+          tty->print_cr("entering: depth %ld bci: %ld",
+                         (istate->_stack_base - istate->_stack),
+                         istate->_bcp - istate->_method->code_base());
+        }
     }
   }
 }
