@@ -14,7 +14,7 @@
 #include <vector>
 
 class ArrayInitExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 16;
+  static const int EXP_NAME_LENGTH = 24;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
