@@ -26,8 +26,9 @@ public:
   inline static bool has_symbolized_method() {
     return ctx && ctx->is_symbolizing_method();
   }
-
-  inline static bool can_do_concolic() {
+  
+  /* let compiler not optimize this  code!! */
+  inline static bool __attribute__((optimize("O0"))) can_do_concolic() {
     return ctx && !ctx->is_symbolizing_method();
   }
 

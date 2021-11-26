@@ -27,7 +27,9 @@ public:
   MethodSymbolizer() : _symbolizing_method(false) {}
   ~MethodSymbolizer();
 
-  inline bool is_symbolizing_method() { return _symbolizing_method; }
+
+  /* let compiler not optimize this  code!! */
+  inline bool __attribute__((optimize("O0"))) is_symbolizing_method() { return _symbolizing_method; }
 
   void add_method(const char *class_name, const char *method_name);
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);

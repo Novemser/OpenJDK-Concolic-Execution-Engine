@@ -178,9 +178,9 @@ void ThreadContext::print() {
 }
 
 void ThreadContext::print_stack_trace() {
-  ZeroStack *stack = _thread->zero_stack();
   static char buf[O_BUFLEN];
   VMError::print_stack_trace(tty, _thread, buf, sizeof(buf));
+  this->get_shadow_stack().print();
 }
 
 void ThreadContext::memory_leak_check() {

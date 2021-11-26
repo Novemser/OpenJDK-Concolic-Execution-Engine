@@ -4080,7 +4080,6 @@ void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, 
       tty->print_cr(CL_YELLOW "=================================================================" CNONE);
       tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
       ConcolicMngr::ctx->print_stack_trace();
-      ConcolicMngr::ctx->get_shadow_stack().print();
       methodHandle mh(THREAD, (Method *)method);
       BytecodeTracer::set_closure(BytecodeTracer::std_closure());
       BytecodeTracer::trace(mh, pc, tty);

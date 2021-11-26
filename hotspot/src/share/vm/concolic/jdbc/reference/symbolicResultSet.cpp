@@ -26,16 +26,19 @@ void SymResSet::print() {
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  // bool need_symbolize = true;
+   bool need_symbolize = false;
 
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
+    need_symbolize = true;
+  } else {
+//    ShouldNotCallThis();
   }
 
-  return true;
+  return need_symbolize;
 }
 
 Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
