@@ -44,4 +44,6 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
   set(str_buf, length);
 }
 
+NullSymbolExp::NullSymbolExp() { _str = "NULL"; }
+
 #endif

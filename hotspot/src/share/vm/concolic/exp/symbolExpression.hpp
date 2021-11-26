@@ -49,7 +49,10 @@ public:
                    BasicType type);
 };
 
-
+class NullSymbolExp : public SymbolExpression {
+public:
+  NullSymbolExp();
+};
 
 #endif
 

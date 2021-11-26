@@ -194,13 +194,15 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
 
   if (type == T_OBJECT) {
     oop obj = *(oop *)(locals - offset);
-    SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-    exp = sym_inst->get_ref_exp();
-    if (!exp) {
-      /**
-       *  TODO: May be this symbol expression can be reused
-       */
-      exp = new InstanceSymbolExp(obj->get_sym_rid(), type);
+    if (obj != NULL) {
+      SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+      exp = sym_inst->get_ref_exp();
+      if (!exp) {
+        /**
+         *  TODO: May be this symbol expression can be reused
+         */
+        exp = new InstanceSymbolExp(obj->get_sym_rid(), type);
+      }
     }
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *)(locals - offset);

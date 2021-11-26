@@ -133,11 +133,13 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
   if (type == T_OBJECT) {
     // only consider the situation that object is a string by now
     oop obj = *(oop *)(locals - offset);
-    if (obj->is_symbolic()) {
-      need_symbolize = true;
-    }
-    if (obj->klass()->name()->equals(TYPE_NAME)) {
-      exp = SymString::get_exp_of(obj);
+    if (obj != NULL) {
+      if (obj->is_symbolic()) {
+        need_symbolize = true;
+      }
+      if (obj->klass()->name()->equals(TYPE_NAME)) {
+        exp = SymString::get_exp_of(obj);
+      }
     }
 
   } else if (type == T_ARRAY) {
