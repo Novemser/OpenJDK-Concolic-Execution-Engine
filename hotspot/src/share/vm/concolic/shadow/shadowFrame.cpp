@@ -12,7 +12,7 @@ ShadowFrame::ShadowFrame(const ZeroFrame *zero_frame, intptr_t *sp,
     : _zero_frame(zero_frame), _sp(sp), _fr_index(fr_index) {}
 
 void ShadowFrame::copy() {
-  tty->print_cr("ShadowFrame Copy[%p]: ", _zero_frame);
+  // tty->print_cr("ShadowFrame Copy[%p]: ", _zero_frame);
   if (_zero_frame->is_interpreter_frame()) {
     const InterpreterFrame *interp_frame = _zero_frame->as_interpreter_frame();
     const interpreterState istate = interp_frame->interpreter_state();
@@ -28,7 +28,7 @@ void ShadowFrame::copy() {
     _opr_stack.init(max_stack);
     _local_tbl.init(max_locals);
 
-    tty->print_cr("max_stack %d, max_locals %d", max_stack, max_locals);
+    // tty->print_cr("max_stack %d, max_locals %d", max_stack, max_locals);
   }
 }
 

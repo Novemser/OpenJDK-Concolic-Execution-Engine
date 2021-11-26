@@ -108,6 +108,9 @@ typeArrayOop TypeArrayKlass::allocate_common(int length, bool do_zero, TRAPS) {
       } else {
         t = (typeArrayOop)CollectedHeap::array_allocate_nozero(h_k, (int)size, length, CHECK_NULL);
       }
+#ifdef ENABLE_CONCOLIC
+      t->set_sym_rid(NULL_SYM_RID);
+#endif
       return t;
     } else {
       report_java_out_of_memory("Requested array size exceeds VM limit");
