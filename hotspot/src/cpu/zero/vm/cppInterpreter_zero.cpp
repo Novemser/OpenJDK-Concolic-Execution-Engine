@@ -77,19 +77,6 @@ int CppInterpreter::normal_entry(Method* method, intptr_t UNUSED, TRAPS) {
   InterpreterFrame *frame = InterpreterFrame::build(method, CHECK_0);
   thread->push_zero_frame(frame);
 
-#ifdef ENABLE_CONCOLIC
-  // {
-  //   ResourceMark rm;
-  //   char* name_and_sig = method->name_and_sig_as_C_string();
-  //   if (strstr(name_and_sig, "main([Ljava/lang/String;)V")) {
-  //     tty->print_cr(CL_YELLOW"================================================================="CNONE);
-  //     Symbol* method_holder_name = method->method_holder()->name();
-  //     Symbol* method_name = method->name();
-  //     tty->print("%s/%s \n", method_holder_name->as_C_string(), method_name->as_C_string());
-  //   }
-  // }
-#endif
-
   // Execute those bytecodes!
   main_loop(0, THREAD);
 
