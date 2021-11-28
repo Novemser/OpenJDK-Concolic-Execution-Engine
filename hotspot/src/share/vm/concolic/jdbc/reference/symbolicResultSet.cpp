@@ -8,8 +8,23 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/utils.hpp"
 
-const char *SymResSet::TYPE_NAME = "com/mysql/jdbc/JDBC42ResultSet";
-const char *SymResSet::BASE_TYPE_NAME = "com/mysql/jdbc/ResultSetImpl";
+std::set<std::string> SymResSet::target_class_names = init_target_class_names();
+
+std::set<std::string> SymResSet::init_target_class_names() {
+  std::set<std::string> set;
+  set.insert("com/mysql/jdbc/JDBC42ResultSet");
+  set.insert("com/mysql/jdbc/ResultSetImpl");
+  return set;
+}
+
+std::set<std::string> SymResSet::skip_method_names = init_skip_method_names();
+
+std::set<std::string> SymResSet::init_skip_method_names() {
+  std::set<std::string> set;
+  set.insert("close");
+  set.insert("realClose");
+  return set;
+}
 
 SymResSet::SymResSet(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
@@ -26,7 +41,7 @@ void SymResSet::print() {
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-   bool need_symbolize = false;
+  bool need_symbolize = false;
 
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
@@ -34,8 +49,12 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
     need_symbolize = true;
+  } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
+    need_symbolize = true;
   } else {
-//    ShouldNotCallThis();
+    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
+                  handle.get_callee_name().c_str());
+    // ShouldNotCallThis();
   }
 
   return need_symbolize;

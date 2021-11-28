@@ -19,8 +19,15 @@ class SymResSet : public SymInstance {
   friend class ResultSetSymbolExp;
 
 public:
-  static const char *TYPE_NAME;
-  static const char *BASE_TYPE_NAME;
+  inline static bool target(const std::string &class_name) {
+    return target_class_names.find(class_name) != target_class_names.end();
+  }
+
+private:
+  static std::set<std::string> target_class_names;
+  static std::set<std::string> init_target_class_names();
+  static std::set<std::string> skip_method_names;
+  static std::set<std::string> init_skip_method_names();
 
 private:
   sym_rid_t _sym_stmt_rid;

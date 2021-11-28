@@ -6,8 +6,8 @@
 #include "concolic/fieldTraverser.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
-#include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicObject.hpp"
+#include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "utilities/vmError.hpp"
 
@@ -47,8 +47,12 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   sym_rid_t sym_rid = get_next_sym_rid();
   obj->set_sym_rid(sym_rid);
   SymInstance *sym_inst;
+  ResourceMark rm;
 
   Symbol *klass_symbol = obj->klass()->name();
+  std::string class_name(klass_symbol->as_C_string());
+  tty->print_cr("%s", klass_symbol->as_C_string());
+
   if (klass_symbol->equals(SymString::TYPE_NAME)) {
     if (OopUtils::is_java_string_interned(obj)) {
       /**
@@ -73,9 +77,9 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymPrimitive<jfloat>(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<double>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
-  } else if (klass_symbol->equals(SymStmt::TYPE_NAME)) {
+  } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
-  } else if (klass_symbol->equals(SymResSet::TYPE_NAME)) {
+  } else if (SymResSet::target(class_name)) {
     sym_inst = new SymResSet(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);

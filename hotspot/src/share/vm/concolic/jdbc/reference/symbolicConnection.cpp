@@ -55,7 +55,6 @@ Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
   oop res_obj = handle.get_result<oop>();
   assert(handle.get_result_type() == T_OBJECT, "sanity check");
   assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!");
-  assert(res_obj->klass()->name()->equals(SymStmt::TYPE_NAME), "should be");
   assert(!sql_template.empty(), "empty");
 
   SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);

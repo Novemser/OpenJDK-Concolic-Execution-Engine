@@ -5,10 +5,36 @@
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
+#include "concolic/utils.hpp"
 
-// const char *SymStmt::TYPE_NAME = "com/mysql/jdbc/StatementImpl";
-const char *SymStmt::TYPE_NAME = "com/mysql/jdbc/JDBC42PreparedStatement";
-const char *SymStmt::BASE_TYPE_NAME = "com/mysql/jdbc/PreparedStatement";
+std::set<std::string> SymStmt::target_class_names = init_target_class_names();
+
+std::set<std::string> SymStmt::init_target_class_names() {
+  std::set<std::string> set;
+  set.insert("com/mysql/jdbc/JDBC42PreparedStatement");
+  set.insert("com/mysql/jdbc/PreparedStatement");
+  set.insert("com/mysql/jdbc/StatementImpl");
+  return set;
+}
+
+std::set<std::string> SymStmt::skip_method_names = init_skip_method_names();
+
+std::set<std::string> SymStmt::init_skip_method_names() {
+  std::set<std::string> set;
+  set.insert("close");
+  set.insert("checkClosed");
+  set.insert("<init>");
+  set.insert("isEscapeNeededForString");
+  set.insert("setInternal");
+  set.insert("setResultSetType");
+  set.insert("setResultSetConcurrency");
+  set.insert("getParameterIndexOffset");
+  set.insert("getMaxRows");
+  set.insert("setMaxRows");
+  set.insert("getQueryTimeout");
+  set.insert("setQueryTimeout");
+  return set;
+}
 
 SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template("") {}
 
@@ -62,13 +88,32 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     sym_stmt->set_param(index, value_exp);
 
     need_symbolize = true;
+  } else if (callee_name == "execute") {
+    int param_size = handle.get_callee_method()->size_of_parameters();
+    assert(param_size == 2, "currently, we only support stmt.execute(String)");
+
+    oop stmt_obj = handle.get_param<oop>(0);
+    oop str_obj = handle.get_param<oop>(1);
+
+    ResourceMark rm;
+    const char *c_sql_template = OopUtils::java_string_to_c(str_obj);
+
+    SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->alloc_sym_inst(stmt_obj);
+    sym_stmt->set_sql_template(c_sql_template);
+
+    need_symbolize = true;
   } else if (callee_name == "executeQuery") {
     int param_size = handle.get_callee_method()->size_of_parameters();
     assert(param_size == 1, "currently, we only support stmt.executeQuery()");
 
     need_symbolize = true;
+  } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
+    need_symbolize = true;
   } else {
-    ShouldNotCallThis();
+    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
+                  handle.get_callee_name().c_str());
+    need_symbolize = true;
+    // ShouldNotCallThis();
   }
 
   return need_symbolize;
@@ -80,7 +125,6 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     oop res_obj = handle.get_result<oop>();
     assert(handle.get_result_type() == T_OBJECT, "sanity check");
     assert(!res_obj->is_symbolic(), "please return a new resultset, JDBC!");
-    assert(res_obj->klass()->name()->equals(SymResSet::TYPE_NAME), "should be");
 
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
@@ -88,6 +132,9 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     oop this_obj = handle.get_param<oop>(0);
     assert(this_obj->is_symbolic(), "should be");
     sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
+  } else if (callee_name == "execute") {
+    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
+                  handle.get_callee_name().c_str());
   }
   return NULL;
 }
