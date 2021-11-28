@@ -23,7 +23,8 @@ public:
   static void symbolizeMethod(Handle holder_name_handle,
                               Handle callee_name_handle);
 
-  inline static bool has_symbolized_method() {
+  /* let compiler not optimize this  code!! */
+  inline static bool __attribute__((optimize("O0"))) has_symbolized_method() {
     return ctx && ctx->is_symbolizing_method();
   }
   
