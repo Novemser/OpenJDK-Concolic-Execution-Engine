@@ -2857,9 +2857,9 @@ run:
           UPDATE_PC_AND_CONTINUE(3);
 
       CASE(_instanceof):
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("instanceof");
-#endif
+// #ifdef ENABLE_CONCOLIC
+//           ConcolicMngr::warning_reach_unhandled_bytecode("instanceof");
+// #endif
           if (STACK_OBJECT(-1) == NULL) {
             SET_STACK_INT(0, -1);
             // Profile instanceof with null_seen and receiver.

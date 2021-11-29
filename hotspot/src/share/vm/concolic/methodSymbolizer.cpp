@@ -51,6 +51,16 @@ void MethodSymbolizer::print() {
 
 void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                                      ZeroFrame *callee_frame) {
+  // if (caller_frame->is_entry_frame() && callee_frame->is_interpreter_frame()) {
+  //   ResourceMark rm;
+  //   Method* method = callee_frame->as_interpreter_frame()->interpreter_state()->method();
+  //   tty->print_cr("invoke: %s", method->name_and_sig_as_C_string());
+  //   Symbol* symbol = method->name();
+  //   std::string method_name = std::string(symbol->as_C_string());
+  //   if (method_name.find("setString") != std::string::npos) {
+  //     tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
+  //   }
+  // }
   if (!caller_frame->is_interpreter_frame()) {
     return;
   }
@@ -71,6 +81,20 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
       callee->method_holder()->name()->as_C_string());
   _handle.set_callee_name(callee->name()->as_C_string());
 
+  // if (_handle.get_callee_name().find("prepareStatement") != std::string::npos) {
+  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+  //                 _handle.get_callee_name().c_str());
+  // }
+
+  // if (_handle.get_callee_name().find("execute") != std::string::npos) {
+  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+  //                 _handle.get_callee_name().c_str());
+  // }
+
+  // if (_handle.get_callee_name().find("setString") != std::string::npos) {
+  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+  //                 _handle.get_callee_name().c_str());
+  // }
   /**
    * Whether we need to symbolize the process of this function
    */
@@ -82,9 +106,9 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymString::invoke_method_helper(_handle);
   } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
     need_symbolize = SymConn::invoke_method_helper(_handle);
-  } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
+  } else if (SymStmt::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymStmt::invoke_method_helper(_handle);
-  } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
+  } else if (SymResSet::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymResSet::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
@@ -109,9 +133,9 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymString::finish_method_helper(_handle);
     } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
       exp = SymConn::finish_method_helper(_handle);
-    } else if (_handle.get_callee_holder_name() == SymStmt::BASE_TYPE_NAME) {
+    } else if (SymStmt::target(_handle.get_callee_holder_name())) {
       exp = SymStmt::finish_method_helper(_handle);
-    } else if (_handle.get_callee_holder_name() == SymResSet::BASE_TYPE_NAME) {
+    } else if (SymResSet::target(_handle.get_callee_holder_name())) {
       exp = SymResSet::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);

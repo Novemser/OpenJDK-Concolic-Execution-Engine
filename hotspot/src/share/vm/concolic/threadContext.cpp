@@ -51,7 +51,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
 
   Symbol *klass_symbol = obj->klass()->name();
   std::string class_name(klass_symbol->as_C_string());
-  tty->print_cr("%s", klass_symbol->as_C_string());
+  tty->print_cr("alloc_sym_inst for %s", klass_symbol->as_C_string());
 
   if (klass_symbol->equals(SymString::TYPE_NAME)) {
     if (OopUtils::is_java_string_interned(obj)) {
