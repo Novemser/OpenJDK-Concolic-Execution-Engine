@@ -2802,7 +2802,7 @@ run:
       }
       CASE(_multianewarray): {
 #ifdef ENABLE_CONCOLIC
-        ConcolicMngr::warning_reach_unhandled_bytecode("checkcast");
+        ConcolicMngr::warning_reach_unhandled_bytecode("multianewarray");
 #endif
         jint dims = *(pc+3);
         jint size = STACK_INT(-1);
@@ -2821,9 +2821,9 @@ run:
         UPDATE_PC_AND_TOS_AND_CONTINUE(4, -(dims-1));
       }
       CASE(_checkcast):
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("checkcast");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("checkcast");
+//#endif
           if (STACK_OBJECT(-1) != NULL) {
             VERIFY_OOP(STACK_OBJECT(-1));
             u2 index = Bytes::get_Java_u2(pc+1);
