@@ -254,8 +254,9 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
   intptr_t *locals = istate->locals();
 
   if(ConcolicMngr::can_do_concolic()) {
-    ResourceMark rm;
-    tty->print_cr("naive %s", istate->method()->name_and_sig_as_C_string());
+    if (istate->method()->name()->equals("invoke0")) {
+      istate->method()->print_name(tty);
+    }
   }
 
   // Update the invocation counter

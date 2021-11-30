@@ -95,6 +95,18 @@ oop Reflection::box(jvalue* value, BasicType type, TRAPS) {
   if (result == NULL) {
     THROW_(vmSymbols::java_lang_IllegalArgumentException(), result);
   }
+
+#ifdef ENABLE_CONCOLIC
+  if (ConcolicMngr::can_do_concolic()) {
+    Expression* ret_exp = ConcolicMngr::ctx->get_shadow_stack().get_reflection_ret_exp();
+    if (ret_exp != NULL) {
+      assert(!result->is_symbolic(), "should not be symbolic!");
+      SymInstance* sym_inst = ConcolicMngr::ctx->alloc_sym_inst(result);
+      sym_inst->set_ref_exp(ret_exp);
+    }
+  }
+#endif
+
   return result;
 }
 

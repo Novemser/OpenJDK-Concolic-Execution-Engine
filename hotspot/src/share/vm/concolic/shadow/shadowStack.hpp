@@ -19,14 +19,27 @@ private:
    * Used to handle special parameter passing of Java reflection,
    */
   ShadowTable _reflection_stack;
+  Expression *_reflection_ret_exp;
 
 public:
   ShadowStack(JavaThread *jt);
+
   ~ShadowStack();
 
-  ShadowTable* init_reflection_stack(int max_slot_size);
+  ShadowTable *init_reflection_stack(int max_slot_size);
 
-  inline ShadowTable& get_reflection_stack() { return _reflection_stack; }
+  inline ShadowTable &get_reflection_stack() { return _reflection_stack; }
+
+  void set_reflection_ret_exp(Expression *exp) {
+    assert(_reflection_ret_exp == NULL, "should be");
+    _reflection_ret_exp = exp;
+  }
+
+  Expression *get_reflection_ret_exp() {
+    Expression *ret = _reflection_ret_exp;
+    _reflection_ret_exp = NULL;
+    return ret;
+  }
 
   inline ShadowFrame &get_last_frame() { return *_s_frames.back(); }
 
@@ -41,9 +54,11 @@ public:
   }
 
   void push(ZeroFrame *callee_frame, ZeroFrame *caller_frame, intptr_t *sp);
+
   void pop(ZeroFrame *zero_frame);
 
   void print_origin();
+
   void print();
 };
 

@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-ShadowStack::ShadowStack(JavaThread *jt) {
+ShadowStack::ShadowStack(JavaThread *jt) : _reflection_ret_exp(NULL) {
   _s_frames.reserve(DEFAULT_MAX_STACK_DEPTH);
 
   if (jt->zero_stack()->sp() && jt->top_zero_frame()) {
@@ -157,7 +157,6 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
           callee_istate->stack_base() - callee_result - 1;
 
       ZeroFrame *caller_frame = callee_frame->next();
-      int caller_opr_stack_offset = 0;
       if (caller_frame->is_interpreter_frame()) {
         interpreterState caller_istate =
             caller_frame->as_interpreter_frame()->interpreter_state();
@@ -165,20 +164,23 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
         /**
          * TODO: Reduandant calculation in MethodSymbolizerHandle
          */
-        caller_opr_stack_offset =
+        int caller_opr_stack_offset =
             caller_istate->stack_base() - caller_result - 1;
-      } else if (caller_frame->is_entry_frame()) {
-        caller_opr_stack_offset = 0;
-      }
-
-      if (next_opr_stack.size() != 0) {
         next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset,
                                     caller_opr_stack_offset, result_slots);
-      } else {
-        assert(caller_frame->is_entry_frame(), "should be");
+      } else if (caller_frame->is_entry_frame()) {
+        if (next_opr_stack.size() != 0) {
+          next_opr_stack.copy_entries(opr_stack, callee_opr_stack_offset,
+                                      0, result_slots);
+        }
       }
+
       // tty->print_cr(CL_GREEN"copy from %d to %d with size=%d"CNONE,
       // callee_opr_stack_offset, caller_opr_stack_offset, result_slots);
+    }
+  } else if (callee_frame->is_entry_frame()) {
+    if (opr_stack.size() != 0) {
+      this->set_reflection_ret_exp(opr_stack.get_slot(0));
     }
   }
 
