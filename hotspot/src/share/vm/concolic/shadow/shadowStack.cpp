@@ -62,11 +62,11 @@ void ShadowStack::push(ZeroFrame *callee_frame, ZeroFrame *caller_frame,
     interpreterState callee_istate =
         callee_frame->as_interpreter_frame()->interpreter_state();
     Method *callee_method = callee_istate->method();
-    if (caller_frame->is_interpreter_frame()) {
-      /**
-       * TODO: skip native here. Need to confirm correctness
-       */
-      if (!callee_method->is_native()) {
+    /**
+     * TODO: skip native here. Need to confirm correctness
+     */
+    if (!callee_method->is_native()) {
+      if (caller_frame->is_interpreter_frame()) {
         interpreterState caller_istate =
             caller_frame->as_interpreter_frame()->interpreter_state();
         /**
@@ -79,14 +79,21 @@ void ShadowStack::push(ZeroFrame *callee_frame, ZeroFrame *caller_frame,
             caller_istate->stack_base() - caller_istate->stack() - 1;
         s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0,
                                               end_offset - begin_offset);
-      } else {
-        /**
-         * For performance issue, we ignore native call,
-         * as they so not support execute symbolically
-         * TODO: heck the effect of this code path
-         */
-//        ShouldNotCallThis();
+      } else if (caller_frame->is_entry_frame()) {
+        if (last_opr_stack.size() != 0) {
+          int begin_offset = 0;
+          int end_offset = (intptr_t *) caller_frame - (intptr_t *) callee_frame - 3;
+          s_frame->get_local_tbl().copy_entries(last_opr_stack, begin_offset, 0,
+                                                end_offset - begin_offset);
+        }
       }
+    } else {
+      /**
+       * For performance issue, we ignore native call,
+       * as they so not support execute symbolically
+       * TODO: heck the effect of this code path
+       */
+//        ShouldNotCallThis();
     }
   } else if (callee_frame->is_entry_frame()) {
     EntryFrame *entry_frame = callee_frame->as_entry_frame();
@@ -96,14 +103,12 @@ void ShadowStack::push(ZeroFrame *callee_frame, ZeroFrame *caller_frame,
     ResourceMark rm;
     tty->print_cr("Entry frame before calling: %s", callee_method->name_and_sig_as_C_string());
 
-
-    JavaThread *java_thread = ConcolicMngr::ctx->get_thread();
-    ZeroStack *zero_stack = java_thread->zero_stack();
-
-    int max_locals = (intptr_t *) callee_frame - zero_stack->sp() - 2;
     ShadowTable &reflection_stack = ConcolicMngr::ctx->get_shadow_stack().get_reflection_stack();
     if (reflection_stack.size() != 0) {
-      assert(max_locals == reflection_stack.size(), "should be");
+      JavaThread *java_thread = ConcolicMngr::ctx->get_thread();
+      ZeroStack *zero_stack = java_thread->zero_stack();
+      int stack_words = (intptr_t *) callee_frame - zero_stack->sp() - 2;
+      assert(stack_words == reflection_stack.size(), "should be");
       s_frame->get_opr_stack().swap(reflection_stack);
     }
   }
@@ -128,7 +133,6 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
 
   /**
    * return result from current opr_stack to locals
-   * TODO: we skip processing of `entry_frame` for now
    */
   if (callee_frame->is_interpreter_frame()) {
     interpreterState callee_istate =
