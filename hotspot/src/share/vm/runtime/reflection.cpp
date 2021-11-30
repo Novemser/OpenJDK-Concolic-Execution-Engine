@@ -1069,7 +1069,7 @@ oop Reflection::invoke(instanceKlassHandle klass, methodHandle reflected_method,
 #ifdef ENABLE_CONCOLIC
       if (reflection_stack != NULL && arg->is_symbolic()) {
         SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(arg);
-        reflection_stack->set_slot(java_args.size_of_parameters(), sym_inst->get_ref_exp(),
+        reflection_stack->set_slot(java_args.size_of_parameters() + type2size[ptype] - 1, sym_inst->get_ref_exp(),
                                    sym_inst->get_sym_rid(), -1);
       }
 #endif
