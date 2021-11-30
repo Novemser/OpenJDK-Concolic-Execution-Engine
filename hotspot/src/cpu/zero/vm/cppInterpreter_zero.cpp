@@ -253,6 +253,11 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
   interpreterState istate = frame->interpreter_state();
   intptr_t *locals = istate->locals();
 
+  if(ConcolicMngr::can_do_concolic()) {
+    ResourceMark rm;
+    tty->print_cr("naive %s", istate->method()->name_and_sig_as_C_string());
+  }
+
   // Update the invocation counter
   if ((UseCompiler || CountCompiledCalls) && !method->is_synchronized()) {
     MethodCounters* mcs = method->method_counters();
@@ -417,8 +422,16 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
       istate->set_oop_temp(JNIHandles::resolve(handle));
 
 #ifdef ENABLE_CONCOLIC
-      if (!istate->method()->name()->equals("Symbolize")){
-        istate->oop_temp()->set_sym_rid(NULL_SYM_RID);
+      /**
+       * This is where we check whether returned oop of native call are initialized with NULL_SYM_RID
+       */
+      if (istate->oop_temp()->is_symbolic()) {
+        if (!(istate->method()->name()->equals("Symbolize") ||
+              istate->method()->name()->equals("invoke0"))) {
+          istate->method()->print_name(tty);
+          tty->cr();
+          ShouldNotCallThis();
+        }
       }
 #endif
 

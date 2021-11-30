@@ -363,9 +363,6 @@ instanceOop InstanceMirrorKlass::allocate_instance(KlassHandle k, TRAPS) {
   int size = instance_size(k);
   KlassHandle h_k(THREAD, this);
   instanceOop i = (instanceOop)CollectedHeap::obj_allocate(h_k, size, CHECK_NULL);
-#ifdef ENABLE_CONCOLIC
-  i->set_sym_rid(NULL_SYM_RID);
-#endif
 
   // Since mirrors can be variable sized because of the static fields, store
   // the size in the mirror itself.
