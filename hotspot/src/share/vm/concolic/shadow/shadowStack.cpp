@@ -180,7 +180,12 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
     }
   } else if (callee_frame->is_entry_frame()) {
     if (opr_stack.size() != 0) {
-      this->set_reflection_ret_exp(opr_stack.get_slot(0));
+      JavaCallWrapper* call_wrapper = *callee_frame->as_entry_frame()->call_wrapper();
+      Method* callee_method = call_wrapper->callee_method();
+      BasicType type = callee_method->result_type();
+      if (is_java_primitive(type)) {
+        this->set_reflection_ret_exp(opr_stack.get_slot(type2size[type] - 1));
+      }
     }
   }
 
