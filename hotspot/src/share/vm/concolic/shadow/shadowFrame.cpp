@@ -1,5 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/concolicMngr.hpp"
 #include "concolic/shadow/shadowFrame.hpp"
 #include "runtime/frame.inline.hpp"
 #include "utilities/ostream.hpp"
@@ -18,9 +19,8 @@ void ShadowFrame::copy() {
     const interpreterState istate = interp_frame->interpreter_state();
     Method *method = istate->method();
     /**
-     * TODO: currently, the following methods return size in word,
-     *    rather than size in object/primitive
-     *    We need to fix this problem
+     *  Be careful, the following methods return size in word,
+     *    rather than size in parameters
      */
     int max_stack = method->max_stack();
     int max_locals = method->max_locals();
@@ -30,6 +30,9 @@ void ShadowFrame::copy() {
 
     // tty->print_cr("max_stack %d, max_locals %d", max_stack, max_locals);
   }
+  /**
+   * For EntryFrame, we currently only care about reflection, which is handled by ShadowStack
+   */
 }
 
 void ShadowFrame::check(ZeroFrame *zero_frame) {

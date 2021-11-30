@@ -26,7 +26,7 @@ void MethodSymbolizer::add_method(const char *class_name,
                                   const char *method_name) {
   SymClassMapIt sym_class_map_it =
       _symbolicMethods
-          .insert(std::make_pair(std::string(class_name), (SymMethodSet *)NULL))
+          .insert(std::make_pair(std::string(class_name), (SymMethodSet *) NULL))
           .first;
   if (sym_class_map_it->second == NULL) {
     sym_class_map_it->second = new SymMethodSet();
@@ -34,67 +34,56 @@ void MethodSymbolizer::add_method(const char *class_name,
   sym_class_map_it->second->insert(std::string(method_name));
 }
 
-void MethodSymbolizer::print() {
-  tty->print_cr("symbolic methods:");
-  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin();
-       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
-    tty->print_cr("%s", sym_class_map_it->first.c_str());
-    if (sym_class_map_it->second) {
-      SymMethodSet *sym_method_set = sym_class_map_it->second;
-      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin();
-           sym_method_set_it != sym_method_set->end(); ++sym_method_set_it) {
-        tty->print_cr("  %s", sym_method_set_it->c_str());
-      }
-    }
-  }
-}
 
 void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                                      ZeroFrame *callee_frame) {
-  // if (caller_frame->is_entry_frame() && callee_frame->is_interpreter_frame()) {
-  //   ResourceMark rm;
-  //   Method* method = callee_frame->as_interpreter_frame()->interpreter_state()->method();
-  //   tty->print_cr("invoke: %s", method->name_and_sig_as_C_string());
-  //   Symbol* symbol = method->name();
-  //   std::string method_name = std::string(symbol->as_C_string());
-  //   if (method_name.find("setString") != std::string::npos) {
-  //     tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
-  //   }
-  // }
-  if (!caller_frame->is_interpreter_frame()) {
-    return;
-  }
   if (!callee_frame->is_interpreter_frame()) {
     return;
   }
-  // assert(callee_frame->is_interpreter_frame(), "should be");
+
+  if (caller_frame->is_entry_frame()) {
+    ResourceMark rm;
+    Method *method = callee_frame->as_interpreter_frame()->interpreter_state()->method();
+    tty->print_cr("invoke: %s", method->name_and_sig_as_C_string());
+    Symbol *symbol = method->name();
+    std::string method_name = std::string(symbol->as_C_string());
+    if (method_name.find("method") != std::string::npos) {
+      tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
+    }
+    if (method_name.find("setString") != std::string::npos) {
+//       tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
+    }
+  }
+  if (!caller_frame->is_interpreter_frame()) {
+    return;
+  }
 
   _handle.set_caller_frame(caller_frame);
-  Method *callee = _handle.get_caller_istate()->callee();
-  if (callee == NULL)
+  _handle.set_callee_frame(callee_frame);
+  Method *callee_method = _handle.get_callee_method();
+  if (callee_method == NULL)
     return;
 
   ResourceMark rm;
 
-  _handle.set_callee_frame(callee_frame);
   _handle.set_callee_holder_name(
-      callee->method_holder()->name()->as_C_string());
-  _handle.set_callee_name(callee->name()->as_C_string());
+      callee_method->method_holder()->name()->as_C_string());
+  _handle.set_callee_name(callee_method->name()->as_C_string());
 
-  // if (_handle.get_callee_name().find("prepareStatement") != std::string::npos) {
-  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-  //                 _handle.get_callee_name().c_str());
-  // }
+  if (_handle.get_callee_name().find("prepareStatement") != std::string::npos) {
+    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+                  _handle.get_callee_name().c_str());
+  }
 
-  // if (_handle.get_callee_name().find("execute") != std::string::npos) {
-  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-  //                 _handle.get_callee_name().c_str());
-  // }
+  if (_handle.get_callee_name().find("execute") != std::string::npos) {
+    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+                  _handle.get_callee_name().c_str());
+  }
 
-  // if (_handle.get_callee_name().find("setString") != std::string::npos) {
-  //   tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-  //                 _handle.get_callee_name().c_str());
-  // }
+  if (_handle.get_callee_name().find("setString") != std::string::npos) {
+    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
+                  _handle.get_callee_name().c_str());
+  }
   /**
    * Whether we need to symbolize the process of this function
    */
@@ -112,9 +101,9 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymResSet::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
-                 sym_methods->end()) {
+             sym_methods->end()) {
     tty->print_cr("Calling function name: %s",
-                  callee->name_and_sig_as_C_string());
+                  callee_method->name_and_sig_as_C_string());
     invoke_method_helper(_handle);
     need_symbolize = true;
   }
@@ -184,25 +173,25 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
   oop obj = NULL;
 
   switch (type) {
-  case T_VOID:
-    break;
-  case T_OBJECT:
-    obj = handle.get_result<oop>();
-    if (!obj->is_symbolic()) {
-      ConcolicMngr::ctx->symbolize(obj);
-    }
-    /*
-      We hope only symbolize the method whose return value
-      is the object we support like SymString and SymInterger.
-    */
-    exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
-    assert(exp != NULL, "should be");
-    break;
-  case T_ARRAY:
-    ShouldNotCallThis();
-    break;
-  default:
-    exp = new MethodReturnSymbolExp();
+    case T_VOID:
+      break;
+    case T_OBJECT:
+      obj = handle.get_result<oop>(type);
+      if (!obj->is_symbolic()) {
+        ConcolicMngr::ctx->symbolize(obj);
+      }
+      /*
+        We hope only symbolize the method whose return value
+        is the object we support like SymString and SymInterger.
+      */
+      exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
+      assert(exp != NULL, "should be");
+      break;
+    case T_ARRAY:
+      ShouldNotCallThis();
+      break;
+    default:
+      exp = new MethodReturnSymbolExp();
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(
@@ -217,7 +206,7 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
   Expression *exp;
 
   if (type == T_OBJECT) {
-    oop obj = *(oop *)(locals - offset);
+    oop obj = *(oop *) (locals - offset);
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       exp = sym_inst->get_ref_exp();
@@ -229,7 +218,7 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
       }
     }
   } else if (type == T_ARRAY) {
-    arrayOop arrObj = *(arrayOop *)(locals - offset);
+    arrayOop arrObj = *(arrayOop *) (locals - offset);
     SymArr *sym_arr = ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);
     /**
      *  TODO: May be this symbol expression can be reused
@@ -242,39 +231,54 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
     exp = ConcolicMngr::ctx->get_stack_slot(offset);
     if (!exp) {
       switch (type) {
-      case T_BYTE:
-        exp = new ConExpression(*(jbyte *)(locals - offset));
-        break;
-      case T_CHAR:
-        exp = new ConExpression(*(jchar *)(locals - offset));
-        break;
-      case T_DOUBLE:
-        exp = new ConExpression(((VMJavaVal64 *)(locals - offset))->d);
-        break;
-      case T_FLOAT:
-        exp = new ConExpression(*(jfloat *)(locals - offset));
-        break;
-      case T_INT:
-        exp = new ConExpression(*(jint *)(locals - offset));
-        break;
-      case T_LONG:
-        exp = new ConExpression(((VMJavaVal64 *)(locals - offset))->l);
-        break;
-      case T_SHORT:
-        exp = new ConExpression(*(jshort *)(locals - offset));
-        break;
-      case T_BOOLEAN:
-        exp = new ConExpression(*(jboolean *)(locals - offset));
-        break;
-      default:
-        ShouldNotReachHere();
-        break;
+        case T_BYTE:
+          exp = new ConExpression(*(jbyte *) (locals - offset));
+          break;
+        case T_CHAR:
+          exp = new ConExpression(*(jchar *) (locals - offset));
+          break;
+        case T_DOUBLE:
+          exp = new ConExpression(((VMJavaVal64 *) (locals - offset))->d);
+          break;
+        case T_FLOAT:
+          exp = new ConExpression(*(jfloat *) (locals - offset));
+          break;
+        case T_INT:
+          exp = new ConExpression(*(jint *) (locals - offset));
+          break;
+        case T_LONG:
+          exp = new ConExpression(((VMJavaVal64 *) (locals - offset))->l);
+          break;
+        case T_SHORT:
+          exp = new ConExpression(*(jshort *) (locals - offset));
+          break;
+        case T_BOOLEAN:
+          exp = new ConExpression(*(jboolean *) (locals - offset));
+          break;
+        default:
+          ShouldNotReachHere();
+          break;
       }
     }
   }
 
   handle.get_param_list().push_back(exp);
   return offset;
+}
+
+void MethodSymbolizer::print() {
+  tty->print_cr("symbolic methods:");
+  for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin();
+       sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
+    tty->print_cr("%s", sym_class_map_it->first.c_str());
+    if (sym_class_map_it->second) {
+      SymMethodSet *sym_method_set = sym_class_map_it->second;
+      for (SymMethodSetIt sym_method_set_it = sym_method_set->begin();
+           sym_method_set_it != sym_method_set->end(); ++sym_method_set_it) {
+        tty->print_cr("  %s", sym_method_set_it->c_str());
+      }
+    }
+  }
 }
 
 sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;

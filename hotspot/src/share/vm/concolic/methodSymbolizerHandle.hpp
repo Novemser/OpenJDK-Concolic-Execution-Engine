@@ -7,6 +7,7 @@
 #include "interpreter/bytecodeInterpreter.hpp"
 #include "interpreterFrame_zero.hpp"
 #include "runtime/frame.hpp"
+#include "runtime/frame.inline.hpp"
 
 #include <string>
 
@@ -14,7 +15,6 @@ class MethodSymbolizerHandle {
 private:
   ZeroFrame *_caller_frame;
   ZeroFrame *_callee_frame;
-  interpreterState _caller_istate;
   interpreterState _callee_istate;
   exp_list_t _param_list;
   std::string _callee_holder_name;
@@ -27,8 +27,15 @@ public:
    */
   inline int get_callee_local_begin_offset() { return 0; }
 
-  inline int get_caller_stack_begin_offset() {
-    return _caller_istate->stack_base() - _callee_istate->locals() - 1;
+  int get_caller_stack_begin_offset() {
+    if (_callee_frame->is_interpreter_frame()) {
+      interpreterState caller_istate = _caller_frame->as_interpreter_frame()->interpreter_state();
+      return caller_istate->stack_base() - _callee_istate->locals() - 1;
+    } else if (_callee_frame->is_entry_frame()) {
+      return 0;
+    }
+    ShouldNotCallThis();
+    return 0;
   }
 
   /**
@@ -38,23 +45,40 @@ public:
   //   return _caller_istate->stack_base() - _caller_istate->stack() - 1;
   // }
 
-  inline Method *get_callee_method() { return _callee_istate->method(); }
+  Method *get_callee_method() {
+    Method *callee_method = _callee_istate->method();
+    if (_caller_frame->is_interpreter_frame()) {
+      interpreterState caller_istate = _caller_frame->as_interpreter_frame()->interpreter_state();
+      assert(caller_istate->callee() == callee_method, "should be");
+    } else if (_callee_frame->is_entry_frame()) {
+      JavaCallWrapper *call_wrapper = *_caller_frame->as_entry_frame()->call_wrapper();
+      assert(call_wrapper->callee_method() == callee_method, "should be");
+    }
+    return callee_method;
+  }
 
   inline intptr_t *get_locals_ptr() { return _callee_istate->locals(); }
 
-  inline BasicType get_result_type() {
-    return _caller_istate->callee()->result_type();
+  BasicType get_result_type() {
+    Method *callee_method = NULL;
+    if (_callee_frame->is_interpreter_frame()) {
+      callee_method = _callee_frame->as_interpreter_frame()->interpreter_state()->callee();
+    } else if (_callee_frame->is_entry_frame()) {
+      JavaCallWrapper *call_wrapper = *_callee_frame->as_entry_frame()->call_wrapper();
+      callee_method = call_wrapper->callee_method();
+    }
+    return callee_method->result_type();
   }
 
-  template <class T> inline T get_result() {
-    int result_slots = type2size[get_result_type()];
+  template<class T>
+  inline T get_result(BasicType type) {
+    int result_slots = type2size[type];
     assert(result_slots >= 0 && result_slots <= 2, "what?");
-    return *(T *)(_callee_istate->stack() + result_slots);
+    return *(T *) (_callee_istate->stack() + result_slots);
   }
 
   inline void set_caller_frame(ZeroFrame *caller_frame) {
     _caller_frame = caller_frame;
-    _caller_istate = caller_frame->as_interpreter_frame()->interpreter_state();
   }
 
   inline void set_callee_frame(ZeroFrame *callee_frame) {
@@ -64,7 +88,6 @@ public:
 
   inline ZeroFrame *get_caller_frame() { return _caller_frame; }
   inline ZeroFrame *get_callee_frame() { return _callee_frame; }
-  inline interpreterState get_caller_istate() { return _caller_istate; }
   inline interpreterState get_callee_istate() { return _callee_istate; }
 
   inline void set_callee_holder_name(const char *c_str) {
@@ -83,8 +106,9 @@ public:
 
   inline exp_list_t &get_param_list() { return _param_list; }
 
-  template <class T> inline T get_param(int offset) {
-    return *(T *)(get_locals_ptr() - offset);
+  template<class T>
+  inline T get_param(int offset) {
+    return *(T *) (get_locals_ptr() - offset);
   }
 
 public:
@@ -102,7 +126,6 @@ public:
   inline void reset() {
     _caller_frame = NULL;
     _callee_frame = NULL;
-    _caller_istate = NULL;
     _callee_istate = NULL;
     clear_param_list();
     _callee_holder_name.clear();

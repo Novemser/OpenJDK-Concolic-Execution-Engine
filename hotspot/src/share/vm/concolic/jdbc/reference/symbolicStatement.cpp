@@ -21,6 +21,7 @@ std::set<std::string> SymStmt::skip_method_names = init_skip_method_names();
 
 std::set<std::string> SymStmt::init_skip_method_names() {
   std::set<std::string> set;
+  set.insert("setInt");
   set.insert("close");
   set.insert("checkClosed");
   set.insert("<init>");
@@ -72,23 +73,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
 
-  if (callee_name == "setInt") {
-    oop stmt_obj = handle.get_param<oop>(0);
-    jint index = handle.get_param<jint>(1);
-
-    Expression *value_exp = ConcolicMngr::ctx->get_stack_slot(
-        handle.get_caller_stack_begin_offset() +
-        2); // this 2's unit is stack words!
-
-    if (!value_exp) {
-      value_exp = new ConExpression(handle.get_param<jint>(2));
-    }
-
-    SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->get_sym_inst(stmt_obj);
-    sym_stmt->set_param(index, value_exp);
-
-    need_symbolize = true;
-  } else if (callee_name == "execute") {
+  if (callee_name == "execute") {
     int param_size = handle.get_callee_method()->size_of_parameters();
     assert(param_size == 2, "currently, we only support stmt.execute(String)");
 
@@ -110,7 +95,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
-    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
+    tty->print_cr("SymStmt unhandle (%s): %s", handle.get_callee_holder_name().c_str(),
                   handle.get_callee_name().c_str());
     need_symbolize = true;
     // ShouldNotCallThis();
@@ -122,7 +107,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   if (callee_name == "executeQuery") {
-    oop res_obj = handle.get_result<oop>();
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
     assert(handle.get_result_type() == T_OBJECT, "sanity check");
     assert(!res_obj->is_symbolic(), "please return a new resultset, JDBC!");
 
@@ -135,6 +120,20 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   } else if (callee_name == "execute") {
     tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
                   handle.get_callee_name().c_str());
+  } else if (callee_name == "setInt") {
+    oop stmt_obj = handle.get_param<oop>(0);
+    jint index = handle.get_param<jint>(1);
+
+    Expression *value_exp = ConcolicMngr::ctx->get_local_slot(
+        handle.get_callee_local_begin_offset() +
+        2); // this 2's unit is stack words!
+
+    if (!value_exp) {
+      value_exp = new ConExpression(handle.get_param<jint>(2));
+    }
+
+    SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    sym_stmt->set_param(index, value_exp);
   }
   return NULL;
 }

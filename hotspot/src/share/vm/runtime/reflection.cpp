@@ -44,6 +44,8 @@
 #include "runtime/reflectionUtils.hpp"
 #include "runtime/signature.hpp"
 #include "runtime/vframe.hpp"
+#include "concolic/concolicMngr.hpp"
+#include "concolic/reference/symbolicInstance.hpp"
 
 static void trace_class_resolution(Klass* to_class) {
   ResourceMark rm;
@@ -1027,6 +1029,13 @@ oop Reflection::invoke(instanceKlassHandle klass, methodHandle reflected_method,
   if (ptypes->length() != args_len) {
     THROW_MSG_0(vmSymbols::java_lang_IllegalArgumentException(), "wrong number of arguments");
   }
+#ifdef ENABLE_CONCOLIC
+  ShadowTable* reflection_stack = NULL;
+  if (ConcolicMngr::can_do_concolic()) {
+    reflection_stack =
+        ConcolicMngr::ctx->get_shadow_stack().init_reflection_stack(method->size_of_parameters());
+  }
+#endif
 
   // Create object to contain parameters for the JavaCall
   JavaCallArguments java_args(method->size_of_parameters());
@@ -1045,6 +1054,12 @@ oop Reflection::invoke(instanceKlassHandle klass, methodHandle reflected_method,
       if (ptype != atype) {
         widen(&value, atype, ptype, CHECK_NULL);
       }
+#ifdef ENABLE_CONCOLIC
+      if (reflection_stack != NULL && arg->is_symbolic()) {
+        SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(arg);
+        reflection_stack->set_slot(java_args.size_of_parameters(), sym_inst->get_ref_exp());
+      }
+#endif
       switch (ptype) {
         case T_BOOLEAN:     java_args.push_int(value.z);    break;
         case T_CHAR:        java_args.push_int(value.c);    break;

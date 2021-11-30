@@ -82,6 +82,10 @@ public:
     entry2 = temp;
   }
 
+  inline std::vector<Entry> &get_tbl() { return _tbl; }
+
+  inline void swap(ShadowTable &other) { _tbl.swap(other.get_tbl()); }
+
   inline int size() { return _tbl.size(); }
 
   void print();

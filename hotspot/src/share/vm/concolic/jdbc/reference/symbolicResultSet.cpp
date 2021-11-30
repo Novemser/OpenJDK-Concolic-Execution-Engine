@@ -89,7 +89,7 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
-    jboolean ret = handle.get_result<jboolean>();
+    jboolean ret = handle.get_result<jboolean>(T_BOOLEAN);
 
     ConcolicMngr::record_path_condition(new OpSymExpression(
         sym_res_set->get_size_exp(),

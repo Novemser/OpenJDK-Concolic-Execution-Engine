@@ -52,7 +52,7 @@ Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
   /**
    * Currently, this is only for prepareStatement
    */
-  oop res_obj = handle.get_result<oop>();
+  oop res_obj = handle.get_result<oop>(T_OBJECT);
   assert(handle.get_result_type() == T_OBJECT, "sanity check");
   assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!");
   assert(!sql_template.empty(), "empty");

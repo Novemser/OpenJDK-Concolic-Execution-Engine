@@ -15,10 +15,18 @@ class ShadowStack {
 
 private:
   ShadowFrames _s_frames;
+  /**
+   * Used to handle special parameter passing of Java reflection,
+   */
+  ShadowTable _reflection_stack;
 
 public:
   ShadowStack(JavaThread *jt);
   ~ShadowStack();
+
+  ShadowTable* init_reflection_stack(int max_slot_size);
+
+  inline ShadowTable& get_reflection_stack() { return _reflection_stack; }
 
   inline ShadowFrame &get_last_frame() { return *_s_frames.back(); }
 
