@@ -28,10 +28,10 @@ public:
   inline int get_callee_local_begin_offset() { return 0; }
 
   int get_caller_stack_begin_offset() {
-    if (_callee_frame->is_interpreter_frame()) {
+    if (_caller_frame->is_interpreter_frame()) {
       interpreterState caller_istate = _caller_frame->as_interpreter_frame()->interpreter_state();
       return caller_istate->stack_base() - _callee_istate->locals() - 1;
-    } else if (_callee_frame->is_entry_frame()) {
+    } else if (_caller_frame->is_entry_frame()) {
       return 0;
     }
     ShouldNotCallThis();
@@ -61,11 +61,13 @@ public:
 
   BasicType get_result_type() {
     Method *callee_method = NULL;
-    if (_callee_frame->is_interpreter_frame()) {
-      callee_method = _callee_frame->as_interpreter_frame()->interpreter_state()->callee();
-    } else if (_callee_frame->is_entry_frame()) {
-      JavaCallWrapper *call_wrapper = *_callee_frame->as_entry_frame()->call_wrapper();
+    if (_caller_frame->is_interpreter_frame()) {
+      callee_method = _caller_frame->as_interpreter_frame()->interpreter_state()->callee();
+      tty->print_cr("1: %p", callee_method);
+    } else if (_caller_frame->is_entry_frame()) {
+      JavaCallWrapper *call_wrapper = *_caller_frame->as_entry_frame()->call_wrapper();
       callee_method = call_wrapper->callee_method();
+      tty->print_cr("2: %p", callee_method);
     }
     return callee_method->result_type();
   }

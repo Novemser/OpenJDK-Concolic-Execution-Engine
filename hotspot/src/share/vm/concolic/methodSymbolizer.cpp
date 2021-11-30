@@ -47,15 +47,12 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     tty->print_cr("invoke: %s", method->name_and_sig_as_C_string());
     Symbol *symbol = method->name();
     std::string method_name = std::string(symbol->as_C_string());
-    if (method_name.find("method") != std::string::npos) {
-      tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
-    }
+
     if (method_name.find("setString") != std::string::npos) {
-//       tty->print_cr("invoke!! : %s", method->name_and_sig_as_C_string());
+       tty->print("invoke!! : ");
+       method->print_name();
+       tty->cr();
     }
-  }
-  if (!caller_frame->is_interpreter_frame()) {
-    return;
   }
 
   _handle.set_caller_frame(caller_frame);

@@ -253,12 +253,6 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
   interpreterState istate = frame->interpreter_state();
   intptr_t *locals = istate->locals();
 
-  if(ConcolicMngr::can_do_concolic()) {
-    if (istate->method()->name()->equals("invoke0")) {
-      istate->method()->print_name(tty);
-    }
-  }
-
   // Update the invocation counter
   if ((UseCompiler || CountCompiledCalls) && !method->is_synchronized()) {
     MethodCounters* mcs = method->method_counters();

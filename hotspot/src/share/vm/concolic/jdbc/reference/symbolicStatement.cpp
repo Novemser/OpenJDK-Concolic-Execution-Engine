@@ -6,6 +6,7 @@
 #include "concolic/exp/expression.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/utils.hpp"
+#include "concolic/reference/symbolicString.hpp"
 
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
@@ -22,6 +23,7 @@ std::set<std::string> SymStmt::skip_method_names = init_skip_method_names();
 std::set<std::string> SymStmt::init_skip_method_names() {
   std::set<std::string> set;
   set.insert("setInt");
+  set.insert("setString");
   set.insert("close");
   set.insert("checkClosed");
   set.insert("<init>");
@@ -131,6 +133,15 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     if (!value_exp) {
       value_exp = new ConExpression(handle.get_param<jint>(2));
     }
+
+    SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    sym_stmt->set_param(index, value_exp);
+  } else if (callee_name == "setString") {
+    oop stmt_obj = handle.get_param<oop>(0);
+    jint index = handle.get_param<jint>(1);
+    oop str_obj = handle.get_param<oop>(2);
+
+    Expression *value_exp = SymString::get_exp_of(str_obj);
 
     SymStmt *sym_stmt = (SymStmt *)ConcolicMngr::ctx->get_sym_inst(stmt_obj);
     sym_stmt->set_param(index, value_exp);
