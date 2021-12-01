@@ -21,8 +21,11 @@ public:
   Expression *get_ref_exp() { return _ref_exp; };
 
   void set_ref_exp(Expression *exp) {
-    exp->inc_ref();
+    if (_ref_exp && _ref_exp->dec_ref()) {
+      delete _ref_exp;
+    }
     _ref_exp = exp;
+    _ref_exp->inc_ref();
   };
 
   void init_sym_exp(int field_offset, Expression *exp);

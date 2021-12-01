@@ -27,9 +27,9 @@ ThreadContext::~ThreadContext() {
 
   int size = _sym_tmp_exps.size();
   for (int i = 1; i != size; ++i) {
-    Expression *sym_exp = _sym_tmp_exps[i];
-    if (sym_exp && sym_exp->able_to_gc()) {
-      delete sym_exp;
+    Expression *exp = _sym_tmp_exps[i];
+    if (exp && exp->dec_ref()) {
+      delete exp;
     }
   }
   _sym_tmp_exps.clear();
@@ -154,6 +154,7 @@ void ThreadContext::symbolize_recursive(oop obj) {
 
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
   sym_rid_t sym_tmp_id = _sym_tmp_id_counter++;
+  sym_exp->inc_ref();
   _sym_tmp_exps.push_back(sym_exp);
   assert(_sym_tmp_exps.size() == sym_tmp_id + 1, "sanity check");
   assert(sym_tmp_id < MAX_SYM_RID, "sym_tmp_id limitted");
@@ -161,6 +162,10 @@ sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
 }
 
 void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
+  Expression* exp = _sym_tmp_exps[sym_tmp_id];
+   if (exp) {
+     exp->dec_ref();
+   }
   _sym_tmp_exps[sym_tmp_id] = NULL;
 }
 
