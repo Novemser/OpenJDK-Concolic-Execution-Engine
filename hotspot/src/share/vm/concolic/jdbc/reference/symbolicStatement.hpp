@@ -20,6 +20,9 @@ private:
   static std::set<std::string> init_target_class_names();
   static std::set<std::string> skip_method_names;
   static std::set<std::string> init_skip_method_names();
+  static std::map<std::string, BasicType> support_set_methods;
+  static std::map<std::string, BasicType> init_support_set_methods();
+  static Expression *get_param_exp(MethodSymbolizerHandle &handle, BasicType method, const std::string &callee_name);
 
 private:
   std::string _sql_template;
@@ -27,6 +30,7 @@ private:
 
 public:
   SymStmt(sym_rid_t sym_rid);
+
   ~SymStmt();
 
 public:
@@ -42,10 +46,12 @@ public:
 
 public:
   bool need_recursive() { return false; }
+
   void print();
 
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
+
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 };
 
