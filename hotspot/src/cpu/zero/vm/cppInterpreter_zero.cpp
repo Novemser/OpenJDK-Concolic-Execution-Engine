@@ -424,8 +424,11 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
         if (!(istate->method()->name()->equals("Symbolize") ||
               istate->method()->name()->equals("invoke0"))) {
           istate->method()->print_name(tty);
-          tty->cr();
-          ShouldNotCallThis();
+          sym_rid_t sym_rid = istate->oop_temp()->get_sym_rid();
+          tty->print_cr("native call returns unexpected symbolic object: %lu", sym_rid);
+          if (sym_rid >= MAX_SYM_RID) {
+            ShouldNotCallThis();
+          }
         }
       }
 #endif
