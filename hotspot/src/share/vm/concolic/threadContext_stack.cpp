@@ -7,10 +7,21 @@
  * calculated, which doesn't have `sym_rid` and `index`
  */
 void ThreadContext::set_stack_slot(int offset, Expression *exp) {
-  assert(offset >= 0, "offset >= 0");
-  sym_tmp_id_t sym_tmp_id = this->get_next_sym_tmp_id(exp);
-  this->get_last_stack().set_slot(offset, exp, NULL_SYM_RID, sym_tmp_id);
+  ShadowTable &opr_stack = this->get_last_stack();
+  if (exp) {
+    sym_tmp_id_t sym_tmp_id = this->get_next_sym_tmp_id(exp);
+    opr_stack.set_slot(offset, exp, NULL_SYM_RID, sym_tmp_id);
+  } else {
+    opr_stack.clear_slot(offset);
+  }
 }
+
+void ThreadContext::set_stack_slot_if_possible(int offset, Expression *exp) {
+  if (this->get_last_stack().size() > 0) {
+    this->set_stack_slot(offset, exp);
+  }
+}
+
 
 void ThreadContext::set_stack_slot(int offset, Expression *exp,
                                    sym_rid_t sym_rid, int index) {
@@ -54,7 +65,6 @@ void ThreadContext::copy_entry_from_stack_to_local(int stack_offset,
   ShadowTable::Entry &entry = this->get_stack_entry(stack_offset);
   this->get_last_local().set_slot(local_offset, entry);
 }
-
 
 
 #endif

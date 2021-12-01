@@ -10,6 +10,7 @@
 const char *SymString::ARRAY_TYPE_NAME = "[Ljava/lang/String;";
 const char *SymString::TYPE_NAME = "java/lang/String";
 method_set_t SymString::symbolized_methods = init_symbolized_methods();
+bool SymString::need_recording = false;
 
 method_set_t SymString::init_symbolized_methods() {
   method_set_t m_set;
@@ -44,7 +45,6 @@ method_set_t SymString::init_symbolized_methods() {
   m_set.insert("toLowerCase");
   m_set.insert("toUpperCase");
   m_set.insert("trim");
-  m_set.insert("valueOf");
   m_set.insert("<init>");
   return m_set;
 }
@@ -98,6 +98,7 @@ void SymString::print() {
 bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
+  need_recording = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
     int offset = handle.get_callee_local_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
@@ -106,7 +107,7 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
     if (!callee_method->is_static()) {
       // handle this
       SymString::prepare_param(handle, T_OBJECT, locals, offset,
-                               need_symbolize);
+                               need_recording);
       ++offset;
     }
 
@@ -114,12 +115,39 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
     SignatureStream ss(callee_method->signature());
     while (!ss.at_return_type()) {
       offset = SymString::prepare_param(handle, ss.type(), locals, offset,
-                                        need_symbolize);
+                                        need_recording);
 
       ss.next();
       ++offset;
     }
-    // assert(offset == handle.get_end_offset(), "equal");
+    need_symbolize = true;
+  } else if (callee_name == "valueOf") {
+    need_symbolize = true;
+    int offset = handle.get_callee_local_begin_offset();
+    register intptr_t *locals = handle.get_locals_ptr();
+    Method *callee_method = handle.get_callee_method();
+
+    ResourceMark rm;
+    SignatureStream ss(callee_method->signature());
+    if (ss.type() == T_OBJECT) {
+      Expression* exp = NULL;
+      oop obj = *(oop *)(locals - offset);
+      if (obj != NULL) {
+        if (obj->is_symbolic()) {
+          SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+          exp = sym_inst->get_ref_exp();
+          if (exp == NULL) {
+            need_symbolize = false;
+          } else {
+            need_recording = true;
+            handle.get_param_list().push_back(exp);
+          }
+        }
+      }
+    } else {
+      SymString::prepare_param(handle, ss.type(), locals, offset,
+                                        need_recording);
+    }
   }
 
   return need_symbolize;
@@ -127,7 +155,7 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                              intptr_t *locals, int offset,
-                             bool &need_symbolize) {
+                             bool &recording) {
   Expression *exp = NULL;
 
   if (type == T_OBJECT) {
@@ -135,7 +163,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     oop obj = *(oop *)(locals - offset);
     if (obj != NULL) {
       if (obj->is_symbolic()) {
-        need_symbolize = true;
+        recording = true;
       }
       if (obj->klass()->name()->equals(TYPE_NAME)) {
         exp = SymString::get_exp_of(obj);
@@ -148,7 +176,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
       SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);
       exp = new ArraySymbolExp(arr_obj->get_sym_rid(), sym_arr->get_version(),
                                type);
-      need_symbolize = true;
+      recording = true;
     } else {
       exp = new ArrayInitExpression(NULL_SYM_RID, arr_obj);
     }
@@ -156,7 +184,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     offset += type2size[type] - 1;
 
     exp = ConcolicMngr::ctx->get_stack_slot(offset);
-    need_symbolize = exp ? true : need_symbolize;
+    recording = exp ? true : recording;
 
     if (!exp) {
       switch (type) {
@@ -181,7 +209,11 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 }
 
 Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
-  return MethodSymbolizer::finish_method_helper(handle);
+  if (need_recording) {
+    return MethodSymbolizer::finish_method_helper(handle);
+  } else {
+    return NULL;
+  }
 }
 
 Expression *SymString::get_exp_of(oop obj) {

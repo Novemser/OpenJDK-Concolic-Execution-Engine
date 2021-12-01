@@ -63,11 +63,9 @@ public:
     Method *callee_method = NULL;
     if (_caller_frame->is_interpreter_frame()) {
       callee_method = _caller_frame->as_interpreter_frame()->interpreter_state()->callee();
-      tty->print_cr("1: %p", callee_method);
     } else if (_caller_frame->is_entry_frame()) {
       JavaCallWrapper *call_wrapper = *_caller_frame->as_entry_frame()->call_wrapper();
       callee_method = call_wrapper->callee_method();
-      tty->print_cr("2: %p", callee_method);
     }
     return callee_method->result_type();
   }

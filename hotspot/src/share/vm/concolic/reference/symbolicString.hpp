@@ -12,7 +12,7 @@ public:
   static const char *TYPE_NAME;
   static const char *ARRAY_TYPE_NAME;
   static method_set_t symbolized_methods;
-
+  static bool need_recording;
 private:
   Expression *_ref_exp;
   Expression *_exp;

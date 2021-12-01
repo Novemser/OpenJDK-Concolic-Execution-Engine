@@ -87,6 +87,7 @@ public:
    * calculated, which doesn't have `sym_rid` and `index`
    */
   void set_stack_slot(int offset, Expression *sym_exp);
+  void set_stack_slot_if_possible(int offset, Expression *sym_exp);
   void set_stack_slot(int offset, Expression *sym_exp, sym_rid_t sym_rid,
                       int index);
 

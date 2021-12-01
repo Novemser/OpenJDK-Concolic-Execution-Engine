@@ -41,20 +41,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     return;
   }
 
-  if (caller_frame->is_entry_frame()) {
-    ResourceMark rm;
-    Method *method = callee_frame->as_interpreter_frame()->interpreter_state()->method();
-    tty->print_cr("invoke: %s", method->name_and_sig_as_C_string());
-    Symbol *symbol = method->name();
-    std::string method_name = std::string(symbol->as_C_string());
-
-    if (method_name.find("setString") != std::string::npos) {
-       tty->print("invoke!! : ");
-       method->print_name();
-       tty->cr();
-    }
-  }
-
   _handle.set_caller_frame(caller_frame);
   _handle.set_callee_frame(callee_frame);
   Method *callee_method = _handle.get_callee_method();
@@ -77,10 +63,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                   _handle.get_callee_name().c_str());
   }
 
-  if (_handle.get_callee_name().find("setString") != std::string::npos) {
-    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-                  _handle.get_callee_name().c_str());
-  }
   /**
    * Whether we need to symbolize the process of this function
    */
@@ -130,7 +112,7 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
     BasicType type = _handle.get_result_type();
     int delta = type2size[type] > 1; // long and double are 1; 0, otherwise
     assert(delta >= 0, "should be");
-    ConcolicMngr::ctx->set_stack_slot(
+    ConcolicMngr::ctx->set_stack_slot_if_possible(
         _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
     this->_symbolizing_method = false;
