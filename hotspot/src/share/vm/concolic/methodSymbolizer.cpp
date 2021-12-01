@@ -59,11 +59,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                   _handle.get_callee_name().c_str());
   }
 
-  if (_handle.get_callee_name().find("execute") != std::string::npos) {
-    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-                  _handle.get_callee_name().c_str());
-  }
-
   /**
    * Whether we need to symbolize the process of this function
    */

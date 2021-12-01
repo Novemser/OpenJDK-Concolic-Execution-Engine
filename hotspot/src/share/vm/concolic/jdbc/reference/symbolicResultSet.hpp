@@ -26,6 +26,8 @@ public:
 private:
   static std::set<std::string> target_class_names;
   static std::set<std::string> init_target_class_names();
+  static std::set<std::string> handle_method_names;
+  static std::set<std::string> init_handle_method_names();
   static std::set<std::string> skip_method_names;
   static std::set<std::string> init_skip_method_names();
 
@@ -35,11 +37,21 @@ private:
   int _row_id;
 
   Expression *_size_exp;
+  Expression* _ref_exp;
 
 public:
   SymResSet(sym_rid_t sym_rid);
   ~SymResSet();
 
+  /**
+   * Handle these redandent code
+   */
+  Expression *get_ref_exp() { return _ref_exp; };
+
+  void set_ref_exp(Expression *exp) {
+    exp->inc_ref();
+    _ref_exp = exp;
+  };
 public:
   inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
     _sym_stmt_rid = sym_stmt_rid;

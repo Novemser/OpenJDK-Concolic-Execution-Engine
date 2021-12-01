@@ -1894,9 +1894,9 @@ run:
       /* Goto pc whose table entry matches specified key. */
 
       CASE(_lookupswitch): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("lookupswitch");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("lookupswitch");
+//#endif
           jint* lpc  = (jint*)VMalignWordUp(pc+1);
           int32_t  key  = STACK_INT(-1);
           int32_t  skip = Bytes::get_Java_u4((address) lpc); /* default amount */
@@ -2282,9 +2282,9 @@ run:
       /* monitorenter and monitorexit for locking/unlocking an object */
 
       CASE(_monitorenter): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("monitorenter");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("monitorenter");
+//#endif
         oop lockee = STACK_OBJECT(-1);
         // derefing's lockee ought to provoke implicit null check
         CHECK_NULL(lockee);
@@ -2392,9 +2392,9 @@ run:
       }
 
       CASE(_monitorexit): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("monitorexit");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("monitorexit");
+//#endif
         oop lockee = STACK_OBJECT(-1);
         CHECK_NULL(lockee);
         // derefing's lockee ought to provoke implicit null check

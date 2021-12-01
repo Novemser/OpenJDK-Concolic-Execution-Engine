@@ -96,13 +96,6 @@ void ShadowStack::push(ZeroFrame *callee_frame, ZeroFrame *caller_frame,
 //        ShouldNotCallThis();
     }
   } else if (callee_frame->is_entry_frame()) {
-    EntryFrame *entry_frame = callee_frame->as_entry_frame();
-    JavaCallWrapper *call_wrapper = *entry_frame->call_wrapper();
-    Method *callee_method = call_wrapper->callee_method();
-
-    ResourceMark rm;
-    tty->print_cr("Entry frame before calling: %s", callee_method->name_and_sig_as_C_string());
-
     ShadowTable &reflection_stack = ConcolicMngr::ctx->get_shadow_stack().get_reflection_stack();
     if (reflection_stack.size() != 0) {
       JavaThread *java_thread = ConcolicMngr::ctx->get_thread();

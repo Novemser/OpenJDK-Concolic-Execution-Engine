@@ -17,12 +17,23 @@ std::set<std::string> SymResSet::init_target_class_names() {
   return set;
 }
 
+std::set<std::string> SymResSet::handle_method_names = init_handle_method_names();
+
+std::set<std::string> SymResSet::init_handle_method_names() {
+  std::set<std::string> set;
+  set.insert("getLong");
+  return set;
+}
+
 std::set<std::string> SymResSet::skip_method_names = init_skip_method_names();
 
 std::set<std::string> SymResSet::init_skip_method_names() {
   std::set<std::string> set;
   set.insert("close");
   set.insert("realClose");
+  set.insert("checkRowPos");
+  set.insert("checkClosed");
+  set.insert("checkColumnBounds");
   return set;
 }
 
@@ -41,19 +52,17 @@ void SymResSet::print() {
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = false;
+  bool need_symbolize = true;
 
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
-    need_symbolize = true;
-  } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
-    need_symbolize = true;
-  } else {
-    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
-                  handle.get_callee_name().c_str());
+  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
+    handle.get_callee_method()->print_name(tty);
+    tty->print_cr(" handled by SymResSet");
+    need_symbolize = false;
     // ShouldNotCallThis();
   }
 

@@ -13,6 +13,20 @@ std::set<std::string> SymMap::target_class_names = init_target_class_names();
 std::set<std::string> SymMap::init_target_class_names() {
   std::set<std::string> set;
   set.insert("java/util/HashMap");
+  set.insert("org/hibernate/internal/util/collections/ConcurrentReferenceHashMap");
+  return set;
+}
+
+std::set<std::string> SymMap::handle_method_names = init_handle_method_names();
+
+std::set<std::string> SymMap::init_handle_method_names() {
+  std::set<std::string> set;
+  set.insert("put");
+  set.insert("putIfAbsent");
+  set.insert("get");
+  set.insert("containsKey");
+  set.insert("isEmpty");
+  set.insert("clear");
   return set;
 }
 
@@ -20,8 +34,8 @@ std::set<std::string> SymMap::skip_method_names = init_skip_method_names();
 
 std::set<std::string> SymMap::init_skip_method_names() {
   std::set<std::string> set;
-  set.insert("put");
-  set.insert("get");
+  set.insert("<init>");
+  set.insert("hash");
   return set;
 }
 
@@ -29,7 +43,7 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
   need_recording = false;
-  if (skip_method_names.find(callee_name) != skip_method_names.end()) {
+  if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     int offset = handle.get_callee_local_begin_offset();
     register intptr_t *locals = handle.get_locals_ptr();
     Method *callee_method = handle.get_callee_method();
@@ -50,7 +64,7 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
       ss.next();
       ++offset;
     }
-  } else {
+  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" handled by SymMap");
   }
@@ -103,37 +117,40 @@ Expression *SymMap::finish_method_helper(MethodSymbolizerHandle &handle) {
     return NULL;
   }
 
-  BasicType type = handle.get_result_type();
   Expression *exp = NULL;
-  oop obj = NULL;
+  if (handle_method_names.find(handle.get_callee_name()) != handle_method_names.end()) {
 
-  switch (type) {
-    case T_VOID:
-      exp = SymbolExpression::get(Sym_VOID);
-      break;
-    case T_OBJECT:
-      obj = handle.get_result<oop>(type);
-      if (obj != NULL) {
-        if (obj->is_symbolic()) {
-          exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
-          SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-          if (exp == NULL) {
-            exp = new InstanceSymbolExp(obj);
-            sym_inst->set_ref_exp(exp);
+    BasicType type = handle.get_result_type();
+    oop obj = NULL;
+
+    switch (type) {
+      case T_VOID:
+        exp = SymbolExpression::get(Sym_VOID);
+        break;
+      case T_OBJECT:
+        obj = handle.get_result<oop>(type);
+        if (obj != NULL) {
+          if (obj->is_symbolic()) {
+            exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
+            SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+            if (exp == NULL) {
+              exp = new InstanceSymbolExp(obj);
+              sym_inst->set_ref_exp(exp);
+            }
           }
+        } else {
+          exp = SymbolExpression::get(Sym_NULL);
         }
-      } else {
-        exp = SymbolExpression::get(Sym_NULL);
-      }
-      break;
-    default:
-      ShouldNotCallThis();
-      break;
-  }
+        break;
+      default:
+        ShouldNotCallThis();
+        break;
+    }
 
-  ConcolicMngr::record_path_condition(new MethodExpression(
-      handle.get_callee_holder_name(), handle.get_callee_name(),
-      handle.get_param_list(), exp));
+    ConcolicMngr::record_path_condition(new MethodExpression(
+        handle.get_callee_holder_name(), handle.get_callee_name(),
+        handle.get_param_list(), exp));
+  }
   return exp;
 }
 
