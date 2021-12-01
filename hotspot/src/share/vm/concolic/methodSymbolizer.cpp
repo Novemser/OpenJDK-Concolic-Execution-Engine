@@ -8,6 +8,7 @@
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicMap.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
@@ -78,6 +79,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymStmt::invoke_method_helper(_handle);
   } else if (SymResSet::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymResSet::invoke_method_helper(_handle);
+  } else if (SymMap::target(_handle.get_callee_holder_name())) {
+    need_symbolize = SymMap::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -105,6 +108,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymStmt::finish_method_helper(_handle);
     } else if (SymResSet::target(_handle.get_callee_holder_name())) {
       exp = SymResSet::finish_method_helper(_handle);
+    } else if (SymMap::target(_handle.get_callee_holder_name())) {
+      exp = SymMap::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }
@@ -153,18 +158,23 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
 
   switch (type) {
     case T_VOID:
+      exp = SymbolExpression::get(Sym_VOID);
       break;
     case T_OBJECT:
       obj = handle.get_result<oop>(type);
-      if (!obj->is_symbolic()) {
-        ConcolicMngr::ctx->symbolize(obj);
+      if (obj != NULL) {
+        if (!obj->is_symbolic()) {
+          ConcolicMngr::ctx->symbolize(obj);
+        }
+        /*
+          We hope only symbolize the method whose return value
+          is the object we support like SymString and SymInterger.
+        */
+        exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
+        assert(exp != NULL, "should be");
+      } else {
+        exp = SymbolExpression::get(Sym_NULL);
       }
-      /*
-        We hope only symbolize the method whose return value
-        is the object we support like SymString and SymInterger.
-      */
-      exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
-      assert(exp != NULL, "should be");
       break;
     case T_ARRAY:
       ShouldNotCallThis();
@@ -190,10 +200,8 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       exp = sym_inst->get_ref_exp();
       if (!exp) {
-        /**
-         *  TODO: May be this symbol expression can be reused
-         */
-        exp = new InstanceSymbolExp(obj->get_sym_rid(), type);
+        exp = new InstanceSymbolExp(obj);
+        sym_inst->set_ref_exp(exp);
       }
     }
   } else if (type == T_ARRAY) {

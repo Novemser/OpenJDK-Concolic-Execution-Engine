@@ -43,7 +43,7 @@ public:
 
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset,
-                           bool &need_symbolize);
+                           bool &recording);
   static Expression *get_exp_of(oop obj);
 
 private:

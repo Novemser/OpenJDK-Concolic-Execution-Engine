@@ -13,7 +13,10 @@ MethodExpression::MethodExpression(const std::string &holder,
   _param_list.swap(param_list);
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
-    _param_list[i]->inc_ref();
+    Expression* exp = _param_list[i];
+    if (exp) {
+      exp->inc_ref();
+    }
   }
 
   /**
@@ -44,14 +47,10 @@ void MethodExpression::print() {
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
     tty->print("  ");
-    _param_list[i]->print();
+    Expression::print_on_maybe_null(_param_list[i]);
   }
   tty->print(") -> ");
-  if (_res_exp) {
-    _res_exp->print();
-  } else {
-    tty->print("VOID");
-  }
+  Expression::print_on_maybe_null(_res_exp);
 }
 
 #endif

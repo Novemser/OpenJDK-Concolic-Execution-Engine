@@ -23,6 +23,14 @@ public:
   virtual void print();
   void print_cr();
 
+  static void print_on_maybe_null(Expression *exp) {
+    if (exp) {
+      exp->print();
+    } else {
+      tty->print("??");
+    }
+  }
+
   inline void inc_ref() { _ref_count += 1; }
   inline bool dec_ref() { return --_ref_count == 0; }
   inline bool able_to_gc() { return _ref_count == 0; }

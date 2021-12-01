@@ -4,7 +4,7 @@
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
 
-SymObj::SymObj(sym_rid_t sym_rid) : SymInstance(sym_rid) {}
+SymObj::SymObj(sym_rid_t sym_rid) : SymInstance(sym_rid), _ref_exp(NULL) {}
 
 SymObj::~SymObj() {
   exp_map_t::iterator iter;
@@ -13,6 +13,9 @@ SymObj::~SymObj() {
     if (exp->dec_ref()) {
       delete exp;
     }
+  }
+  if (_ref_exp && _ref_exp->dec_ref()) {
+    delete _ref_exp;
   }
 }
 

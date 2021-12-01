@@ -154,13 +154,13 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                             intptr_t *locals, int offset,
+                             intptr_t *locals, int locals_offset,
                              bool &recording) {
   Expression *exp = NULL;
 
   if (type == T_OBJECT) {
     // only consider the situation that object is a string by now
-    oop obj = *(oop *)(locals - offset);
+    oop obj = *(oop *)(locals - locals_offset);
     if (obj != NULL) {
       if (obj->is_symbolic()) {
         recording = true;
@@ -171,7 +171,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     }
 
   } else if (type == T_ARRAY) {
-    arrayOop arr_obj = *(arrayOop *)(locals - offset);
+    arrayOop arr_obj = *(arrayOop *)(locals - locals_offset);
     if (arr_obj->is_symbolic()) {
       SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);
       exp = new ArraySymbolExp(arr_obj->get_sym_rid(), sym_arr->get_version(),
@@ -181,31 +181,31 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
       exp = new ArrayInitExpression(NULL_SYM_RID, arr_obj);
     }
   } else {
-    offset += type2size[type] - 1;
-
-    exp = ConcolicMngr::ctx->get_stack_slot(offset);
-    recording = exp ? true : recording;
+    locals_offset += type2size[type] - 1;
+    exp = ConcolicMngr::ctx->get_stack_slot(locals_offset);
 
     if (!exp) {
       switch (type) {
       case T_BOOLEAN:
-        exp = new ConExpression(*(jboolean *)(locals - offset));
+        exp = new ConExpression(*(jboolean *)(locals - locals_offset));
         break;
       case T_INT:
-        exp = new ConExpression(*(jint *)(locals - offset));
+        exp = new ConExpression(*(jint *)(locals - locals_offset));
         break;
       case T_CHAR:
-        exp = new ConExpression(*(jchar *)(locals - offset));
+        exp = new ConExpression(*(jchar *)(locals - locals_offset));
         break;
       default:
         ShouldNotReachHere();
         break;
       }
+    } else {
+      recording = true;
     }
   }
 
   handle.get_param_list().push_back(exp);
-  return offset;
+  return locals_offset;
 }
 
 Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {

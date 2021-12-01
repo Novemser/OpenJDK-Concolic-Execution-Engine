@@ -2224,7 +2224,7 @@ run:
 
               if (!value_exp) {
                 value_exp =
-                    new InstanceSymbolExp(rhsObject->get_sym_rid(), T_OBJECT);
+                    new InstanceSymbolExp(rhsObject);
               }
 
               ConcolicMngr::record_path_condition(new ArrayExpression(

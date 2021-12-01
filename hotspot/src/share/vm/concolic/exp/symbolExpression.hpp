@@ -9,10 +9,24 @@
 
 #include <string>
 
+enum BuiltInSym {
+  Sym_NULL = 0,
+  Sym_VOID,
+  number_of_builtin_syms
+};
+
 class SymbolExpression : public Expression {
+  static SymbolExpression* shared_exp[number_of_builtin_syms];
+public:
+  static void init_single_instances();
+  static SymbolExpression *get(BuiltInSym type) { return shared_exp[type];}
+
 public:
   static const int BUF_SIZE = 1024;
   static char str_buf[BUF_SIZE];
+
+  SymbolExpression() {}
+  SymbolExpression(const char *buf, int length) { set(buf, length);}
 
 protected:
   std::string _str;
@@ -25,7 +39,7 @@ public:
 
 class InstanceSymbolExp : public SymbolExpression {
 public:
-  InstanceSymbolExp(sym_rid_t sym_rid, BasicType type);
+  InstanceSymbolExp(oop obj);
 };
 
 class FieldSymbolExp : public SymbolExpression {
@@ -49,10 +63,6 @@ public:
                    BasicType type);
 };
 
-class NullSymbolExp : public SymbolExpression {
-public:
-  NullSymbolExp();
-};
 
 #endif
 

@@ -14,6 +14,8 @@
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
   init_sym_rid_counter();
   init_sym_tmp_id_counter();
+
+  SymbolExpression::init_single_instances();
 }
 
 ThreadContext::~ThreadContext() {

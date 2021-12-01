@@ -11,14 +11,19 @@
 class SymObj : public SymInstance {
 private:
   exp_map_t _exps;
+  Expression* _ref_exp;
 
 public:
   SymObj(sym_rid_t sym_rid);
   ~SymObj();
 
   Expression *get(int field_offset);
-  Expression *get_ref_exp() { return NULL; };
-  void set_ref_exp(Expression *exp) { return; };
+  Expression *get_ref_exp() { return _ref_exp; };
+
+  void set_ref_exp(Expression *exp) {
+    exp->inc_ref();
+    _ref_exp = exp;
+  };
 
   void init_sym_exp(int field_offset, Expression *exp);
   void set_sym_exp(int field_offset, Expression *exp);
