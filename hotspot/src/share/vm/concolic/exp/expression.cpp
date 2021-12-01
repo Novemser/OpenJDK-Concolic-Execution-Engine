@@ -43,7 +43,7 @@ OpSymExpression::~OpSymExpression() {
 
 void OpSymExpression::print() {
 #ifdef ONELINE
-  tty->print("(%s ", SymbolicOpStr[(int)_op]);
+  tty->print("(%s ", SymbolicOpStr[(int) _op]);
   if (_left) {
     _left->print();
     tty->print(" ");
@@ -68,13 +68,33 @@ void OpSymExpression::print() {
 #endif
 }
 
+ConExpression::ConExpression(jboolean z) {
+  int ret = sprintf(_str, "CZ_0x%x", z);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
+}
+
+ConExpression::ConExpression(jbyte b) {
+  int ret = sprintf(_str, "CB_0x%x", b);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
+}
+
+ConExpression::ConExpression(jchar b) {
+  int ret = sprintf(_str, "CC_%c", b);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
+}
+
 ConExpression::ConExpression(jint i) {
   int ret = sprintf(_str, "CI_0x%x", i);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
+ConExpression::ConExpression(jshort s) {
+  int ret = sprintf(_str, "CS_0x%x", s);
+  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
+}
+
 ConExpression::ConExpression(jlong l) {
-  int ret = sprintf(_str, "CI_0x%lx", l);
+  int ret = sprintf(_str, "CJ_0x%lx", l);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
@@ -84,7 +104,7 @@ ConExpression::ConExpression(jfloat f) {
 }
 
 ConExpression::ConExpression(jdouble d) {
-  int ret = sprintf(_str, "CF_%e", d);
+  int ret = sprintf(_str, "CD_%le", d);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
