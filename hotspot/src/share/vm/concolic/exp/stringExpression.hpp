@@ -18,6 +18,5 @@ public:
   void print();
 };
 
-#endif
-
+#endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_EXP_STRINGEXPRESSION_HPP

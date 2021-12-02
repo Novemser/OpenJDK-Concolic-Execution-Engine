@@ -29,6 +29,11 @@ std::set<std::string> SymMap::init_handle_method_names() {
   set.insert("containsKey");
   set.insert("isEmpty");
   set.insert("clear");
+  /**
+   * Please revise this operation when you have time!!!
+   * Although it is symbolized, it might call some methods which should not be symbolized...
+   */
+  set.insert("merge");
   return set;
 }
 

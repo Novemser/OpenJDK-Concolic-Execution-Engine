@@ -9,6 +9,12 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
+class SymStmt;
+class StatementSymbolExp : public SymbolExpression {
+public:
+  StatementSymbolExp(SymStmt* sym_stmt);
+};
+
 class SymStmt : public SymInstance {
 public:
   inline static bool target(const std::string &class_name) {
@@ -27,6 +33,7 @@ private:
 private:
   std::string _sql_template;
   exp_map_t _param_exps;
+  Expression* _row_count_exp;
 
 public:
   SymStmt(sym_rid_t sym_rid);
@@ -43,6 +50,8 @@ public:
   }
 
   void set_param(int index, Expression *exp);
+
+  void set_row_count_exp(Expression* row_count_exp);
 
 public:
   bool need_recursive() { return false; }

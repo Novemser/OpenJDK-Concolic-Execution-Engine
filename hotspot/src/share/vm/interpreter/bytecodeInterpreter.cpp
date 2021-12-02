@@ -2800,10 +2800,21 @@ run:
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_CONTINUE(3);
       }
-      CASE(_multianewarray): {
+
 #ifdef ENABLE_CONCOLIC
-        ConcolicMngr::warning_reach_unhandled_bytecode("multianewarray");
+#define CONCOLIC_NEW_MULTIARRAY()                                              \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
+    Expression *exp = ConcolicMngr::ctx->get_stack_slot(GET_STACK_OFFSET - 1); \
+    guarantee (exp == NULL, "do not support");                                 \
+  }
+#else
+#define CONCOLIC_NEW_ARRAY()
 #endif
+
+      CASE(_multianewarray): {
+//#ifdef ENABLE_CONCOLIC
+//        ConcolicMngr::warning_reach_unhandled_bytecode("multianewarray");
+//#endif
         jint dims = *(pc+3);
         jint size = STACK_INT(-1);
         // stack grows down, dimensions are up!
@@ -2816,6 +2827,9 @@ run:
         // Must prevent reordering of stores for object initialization
         // with stores that publish the new object.
         OrderAccess::storestore();
+
+        CONCOLIC_NEW_MULTIARRAY();
+
         SET_STACK_OBJECT(THREAD->vm_result(), -dims);
         THREAD->set_vm_result(NULL);
         UPDATE_PC_AND_TOS_AND_CONTINUE(4, -(dims-1));
@@ -3290,9 +3304,9 @@ run:
       /* Throw an exception. */
 
       CASE(_athrow): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("athrow");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("athrow");
+//#endif
           oop except_oop = STACK_OBJECT(-1);
           CHECK_NULL(except_oop);
           // set pending_exception so we use common code
