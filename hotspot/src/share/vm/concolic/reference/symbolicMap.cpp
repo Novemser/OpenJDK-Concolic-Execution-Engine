@@ -25,6 +25,7 @@ std::set<std::string> SymMap::init_handle_method_names() {
   set.insert("put");
   set.insert("putIfAbsent");
   set.insert("get");
+  set.insert("remove");
   set.insert("containsKey");
   set.insert("isEmpty");
   set.insert("clear");

@@ -23,6 +23,8 @@ method_set_t SymConn::skip_method_names = init_skip_method_names();
 
 method_set_t SymConn::init_skip_method_names() {
   method_set_t m_set;
+  m_set.insert("getAutoCommit");
+  m_set.insert("commit");
   return m_set;
 }
 
