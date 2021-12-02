@@ -71,7 +71,7 @@ public:
   }
 
   template<class T>
-  inline T get_result(BasicType type) {
+  T get_result(BasicType type) {
     int result_slots = type2size[type];
     assert(result_slots >= 0 && result_slots <= 2, "what?");
     return *(T *) (_callee_istate->stack() + result_slots);

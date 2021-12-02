@@ -38,7 +38,8 @@ std::set<std::string> SymMap::init_skip_method_names() {
   set.insert("<init>");
   set.insert("hash");
   set.insert("keySet"); // really?
-  set.insert("entrySet"); // really?values
+  set.insert("entrySet"); // really?
+  set.insert("values"); // really?
   return set;
 }
 

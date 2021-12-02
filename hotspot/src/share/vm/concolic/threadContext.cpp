@@ -186,6 +186,8 @@ void ThreadContext::print() {
   }
 
   _path_condition.print();
+
+  _jdbc_mngr.print();
 }
 
 void ThreadContext::print_stack_trace() {

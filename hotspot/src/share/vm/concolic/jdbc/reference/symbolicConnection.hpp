@@ -8,16 +8,23 @@
 
 class SymConn {
 public:
+  inline static bool target(const std::string &class_name) {
+    return class_name == TYPE_NAME;
+  }
+private:
   static const char *TYPE_NAME;
+  static method_set_t init_handle_method_names();
+  static method_set_t handle_method_names;
+  static method_set_t skip_method_names;
+  static method_set_t init_skip_method_names();
+
+public:
   static std::string sql_template;
-  static method_set_t symbolized_methods;
 
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
-private:
-  static method_set_t init_symbolized_methods();
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

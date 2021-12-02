@@ -3,7 +3,7 @@
 
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/jdbc/JdbcMngr.hpp"
+#include "concolic/jdbc/jdbcMngr.hpp"
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/pathCondition.hpp"
 #include "concolic/reference/symbolicArray.hpp"

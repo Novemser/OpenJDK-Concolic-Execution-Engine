@@ -68,7 +68,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 
   if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
     need_symbolize = SymString::invoke_method_helper(_handle);
-  } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
+  } else if (SymConn::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymConn::invoke_method_helper(_handle);
   } else if (SymStmt::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymStmt::invoke_method_helper(_handle);
@@ -97,7 +97,7 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
     Expression *exp = NULL;
     if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
       exp = SymString::finish_method_helper(_handle);
-    } else if (_handle.get_callee_holder_name() == SymConn::TYPE_NAME) {
+    } else if (SymConn::target(_handle.get_callee_holder_name())) {
       exp = SymConn::finish_method_helper(_handle);
     } else if (SymStmt::target(_handle.get_callee_holder_name())) {
       exp = SymStmt::finish_method_helper(_handle);

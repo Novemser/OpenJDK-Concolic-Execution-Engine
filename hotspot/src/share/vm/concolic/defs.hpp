@@ -3,6 +3,8 @@
 
 #ifdef ENABLE_CONCOLIC
 
+#include "jni.h"
+
 #include <set>
 #include <string>
 #include <sys/types.h>
