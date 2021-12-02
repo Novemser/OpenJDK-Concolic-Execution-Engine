@@ -33,12 +33,8 @@ OpSymExpression::OpSymExpression(Expression *r, SymbolicOp op)
 }
 
 OpSymExpression::~OpSymExpression() {
-  if (_left && _left->dec_ref()) {
-    delete _left;
-  }
-  if (_right && _right->dec_ref()) {
-    delete _right;
-  }
+  Expression::gc(_left);
+  Expression::gc(_right);
 }
 
 void OpSymExpression::print() {

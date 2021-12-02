@@ -19,6 +19,13 @@ private:
 public:
   static ulong total_count;
 
+  static void gc(Expression* exp) {
+    if (exp && exp->dec_ref()) {
+      delete exp;
+    }
+  }
+
+public:
   virtual ~Expression() { total_count--; }
   virtual void print();
   void print_cr();

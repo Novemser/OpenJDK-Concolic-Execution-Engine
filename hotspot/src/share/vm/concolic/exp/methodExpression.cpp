@@ -31,15 +31,9 @@ MethodExpression::MethodExpression(const std::string &holder,
 MethodExpression::~MethodExpression() {
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
-    Expression *exp = _param_list[i];
-    if (exp && exp->dec_ref()) {
-      delete exp;
-    }
+    Expression::gc(_param_list[i]);
   }
-
-  if (_res_exp && _res_exp->dec_ref()) {
-    delete _res_exp;
-  }
+  Expression::gc(_res_exp);
 }
 
 void MethodExpression::print() {

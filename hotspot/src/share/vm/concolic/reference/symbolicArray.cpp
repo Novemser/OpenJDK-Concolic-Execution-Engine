@@ -12,9 +12,7 @@ SymArr::SymArr(sym_rid_t sym_rid, Expression *length_exp)
 }
 
 SymArr::~SymArr() {
-  if (_length_exp && _length_exp->dec_ref()) {
-    delete _length_exp;
-  }
+  Expression::gc(_length_exp);
 }
 
 void SymArr::print() {

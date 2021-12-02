@@ -30,11 +30,7 @@ public:
   }
 
   inline void set_length_exp(Expression *length_exp) {
-    assert(_length_exp == NULL, "not override old one");
-    assert(length_exp != NULL, "not NULL");
-    if (_length_exp && _length_exp->dec_ref()) {
-      delete _length_exp;
-    }
+    Expression::gc(_length_exp);
     _length_exp = length_exp;
     _length_exp->inc_ref();
   }

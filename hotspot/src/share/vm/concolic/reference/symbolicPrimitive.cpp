@@ -34,9 +34,7 @@ template <class T>
 SymPrimitive<T>::SymPrimitive(sym_rid_t sym_rid) : SymInstance(sym_rid) {}
 
 template <class T> SymPrimitive<T>::~SymPrimitive() {
-  if (_exp && _exp->dec_ref()) {
-    delete _exp;
-  }
+  Expression::gc(_exp);
 }
 
 template <class T> Expression *SymPrimitive<T>::get(int field_offset) {
@@ -55,11 +53,7 @@ void SymPrimitive<T>::init_sym_exp(int field_offset, Expression *exp) {
 
 template <class T>
 void SymPrimitive<T>::set_sym_exp(int field_offset, Expression *exp) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  if (_exp && _exp->dec_ref()) {
-    delete _exp;
-  }
+  Expression::gc(_exp);
 
   _exp = exp;
   if (_exp) {

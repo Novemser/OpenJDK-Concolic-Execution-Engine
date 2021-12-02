@@ -92,10 +92,7 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
 ArrayInitExpression::~ArrayInitExpression() {
   int size = _arr_exps.size();
   for (int i = 0; i < size; ++i) {
-    Expression *exp = _arr_exps[i];
-    if (exp && exp->dec_ref()) {
-      delete exp;
-    }
+    Expression::gc(_arr_exps[i]);
   }
 }
 

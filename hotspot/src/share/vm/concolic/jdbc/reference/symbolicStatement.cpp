@@ -67,14 +67,9 @@ SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _
 SymStmt::~SymStmt() {
   exp_map_t::iterator iter;
   for (iter = _param_exps.begin(); iter != _param_exps.end(); ++iter) {
-    Expression *exp = iter->second;
-    if (exp && exp->dec_ref()) {
-      delete exp;
-    }
+    Expression::gc(iter->second);
   }
-  if (_row_count_exp && _row_count_exp->dec_ref()) {
-    delete _row_count_exp;
-  }
+  Expression::gc(_row_count_exp);
 }
 
 void SymStmt::set_param(int index, Expression *exp) {

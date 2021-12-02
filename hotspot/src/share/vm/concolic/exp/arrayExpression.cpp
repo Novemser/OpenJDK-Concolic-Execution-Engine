@@ -18,12 +18,8 @@ ArrayExpression::ArrayExpression(sym_rid_t array_id, Expression *index_exp,
 }
 
 ArrayExpression::~ArrayExpression() {
-  if (_index_exp && _index_exp->dec_ref()) {
-    delete _index_exp;
-  }
-  if (_value_exp && _value_exp->dec_ref()) {
-    delete _value_exp;
-  }
+  Expression::gc(_index_exp);
+  Expression::gc(_value_exp);
 }
 
 void ArrayExpression::print() {

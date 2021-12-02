@@ -25,9 +25,7 @@ public:
   Expression *get(int field_offset);
   Expression *get_ref_exp() { return _exp; };
   void set_ref_exp(Expression *exp) {
-    if (_exp && _exp->dec_ref()) {
-      delete _exp;
-    }
+    Expression::gc(_exp);
     _exp = exp;
     _exp->inc_ref();
   };

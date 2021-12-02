@@ -2,6 +2,7 @@
 
 #include "concolic/jdbc/jdbcMngr.hpp"
 #include "utilities/debug.hpp"
+#include "utilities/ostream.hpp"
 
 JdbcMngr::~JdbcMngr() {
   ulong size = _txs.size();
@@ -12,6 +13,7 @@ JdbcMngr::~JdbcMngr() {
 }
 
 void JdbcMngr::set_auto_commit(jboolean auto_commit) {
+  tty->print_cr("set_auto_commit: %us", auto_commit);
   if (!auto_commit) {
     guarantee(!has_ongoing_tx(), "should be");
     TxInfo *tx = new TxInfo(_txs.size());

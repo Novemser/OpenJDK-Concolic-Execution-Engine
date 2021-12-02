@@ -48,12 +48,8 @@ SymResSet::SymResSet(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
 
 SymResSet::~SymResSet() {
-  if (_size_exp->dec_ref()) {
-    delete _size_exp;
-  }
-  if (_ref_exp && _ref_exp->dec_ref()) {
-    delete _ref_exp;
-  }
+  Expression::gc(_size_exp);
+  Expression::gc(_ref_exp);
 }
 
 void SymResSet::print() {

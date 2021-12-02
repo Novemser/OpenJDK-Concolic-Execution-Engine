@@ -55,13 +55,8 @@ SymString::SymString(sym_rid_t sym_rid)
 }
 
 SymString::~SymString() {
-  if (_exp && _exp->dec_ref()) {
-    delete _exp;
-  }
-  assert(_ref_exp, "not NULL");
-  if (_ref_exp && _ref_exp->dec_ref()) {
-    delete _ref_exp;
-  }
+  Expression::gc(_exp);
+  Expression::gc(_ref_exp);
 }
 
 Expression *SymString::get(int field_offset) {
@@ -80,9 +75,7 @@ void SymString::init_sym_exp(int field_offset, Expression *exp) {
 void SymString::set_sym_exp(int field_offset, Expression *exp) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
-  if (_exp && _exp->dec_ref()) {
-    delete _exp;
-  }
+  Expression::gc(_exp);
 
   _exp = exp;
   if (_exp) {

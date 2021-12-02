@@ -27,10 +27,7 @@ ThreadContext::~ThreadContext() {
 
   int size = _sym_tmp_exps.size();
   for (int i = 1; i != size; ++i) {
-    Expression *exp = _sym_tmp_exps[i];
-    if (exp && exp->dec_ref()) {
-      delete exp;
-    }
+    Expression::gc(_sym_tmp_exps[i]);
   }
   _sym_tmp_exps.clear();
 

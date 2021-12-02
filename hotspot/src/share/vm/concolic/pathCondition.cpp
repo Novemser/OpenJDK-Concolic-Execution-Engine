@@ -11,10 +11,7 @@ void PathCondition::add(Expression *exp) {
 void PathCondition::gc() {
   int size = _exps.size();
   for (int i = 0; i < size; ++i) {
-    Expression *exp = _exps[i];
-    if (exp->dec_ref()) {
-      delete exp;
-    }
+    Expression::gc(_exps[i]);
   }
 }
 
