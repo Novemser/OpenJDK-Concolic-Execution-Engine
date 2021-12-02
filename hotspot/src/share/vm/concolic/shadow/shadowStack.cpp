@@ -131,16 +131,18 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
     interpreterState callee_istate =
         callee_frame->as_interpreter_frame()->interpreter_state();
     Method *callee_method = callee_istate->method();
+    BasicType res_type = callee_method->result_type();
     /**
      * TODO: skip native here. Need to confirm correctness
      */
-    if (!callee_method->is_native()) {
+    if (is_java_primitive(res_type) && !callee_method->is_native()) {
       // here `result` describes whatever returned
-      int result_slots = type2size[callee_method->result_type()];
-      if (callee_istate->thread()->has_pending_exception()) {
-        result_slots = 0;
-      }
-      assert(result_slots >= 0 && result_slots <= 2, "what?");
+      int result_slots = type2size[res_type];
+//      if (!callee_istate->thread()->has_pending_exception()) {
+//        result_slots = type2size[res_type];
+//      } else {
+//        result_slots = 0;
+//      }
 
       intptr_t *callee_result = callee_istate->stack() + result_slots;
       /**
@@ -148,6 +150,15 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
        */
       int callee_opr_stack_offset =
           callee_istate->stack_base() - callee_result - 1;
+      /**
+       * Previously, we find a bug that causes callee_opr_stack_offset < 0,
+       * it seems to be related with athrow, and thus we wrote an if statement
+       * that checks thread()->has_pending_exception().
+       *
+       * But the foundamental reason why exception causes stack() + 1== stack() is not dedtermined.
+       * Therefore, I use the following guarantee, and decide to check the reason when the guarantee is violated
+       */
+      guarantee(callee_opr_stack_offset >= 0, "should be");
 
       ZeroFrame *caller_frame = callee_frame->next();
       if (caller_frame->is_interpreter_frame()) {

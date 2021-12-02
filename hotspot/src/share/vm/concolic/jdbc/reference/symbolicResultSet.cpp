@@ -21,7 +21,14 @@ std::set<std::string> SymResSet::handle_method_names = init_handle_method_names(
 
 std::set<std::string> SymResSet::init_handle_method_names() {
   std::set<std::string> set;
+  set.insert("getBoolean");
+  set.insert("getByte");
+  set.insert("getShort");
+  set.insert("getInt");
   set.insert("getLong");
+  set.insert("getFloat");
+  set.insert("getDouble");
+  set.insert("getString");
   return set;
 }
 
@@ -60,7 +67,7 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
+        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
 
     need_symbolize = true;
@@ -81,29 +88,32 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (strncmp("get", callee_name.c_str(), 3) == 0) {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
-
-    oop col_str_obj = handle.get_param<oop>(1);
-    assert(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
-           "should be");
+        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(this_obj);
 
     ResourceMark rm;
-    const char *col_name = OopUtils::java_string_to_c(col_str_obj);
+    SignatureStream ss(handle.get_callee_method()->signature());
+    BasicType col_type = ss.type();
+    if (col_type == T_OBJECT) {
+      oop col_str_obj = handle.get_param<oop>(1);
+      guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
+                "should be");
 
-    BasicType type = handle.get_result_type();
-    switch (type) {
-    case T_VOID:
-    case T_OBJECT:
-    case T_ARRAY:
-      ShouldNotCallThis();
-      break;
-    default:
+      const char *col_name = OopUtils::java_string_to_c(col_str_obj);
       exp = new ResultSetSymbolExp(sym_res_set, col_name);
+    } else if (col_type == T_INT) {
+      jint col_i = handle.get_param<int>(1);
+      exp = new ResultSetSymbolExp(sym_res_set, col_i);
+    } else {
+      ShouldNotCallThis();
     }
+
+//    if (is_java_primitive(type)) {
+//    } else if (type == T_OBJECT) {
+//    }
   } else if (callee_name == "next") {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
+        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(this_obj);
     jboolean ret = handle.get_result<jboolean>(T_BOOLEAN);
 
     ConcolicMngr::record_path_condition(new OpSymExpression(
@@ -126,4 +136,10 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
   set(str_buf, length);
 }
 
+ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
+                                       int col_i) {
+  int length = sprintf(str_buf, "RS_%d_%d_col%d", sym_res_set->_sql_id,
+                       sym_res_set->_row_id, col_i);
+  set(str_buf, length);
+}
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

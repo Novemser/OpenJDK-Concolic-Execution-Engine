@@ -120,8 +120,8 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
-    tty->print_cr("SymStmt unhandle (%s): %s", handle.get_callee_holder_name().c_str(),
-                  handle.get_callee_name().c_str());
+    handle.get_callee_method()->print_name(tty);
+    tty->print_cr(" handled by SymStmt");
     need_symbolize = true;
     // ShouldNotCallThis();
   }
@@ -158,8 +158,8 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
       sym_stmt->set_param(index, value_exp);
     } else {
-      tty->print_cr("Unhandled set method:");
-      handle.get_callee_method()->print_on(tty);
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" handled by SymStmt");
     }
   }
   return NULL;

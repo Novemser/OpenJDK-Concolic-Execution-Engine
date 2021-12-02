@@ -3357,9 +3357,9 @@ run:
       /* debugger breakpoint */
 
       CASE(_breakpoint): {
-#ifdef ENABLE_CONCOLIC
-          ConcolicMngr::warning_reach_unhandled_bytecode("breakpoint");
-#endif
+//#ifdef ENABLE_CONCOLIC
+//          ConcolicMngr::warning_reach_unhandled_bytecode("breakpoint");
+//#endif
           Bytecodes::Code original_bytecode;
           DECACHE_STATE();
           SET_LAST_JAVA_FRAME();

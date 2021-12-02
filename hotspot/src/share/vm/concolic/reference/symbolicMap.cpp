@@ -13,6 +13,7 @@ std::set<std::string> SymMap::target_class_names = init_target_class_names();
 std::set<std::string> SymMap::init_target_class_names() {
   std::set<std::string> set;
   set.insert("java/util/HashMap");
+  set.insert("java/util/LinkedHashMap");
   set.insert("org/hibernate/internal/util/collections/ConcurrentReferenceHashMap");
   return set;
 }
@@ -36,6 +37,8 @@ std::set<std::string> SymMap::init_skip_method_names() {
   std::set<std::string> set;
   set.insert("<init>");
   set.insert("hash");
+  set.insert("keySet"); // really?
+  set.insert("entrySet"); // really?values
   return set;
 }
 
