@@ -58,7 +58,7 @@ void SymResSet::print() {
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = false;
+  bool need_symbolize = true;
 
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
@@ -67,9 +67,10 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     sym_res_set->next();
 
     need_symbolize = true;
-  } else if (handle_method_names.find(callee_name) != handle_method_names.end()) {
+  } else if (handle_method_names.find(callee_name) != handle_method_names.end() ||
+             skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
-  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
+  } else {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" handled by SymResSet");
     // ShouldNotCallThis();
@@ -138,4 +139,5 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                        sym_res_set->_row_id, col_i);
   set(str_buf, length);
 }
+
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

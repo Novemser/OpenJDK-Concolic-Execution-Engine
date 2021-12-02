@@ -116,7 +116,14 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     ResourceMark rm;
     const char *c_sql_template = OopUtils::java_string_to_c(str_obj);
 
-    SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(stmt_obj);
+    SymStmt *sym_stmt;
+    if (stmt_obj->is_symbolic()) {
+      tty->print_cr("Statement(execute) with %lu", stmt_obj->get_sym_rid());
+      sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    } else {
+      tty->print_cr("Statement(execute) with new statement");
+      sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(stmt_obj);
+    }
     sym_stmt->set_sql_template(c_sql_template);
 
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
@@ -148,7 +155,6 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
   } else if (callee_name == "executeUpdate") {
     oop this_obj = handle.get_param<oop>(0);
-    jint row_count = handle.get_result<int>(T_INT);
 
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
     exp = new StatementSymbolExp(sym_stmt);

@@ -14,6 +14,7 @@ method_set_t SymConn::handle_method_names = init_handle_method_names();
 method_set_t SymConn::init_handle_method_names() {
   method_set_t m_set;
   m_set.insert("prepareStatement");
+  m_set.insert("createStatement");
   m_set.insert("setAutoCommit");
   return m_set;
 }
@@ -42,6 +43,7 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
     } else if (callee_name == "setAutoCommit") {
       jboolean auto_commit = handle.get_param<jboolean>(1);
       ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(auto_commit);
+    } else if (callee_name == "createStatement") {
     } else {
       ShouldNotCallThis();
     }
@@ -59,17 +61,15 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   if (callee_name == "prepareStatement") {
-    /**
-     * Currently, this is only for prepareStatement
-     */
     oop res_obj = handle.get_result<oop>(T_OBJECT);
-    assert(handle.get_result_type() == T_OBJECT, "sanity check");
-    assert(!res_obj->is_symbolic(), "please return a new statment, JDBC!");
-    assert(!sql_template.empty(), "empty");
 
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
     sym_stmt->swap_sql_template(sql_template);
-
+    tty->print_cr("Connection prepare statement: %lu", sym_stmt->get_sym_rid());
+  } else if (callee_name == "createStatement") {
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
+    SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+    tty->print_cr("Connection create statement: %lu", sym_stmt->get_sym_rid());
   }
 
   return NULL;

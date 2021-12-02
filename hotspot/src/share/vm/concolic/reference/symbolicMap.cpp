@@ -152,7 +152,11 @@ Expression *SymMap::finish_method_helper(MethodSymbolizerHandle &handle) {
           exp = SymbolExpression::get(Sym_NULL);
         }
         break;
+      case T_BOOLEAN:
+          exp = new MethodReturnSymbolExp();
+        break;
       default:
+        tty->print_cr("%c", type2char(type));
         ShouldNotCallThis();
         break;
     }
