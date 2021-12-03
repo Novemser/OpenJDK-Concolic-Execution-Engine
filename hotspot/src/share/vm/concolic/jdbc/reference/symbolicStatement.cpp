@@ -222,8 +222,10 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
 }
 
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) {
-  int length = sprintf(str_buf, "RS_%lu_rowCount", sym_stmt->get_sym_rid());
-  set(str_buf, length);
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_INT);
+  ss.print("RS_%lu_rowCount", sym_stmt->get_sym_rid());
+  this->finalize(ss.size());
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

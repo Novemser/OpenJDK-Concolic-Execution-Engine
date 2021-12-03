@@ -37,7 +37,8 @@ public:
     }
   }
 
-  inline static void record_path_condition(Expression *sym_exp) {
+  /** unoptimize for breakpoint */
+  inline static void __attribute__((optimize("O0"))) record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
   }
 #else

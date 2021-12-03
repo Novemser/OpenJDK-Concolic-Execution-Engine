@@ -87,19 +87,30 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
     SymResSet *sym_res_set =
         (SymResSet *) ConcolicMngr::ctx->get_sym_inst(this_obj);
 
-    ResourceMark rm;
-    SignatureStream ss(handle.get_callee_method()->signature());
-    BasicType col_type = ss.type();
+    BasicType col_type;
+    {
+      ResourceMark rm;
+      SignatureStream ss(handle.get_callee_method()->signature());
+      col_type = ss.type();
+    }
+
+    BasicType res_type = handle.get_result_type();
+    oop res_obj = NULL;
+    {
+      if (res_type == T_OBJECT) {
+        res_obj = handle.get_result<oop>(T_OBJECT);
+      }
+    }
     if (col_type == T_OBJECT) {
       oop col_str_obj = handle.get_param<oop>(1);
       guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
                 "should be");
 
       const char *col_name = OopUtils::java_string_to_c(col_str_obj);
-      exp = new ResultSetSymbolExp(sym_res_set, col_name);
+      exp = new ResultSetSymbolExp(sym_res_set, col_name, res_type, res_obj);
     } else if (col_type == T_INT) {
       jint col_i = handle.get_param<int>(1);
-      exp = new ResultSetSymbolExp(sym_res_set, col_i);
+      exp = new ResultSetSymbolExp(sym_res_set, col_i, res_type, res_obj);
     } else {
       ShouldNotCallThis();
     }
@@ -122,22 +133,28 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set) {
-  int length = sprintf(str_buf, "RS_%d.size", sym_res_set->_sql_id);
-  set(str_buf, length);
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_INT);
+  ss.print("RS_%d.size", sym_res_set->_sql_id);
+  this->finalize(ss.size());
 }
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
-                                       const char *col_name) {
-  int length = sprintf(str_buf, "RS_%d_%d_%s", sym_res_set->_sql_id,
-                       sym_res_set->_row_id, col_name);
-  set(str_buf, length);
+                                       const char *col_name, BasicType type, oop obj) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', type);
+  ss.print("RS_%d_%d_%s", sym_res_set->_sql_id,
+           sym_res_set->_row_id, col_name);
+  this->finalize(ss.size());
 }
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
-                                       int col_i) {
-  int length = sprintf(str_buf, "RS_%d_%d_col%d", sym_res_set->_sql_id,
+                                       int col_i, BasicType type, oop obj) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', type);
+  ss.print("RS_%d_%d_col%d", sym_res_set->_sql_id,
                        sym_res_set->_row_id, col_i);
-  set(str_buf, length);
+  this->finalize(ss.size());
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

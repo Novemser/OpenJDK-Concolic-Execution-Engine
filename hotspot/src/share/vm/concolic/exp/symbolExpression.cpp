@@ -22,10 +22,10 @@ void SymbolExpression::set(const char *buf, int length) {
   _str = std::string(buf, length);
 }
 
-void SymbolExpression::set_head(stringStream &ss, char main_type, BasicType class_type, Klass *class_symbol) {
+void SymbolExpression::set_head(stringStream &ss, char main_type, BasicType class_type, oop obj) {
   ss.print("%c_%c", main_type, type2char(class_type));
-  if (class_symbol != NULL) {
-    class_symbol->print_value_on(&ss);
+  if (obj != NULL) {
+    obj->klass()->print_value_on(&ss);
   }
   ss.print("_");
 }
@@ -38,11 +38,10 @@ void SymbolExpression::print() { tty->indent().print("%s", _str.c_str()); }
 
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'M', T_OBJECT, obj->klass());
+  set_head(ss, 'M', T_OBJECT, obj);
   ss.print("%lu", obj->get_sym_rid());
   this->finalize(ss.size());
 }
-
 
 FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
                                BasicType type) {

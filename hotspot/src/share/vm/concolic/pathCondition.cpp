@@ -3,7 +3,7 @@
 #include "concolic/pathCondition.hpp"
 #include "utilities/ostream.hpp"
 
-void PathCondition::add(Expression *exp) {
+void __attribute__((optimize("O0"))) PathCondition::add(Expression *exp) {
   exp->inc_ref();
   _exps.push_back(exp);
 }

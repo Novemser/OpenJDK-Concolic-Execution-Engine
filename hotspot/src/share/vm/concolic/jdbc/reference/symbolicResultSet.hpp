@@ -13,8 +13,8 @@ class SymResSet;
 class ResultSetSymbolExp : public SymbolExpression {
 public:
   ResultSetSymbolExp(SymResSet *sym_res_set);
-  ResultSetSymbolExp(SymResSet *sym_res_set, const char *col_name);
-  ResultSetSymbolExp(SymResSet *sym_res_set, int col_i);
+  ResultSetSymbolExp(SymResSet *sym_res_set, const char *col_name, BasicType type, oop obj);
+  ResultSetSymbolExp(SymResSet *sym_res_set, int col_i, BasicType type, oop obj);
 };
 class SymResSet : public SymInstance {
   friend class ResultSetSymbolExp;

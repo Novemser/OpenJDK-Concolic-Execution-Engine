@@ -31,7 +31,7 @@ template <> const char *SymPrimitive<jdouble>::TYPE_NAME = "java/lang/Double";
 template <class T> sym_rid_t SymPrimitive<T>::sym_count = 0;
 
 template <class T>
-SymPrimitive<T>::SymPrimitive(sym_rid_t sym_rid) : SymInstance(sym_rid) {}
+SymPrimitive<T>::SymPrimitive(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 
 template <class T> SymPrimitive<T>::~SymPrimitive() {
   Expression::gc(_exp);
