@@ -73,9 +73,8 @@ SymStmt::~SymStmt() {
 }
 
 void SymStmt::set_param(int index, Expression *exp) {
-  exp_map_t::iterator iter = _param_exps.find(index);
-  assert(iter == _param_exps.end(),
-         "currently, assume each parameter is only set once");
+//  assert(_param_exps.find(index) == _param_exps.end(),
+//         "currently, assume each parameter is only set once");
   exp->inc_ref();
   _param_exps.insert(std::make_pair(index, exp));
 }
@@ -131,7 +130,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
   } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled by SymStmt");
+    tty->print_cr(" unhandled by SymStmt");
     // ShouldNotCallThis();
   }
 
@@ -141,24 +140,22 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
-  if (callee_name == "execute") {
-    tty->print_cr("%s: %s", handle.get_callee_holder_name().c_str(),
-                  handle.get_callee_name().c_str());
-  } else if (callee_name == "executeQuery") {
-    oop res_obj = handle.get_result<oop>(T_OBJECT);
-
-    SymResSet *sym_res_set =
-        (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-
+  if (strncmp("execute", callee_name.c_str(), 7) == 0) {
     oop this_obj = handle.get_param<oop>(0);
-    assert(this_obj->is_symbolic(), "should be");
-    sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
-  } else if (callee_name == "executeUpdate") {
-    oop this_obj = handle.get_param<oop>(0);
-
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
-    exp = new StatementSymbolExp(sym_stmt);
-    sym_stmt->set_row_count_exp(exp);
+    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
+    handle.get_callee_method()->print_name(tty);
+    tty->print_cr(" executed");
+
+    if (callee_name == "executeQuery") {
+      oop res_obj = handle.get_result<oop>(T_OBJECT);
+      SymResSet *sym_res_set =
+          (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+      sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
+    } else if (callee_name == "executeUpdate") {
+      exp = new ResultSetSymbolExp(sym_stmt);
+      sym_stmt->set_row_count_exp(exp);
+    }
   } else if (strncmp("set", callee_name.c_str(), 3) == 0) {
     ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
     if (arg_cnt.size() > 3) {
@@ -221,11 +218,10 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   return value_exp;
 }
 
-StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) {
-  stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'M', T_INT);
-  ss.print("RS_%lu_rowCount", sym_stmt->get_sym_rid());
-  this->finalize(ss.size());
-};
+StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
+
+void StatementSymbolExp::print() {
+  tty->print("SymStmt: %s", _sym_stmt->_sql_template.c_str());
+}
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

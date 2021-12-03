@@ -10,9 +10,11 @@
 #include "utilities/debug.hpp"
 
 class SymResSet;
+class SymStmt;
 class ResultSetSymbolExp : public SymbolExpression {
 public:
-  ResultSetSymbolExp(SymResSet *sym_res_set);
+  ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size = false);
+  ResultSetSymbolExp(SymStmt *sym_stmt);
   ResultSetSymbolExp(SymResSet *sym_res_set, const char *col_name, BasicType type, oop obj);
   ResultSetSymbolExp(SymResSet *sym_res_set, int col_i, BasicType type, oop obj);
 };
@@ -34,7 +36,7 @@ private:
 
 private:
   sym_rid_t _sym_stmt_rid;
-  int _sql_id;
+  sym_rid_t _sql_id;
   int _row_id;
 
   Expression *_size_exp;
@@ -57,8 +59,9 @@ public:
 public:
   inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
     _sym_stmt_rid = sym_stmt_rid;
-    _sql_id = (int)sym_stmt_rid;
-    _size_exp = new ResultSetSymbolExp(this);
+    _sql_id = sym_stmt_rid;
+    _ref_exp = new ResultSetSymbolExp(this);
+    _size_exp = new ResultSetSymbolExp(this, true);
     _size_exp->inc_ref();
   }
 

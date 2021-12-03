@@ -10,12 +10,19 @@
 #include "utilities/debug.hpp"
 
 class SymStmt;
-class StatementSymbolExp : public SymbolExpression {
+class StatementSymbolExp : public Expression {
+private:
+  SymStmt* _sym_stmt;
 public:
   StatementSymbolExp(SymStmt* sym_stmt);
+
+public:
+  void print();
 };
 
 class SymStmt : public SymInstance {
+  friend class StatementSymbolExp;
+
 public:
   inline static bool target(const std::string &class_name) {
     return target_class_names.find(class_name) != target_class_names.end();

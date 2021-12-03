@@ -2,6 +2,7 @@
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
+#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/SymbolicOp.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
@@ -45,7 +46,7 @@ std::set<std::string> SymResSet::init_skip_method_names() {
 }
 
 SymResSet::SymResSet(sym_rid_t sym_rid)
-    : SymInstance(sym_rid), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
+    : SymInstance(sym_rid), _ref_exp(NULL), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
 
 SymResSet::~SymResSet() {
   Expression::gc(_size_exp);
@@ -132,18 +133,29 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   return exp;
 }
 
-ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set) {
+ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_INT);
-  ss.print("RS_%d.size", sym_res_set->_sql_id);
+  ss.print("RS_%lu", sym_res_set->_sql_id);
+  if (is_size) {
+    ss.print("_size");
+  }
   this->finalize(ss.size());
 }
+
+ResultSetSymbolExp::ResultSetSymbolExp(SymStmt *sym_stmt) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_INT);
+  ss.print("RS_%lu_rowCount", sym_stmt->get_sym_rid());
+  this->finalize(ss.size());
+}
+
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                                        const char *col_name, BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type);
-  ss.print("RS_%d_%d_%s", sym_res_set->_sql_id,
+  ss.print("RS_%lu_%d_%s", sym_res_set->_sql_id,
            sym_res_set->_row_id, col_name);
   this->finalize(ss.size());
 }
@@ -152,8 +164,8 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                                        int col_i, BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type);
-  ss.print("RS_%d_%d_col%d", sym_res_set->_sql_id,
-                       sym_res_set->_row_id, col_i);
+  ss.print("RS_%lu_%d_col%d", sym_res_set->_sql_id,
+           sym_res_set->_row_id, col_i);
   this->finalize(ss.size());
 }
 
