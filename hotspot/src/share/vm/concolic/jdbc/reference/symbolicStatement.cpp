@@ -221,7 +221,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
 
 void StatementSymbolExp::print() {
-  tty->print("SymStmt: %s", _sym_stmt->_sql_template.c_str());
+  tty->print("#SymStmt(%lu): %s", _sym_stmt->get_sym_rid(), _sym_stmt->_sql_template.c_str());
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

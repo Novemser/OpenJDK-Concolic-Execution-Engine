@@ -90,7 +90,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
 }
 
 SymInstance *ThreadContext::get_sym_inst(sym_rid_t sym_rid) {
-  SymInstance *ret = (SymInstance *)_sym_refs[sym_rid];
+  SymInstance *ret = (SymInstance *) _sym_refs[sym_rid];
   /**
    * When this assertion is broken,
    * it means that the target object is not initialized with NULL_SYM_RID
@@ -126,7 +126,7 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 }
 
 SymArr *ThreadContext::get_sym_array(sym_rid_t sym_rid) {
-  SymArr *ret = (SymArr *)_sym_refs[sym_rid];
+  SymArr *ret = (SymArr *) _sym_refs[sym_rid];
   /**
    * When this assertion is broken,
    * it means that the target object is not initialized with NULL_SYM_RID
@@ -157,11 +157,31 @@ sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
 }
 
 void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
-  Expression* exp = _sym_tmp_exps[sym_tmp_id];
-   if (exp) {
-     exp->dec_ref();
-   }
+  Expression *exp = _sym_tmp_exps[sym_tmp_id];
+  if (exp) {
+    exp->dec_ref();
+  }
   _sym_tmp_exps[sym_tmp_id] = NULL;
+}
+
+std::string ThreadContext::get_current_code_pos() {
+ static const int SIZE = 1024;
+ static char buf[SIZE];
+
+ stringStream ss(buf, SIZE);
+
+ const ZeroFrame *zero_frame = get_shadow_stack().get_last_frame().get_zero_frame();
+ interpreterState istate = zero_frame->as_interpreter_frame()->interpreter_state();
+ address bcp = istate->bcp();
+
+ Method* method = istate->method();
+ int bci = method->bci_from(bcp);
+ int line = method->line_number_from_bci(bci);
+
+ method->print_name(&ss);
+ ss.print(":%d", line);
+
+ return std::string(buf, ss.size());
 }
 
 void ThreadContext::print() {

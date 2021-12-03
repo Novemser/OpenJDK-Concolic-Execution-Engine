@@ -162,7 +162,6 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
         exp = SymString::get_exp_of(obj);
       }
     }
-
   } else if (type == T_ARRAY) {
     arrayOop arr_obj = *(arrayOop *)(locals - locals_offset);
     if (arr_obj->is_symbolic()) {

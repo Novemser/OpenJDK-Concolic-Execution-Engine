@@ -8,10 +8,20 @@
 #include <vector>
 
 class PathCondition {
-  typedef std::vector<Expression *> SymExpList;
+  struct Condition {
+    std::string _code_pos;
+    Expression *_exp;
+
+    Condition(std::string code_pos, Expression *exp)
+        : _code_pos(code_pos), _exp(exp) {
+      exp->inc_ref();
+    }
+
+    ~Condition() { Expression::gc(_exp); }
+  };
 
 private:
-  SymExpList _exps;
+  std::vector<Condition *> _conds;
 
 public:
   void add(Expression *exp);

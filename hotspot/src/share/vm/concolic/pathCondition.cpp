@@ -1,26 +1,31 @@
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/concolicMngr.hpp"
 #include "concolic/pathCondition.hpp"
 #include "utilities/ostream.hpp"
 
 void __attribute__((optimize("O0"))) PathCondition::add(Expression *exp) {
-  exp->inc_ref();
-  _exps.push_back(exp);
+  Condition *cond = new Condition(ConcolicMngr::ctx->get_current_code_pos(), exp);
+  _conds.push_back(cond);
 }
 
 void PathCondition::gc() {
-  int size = _exps.size();
+  int size = _conds.size();
   for (int i = 0; i < size; ++i) {
-    Expression::gc(_exps[i]);
+    delete _conds[i];
   }
+  _conds.clear();
 }
 
 void PathCondition::print() {
   tty->print_cr("PathCondition:");
-  int size = _exps.size();
+  int size = _conds.size();
   for (int i = 0; i < size; ++i) {
-    tty->print("- exp[%d]:", i);
-    _exps[i]->print_cr();
+    tty->print("[exp:%d]\t", i);
+    Condition *cond = _conds[i];
+    tty->print_cr("%s", cond->_code_pos.c_str());
+    tty->print("\t\t  ");
+    cond->_exp->print_cr();
   }
 }
 

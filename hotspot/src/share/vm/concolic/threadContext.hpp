@@ -58,6 +58,9 @@ public:
   }
 
 public:
+  std::string get_current_code_pos();
+
+public:
   SymInstance *get_or_alloc_sym_inst(oop obj);
   SymInstance *alloc_sym_inst(oop obj);
   inline SymInstance *get_sym_inst(oop obj) {
