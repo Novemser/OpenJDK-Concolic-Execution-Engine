@@ -3,7 +3,7 @@ import java.util.Map;
 
 public class TestContainer {
   static class MyInteger {
-    long value;
+    int value;
     public MyInteger(int value) { this.value = value; }
   }
   public static void main(String[] args) {
@@ -15,16 +15,16 @@ public class TestContainer {
 
     Map map = new HashMap();
     Integer i = new Integer(2);
-    Long l = new Long(5l);
-    long ret;
+    MyInteger l = new MyInteger(5);
 
     System.startConcolic();
     System.symbolize(i);
+    System.symbolize(l);
 
     map.put(i, l);
-    ret = (long)map.get(i);
+    MyInteger ret = (MyInteger)map.get(i);
 
-    if (ret > 100) {
+    if (ret.value > 100) {
     }
 
     System.endConcolic();

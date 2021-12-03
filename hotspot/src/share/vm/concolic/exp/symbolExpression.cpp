@@ -4,15 +4,16 @@
 #include "utilities/ostream.hpp"
 
 char SymbolExpression::str_buf[SymbolExpression::BUF_SIZE];
+char SymbolExpression::temp_buf[SymbolExpression::BUF_SIZE];
 
 
 SymbolExpression *SymbolExpression::shared_exp[number_of_builtin_syms];
 
 void SymbolExpression::init_single_instances() {
-  shared_exp[Sym_NULL] = new SymbolExpression("NULL", 4);
+  shared_exp[Sym_NULL] = new SymbolExpression("N", 1);
   shared_exp[Sym_NULL]->inc_ref();
 
-  shared_exp[Sym_VOID] = new SymbolExpression("VOID", 4);
+  shared_exp[Sym_VOID] = new SymbolExpression("V", 1);
   shared_exp[Sym_VOID]->inc_ref();
 }
 
@@ -21,13 +22,25 @@ void SymbolExpression::set(const char *buf, int length) {
   _str = std::string(buf, length);
 }
 
+void SymbolExpression::set_head(stringStream &ss, char main_type, BasicType class_type, Klass *class_symbol) {
+  ss.print("%c_%c", main_type, type2char(class_type));
+  if (class_symbol != NULL) {
+    class_symbol->print_value_on(&ss);
+  }
+  ss.print("_");
+}
+
+void SymbolExpression::finalize(int length) {
+  _str = std::string(str_buf, length);
+}
+
 void SymbolExpression::print() { tty->indent().print("%s", _str.c_str()); }
 
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
-  ResourceMark rm;
-  const char *class_name = obj->klass()->print_value_string();
-  int length = sprintf(str_buf, "S%c_%lu_%s", type2char(T_OBJECT), obj->get_sym_rid(), class_name);
-  set(str_buf, length);
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_OBJECT, obj->klass());
+  ss.print("%lu", obj->get_sym_rid());
+  this->finalize(ss.size());
 }
 
 

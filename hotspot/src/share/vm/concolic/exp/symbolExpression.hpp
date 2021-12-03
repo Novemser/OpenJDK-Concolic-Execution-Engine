@@ -9,6 +9,14 @@
 
 #include <string>
 
+/**
+ * The format of output of Symbol_Expression:
+ *     {Y/M/N/V}_{Z/C/B/S/I/F/J/D/[xxx/Lxxx}_{self-defined part}
+ *     1. Whether this exp is constant: "Y"->const, "M"->non-const
+ *     2. The type of this exp
+ *     3. self-defined part for each extended expression
+ */
+
 enum BuiltInSym {
   Sym_NULL = 0,
   Sym_VOID,
@@ -24,6 +32,7 @@ public:
 public:
   static const int BUF_SIZE = 1024;
   static char str_buf[BUF_SIZE];
+  static char temp_buf[BUF_SIZE];
 
   SymbolExpression() {}
   SymbolExpression(const char *buf, int length) { set(buf, length);}
@@ -32,6 +41,12 @@ protected:
   std::string _str;
 
   void set(const char *buf, int length);
+
+  /**
+   * The following calls must be called in order!
+   */
+  static void set_head(stringStream& ss, char main_type, BasicType class_type, Klass *class_symbol = NULL);
+  void finalize(int length);
 
 public:
   void print();

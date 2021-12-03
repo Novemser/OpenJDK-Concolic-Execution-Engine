@@ -136,8 +136,6 @@ SymArr *ThreadContext::get_sym_array(sym_rid_t sym_rid) {
 }
 
 void ThreadContext::symbolize_recursive(oop obj) {
-  tty->print("ThreadContext::symbolize_recursive\n");
-
   // SimpleFieldPrinter field_printer(obj);
   // field_printer.do_recursive();
 
@@ -173,14 +171,14 @@ void ThreadContext::print() {
     sym_iter->second->print();
   }
 
-  int size = _sym_tmp_exps.size();
-  for (int i = 1; i < size; ++i) {
-    Expression *sym_exp = _sym_tmp_exps[i];
-    if (sym_exp) {
-      tty->print_cr("<< sym_tmp_exp[%d]:", i);
-      sym_exp->print_cr();
-    }
-  }
+//  int size = _sym_tmp_exps.size();
+//  for (int i = 1; i < size; ++i) {
+//    Expression *sym_exp = _sym_tmp_exps[i];
+//    if (sym_exp) {
+//      tty->print_cr("<< sym_tmp_exp[%d]:", i);
+//      sym_exp->print_cr();
+//    }
+//  }
 
   _path_condition.print();
 
