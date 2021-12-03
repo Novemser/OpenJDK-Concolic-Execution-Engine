@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TestContainer {
   static class MyInteger {
@@ -14,6 +16,7 @@ public class TestContainer {
     System.out.println("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
     Map map = new HashMap();
+    Set set = new HashSet();
     Integer i = new Integer(2);
     MyInteger l = new MyInteger(5);
 
@@ -21,13 +24,10 @@ public class TestContainer {
     System.symbolize(i);
     System.symbolize(l);
 
-    map.put(i, l);
-    MyInteger ret = (MyInteger)map.get(i);
-
-    if (ret.value > 100) {
-    }
+    set.add(i);
+//     MyInteger ret = (MyInteger)map.get(i);
 
     System.endConcolic();
-    System.out.println(ret);
+    System.out.println(i);
   }
 }

@@ -9,6 +9,7 @@
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicMap.hpp"
+#include "concolic/reference/symbolicSet.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
@@ -76,6 +77,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymResSet::invoke_method_helper(_handle);
   } else if (SymMap::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymMap::invoke_method_helper(_handle);
+  } else if (SymSet::target(_handle.get_callee_holder_name())) {
+    need_symbolize = SymSet::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -105,6 +108,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymResSet::finish_method_helper(_handle);
     } else if (SymMap::target(_handle.get_callee_holder_name())) {
       exp = SymMap::finish_method_helper(_handle);
+    } else if (SymSet::target(_handle.get_callee_holder_name())) {
+      exp = SymSet::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }
