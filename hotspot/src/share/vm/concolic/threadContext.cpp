@@ -10,6 +10,7 @@
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
+#include "concolic/reference/symbolicTimestamp.hpp"
 #include "utilities/vmError.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
@@ -80,6 +81,11 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymPrimitive<jfloat>(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<double>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
+  } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
+    sym_inst = new SymBigDecimal(sym_rid);
+    sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
+  } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
+    sym_inst = new SymTimestamp(sym_rid);
   } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {
