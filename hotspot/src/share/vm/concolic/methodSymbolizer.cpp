@@ -10,6 +10,7 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/reference/symbolicSet.hpp"
+#include "concolic/reference/symbolicBigDecimal.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
@@ -79,6 +80,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymMap::invoke_method_helper(_handle);
   } else if (SymSet::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymSet::invoke_method_helper(_handle);
+  } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
+    need_symbolize = SymBigDecimal::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -100,7 +103,7 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
     Expression *exp = NULL;
     if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
       exp = SymString::finish_method_helper(_handle);
-    } else if (SymConn::target(_handle.get_callee_holder_name())) {
+    }else if (SymConn::target(_handle.get_callee_holder_name())) {
       exp = SymConn::finish_method_helper(_handle);
     } else if (SymStmt::target(_handle.get_callee_holder_name())) {
       exp = SymStmt::finish_method_helper(_handle);
@@ -110,6 +113,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymMap::finish_method_helper(_handle);
     } else if (SymSet::target(_handle.get_callee_holder_name())) {
       exp = SymSet::finish_method_helper(_handle);
+    } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
+      exp = SymBigDecimal::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }
