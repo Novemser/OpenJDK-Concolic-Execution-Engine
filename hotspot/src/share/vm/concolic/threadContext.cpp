@@ -169,23 +169,26 @@ void ThreadContext::detach_tmp_exp(sym_tmp_id_t sym_tmp_id) {
 }
 
 std::string ThreadContext::get_current_code_pos() {
- static const int SIZE = 1024;
- static char buf[SIZE];
+  static const int SIZE = 1024;
+  static char buf[SIZE];
 
- stringStream ss(buf, SIZE);
+  stringStream ss(buf, SIZE);
 
- const ZeroFrame *zero_frame = get_shadow_stack().get_last_frame().get_zero_frame();
- interpreterState istate = zero_frame->as_interpreter_frame()->interpreter_state();
- address bcp = istate->bcp();
+  const ZeroFrame *zero_frame = get_shadow_stack().get_last_frame().get_zero_frame();
+  while (!zero_frame->is_interpreter_frame()) {
+    zero_frame = zero_frame->next();
+  }
+  interpreterState istate = zero_frame->as_interpreter_frame()->interpreter_state();
+  address bcp = istate->bcp();
 
- Method* method = istate->method();
- int bci = method->bci_from(bcp);
- int line = method->line_number_from_bci(bci);
+  Method *method = istate->method();
+  int bci = method->bci_from(bcp);
+  int line = method->line_number_from_bci(bci);
 
- method->print_name(&ss);
- ss.print(":%d", line);
+  method->print_name(&ss);
+  ss.print(":%d", line);
 
- return std::string(buf, ss.size());
+  return std::string(buf, ss.size());
 }
 
 void ThreadContext::print() {
