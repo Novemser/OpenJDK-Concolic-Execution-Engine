@@ -178,42 +178,44 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
 
 // this type mean the param type of ? in sql statement
 Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType type, const std::string &callee_name) {
-  Expression *value_exp;
-  int offset = 2;
 
-  switch (type) {
-    case T_BYTE:
-      value_exp = new ConExpression(handle.get_param<jbyte>(offset));
-      break;
-    case T_BOOLEAN:
-      value_exp = new ConExpression(handle.get_param<jboolean>(offset));
-      break;
-    case T_INT:
-      value_exp = new ConExpression(handle.get_param<jint>(offset));
-      break;
-    case T_SHORT:
-      value_exp = new ConExpression(handle.get_param<jshort>(offset));
-      break;
-    case T_LONG:
-      value_exp = new ConExpression(handle.get_param<jlong>(offset + 1));
-      break;
-    case T_FLOAT:
-      value_exp = new ConExpression(handle.get_param<jfloat>(offset));
-      break;
-    case T_DOUBLE:
-      value_exp = new ConExpression(handle.get_param<jdouble>(offset + 1));
-      break;
-    case T_OBJECT:
-      if (callee_name == "setNull") {
-        value_exp = SymbolExpression::get(Sym_NULL);
-      } else if (callee_name == "setString") {
-        value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
-      } else {
-        ShouldNotReachHere();
+  int offset = 2;
+  Expression *value_exp;
+  if (is_java_primitive(type)) {
+    value_exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + offset);
+    if (!value_exp) {
+      switch (type) {
+        case T_BYTE:
+          value_exp = new ConExpression(handle.get_param<jbyte>(offset));
+          break;
+        case T_BOOLEAN:
+          value_exp = new ConExpression(handle.get_param<jboolean>(offset));
+          break;
+        case T_INT:
+          value_exp = new ConExpression(handle.get_param<jint>(offset));
+          break;
+        case T_SHORT:
+          value_exp = new ConExpression(handle.get_param<jshort>(offset));
+          break;
+        case T_LONG:
+          value_exp = new ConExpression(handle.get_param<jlong>(offset + 1));
+          break;
+        case T_FLOAT:
+          value_exp = new ConExpression(handle.get_param<jfloat>(offset));
+          break;
+        case T_DOUBLE:
+          value_exp = new ConExpression(handle.get_param<jdouble>(offset + 1));
+          break;
+        default:
+          ShouldNotReachHere();
       }
-      break;
-    default:
-      ShouldNotReachHere();
+    }
+  } else if (callee_name == "setString") {
+    value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
+  } else if (callee_name == "setNull") {
+    return SymbolExpression::get(Sym_NULL);
+  } else {
+    ShouldNotReachHere();
   }
   return value_exp;
 }
