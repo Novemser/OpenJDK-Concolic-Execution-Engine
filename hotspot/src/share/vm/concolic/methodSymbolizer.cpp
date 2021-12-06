@@ -118,6 +118,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymSet::finish_method_helper(_handle);
     } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
       exp = SymBigDecimal::finish_method_helper(_handle);
+    } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
+      exp = SymTimestamp::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }

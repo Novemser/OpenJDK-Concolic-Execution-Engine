@@ -55,8 +55,7 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 Expression *SymTimestamp::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  Expression *exp;
-  ShouldNotCallThis();
+  Expression *exp = NULL;
   return exp;
 }
 
