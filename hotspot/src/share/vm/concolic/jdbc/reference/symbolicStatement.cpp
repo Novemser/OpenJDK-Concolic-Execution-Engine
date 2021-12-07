@@ -199,13 +199,13 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
           value_exp = new ConExpression(handle.get_param<jshort>(offset));
           break;
         case T_LONG:
-          value_exp = new ConExpression(handle.get_param<jlong>(offset + 1));
+          value_exp = new ConExpression(handle.get_param<jlong>(offset));
           break;
         case T_FLOAT:
           value_exp = new ConExpression(handle.get_param<jfloat>(offset));
           break;
         case T_DOUBLE:
-          value_exp = new ConExpression(handle.get_param<jdouble>(offset + 1));
+          value_exp = new ConExpression(handle.get_param<jdouble>(offset));
           break;
         default:
           ShouldNotReachHere();
