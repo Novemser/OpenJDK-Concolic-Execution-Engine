@@ -44,8 +44,10 @@ jlong ConcolicMngr::endConcolic() {
 }
 
 void ConcolicMngr::symbolize(Handle handle) {
-  tty->print("Symbolize!\n");
-  ctx->symbolize(handle);
+  if (can_do_concolic()) {
+    tty->print("Symbolize!\n");
+    ctx->symbolize(handle);
+  }
 }
 
 void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
