@@ -199,6 +199,7 @@ void ShadowStack::pop(ZeroFrame *callee_frame) {
 ShadowTable *ShadowStack::init_reflection_stack(int max_slot_size) {
   assert(_reflection_stack.size() == 0, "should be");
   _reflection_stack.init(max_slot_size);
+  return &_reflection_stack;
 }
 
 void ShadowStack::print_origin() {

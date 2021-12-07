@@ -182,6 +182,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   int offset = 2;
   Expression *value_exp;
   if (is_java_primitive(type)) {
+    offset += type2size[type] - 1;
     value_exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + offset);
     if (!value_exp) {
       switch (type) {
