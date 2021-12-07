@@ -224,7 +224,7 @@ void ThreadContext::print() {
 void ThreadContext::print_stack_trace() {
   static char buf[O_BUFLEN];
   VMError::print_stack_trace(tty, _thread, buf, sizeof(buf));
-  this->get_shadow_stack().print();
+//  this->get_shadow_stack().print();
 }
 
 void ThreadContext::memory_leak_check() {

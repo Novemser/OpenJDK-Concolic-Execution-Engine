@@ -111,6 +111,8 @@ public:
     return *(T *) (get_locals_ptr() - offset);
   }
 
+  Expression* get_primitive_exp(int offset, BasicType type);
+
 public:
   inline void clear_param_list() {
     int size = _param_list.size();

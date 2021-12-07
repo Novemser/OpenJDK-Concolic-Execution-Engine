@@ -174,7 +174,7 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
     }
   } else {
     locals_offset += type2size[type] - 1;
-    exp = ConcolicMngr::ctx->get_stack_slot(locals_offset);
+    exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + locals_offset);
 
     if (!exp) {
       switch (type) {
