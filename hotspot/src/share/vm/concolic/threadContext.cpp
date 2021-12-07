@@ -56,6 +56,9 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
 
   if (klass_symbol->equals(SymString::TYPE_NAME)) {
     if (OopUtils::is_java_string_interned(obj)) {
+      ResourceMark rm;
+      const char* str = OopUtils::java_string_to_c(obj);
+      tty->print_cr("Interned String!: %s", str);
       /**
        * we do not support symbolize interned Java string
        */

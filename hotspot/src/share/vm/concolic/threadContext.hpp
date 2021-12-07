@@ -155,7 +155,7 @@ private:
 
   sym_rid_t get_next_sym_rid() {
     sym_rid_t ret = _sym_rid_counter++;
-    assert(ret < MAX_SYM_RID, "sym_rid limitted");
+    guarantee(ret < MAX_SYM_RID, "sym_rid limitted");
     return ret;
   }
 
