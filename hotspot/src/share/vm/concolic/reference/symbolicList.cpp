@@ -1,102 +1,102 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/methodExpression.hpp"
-#include "concolic/reference/symbolicSet.hpp"
+#include "concolic/reference/symbolicList.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
 
-bool SymSet::need_recording = false;
+bool SymList::need_recording = false;
 
-std::set<std::string> SymSet::target_class_names = init_target_class_names();
+std::set<std::string> SymList::target_class_names = init_target_class_names();
 
-std::set<std::string> SymSet::init_target_class_names() {
+std::set<std::string> SymList::init_target_class_names() {
   std::set<std::string> set;
-  set.insert("java/util/HashSet");
-  set.insert("java/util/LinkedHashSet");
-  set.insert("org/hibernate/collection/internal/PersistentSet");
+  set.insert("java/util/List");
+  set.insert("java/util/ArrayList");
+  set.insert("org/hibernate/collection/internal/PersistentBag");
   return set;
 }
 
-std::set<std::string> SymSet::handle_method_names = init_handle_method_names();
+std::set<std::string> SymList::handle_method_names = init_handle_method_names();
 
-std::set<std::string> SymSet::init_handle_method_names() {
+std::set<std::string> SymList::init_handle_method_names() {
   std::set<std::string> set;
   set.insert("add");
+  set.insert("get");
+  set.insert("remove");
   set.insert("contains");
   set.insert("isEmpty");
-  set.insert("size");
   set.insert("clear");
   return set;
 }
 
-std::map<std::string, bool> SymSet::skip_method_names = init_skip_method_names();
+std::map<std::string, bool> SymList::skip_method_names = init_skip_method_names();
 
-std::map<std::string, bool> SymSet::init_skip_method_names() {
+std::map<std::string, bool> SymList::init_skip_method_names() {
   std::map<std::string, bool> map;
-  map["<init>"] = true; //really??
-  map["iterator"] = true; // really???
+  map["<init>"] = true;// really?
+  map["iterator"] = true;
+  map["sort"] = true;
   map["equalsSnapshot"] = false; // really???
   map["getSnapshot"] = false; // really???
   map["entries"] = false; // really???
+  map["getOrphans"] = false; // really???
+  map["addAll"] = false; // really???
   return map;
 }
 
-bool SymSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
+bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
-    need_recording = SymSet::check_param_symbolized(handle);
+    need_recording = SymList::check_param_symbolized(handle);
     if (need_recording) {
-      SymSet::prepare_param(handle);
+      SymList::prepare_param(handle);
     }
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
       if (!need_symbolize) {
-        bool recording = SymSet::check_param_symbolized(handle);
+        bool recording = SymList::check_param_symbolized(handle);
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymSet, need recording %c", recording ? 'Y' : 'N');
+        tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
       }
     } else {
-      bool recording = SymSet::check_param_symbolized(handle);
+      bool recording = SymList::check_param_symbolized(handle);
       handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymSet, need recording %c", recording ? 'Y' : 'N');
+      tty->print_cr(" handled by SymList, need recording %c", recording ? 'Y' : 'N');
     }
   }
 
-
-//  else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
-//    handle.get_callee_method()->print_name(tty);
-//    tty->print_cr(" handled by SymSet");
-//  }
   return need_symbolize;
 }
 
-void SymSet::prepare_param(MethodSymbolizerHandle &handle) {
+void SymList::prepare_param(MethodSymbolizerHandle &handle) {
   Method *callee_method = handle.get_callee_method();
   guarantee(!callee_method->is_static(), "should be");
 
   int offset = handle.get_callee_local_begin_offset();
   // handle this
-  SymSet::prepare_param_helper(handle, T_OBJECT, offset);
+  SymList::prepare_param_helper(handle, T_OBJECT, offset);
   ++offset;
 
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
   while (!ss.at_return_type()) {
-    offset = SymSet::prepare_param_helper(handle, ss.type(), offset);
+    offset = SymList::prepare_param_helper(handle, ss.type(), offset);
     ss.next();
     ++offset;
   }
 }
 
-int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                 int locals_offset) {
+int SymList::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                  int locals_offset) {
   Expression *exp = NULL;
-
-  if (type == T_OBJECT) {
+  if (is_java_primitive(type)) {
+    exp = handle.get_primitive_exp(locals_offset, type);
+  } else if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
@@ -107,7 +107,7 @@ int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
       }
     }
   } else {
-    tty->print_cr("unhandled set parameter types!");
+    tty->print_cr("un_handled type %c", type2char(type));
     ShouldNotCallThis();
   }
 
@@ -116,36 +116,51 @@ int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
 }
 
 
-bool SymSet::check_param_symbolized(MethodSymbolizerHandle &handle) {
+bool SymList::check_param_symbolized(MethodSymbolizerHandle &handle) {
   Method *callee_method = handle.get_callee_method();
   guarantee(!callee_method->is_static(), "should be");
   int offset = handle.get_callee_local_begin_offset();
   bool recording = false;
 
-  SymSet::check_param_symbolized_helper(handle, T_OBJECT, offset,
-                                        recording);
+  SymList::check_param_symbolized_helper(handle, T_OBJECT, offset,
+                                         recording);
   ++offset;
 
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
-  // Only when this or key object is symbolized, we symbolize Set
-  SymSet::check_param_symbolized_helper(handle, ss.type(), offset,
-                                        recording);
+  // Only when this or key object is symbolized, we symbolize Map
+  while (!ss.at_return_type()) {
+    offset = SymList::check_param_symbolized_helper(handle, ss.type(), offset,
+                                                    recording);
+    ss.next();
+    ++offset;
+  }
   return recording;
 }
 
-int SymSet::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                          int locals_offset,
-                                          bool &recording) {
-  oop obj = handle.get_param<oop>(locals_offset);
-  if (obj != NULL && obj->is_symbolic()) {
-    recording = true;
+int SymList::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                           int locals_offset,
+                                           bool &recording) {
+  if (is_java_primitive(type)) {
+    locals_offset += type2size[type] - 1;
+    Expression *exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + locals_offset);
+    if (exp != NULL) {
+      recording = true;
+    }
+  } else if (type == T_OBJECT) {
+    oop obj = handle.get_param<oop>(locals_offset);
+    if (obj != NULL && obj->is_symbolic()) {
+      recording = true;
+    }
+  } else {
+    tty->print_cr("un_handled type %c", type2char(type));
   }
 
   return locals_offset;
 }
 
-Expression *SymSet::finish_method_helper(MethodSymbolizerHandle &handle) {
+
+Expression *SymList::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (!need_recording) {
     return NULL;
   }
@@ -181,8 +196,6 @@ Expression *SymSet::finish_method_helper(MethodSymbolizerHandle &handle) {
         break;
       default:
         tty->print_cr("%c", type2char(type));
-        handle.get_callee_method()->print_name(tty);
-        tty->cr();
         ShouldNotCallThis();
         break;
     }

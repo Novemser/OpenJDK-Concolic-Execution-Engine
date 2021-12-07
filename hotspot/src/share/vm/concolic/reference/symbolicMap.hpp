@@ -25,9 +25,13 @@ public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
-  static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                           intptr_t *locals, int locals_offset,
-                           bool &recording);
+  static bool check_param_symbolized(MethodSymbolizerHandle &handle);
+  static int check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                           int locals_offset, bool &recording);
+
+  static void prepare_param(MethodSymbolizerHandle &handle);
+  static int prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                  int locals_offset);
 };
 
 #endif // ENABLE_CONCOLIC

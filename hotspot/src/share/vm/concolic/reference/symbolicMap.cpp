@@ -1,7 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/methodExpression.hpp"
-#include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
@@ -41,7 +40,7 @@ std::set<std::string> SymMap::skip_method_names = init_skip_method_names();
 
 std::set<std::string> SymMap::init_skip_method_names() {
   std::set<std::string> set;
-  set.insert("<init>");
+  set.insert("<init>"); //really??
   set.insert("hash");
   set.insert("keySet"); // really?
   set.insert("entrySet"); // really?
@@ -54,25 +53,9 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
   bool need_symbolize = true;
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
-    int offset = handle.get_callee_local_begin_offset();
-    register intptr_t *locals = handle.get_locals_ptr();
-    Method *callee_method = handle.get_callee_method();
-
-    if (!callee_method->is_static()) {
-      // handle this
-      SymMap::prepare_param(handle, T_OBJECT, locals, offset,
-                            need_recording);
-      ++offset;
-    }
-
-    ResourceMark rm;
-    SignatureStream ss(callee_method->signature());
-    while (!ss.at_return_type()) {
-      offset = SymMap::prepare_param(handle, ss.type(), locals, offset,
-                                     need_recording);
-
-      ss.next();
-      ++offset;
+    need_recording = SymMap::check_param_symbolized(handle);
+    if (need_recording) {
+      SymMap::prepare_param(handle);
     }
   } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
@@ -82,45 +65,77 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
-int SymMap::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                          intptr_t *locals, int locals_offset,
-                          bool &recording) {
+void SymMap::prepare_param(MethodSymbolizerHandle &handle) {
+  Method *callee_method = handle.get_callee_method();
+  guarantee(!callee_method->is_static(), "should be");
+
+  int offset = handle.get_callee_local_begin_offset();
+  // handle this
+  SymMap::prepare_param_helper(handle, T_OBJECT, offset);
+  ++offset;
+
+  ResourceMark rm;
+  SignatureStream ss(callee_method->signature());
+  while (!ss.at_return_type()) {
+    offset = SymMap::prepare_param_helper(handle, ss.type(), offset);
+    ss.next();
+    ++offset;
+  }
+}
+
+int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                 int locals_offset) {
   Expression *exp = NULL;
 
   if (type == T_OBJECT) {
-    // only consider the situation that object is a string by now
-    oop obj = *(oop *) (locals - locals_offset);
+    oop obj = handle.get_param<oop>(locals_offset);
     if (obj != NULL) {
-      if (obj->is_symbolic()) {
-        recording = true;
-        SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-        exp = sym_inst->get_ref_exp();
-        if (exp == NULL) {
-          exp = new InstanceSymbolExp(obj);
-          sym_inst->set_ref_exp(exp);
-        }
+      SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+      exp = sym_inst->get_ref_exp();
+      if (exp == NULL) {
+        exp = new InstanceSymbolExp(obj);
+        sym_inst->set_ref_exp(exp);
       }
-      /**
-       * TODO: handle expression for non-symbolic objects
-       */
-    }
-  } else if (type == T_ARRAY) {
-    arrayOop arr_obj = *(arrayOop *) (locals - locals_offset);
-    if (arr_obj->is_symbolic()) {
-      SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);
-      exp = new ArraySymbolExp(arr_obj->get_sym_rid(), sym_arr->get_version(),
-                               type);
-      recording = true;
-    } else {
-      exp = new ArrayInitExpression(NULL_SYM_RID, arr_obj);
     }
   } else {
     tty->print_cr("unhandled map parameter types!");
+    ShouldNotCallThis();
   }
 
   handle.get_param_list().push_back(exp);
   return locals_offset;
 }
+
+
+bool SymMap::check_param_symbolized(MethodSymbolizerHandle &handle) {
+  Method *callee_method = handle.get_callee_method();
+  guarantee(!callee_method->is_static(), "should be");
+  int offset = handle.get_callee_local_begin_offset();
+  bool recording = false;
+
+  SymMap::check_param_symbolized_helper(handle, T_OBJECT, offset,
+                                        recording);
+  ++offset;
+
+  ResourceMark rm;
+  SignatureStream ss(callee_method->signature());
+  // Only when this or key object is symbolized, we symbolize Map
+  SymMap::check_param_symbolized_helper(handle, ss.type(), offset,
+                                                   recording);
+  return recording;
+}
+
+int SymMap::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                          int locals_offset,
+                                          bool &recording) {
+  oop obj = handle.get_param<oop>(locals_offset);
+  if (obj != NULL && obj->is_symbolic()) {
+    recording = true;
+  }
+
+  return locals_offset;
+}
+
 
 Expression *SymMap::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (!need_recording) {
@@ -153,7 +168,7 @@ Expression *SymMap::finish_method_helper(MethodSymbolizerHandle &handle) {
         }
         break;
       case T_BOOLEAN:
-          exp = new MethodReturnSymbolExp();
+        exp = new MethodReturnSymbolExp();
         break;
       default:
         tty->print_cr("%c", type2char(type));

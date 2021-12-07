@@ -10,6 +10,7 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/reference/symbolicSet.hpp"
+#include "concolic/reference/symbolicList.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "memory/resourceArea.hpp"
@@ -81,6 +82,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymMap::invoke_method_helper(_handle);
   } else if (SymSet::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymSet::invoke_method_helper(_handle);
+  } else if (SymList::target(_handle.get_callee_holder_name())) {
+    need_symbolize = SymList::invoke_method_helper(_handle);
   } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymBigDecimal::invoke_method_helper(_handle);
   } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
@@ -116,6 +119,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymMap::finish_method_helper(_handle);
     } else if (SymSet::target(_handle.get_callee_holder_name())) {
       exp = SymSet::finish_method_helper(_handle);
+    } else if (SymList::target(_handle.get_callee_holder_name())) {
+      exp = SymList::finish_method_helper(_handle);
     } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
       exp = SymBigDecimal::finish_method_helper(_handle);
     } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {

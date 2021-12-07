@@ -1,15 +1,14 @@
-#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICSET_HPP
-#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICSET_HPP
+#ifndef SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICLIST_HPP
+#define SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICLIST_HPP
 
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 
-class SymSet {
+class SymList {
 public:
   inline static bool target(const std::string &class_name) {
-//    return false;
     return target_class_names.find(class_name) != target_class_names.end();
   }
 
@@ -36,4 +35,4 @@ public:
 };
 
 #endif // ENABLE_CONCOLIC
-#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICSET_HPP
+#endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICLIST_HPP
