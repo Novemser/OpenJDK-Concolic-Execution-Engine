@@ -201,11 +201,11 @@ std::string ThreadContext::get_current_code_pos() {
 }
 
 void ThreadContext::print() {
-  for (SymStore::iterator sym_iter = _sym_refs.begin();
-       sym_iter != _sym_refs.end(); ++sym_iter) {
-    tty->print_cr("- sym_inst[%lu]:", sym_iter->first);
-    sym_iter->second->print();
-  }
+//  for (SymStore::iterator sym_iter = _sym_refs.begin();
+//       sym_iter != _sym_refs.end(); ++sym_iter) {
+//    tty->print_cr("- sym_inst[%lu]:", sym_iter->first);
+//    sym_iter->second->print();
+//  }
 
 //  int size = _sym_tmp_exps.size();
 //  for (int i = 1; i < size; ++i) {

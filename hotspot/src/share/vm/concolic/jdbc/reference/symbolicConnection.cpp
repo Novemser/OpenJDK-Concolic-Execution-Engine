@@ -67,11 +67,11 @@ Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
 
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
     sym_stmt->swap_sql_template(sql_template);
-    tty->print_cr("Connection prepare statement: %lu", sym_stmt->get_sym_rid());
+//    tty->print_cr("Connection prepare statement: %lu", sym_stmt->get_sym_rid());
   } else if (callee_name == "createStatement") {
     oop res_obj = handle.get_result<oop>(T_OBJECT);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-    tty->print_cr("Connection create statement: %lu", sym_stmt->get_sym_rid());
+//    tty->print_cr("Connection create statement: %lu", sym_stmt->get_sym_rid());
   }
 
   return NULL;
