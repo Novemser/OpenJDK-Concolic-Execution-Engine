@@ -9,17 +9,19 @@
 class TxInfo {
 private:
   bool _committed;
-  ulong _tx_id;
+  tx_id_t _tx_id;
   std::vector<SymStmt *> _stmts;
 
 public:
-  TxInfo(ulong tx_id) : _tx_id(tx_id), _committed(false) {}
+  TxInfo(tx_id_t tx_id) : _tx_id(tx_id), _committed(false) {}
 
   inline void commit() { _committed = true; }
 
   inline bool is_committed() { return _committed; }
 
-  inline void record_stmt(SymStmt *stmt) { _stmts.push_back(stmt); }
+  inline void record_stmt(SymStmt *stmt) {
+    stmt->set_tx_id(_tx_id);
+    _stmts.push_back(stmt); }
 
 public:
   void print();

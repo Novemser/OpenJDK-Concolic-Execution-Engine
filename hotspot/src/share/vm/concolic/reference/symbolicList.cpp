@@ -37,11 +37,15 @@ std::map<std::string, bool> SymList::init_skip_method_names() {
   map["<init>"] = true;// really?
   map["iterator"] = true;
   map["sort"] = true;
-  map["equalsSnapshot"] = false; // really???
-  map["getSnapshot"] = false; // really???
-  map["entries"] = false; // really???
-  map["getOrphans"] = false; // really???
-  map["addAll"] = false; // really???
+  map["listIterator"] = true; // really???
+  map["addAll"] = true; // really???
+  map["toArray"] = true; // really???
+  map["indexOf"] = true; // really???
+  map["spliterator"] = true; // really???
+  map["equalsSnapshot"] = true; // really???
+  map["getSnapshot"] = true; // really???
+  map["entries"] = true; // really???
+  map["getOrphans"] = true; // really???
   map["size"] = false; // really???
   return map;
 }
@@ -148,13 +152,13 @@ int SymList::check_param_symbolized_helper(MethodSymbolizerHandle &handle, Basic
     if (exp != NULL) {
       recording = true;
     }
-  } else if (type == T_OBJECT) {
+  } else if (type == T_OBJECT || type == T_ARRAY) {
     oop obj = handle.get_param<oop>(locals_offset);
     if (obj != NULL && obj->is_symbolic()) {
       recording = true;
     }
   } else {
-    tty->print_cr("un_handled type %c", type2char(type));
+    ShouldNotCallThis();
   }
 
   return locals_offset;

@@ -86,7 +86,7 @@ void SymStmt::set_row_count_exp(Expression *row_count_exp) {
 }
 
 void SymStmt::print() {
-  tty->print_cr("SymStmt: %s", _sql_template.c_str());
+  tty->print_cr("SymStmt(%lu) of txn (%lu): %s", _sym_rid, _tx_id, _sql_template.c_str());
   exp_map_t::iterator iter;
   for (iter = _param_exps.begin(); iter != _param_exps.end(); ++iter) {
     tty->print("%d: ", iter->first);
@@ -146,10 +146,8 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
     ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
     handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" executed");
 
     jlong conn_id = JdbcUtils::get_stmt_connection_id(this_obj);
-    tty->print_cr("conn_id:%ld", conn_id);
     ConcolicMngr::ctx->get_jdbc_mngr().record_stmt(sym_stmt, conn_id);
 
     if (callee_name == "executeQuery") {

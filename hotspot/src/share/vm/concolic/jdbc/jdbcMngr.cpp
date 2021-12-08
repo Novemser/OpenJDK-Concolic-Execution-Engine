@@ -13,21 +13,20 @@ JdbcMngr::~JdbcMngr() {
 }
 
 void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
-  tty->print_cr("set_auto_commit: %us", auto_commit);
+  tty->print_cr("set_auto_commit: %us, conn_id:%ld", auto_commit, conn_id);
+  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
+
   if (!auto_commit) {
-    int tx_id = _txs.size();
+    tx_id_t tx_id = _txs.size();
     TxInfo *tx = new TxInfo(tx_id);
     _txs.push_back(tx);
-    if (_conn_ongoing_tx.find(conn_id) == _conn_ongoing_tx.end()) {
-      _conn_ongoing_tx[conn_id] = tx;
-    } else {
-      // we assume one connection only have one ongoing transaction
-      ShouldNotReachHere();
-    }
+
+    guarantee(iter == _conn_ongoing_tx.end(), "should be");
+    _conn_ongoing_tx[conn_id] = tx;
   } else {
-    if (_conn_ongoing_tx.find(conn_id) != _conn_ongoing_tx.end()) {
-      _conn_ongoing_tx[conn_id]->commit();
-      _conn_ongoing_tx.erase(conn_id);
+    if (iter != _conn_ongoing_tx.end()) {
+      iter->second->commit();
+      _conn_ongoing_tx.erase(iter);
     }
   }
 }
@@ -40,11 +39,12 @@ void JdbcMngr::print() {
 }
 
 void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
-  // There's no ongoing transaction in conn_id connection
-  if (_conn_ongoing_tx.find(conn_id) == _conn_ongoing_tx.end() ) {
-    return;
+  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
+  if (iter != _conn_ongoing_tx.end()) {
+    // There's no ongoing transaction in conn_id connection
+    guarantee(iter->second, "should be");
+    iter->second->record_stmt(stmt);
   }
-  _conn_ongoing_tx[conn_id]->record_stmt(stmt);
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

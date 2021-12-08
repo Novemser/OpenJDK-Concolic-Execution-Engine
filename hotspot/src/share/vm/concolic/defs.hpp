@@ -17,6 +17,8 @@ typedef ulong sym_rid_t;
 #define MAX_SYM_TMP_ID 10000
 typedef int sym_tmp_id_t;
 
+typedef ulong tx_id_t;
+
 #define FIELD_INDEX_ARRAY_LENGTH -1
 
 typedef std::set<std::string> method_set_t;

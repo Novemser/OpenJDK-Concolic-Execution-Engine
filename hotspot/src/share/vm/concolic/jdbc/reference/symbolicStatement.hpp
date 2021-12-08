@@ -10,11 +10,12 @@
 #include "utilities/debug.hpp"
 
 class SymStmt;
+
 class StatementSymbolExp : public Expression {
 private:
-  SymStmt* _sym_stmt;
+  SymStmt *_sym_stmt;
 public:
-  StatementSymbolExp(SymStmt* sym_stmt);
+  StatementSymbolExp(SymStmt *sym_stmt);
 
 public:
   void print();
@@ -38,9 +39,10 @@ private:
   static Expression *get_param_exp(MethodSymbolizerHandle &handle, BasicType method, const std::string &callee_name);
 
 private:
+  tx_id_t _tx_id;
   std::string _sql_template;
   exp_map_t _param_exps;
-  Expression* _row_count_exp;
+  Expression *_row_count_exp;
 
 public:
   SymStmt(sym_rid_t sym_rid);
@@ -56,18 +58,18 @@ public:
     _sql_template = std::string(sql_template);
   }
 
+  inline void set_tx_id(tx_id_t tx_id) { _tx_id = tx_id; }
+
   void set_param(int index, Expression *exp);
 
-  void set_row_count_exp(Expression* row_count_exp);
+  void set_row_count_exp(Expression *row_count_exp);
 
 public:
   bool need_recursive() { return false; }
-
   void print();
 
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
-
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 };
 

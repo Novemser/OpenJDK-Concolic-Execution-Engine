@@ -35,6 +35,7 @@ std::map<std::string, bool> SymSet::init_skip_method_names() {
   std::map<std::string, bool> map;
   map["<init>"] = true; //really??
   map["iterator"] = true; // really???
+  map["spliterator"] = true; // really???
   map["equalsSnapshot"] = false; // really???
   map["getSnapshot"] = false; // really???
   map["entries"] = false; // really???

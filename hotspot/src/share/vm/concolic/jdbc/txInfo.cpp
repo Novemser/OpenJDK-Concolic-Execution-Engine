@@ -6,9 +6,9 @@
 
 void TxInfo::print() {
   tty->print_cr("TxInfo (%lu): %s", _tx_id, is_committed() ? "committed" : "not committed");
-  tty->print_cr("-SymStmts in this Tx:");
-  for (std::vector<SymStmt *>::iterator it = _stmts.begin(); it != _stmts.end(); ++it) {
-    (*it)->print();
+  int size = _stmts.size();
+  for (int i = 0; i < size; ++i) {
+    _stmts[i]->print();
   }
 }
 
