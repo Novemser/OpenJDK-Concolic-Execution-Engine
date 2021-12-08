@@ -182,35 +182,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   int offset = 2;
   Expression *value_exp;
   if (is_java_primitive(type)) {
-    offset += type2size[type] - 1;
-    value_exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + offset);
-    if (!value_exp) {
-      switch (type) {
-        case T_BYTE:
-          value_exp = new ConExpression(handle.get_param<jbyte>(offset));
-          break;
-        case T_BOOLEAN:
-          value_exp = new ConExpression(handle.get_param<jboolean>(offset));
-          break;
-        case T_INT:
-          value_exp = new ConExpression(handle.get_param<jint>(offset));
-          break;
-        case T_SHORT:
-          value_exp = new ConExpression(handle.get_param<jshort>(offset));
-          break;
-        case T_LONG:
-          value_exp = new ConExpression(handle.get_param<jlong>(offset));
-          break;
-        case T_FLOAT:
-          value_exp = new ConExpression(handle.get_param<jfloat>(offset));
-          break;
-        case T_DOUBLE:
-          value_exp = new ConExpression(handle.get_param<jdouble>(offset));
-          break;
-        default:
-          ShouldNotReachHere();
-      }
-    }
+    value_exp = handle.get_primitive_exp(offset, type);
   } else if (callee_name == "setString") {
     value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setNull") {
