@@ -49,9 +49,11 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
     need_symbolize = true;
   } else {
-    tty->print_cr("BigDecimal Unhandled method:");
-    tty->print_cr(callee_name.c_str());
-    ShouldNotCallThis();
+    handle.get_callee_method()->print_name(tty);
+    tty->print_cr("unhandled by SymBigDecimal:");
+
+    // TODO: handle
+    need_symbolize = true;
   }
 
   return need_symbolize;
@@ -59,8 +61,8 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  Expression *exp;
-  ShouldNotCallThis();
+  Expression *exp = NULL;
+//  ShouldNotCallThis();
 //  if (callee_name == "add") {
 //    oop left_obj = handle.get_param<oop>(0);
 //    oop right_obj = handle.get_param<oop>(1);

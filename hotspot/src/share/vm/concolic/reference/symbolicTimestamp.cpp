@@ -45,9 +45,8 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
     need_symbolize = true;
   } else {
-    tty->print_cr("Timestamp Unhandled method:");
-    tty->print_cr(callee_name.c_str());
-    ShouldNotCallThis();
+    handle.get_callee_method()->print_name(tty);
+    tty->print_cr("unhandled by SymTimestamp:");
   }
 
   return need_symbolize;
