@@ -31,7 +31,7 @@ Expression *MethodSymbolizerHandle::get_primitive_exp(int offset, BasicType type
         exp = new ConExpression(this->get_param<jdouble>(offset));
         break;
       case T_CHAR:
-        exp = new ConExpression(this->get_param<jdouble>(offset));
+        exp = new ConExpression(this->get_param<jchar>(offset));
         break;
       default:
         ShouldNotReachHere();
