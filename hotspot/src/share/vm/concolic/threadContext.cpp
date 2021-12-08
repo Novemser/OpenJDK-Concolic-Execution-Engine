@@ -88,7 +88,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymBigDecimal(sym_rid);
     sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
-    sym_inst = new SymTimestamp(sym_rid);
+    sym_inst = new SymTimestamp(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {
@@ -149,8 +149,10 @@ SymArr *ThreadContext::get_sym_array(sym_rid_t sym_rid) {
 }
 
 void ThreadContext::symbolize_recursive(oop obj) {
-  // SimpleFieldPrinter field_printer(obj);
-  // field_printer.do_recursive();
+//  tty->print_cr(obj->klass()->signature_name());
+//  tty->print_cr(obj->klass()->name()->as_C_string());
+//  SimpleFieldPrinter field_printer(obj);
+//   field_printer.do_recursive();
 
   FieldSymbolizer field_symbolzier(obj, *this);
   field_symbolzier.do_recursive();

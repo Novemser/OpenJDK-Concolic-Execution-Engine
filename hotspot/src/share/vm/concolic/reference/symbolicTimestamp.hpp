@@ -16,7 +16,7 @@ private:
 
 public:
   SymTimestamp(sym_rid_t sym_rid);
-  SymTimestamp(sym_rid_t sym_rid, Expression *exp);
+  SymTimestamp(sym_rid_t sym_rid, oop obj);
   ~SymTimestamp();
 
   inline static bool target(const std::string &class_name) {

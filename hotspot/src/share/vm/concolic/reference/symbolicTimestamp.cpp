@@ -10,11 +10,15 @@ method_set_t SymTimestamp::symbolized_methods = init_symbolized_methods();
 method_set_t SymTimestamp::init_symbolized_methods() {
   method_set_t m_set;
   m_set.insert("<init>");
+  m_set.insert("getTime");
+  m_set.insert("getNanos");
+  m_set.insert("setTime");
+  m_set.insert("setNanos");
   return m_set;
 }
 
 SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
-SymTimestamp::SymTimestamp(sym_rid_t sym_rid, Expression *exp) : SymInstance(sym_rid), _exp(exp) {}
+SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)) {}
 
 SymTimestamp::~SymTimestamp() {
   Expression::gc(_exp);
@@ -29,8 +33,8 @@ Expression *SymTimestamp::get_exp_of(oop obj) {
     assert(exp != NULL, "NOT NULL");
   } else {
     ResourceMark rm;
-    //TODO: get double value from Timestamp obj;
-    ShouldNotCallThis();
+    //now, we can't care about the value of a concrete Timestamp
+    exp = new ConExpression(0.0);
   }
   return exp;
 }
@@ -39,15 +43,11 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
-    int offset = handle.get_callee_local_begin_offset();
-    register intptr_t *locals = handle.get_locals_ptr();
-    Method *callee_method = handle.get_callee_method();
-
     need_symbolize = true;
   } else {
     tty->print_cr("Timestamp Unhandled method:");
     tty->print_cr(callee_name.c_str());
-    //ShouldNotCallThis();
+    ShouldNotCallThis();
   }
 
   return need_symbolize;
