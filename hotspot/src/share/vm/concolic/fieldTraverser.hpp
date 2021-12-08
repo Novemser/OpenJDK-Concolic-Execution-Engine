@@ -24,6 +24,7 @@ protected:
 
   FieldTraverser(oop obj) : _obj(obj), _depth(1) {}
   void print_indent();
+  void print_indent_klass();
 
 public:
   // recursive functions
@@ -54,6 +55,8 @@ private:
 public:
   FieldSymbolizer(oop obj, ThreadContext &ctx)
       : FieldTraverser(obj), _ctx(ctx) {}
+  bool print_field(fieldDescriptor *fd, oop obj);
+  bool print_element(int index, arrayOop array_obj);
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);
@@ -71,8 +74,8 @@ public:
   SimpleFieldPrinter(oop obj) : FieldTraverser(obj) {}
 
 protected:
-  bool do_field_helper(fieldDescriptor *fd, oop obj);
-  bool do_element_helper(int index, arrayOop array_obj);
+    bool do_field_helper(fieldDescriptor *fd, oop obj);
+    bool do_element_helper(int index, arrayOop array_obj);
 };
 
 #endif // ENABLE_CONCOLIC
