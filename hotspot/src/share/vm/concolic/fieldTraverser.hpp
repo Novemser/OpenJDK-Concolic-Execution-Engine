@@ -54,6 +54,8 @@ private:
 public:
   FieldSymbolizer(oop obj, ThreadContext &ctx)
       : FieldTraverser(obj), _ctx(ctx) {}
+  bool print_field(fieldDescriptor *fd, oop obj);
+  bool print_element(int index, arrayOop array_obj);
 
 protected:
   bool do_field_helper(fieldDescriptor *fd, oop obj);

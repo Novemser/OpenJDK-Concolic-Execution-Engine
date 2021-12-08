@@ -127,6 +127,7 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   SymArr *sym_arr;
 
   BasicType type = fd->field_type();
+  this->print_field(fd,obj);
   switch (type) {
   case T_OBJECT:
     return obj->obj_field(fd->offset()) != NULL;
@@ -159,13 +160,19 @@ bool FieldSymbolizer::before_instance_helper() {
   SymInstance *sym_inst = this->_ctx.alloc_sym_inst(this->_obj);
   if (sym_inst && sym_inst->need_recursive()) {
     _sym_refs.push_back(sym_inst);
+
+    tty->indent().print_cr("%s",this->_obj->klass()->name()->as_C_string());
+    tty->inc();
     return true;
   } else {
     return false;
   }
 }
 
-void FieldSymbolizer::after_instance_helper() { _sym_refs.pop_back(); }
+void FieldSymbolizer::after_instance_helper() {
+    _sym_refs.pop_back();
+    tty->dec();
+}
 
 bool FieldSymbolizer::do_element_helper(int index, arrayOop array_obj) {
   ArrayKlass *array_klass = ArrayKlass::cast(array_obj->klass());
@@ -179,11 +186,13 @@ bool FieldSymbolizer::do_element_helper(int index, arrayOop array_obj) {
     // element won't be array(it will be object)
     ShouldNotCallThis();
   case T_OBJECT:
+    this->print_element(index,array_obj);
     return true;
   default:
     // the element_type is primitives
     sym_arr = this->_ctx.get_sym_array(array_obj);
     assert(sym_arr == (SymArr *)this->_sym_refs.back(), "should be equal");
+    this->print_element(index,array_obj);
     return false;
   }
 }
@@ -205,9 +214,15 @@ bool FieldSymbolizer::before_array_helper() {
   sym_arr->set_length_exp(new ArrayLengthExp(sym_arr->get_sym_rid(), type));
 
   _sym_refs.push_back(sym_arr);
+
+  tty->indent().print_cr("symbolize array rid:%lu type:%c length:%d",array_obj->get_sym_rid(),type2char(type),array_obj->length());
+  tty->inc();
 }
 
-void FieldSymbolizer::after_array_helper() { _sym_refs.pop_back(); }
+void FieldSymbolizer::after_array_helper() {
+    _sym_refs.pop_back();
+    tty->dec();
+}
 
 /**************************************************
  * SimpleFieldPrinter
@@ -266,5 +281,19 @@ bool SimpleFieldPrinter::do_element_helper(int index, arrayOop array_obj) {
    * TODO: complete this
    */
 }
+
+bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj)  {
+    tty->indent().print("symbolize field %s rid:%lu index:%d type:%s offset:%d\n",
+                fd->name()->as_C_string(), obj->get_sym_rid(), fd->index(),
+                        fd->signature()->as_C_string(), fd->offset());
+}
+
+bool FieldSymbolizer::print_element(int index, arrayOop array_obj)  {
+    ArrayKlass *ak = (ArrayKlass *)array_obj->klass();
+    BasicType T = ak->element_type();
+    tty->indent().print("symbolize element rid:%lu index:%d type:%c\n",
+                         array_obj->get_sym_rid(), index,type2char(T));
+}
+
 
 #endif
