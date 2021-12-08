@@ -42,6 +42,7 @@ std::map<std::string, bool> SymList::init_skip_method_names() {
   map["entries"] = false; // really???
   map["getOrphans"] = false; // really???
   map["addAll"] = false; // really???
+  map["size"] = false; // really???
   return map;
 }
 

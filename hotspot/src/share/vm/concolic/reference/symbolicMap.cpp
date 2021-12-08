@@ -120,8 +120,10 @@ bool SymMap::check_param_symbolized(MethodSymbolizerHandle &handle) {
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
   // Only when this or key object is symbolized, we symbolize Map
-  SymMap::check_param_symbolized_helper(handle, ss.type(), offset,
-                                                   recording);
+  if (!ss.at_return_type()) {
+    SymMap::check_param_symbolized_helper(handle, ss.type(), offset,
+                                          recording);
+  }
   return recording;
 }
 

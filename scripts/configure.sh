@@ -1,6 +1,7 @@
 #!/bin/sh
 
-FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG -DONELINE -DCONCOLIC_JDBC "
+DEBUG_FLAGS="-DENABLE_CONCOLIC -DONELINE -DCONCOLIC_JDBC -DCONCOLIC_DEBUG"
+RELEASE_FLAGS="-DENABLE_CONCOLIC -DONELINE -DCONCOLIC_JDBC"
 # FLAGS="-DENABLE_CONCOLIC -DCONCOLIC_DEBUG"
 # FLAGS="-DENABLE_CONCOLIC"
 
@@ -10,17 +11,17 @@ bash ./configure                    \
 bash ./configure                    \
     --with-jvm-variants=zero        \
     --with-debug-level=release    \
-    --with-extra-cflags="$FLAGS"    \
-    --with-extra-cxxflags="$FLAGS"
+    --with-extra-cflags="$RELEASE_FLAGS"    \
+    --with-extra-cxxflags="$RELEASE_FLAGS"
 
 bash ./configure                    \
     --with-jvm-variants=zero        \
     --with-debug-level=fastdebug    \
-    --with-extra-cflags="$FLAGS"    \
-    --with-extra-cxxflags="$FLAGS"
+    --with-extra-cflags="$DEBUG_FLAGS"    \
+    --with-extra-cxxflags="$DEBUG_FLAGS"
 
 bash ./configure                    \
     --with-jvm-variants=zero        \
     --with-debug-level=slowdebug    \
-    --with-extra-cflags="$FLAGS"    \
-    --with-extra-cxxflags="$FLAGS"
+    --with-extra-cflags="$DEBUG_FLAGS"    \
+    --with-extra-cxxflags="$DEBUG_FLAGS"

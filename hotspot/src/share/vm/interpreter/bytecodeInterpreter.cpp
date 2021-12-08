@@ -193,11 +193,11 @@
 // Have to do this dispatch this way in C++ because otherwise gcc complains about crossing an
 // initialization (which is is the initialization of the table pointer...)
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-#define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
-#else
 #define DISPATCH(opcode)\
   BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
   goto *(void*)dispatch_table[opcode]
+#else
+#define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
 #endif
 #define CONTINUE {                              \
         opcode = *pc;                           \
@@ -2272,7 +2272,9 @@ run:
               ConcolicMngr::ctx->set_stack_slot(GET_STACK_OFFSET - 1,
                                                 length_exp, sym_arr_oid,
                                                 FIELD_INDEX_ARRAY_LENGTH);
-            } 
+            } else {
+              CONCOLIC_CONST(-1);
+            }
           }
 #endif
           SET_STACK_INT(ary->length(), -1);
@@ -4094,7 +4096,7 @@ void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, 
       tty->print_cr(CL_YELLOW "=================================================================" CNONE);
       tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
       ConcolicMngr::ctx->print_stack_trace();
-      methodHandle mh(THREAD, (Method *)method);
+      methodHandle mh(THREAD, (Method *) method);
       BytecodeTracer::set_closure(BytecodeTracer::std_closure());
       BytecodeTracer::trace(mh, pc, tty);
     }
