@@ -22,7 +22,7 @@ void FieldTraverser::do_recursive_helper() {
       /**
        * Currently, we do not consider static fields
        */
-      // instanceKlass->do_local_static_fields(this);    
+      // instanceKlass->do_local_static_fields(this);
       instanceKlass->do_nonstatic_fields(this);
       this->after_instance_helper();
     }
@@ -216,7 +216,6 @@ bool FieldSymbolizer::before_array_helper() {
   _sym_refs.push_back(sym_arr);
 
   tty->indent().print_cr("symbolize array rid:%lu type:%c length:%d",array_obj->get_sym_rid(),type2char(type),array_obj->length());
-//  tty->indent().print_cr("A%c_%lu_%d", type2char(type),array_obj->get_sym_rid(),array_obj->length());
   tty->inc();
 }
 
@@ -283,13 +282,9 @@ bool SimpleFieldPrinter::do_element_helper(int index, arrayOop array_obj) {
    */
 }
 
-/**************************************************
- * SimFieldPrinter
- */
 bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj)  {
-//    this->print_indent();
     tty->indent().print("symbolize field %s rid:%lu index:%d type:%s offset:%d\n",
-               fd->name()->as_C_string(), obj->get_sym_rid(), fd->index(),
+                fd->name()->as_C_string(), obj->get_sym_rid(), fd->index(),
                         fd->signature()->as_C_string(), fd->offset());
 }
 
