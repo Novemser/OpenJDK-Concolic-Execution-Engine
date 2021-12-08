@@ -5,25 +5,30 @@
 
 #include "jni.h"
 #include "concolic/jdbc/txInfo.hpp"
-
+#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include <vector>
+#include <map>
 
 class JdbcMngr {
 private:
   std::vector<TxInfo *> _txs;
+  std::map<jlong, TxInfo *> _conn_ongoing_tx;
 public:
   JdbcMngr() {}
+
   ~JdbcMngr();
 
-  void set_auto_commit(jboolean auto_commit);
+  void set_auto_commit(jboolean auto_commit, jlong conn_id);
 
 public:
-  bool has_ongoing_tx() {
-    return _txs.size() != 0 && !_txs.back()->is_committed();
-  }
+//  bool has_ongoing_tx(jlong conn_id) {
+//    return _conn_ongoing_tx[conn_id] != NULL;
+//  }
 
 public:
   void print();
+
+  void record_stmt(SymStmt *stmt, jlong conn_id);
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

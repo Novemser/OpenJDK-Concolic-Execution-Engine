@@ -30,6 +30,9 @@ Expression *MethodSymbolizerHandle::get_primitive_exp(int offset, BasicType type
       case T_DOUBLE:
         exp = new ConExpression(this->get_param<jdouble>(offset));
         break;
+      case T_CHAR:
+        exp = new ConExpression(this->get_param<jdouble>(offset));
+        break;
       default:
         ShouldNotReachHere();
     }

@@ -139,7 +139,7 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
       }
     } else {
       SymString::prepare_param(handle, ss.type(), locals, offset,
-                                        need_recording);
+                               need_recording);
     }
   }
 
@@ -178,18 +178,33 @@ int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
 
     if (!exp) {
       switch (type) {
-      case T_BOOLEAN:
-        exp = new ConExpression(*(jboolean *)(locals - locals_offset));
-        break;
-      case T_INT:
-        exp = new ConExpression(*(jint *)(locals - locals_offset));
-        break;
-      case T_CHAR:
-        exp = new ConExpression(*(jchar *)(locals - locals_offset));
-        break;
-      default:
-        ShouldNotReachHere();
-        break;
+        case T_BYTE:
+          exp = new ConExpression(handle.get_param<jbyte>(locals_offset));
+          break;
+        case T_BOOLEAN:
+          exp = new ConExpression(handle.get_param<jboolean>(locals_offset));
+          break;
+        case T_INT:
+          exp = new ConExpression(handle.get_param<jint>(locals_offset));
+          break;
+        case T_SHORT:
+          exp = new ConExpression(handle.get_param<jshort>(locals_offset));
+          break;
+        case T_LONG:
+          exp = new ConExpression(handle.get_param<jlong>(locals_offset));
+          break;
+        case T_FLOAT:
+          exp = new ConExpression(handle.get_param<jfloat>(locals_offset));
+          break;
+        case T_DOUBLE:
+          exp = new ConExpression(handle.get_param<jdouble>(locals_offset));
+          break;
+        case T_CHAR:
+          exp = new ConExpression(handle.get_param<jchar>(locals_offset));
+          break;
+        default:
+          tty->print_cr(type2name(type));
+          ShouldNotReachHere();
       }
     } else {
       recording = true;
