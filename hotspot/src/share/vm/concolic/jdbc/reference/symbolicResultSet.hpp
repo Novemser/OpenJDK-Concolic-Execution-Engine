@@ -61,6 +61,7 @@ public:
     _sym_stmt_rid = sym_stmt_rid;
     _sql_id = sym_stmt_rid;
     _ref_exp = new ResultSetSymbolExp(this);
+    _ref_exp->inc_ref();
     _size_exp = new ResultSetSymbolExp(this, true);
     _size_exp->inc_ref();
   }

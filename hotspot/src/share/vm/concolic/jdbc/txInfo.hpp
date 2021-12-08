@@ -1,5 +1,6 @@
-#ifndef SHARE_VM_CONCOLIC_JDBC_TXSTATUS_HPP
-#define SHARE_VM_CONCOLIC_JDBC_TXSTATUS_HPP
+#ifndef SHARE_VM_CONCOLIC_JDBC_TXINFO_HPP
+#define SHARE_VM_CONCOLIC_JDBC_TXINFO_HPP
+
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
 #include <sys/types.h>
@@ -21,11 +22,12 @@ public:
 
   inline void record_stmt(SymStmt *stmt) {
     stmt->set_tx_id(_tx_id);
-    _stmts.push_back(stmt); }
+    _stmts.push_back(stmt);
+  }
 
 public:
   void print();
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
-#endif //SHARE_VM_CONCOLIC_JDBC_TXSTATUS_HPP
+#endif //SHARE_VM_CONCOLIC_JDBC_TXINFO_HPP

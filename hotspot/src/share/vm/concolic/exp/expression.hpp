@@ -19,7 +19,7 @@ private:
 public:
   static ulong total_count;
 
-  static void gc(Expression* exp) {
+  static void gc(Expression *exp) {
     if (exp && exp->dec_ref()) {
       delete exp;
     }
@@ -43,7 +43,9 @@ public:
   inline bool able_to_gc() { return _ref_count == 0; }
 
 protected:
-  Expression() : _ref_count(0) { total_count++; }
+  Expression() : _ref_count(0) {
+    total_count++;
+  }
 };
 
 class OpSymExpression : public Expression {
