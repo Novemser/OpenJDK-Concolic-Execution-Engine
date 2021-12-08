@@ -36,16 +36,17 @@ std::set<std::string> SymMap::init_handle_method_names() {
   return set;
 }
 
-std::set<std::string> SymMap::skip_method_names = init_skip_method_names();
+std::map<std::string, bool> SymMap::skip_method_names = init_skip_method_names();
 
-std::set<std::string> SymMap::init_skip_method_names() {
-  std::set<std::string> set;
-  set.insert("<init>"); //really??
-  set.insert("hash");
-  set.insert("keySet"); // really?
-  set.insert("entrySet"); // really?
-  set.insert("values"); // really?
-  return set;
+std::map<std::string, bool> SymMap::init_skip_method_names() {
+  std::map<std::string, bool> map;
+  map["<init>"] = true; //really??
+  map["hash"] = true;
+  map["putAll"] = true;
+  map["keySet"] = true; // really?
+  map["entrySet"] = true; // really?
+  map["values"] = true; // really?
+  return map;
 }
 
 bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
@@ -57,9 +58,20 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
     if (need_recording) {
       SymMap::prepare_param(handle);
     }
-  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled by SymMap");
+  } else {
+    std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
+    if (iter != skip_method_names.end()) {
+      need_symbolize = iter->second;
+      if (!need_symbolize) {
+        bool recording = SymMap::check_param_symbolized(handle);
+        handle.get_callee_method()->print_name(tty);
+        tty->print_cr(" skipped by SymMap, need recording %c", recording ? 'Y' : 'N');
+      }
+    } else {
+      bool recording = SymMap::check_param_symbolized(handle);
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" handled by SymMap, need recording %c", recording ? 'Y' : 'N');
+    }
   }
 
   return need_symbolize;

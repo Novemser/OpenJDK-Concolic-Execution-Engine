@@ -17,8 +17,8 @@ private:
   static std::set<std::string> init_target_class_names();
   static std::set<std::string> handle_method_names;
   static std::set<std::string> init_handle_method_names();
-  static std::set<std::string> skip_method_names;
-  static std::set<std::string> init_skip_method_names();
+  static std::map<std::string, bool> skip_method_names;
+  static std::map<std::string, bool> init_skip_method_names();
   static bool need_recording;
 
 public:

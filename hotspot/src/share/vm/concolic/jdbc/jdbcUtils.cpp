@@ -7,18 +7,20 @@ jlong JdbcUtils::get_conn_connection_id(oop obj) {
   if (klass->name()->equals("com/mysql/jdbc/JDBC4Connection")) {
     return obj->long_field(1736);
   } else {
-    tty->print_cr("Unhandled JDBC connection class");
-    tty->print_cr(klass->name()->as_C_string());
+    tty->print_cr("Unhandled JDBC connection class: %s", klass->name()->as_C_string());
+    ShouldNotCallThis();
   }
 }
 
 jlong JdbcUtils::get_stmt_connection_id(oop obj) {
   Klass *klass = obj->klass();
-  if (SymStmt::target(std::string(klass->name()->as_C_string()))) {
+  ResourceMark rm;
+  std::string class_name(klass->name()->as_C_string());
+  if (SymStmt::target(class_name)) {
     return obj->long_field(24);
   } else {
-    tty->print_cr("Unhandled JDBC statement class");
-    tty->print_cr(klass->name()->as_C_string());
+    tty->print_cr("Unhandled JDBC statement class: %s", klass->name()->as_C_string());
+    ShouldNotCallThis();
   }
 }
 
