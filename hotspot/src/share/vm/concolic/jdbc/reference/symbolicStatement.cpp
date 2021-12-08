@@ -6,6 +6,7 @@
 #include "concolic/exp/expression.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/utils.hpp"
+#include "concolic/jdbc/jdbcUtils.hpp"
 #include "concolic/reference/symbolicString.hpp"
 
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
@@ -147,6 +148,10 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" executed");
 
+    jlong conn_id = JdbcUtils::get_stmt_connection_id(this_obj);
+    tty->print_cr("conn_id:%ld", conn_id);
+    ConcolicMngr::ctx->get_jdbc_mngr().record_stmt(sym_stmt, conn_id);
+
     if (callee_name == "executeQuery") {
       oop res_obj = handle.get_result<oop>(T_OBJECT);
       SymResSet *sym_res_set =
@@ -186,7 +191,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   } else if (callee_name == "setString") {
     value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setNull") {
-    return SymbolExpression::get(Sym_NULL);
+    value_exp = SymbolExpression::get(Sym_NULL);
   } else {
     ShouldNotReachHere();
   }

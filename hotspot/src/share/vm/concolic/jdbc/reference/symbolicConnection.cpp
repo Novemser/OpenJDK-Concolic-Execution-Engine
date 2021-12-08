@@ -5,6 +5,7 @@
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/utils.hpp"
+#include "concolic/jdbc/jdbcUtils.hpp"
 
 const char *SymConn::TYPE_NAME = "com/mysql/jdbc/ConnectionImpl";
 std::string SymConn::sql_template = "";
@@ -41,8 +42,10 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
       ResourceMark rm;
       sql_template = std::string(OopUtils::java_string_to_c(obj));
     } else if (callee_name == "setAutoCommit") {
+      long conn_id = JdbcUtils::get_conn_connection_id(handle.get_param<oop>(0));
+      tty->print_cr("conn_id:%ld", conn_id);
       jboolean auto_commit = handle.get_param<jboolean>(1);
-      ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(auto_commit);
+      ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(auto_commit, conn_id);
     } else if (callee_name == "createStatement") {
     } else {
       ShouldNotCallThis();
