@@ -8,6 +8,7 @@
 #include "concolic/utils.hpp"
 #include "concolic/jdbc/jdbcUtils.hpp"
 #include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicTimestamp.hpp"
 
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
@@ -44,6 +45,7 @@ std::set<std::string> SymStmt::init_skip_method_names() {
   set.insert("setMaxRows");
   set.insert("getQueryTimeout");
   set.insert("setQueryTimeout");
+  set.insert("setTimestamp");
   return set;
 }
 
@@ -60,6 +62,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   map["setDouble"] = T_DOUBLE;
   map["setString"] = T_OBJECT;
   map["setNull"] = T_OBJECT;
+  map["setTimestamp"] = T_OBJECT;
   return map;
 }
 
@@ -189,6 +192,8 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setNull") {
     value_exp = SymbolExpression::get(Sym_NULL);
+  } else if (callee_name == "setTimestamp") {
+    value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
   } else {
     ShouldNotReachHere();
   }
