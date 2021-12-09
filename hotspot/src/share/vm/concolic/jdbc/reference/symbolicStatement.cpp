@@ -1,6 +1,7 @@
 
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
+#include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
@@ -46,6 +47,7 @@ std::set<std::string> SymStmt::init_skip_method_names() {
   set.insert("getQueryTimeout");
   set.insert("setQueryTimeout");
   set.insert("setTimestamp");
+  set.insert("setBigDecimal");
   return set;
 }
 
@@ -63,6 +65,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   map["setString"] = T_OBJECT;
   map["setNull"] = T_OBJECT;
   map["setTimestamp"] = T_OBJECT;
+  map["setBigDecimal"] = T_OBJECT;
   return map;
 }
 
@@ -194,6 +197,8 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymbolExpression::get(Sym_NULL);
   } else if (callee_name == "setTimestamp") {
     value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
+  } else if (callee_name == "setBigDecimal") {
+    value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));
   } else {
     ShouldNotReachHere();
   }

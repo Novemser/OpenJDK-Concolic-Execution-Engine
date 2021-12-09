@@ -24,10 +24,6 @@ private:
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
-
-  static void prepare_param(MethodSymbolizerHandle &handle);
-  static int prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                  int locals_offset);
 };
 
 #endif // ENABLE_CONCOLIC

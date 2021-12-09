@@ -13,6 +13,14 @@ std::set<std::string> SymBigDecimal::handle_method_names = init_handle_method_na
 
 std::set<std::string> SymBigDecimal::init_handle_method_names() {
   std::set<std::string> set;
+  set.insert("valueOf");
+  set.insert("setScale");
+  set.insert("equals");
+  set.insert("add");
+  set.insert("multiply");
+  set.insert("subtract");
+  set.insert("divide");
+  set.insert("compareTo");
   return set;
 }
 
@@ -20,7 +28,6 @@ std::map<std::string, bool> SymBigDecimal::skip_method_names = init_skip_method_
 
 std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
   std::map<std::string, bool> map;
-//  map["<init>"] = false;
   return map;
 }
 
@@ -34,7 +41,9 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     need_recording = handle.general_check_param_symbolized();
-    if (need_recording) {}
+    if (need_recording) {
+      handle.general_prepare_param();
+    }
     need_symbolize = true;
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
@@ -56,8 +65,41 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (!need_recording) {
+    return NULL;
+  }
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
+
+  if (callee_name == "valueOf") {
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
+    SymBigDecimal *sym_bigd = (SymBigDecimal *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+    Expression *value_exp = handle.get_param_list()[0];
+    sym_bigd->set_ref_exp(value_exp);
+  } else if (callee_name == "setScale") {
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
+    SymBigDecimal *sym_bigd = (SymBigDecimal *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+
+    Expression *this_exp = handle.get_param_list()[0];
+    guarantee(this_exp != NULL, "should be");
+    sym_bigd->set_ref_exp(this_exp);
+  } else {
+    Expression *left_exp = handle.get_param_list()[0];
+    Expression *right_exp = handle.get_param_list()[1];
+    if (callee_name == "equals") {
+      exp = new OpSymExpression(left_exp, right_exp, op_eq);
+    } else if (callee_name == "compareTo") {
+      exp = new OpSymExpression(left_exp, right_exp, op_cmp);
+    } else if (callee_name == "add") {
+      exp = new OpSymExpression(left_exp, right_exp, op_add);
+    } else if (callee_name == "subtract") {
+      exp = new OpSymExpression(left_exp, right_exp, op_sub);
+    } else if (callee_name == "multiply") {
+      exp = new OpSymExpression(left_exp, right_exp, op_mul);
+    } else if (callee_name == "divide") {
+      exp = new OpSymExpression(left_exp, right_exp, op_div);
+    }
+  }
 //  ShouldNotCallThis();
 //  if (callee_name == "add") {
 //    oop left_obj = handle.get_param<oop>(0);
@@ -82,11 +124,9 @@ Expression *SymBigDecimal::get_exp_of(oop obj) {
   if (obj->is_symbolic()) {
     SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
     exp = sym_inst->get_ref_exp();
-    assert(exp != NULL, "NOT NULL");
+    guarantee(exp != NULL, "NOT NULL");
   } else {
-    ResourceMark rm;
-    //TODO: get double value from BigDecimal obj;
-    ShouldNotCallThis();
+    exp = new InstanceSymbolExp(obj);
   }
   return exp;
 }

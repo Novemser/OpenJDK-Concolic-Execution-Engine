@@ -40,6 +40,50 @@ Expression *MethodSymbolizerHandle::get_primitive_exp(int offset, BasicType type
   return exp;
 }
 
+
+void MethodSymbolizerHandle::general_prepare_param() {
+  Method *callee_method = this->get_callee_method();
+  int offset = this->get_callee_local_begin_offset();
+
+  if (!callee_method->is_static()) {
+    this->general_prepare_param_helper(T_OBJECT, offset);
+    ++offset;
+  }
+  // handle this
+
+  ResourceMark rm;
+  SignatureStream ss(callee_method->signature());
+  while (!ss.at_return_type()) {
+    offset = this->general_prepare_param_helper(ss.type(), offset);
+    ss.next();
+    ++offset;
+  }
+}
+
+int MethodSymbolizerHandle::general_prepare_param_helper(BasicType type,
+                                                         int locals_offset) {
+  Expression *exp = NULL;
+  if (is_java_primitive(type)) {
+    exp = this->get_primitive_exp(locals_offset, type);
+  } else if (type == T_OBJECT) {
+    oop obj = this->get_param<oop>(locals_offset);
+    if (obj != NULL) {
+      SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+      exp = sym_inst->get_ref_exp();
+      if (exp == NULL) {
+        exp = new InstanceSymbolExp(obj);
+        sym_inst->set_ref_exp(exp);
+      }
+    }
+  } else {
+    tty->print_cr("un_handled type %c", type2char(type));
+    ShouldNotCallThis();
+  }
+
+  this->get_param_list().push_back(exp);
+  return locals_offset;
+}
+
 bool MethodSymbolizerHandle::general_check_param_symbolized() {
   Method *callee_method = this->get_callee_method();
   int offset = this->get_callee_local_begin_offset();

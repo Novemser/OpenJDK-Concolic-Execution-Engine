@@ -57,7 +57,7 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     need_recording = handle.general_check_param_symbolized();
     if (need_recording) {
-      SymList::prepare_param(handle);
+      handle.general_prepare_param();
     }
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
@@ -78,47 +78,6 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
-void SymList::prepare_param(MethodSymbolizerHandle &handle) {
-  Method *callee_method = handle.get_callee_method();
-  guarantee(!callee_method->is_static(), "should be");
-
-  int offset = handle.get_callee_local_begin_offset();
-  // handle this
-  SymList::prepare_param_helper(handle, T_OBJECT, offset);
-  ++offset;
-
-  ResourceMark rm;
-  SignatureStream ss(callee_method->signature());
-  while (!ss.at_return_type()) {
-    offset = SymList::prepare_param_helper(handle, ss.type(), offset);
-    ss.next();
-    ++offset;
-  }
-}
-
-int SymList::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                  int locals_offset) {
-  Expression *exp = NULL;
-  if (is_java_primitive(type)) {
-    exp = handle.get_primitive_exp(locals_offset, type);
-  } else if (type == T_OBJECT) {
-    oop obj = handle.get_param<oop>(locals_offset);
-    if (obj != NULL) {
-      SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-      if (exp == NULL) {
-        exp = new InstanceSymbolExp(obj);
-        sym_inst->set_ref_exp(exp);
-      }
-    }
-  } else {
-    tty->print_cr("un_handled type %c", type2char(type));
-    ShouldNotCallThis();
-  }
-
-  handle.get_param_list().push_back(exp);
-  return locals_offset;
-}
 
 Expression *SymList::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (!need_recording) {
