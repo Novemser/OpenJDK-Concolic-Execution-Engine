@@ -55,7 +55,7 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   bool need_symbolize = true;
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
-    need_recording = SymList::check_param_symbolized(handle);
+    need_recording = handle.general_check_param_symbolized();
     if (need_recording) {
       SymList::prepare_param(handle);
     }
@@ -64,12 +64,12 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
       if (!need_symbolize) {
-        bool recording = SymList::check_param_symbolized(handle);
+        bool recording = handle.general_check_param_symbolized();
         handle.get_callee_method()->print_name(tty);
         tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
       }
     } else {
-      bool recording = SymList::check_param_symbolized(handle);
+      bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
       tty->print_cr(" handled by SymList, need recording %c", recording ? 'Y' : 'N');
     }
@@ -119,51 +119,6 @@ int SymList::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type
   handle.get_param_list().push_back(exp);
   return locals_offset;
 }
-
-
-bool SymList::check_param_symbolized(MethodSymbolizerHandle &handle) {
-  Method *callee_method = handle.get_callee_method();
-  guarantee(!callee_method->is_static(), "should be");
-  int offset = handle.get_callee_local_begin_offset();
-  bool recording = false;
-
-  SymList::check_param_symbolized_helper(handle, T_OBJECT, offset,
-                                         recording);
-  ++offset;
-
-  ResourceMark rm;
-  SignatureStream ss(callee_method->signature());
-  // Only when this or key object is symbolized, we symbolize Map
-  while (!ss.at_return_type()) {
-    offset = SymList::check_param_symbolized_helper(handle, ss.type(), offset,
-                                                    recording);
-    ss.next();
-    ++offset;
-  }
-  return recording;
-}
-
-int SymList::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                           int locals_offset,
-                                           bool &recording) {
-  if (is_java_primitive(type)) {
-    locals_offset += type2size[type] - 1;
-    Expression *exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + locals_offset);
-    if (exp != NULL) {
-      recording = true;
-    }
-  } else if (type == T_OBJECT || type == T_ARRAY) {
-    oop obj = handle.get_param<oop>(locals_offset);
-    if (obj != NULL && obj->is_symbolic()) {
-      recording = true;
-    }
-  } else {
-    ShouldNotCallThis();
-  }
-
-  return locals_offset;
-}
-
 
 Expression *SymList::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (!need_recording) {

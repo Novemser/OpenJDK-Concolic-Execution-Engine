@@ -30,6 +30,8 @@ std::set<std::string> SymResSet::init_handle_method_names() {
   set.insert("getFloat");
   set.insert("getDouble");
   set.insert("getString");
+  set.insert("getTimestamp");
+  set.insert("getBigDecimal");
   return set;
 }
 
@@ -154,7 +156,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymStmt *sym_stmt) {
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                                        const char *col_name, BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'M', type);
+  set_head(ss, 'M', type, obj);
   ss.print("RS_%lu_%d_%s", sym_res_set->_sql_id,
            sym_res_set->_row_id, col_name);
   this->finalize(ss.size());
@@ -163,7 +165,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                                        int col_i, BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'M', type);
+  set_head(ss, 'M', type, obj);
   ss.print("RS_%lu_%d_col%d", sym_res_set->_sql_id,
            sym_res_set->_row_id, col_i);
   this->finalize(ss.size());

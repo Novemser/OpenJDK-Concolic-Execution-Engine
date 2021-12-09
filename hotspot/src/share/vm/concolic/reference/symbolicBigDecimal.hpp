@@ -10,7 +10,13 @@
 class SymBigDecimal : public SymInstance {
 public:
   static const char *TYPE_NAME;
-  static method_set_t symbolized_methods;
+  static std::set<std::string> handle_method_names;
+  static std::set<std::string> init_handle_method_names();
+  static std::map<std::string, bool> skip_method_names;
+  static std::map<std::string, bool> init_skip_method_names();
+  static bool need_recording;
+
+
 private:
   Expression *_exp;
 

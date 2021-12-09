@@ -6,54 +6,50 @@
 #include "concolic/utils.hpp"
 
 const char *SymBigDecimal::TYPE_NAME = "java/math/BigDecimal";
-method_set_t SymBigDecimal::symbolized_methods = init_symbolized_methods();
+bool SymBigDecimal::need_recording = false;
 
-method_set_t SymBigDecimal::init_symbolized_methods() {
-  method_set_t m_set;
-  m_set.insert("<init>");
-//  m_set.insert("add");
-//  m_set.insert("subtract");
-//  m_set.insert("divide");
-//  m_set.insert("multiply");
-  return m_set;
+
+std::set<std::string> SymBigDecimal::handle_method_names = init_handle_method_names();
+
+std::set<std::string> SymBigDecimal::init_handle_method_names() {
+  std::set<std::string> set;
+  return set;
+}
+
+std::map<std::string, bool> SymBigDecimal::skip_method_names = init_skip_method_names();
+
+std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
+  std::map<std::string, bool> map;
+//  map["<init>"] = false;
+  return map;
 }
 
 SymBigDecimal::SymBigDecimal(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 
-SymBigDecimal::~SymBigDecimal() {
-  Expression::gc(_exp);
-}
-
-Expression *SymBigDecimal::get_exp_of(oop obj) {
-  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
-  Expression *exp;
-  if (obj->is_symbolic()) {
-    SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-    exp = sym_inst->get_ref_exp();
-    assert(exp != NULL, "NOT NULL");
-  } else {
-    ResourceMark rm;
-    //TODO: get double value from BigDecimal obj;
-    ShouldNotCallThis();
-  }
-  return exp;
-}
+SymBigDecimal::~SymBigDecimal() { Expression::gc(_exp); }
 
 bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = false;
-  if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
-    int offset = handle.get_callee_local_begin_offset();
-    register intptr_t *locals = handle.get_locals_ptr();
-    Method *callee_method = handle.get_callee_method();
-
+  bool need_symbolize = true;
+  need_recording = false;
+  if (handle_method_names.find(callee_name) != handle_method_names.end()) {
+    need_recording = handle.general_check_param_symbolized();
+    if (need_recording) {}
     need_symbolize = true;
   } else {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr("unhandled by SymBigDecimal:");
-
-    // TODO: handle
-    need_symbolize = true;
+    std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
+    if (iter != skip_method_names.end()) {
+      need_symbolize = iter->second;
+      if (!need_symbolize) {
+        bool recording = handle.general_check_param_symbolized();
+        handle.get_callee_method()->print_name(tty);
+        tty->print_cr(" skipped by SymBigDecimal, need recording %c", recording ? 'Y' : 'N');
+      }
+    } else {
+      bool recording = handle.general_check_param_symbolized();
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" handled by SymBigDecimal, need recording %c", recording ? 'Y' : 'N');
+    }
   }
 
   return need_symbolize;
@@ -77,6 +73,21 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
 //  } else {
 //    ShouldNotCallThis();
 //  }
+  return exp;
+}
+
+Expression *SymBigDecimal::get_exp_of(oop obj) {
+  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
+  Expression *exp;
+  if (obj->is_symbolic()) {
+    SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+    exp = sym_inst->get_ref_exp();
+    assert(exp != NULL, "NOT NULL");
+  } else {
+    ResourceMark rm;
+    //TODO: get double value from BigDecimal obj;
+    ShouldNotCallThis();
+  }
   return exp;
 }
 

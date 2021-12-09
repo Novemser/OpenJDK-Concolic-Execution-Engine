@@ -87,7 +87,9 @@ public:
   }
 
   inline ZeroFrame *get_caller_frame() { return _caller_frame; }
+
   inline ZeroFrame *get_callee_frame() { return _callee_frame; }
+
   inline interpreterState get_callee_istate() { return _callee_istate; }
 
   inline void set_callee_holder_name(const char *c_str) {
@@ -111,7 +113,10 @@ public:
     return *(T *) (get_locals_ptr() - offset);
   }
 
-  Expression* get_primitive_exp(int offset, BasicType type);
+  Expression *get_primitive_exp(int offset, BasicType type);
+
+  bool general_check_param_symbolized();
+  bool general_check_param_symbolized_helper(BasicType type, int &locals_offset);
 
 public:
   inline void clear_param_list() {
