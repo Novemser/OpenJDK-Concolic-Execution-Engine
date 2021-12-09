@@ -44,6 +44,8 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   set.insert("checkRowPos");
   set.insert("checkClosed");
   set.insert("checkColumnBounds");
+  // do not handle clob~
+  set.insert("getClob");
   return set;
 }
 
@@ -74,9 +76,13 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
              skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
+//    oop str_obj = handle.get_param<oop>(1);
+//    ResourceMark rm;
+//    tty->print_cr("%s", OopUtils::java_string_to_c(str_obj));
+
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" handled by SymResSet");
-    // ShouldNotCallThis();
+     ShouldNotCallThis();
   }
 
   return need_symbolize;
