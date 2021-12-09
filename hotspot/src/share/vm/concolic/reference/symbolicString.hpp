@@ -11,7 +11,8 @@ class SymString : public SymInstance {
 public:
   static const char *TYPE_NAME;
   static const char *ARRAY_TYPE_NAME;
-  static method_set_t symbolized_methods;
+  static method_set_t handle_method_names;
+  static std::map<std::string, bool> skip_method_names;
   static bool need_recording;
 private:
   Expression *_ref_exp;
@@ -21,16 +22,12 @@ public:
   SymString(sym_rid_t sym_rid);
   ~SymString();
 
-  Expression *get(int field_offset);
   Expression *get_ref_exp() { return _ref_exp; };
   void set_ref_exp(Expression *exp) {
     Expression::gc(_ref_exp);
     _ref_exp = exp;
     _ref_exp->inc_ref();
   };
-
-  void init_sym_exp(int field_offset, Expression *exp);
-  void set_sym_exp(int field_offset, Expression *exp);
 
   bool need_recursive() { return false; }
   void print();
@@ -39,13 +36,15 @@ public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
-  static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                           intptr_t *locals, int locals_offset,
-                           bool &recording);
+  static void prepare_param(MethodSymbolizerHandle &handle);
+  static int prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                  int locals_offset);
+
   static Expression *get_exp_of(oop obj);
 
 private:
-  static method_set_t init_symbolized_methods();
+  static method_set_t init_handle_method_names();
+  static std::map<std::string, bool> init_skip_method_names();
 };
 
 class StringSymbolExp : public SymbolExpression {
