@@ -9,22 +9,21 @@
 
 const char *SymString::ARRAY_TYPE_NAME = "[Ljava/lang/String;";
 const char *SymString::TYPE_NAME = "java/lang/String";
-method_set_t SymString::symbolized_methods = init_symbolized_methods();
+method_set_t SymString::handle_method_names = init_handle_method_names();
+std::map<std::string, bool> SymString::skip_method_names = init_skip_method_names();
 bool SymString::need_recording = false;
 
-method_set_t SymString::init_symbolized_methods() {
+method_set_t SymString::init_handle_method_names() {
   method_set_t m_set;
   m_set.insert("charAt");
   m_set.insert("compareTo");
   m_set.insert("concat");
   m_set.insert("copyValueOf");
   m_set.insert("compareToIgnoreCase");
-  m_set.insert("contentEquals");
   m_set.insert("contains");
   m_set.insert("endsWith");
   m_set.insert("equals");
   m_set.insert("equalsIgnoreCase");
-  m_set.insert("getBytes");
   m_set.insert("getChars");
   m_set.insert("hashCode");
   m_set.insert("isEmpty");
@@ -45,8 +44,15 @@ method_set_t SymString::init_symbolized_methods() {
   m_set.insert("toLowerCase");
   m_set.insert("toUpperCase");
   m_set.insert("trim");
-  m_set.insert("<init>");
+  m_set.insert("valueOf");
   return m_set;
+}
+
+std::map<std::string, bool> SymString::init_skip_method_names() {
+  std::map<std::string, bool> map;
+  map["<init>"] = false;
+  map["contentEquals"] = false;
+  map["toString"] = false;
 }
 
 SymString::SymString(sym_rid_t sym_rid)
@@ -59,30 +65,6 @@ SymString::~SymString() {
   Expression::gc(_ref_exp);
 }
 
-Expression *SymString::get(int field_offset) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  return _exp;
-}
-
-void SymString::init_sym_exp(int field_offset, Expression *exp) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  exp->inc_ref();
-  _exp = exp;
-}
-
-void SymString::set_sym_exp(int field_offset, Expression *exp) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  Expression::gc(_exp);
-
-  _exp = exp;
-  if (_exp) {
-    _exp->inc_ref();
-  }
-}
-
 void SymString::print() {
   tty->print_cr("SymString: ");
   _ref_exp->print_cr();
@@ -90,125 +72,83 @@ void SymString::print() {
 
 bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = false;
+  bool need_symbolize = true;
   need_recording = false;
-  if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
-    int offset = handle.get_callee_local_begin_offset();
-    register intptr_t *locals = handle.get_locals_ptr();
-    Method *callee_method = handle.get_callee_method();
-
-    if (!callee_method->is_static()) {
-      // handle this
-      SymString::prepare_param(handle, T_OBJECT, locals, offset,
-                               need_recording);
-      ++offset;
+  if (handle_method_names.find(callee_name) != handle_method_names.end()) {
+      need_recording = handle.general_check_param_symbolized();
+    if (need_recording) {
+      SymString::prepare_param(handle);
     }
-
-    ResourceMark rm;
-    SignatureStream ss(callee_method->signature());
-    while (!ss.at_return_type()) {
-      offset = SymString::prepare_param(handle, ss.type(), locals, offset,
-                                        need_recording);
-
-      ss.next();
-      ++offset;
-    }
-    need_symbolize = true;
-  } else if (callee_name == "valueOf") {
-    need_symbolize = true;
-    int offset = handle.get_callee_local_begin_offset();
-    register intptr_t *locals = handle.get_locals_ptr();
-    Method *callee_method = handle.get_callee_method();
-
-    ResourceMark rm;
-    SignatureStream ss(callee_method->signature());
-    if (ss.type() == T_OBJECT) {
-      Expression* exp = NULL;
-      oop obj = *(oop *)(locals - offset);
-      if (obj != NULL) {
-        if (obj->is_symbolic()) {
-          SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-          exp = sym_inst->get_ref_exp();
-          if (exp == NULL) {
-            need_symbolize = false;
-          } else {
-            need_recording = true;
-            handle.get_param_list().push_back(exp);
-          }
-        }
+  } else {
+    std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
+    if (iter != skip_method_names.end()) {
+      need_symbolize = iter->second;
+      if (!need_symbolize) {
+        bool recording = handle.general_check_param_symbolized();
+        handle.get_callee_method()->print_name(tty);
+        tty->print_cr(" skipped by SymString, need recording %c", recording ? 'Y' : 'N');
       }
     } else {
-      SymString::prepare_param(handle, ss.type(), locals, offset,
-                               need_recording);
+      bool recording = handle.general_check_param_symbolized();
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" handled by SymString, need recording %c", recording ? 'Y' : 'N');
     }
   }
 
   return need_symbolize;
 }
 
-int SymString::prepare_param(MethodSymbolizerHandle &handle, BasicType type,
-                             intptr_t *locals, int locals_offset,
-                             bool &recording) {
+void SymString::prepare_param(MethodSymbolizerHandle &handle) {
+  Method *callee_method = handle.get_callee_method();
+
+  int offset = handle.get_callee_local_begin_offset();
+
+  if (!callee_method->is_static()) {
+    SymString::prepare_param_helper(handle, T_OBJECT, offset);
+    ++offset;
+  }
+
+  ResourceMark rm;
+  SignatureStream ss(callee_method->signature());
+  while (!ss.at_return_type()) {
+    offset = SymString::prepare_param_helper(handle, ss.type(), offset);
+    ss.next();
+    ++offset;
+  }
+}
+
+int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+                                 int locals_offset) {
   Expression *exp = NULL;
 
-  if (type == T_OBJECT) {
-    // only consider the situation that object is a string by now
-    oop obj = *(oop *)(locals - locals_offset);
-    if (obj != NULL) {
-      if (obj->is_symbolic()) {
-        recording = true;
-      }
-      if (obj->klass()->name()->equals(TYPE_NAME)) {
-        exp = SymString::get_exp_of(obj);
-      }
+  if (is_java_primitive(type)) {
+    exp = handle.get_primitive_exp(locals_offset, type);
+    locals_offset += type2size[type] - 1;
+  } else if (type == T_OBJECT) {
+    oop obj = handle.get_param<oop>(locals_offset);
+    guarantee(obj != NULL, "should be");
+    if (obj->is_symbolic()) {
+      SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+      exp = sym_inst->get_ref_exp();
+    } else {
+      // only consider the situation that unsymbolized object is a string by now
+      guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME), "should be");
+      exp = SymString::get_exp_of(obj);
     }
   } else if (type == T_ARRAY) {
-    arrayOop arr_obj = *(arrayOop *)(locals - locals_offset);
+    tty->print_cr("record string method having a array param: ");
+    handle.get_callee_method()->print_name(tty);
+    arrayOop arr_obj = handle.get_param<arrayOop>(locals_offset);
     if (arr_obj->is_symbolic()) {
       SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);
       exp = new ArraySymbolExp(arr_obj->get_sym_rid(), sym_arr->get_version(),
                                type);
-      recording = true;
     } else {
       exp = new ArrayInitExpression(NULL_SYM_RID, arr_obj);
     }
   } else {
-    locals_offset += type2size[type] - 1;
-    exp = ConcolicMngr::ctx->get_stack_slot(handle.get_caller_stack_begin_offset() + locals_offset);
-
-    if (!exp) {
-      switch (type) {
-        case T_BYTE:
-          exp = new ConExpression(handle.get_param<jbyte>(locals_offset));
-          break;
-        case T_BOOLEAN:
-          exp = new ConExpression(handle.get_param<jboolean>(locals_offset));
-          break;
-        case T_INT:
-          exp = new ConExpression(handle.get_param<jint>(locals_offset));
-          break;
-        case T_SHORT:
-          exp = new ConExpression(handle.get_param<jshort>(locals_offset));
-          break;
-        case T_LONG:
-          exp = new ConExpression(handle.get_param<jlong>(locals_offset));
-          break;
-        case T_FLOAT:
-          exp = new ConExpression(handle.get_param<jfloat>(locals_offset));
-          break;
-        case T_DOUBLE:
-          exp = new ConExpression(handle.get_param<jdouble>(locals_offset));
-          break;
-        case T_CHAR:
-          exp = new ConExpression(handle.get_param<jchar>(locals_offset));
-          break;
-        default:
-          tty->print_cr(type2name(type));
-          ShouldNotReachHere();
-      }
-    } else {
-      recording = true;
-    }
+    tty->print_cr("unhandled String parameter types!");
+    ShouldNotCallThis();
   }
 
   handle.get_param_list().push_back(exp);
