@@ -45,14 +45,16 @@ method_set_t SymString::init_handle_method_names() {
   m_set.insert("toUpperCase");
   m_set.insert("trim");
   m_set.insert("valueOf");
+  m_set.insert("<init>");
+  m_set.insert("getBytes");
+  m_set.insert("toString");
   return m_set;
 }
 
 std::map<std::string, bool> SymString::init_skip_method_names() {
   std::map<std::string, bool> map;
-  map["<init>"] = false;
   map["contentEquals"] = false;
-  map["toString"] = false;
+  return map;
 }
 
 SymString::SymString(sym_rid_t sym_rid)
@@ -138,6 +140,8 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType ty
   } else if (type == T_ARRAY) {
     tty->print_cr("record string method having a array param: ");
     handle.get_callee_method()->print_name(tty);
+    tty->cr();
+
     arrayOop arr_obj = handle.get_param<arrayOop>(locals_offset);
     if (arr_obj->is_symbolic()) {
       SymArr *sym_arr = ConcolicMngr::ctx->get_sym_array(arr_obj);

@@ -28,6 +28,8 @@ std::set<std::string> SymMap::init_handle_method_names() {
   set.insert("containsKey");
   set.insert("isEmpty");
   set.insert("clear");
+  set.insert("putAll");
+  set.insert("size");
   /**
    * Please revise this operation when you have time!!!
    * Although it is symbolized, it might call some methods which should not be symbolized...
@@ -42,10 +44,10 @@ std::map<std::string, bool> SymMap::init_skip_method_names() {
   std::map<std::string, bool> map;
   map["<init>"] = true; //really??
   map["hash"] = true;
-  map["putAll"] = true;
   map["keySet"] = true; // really?
   map["entrySet"] = true; // really?
   map["values"] = true; // really?
+  map["forEach"] = false; // really?
   return map;
 }
 
@@ -64,8 +66,10 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
       need_symbolize = iter->second;
       if (!need_symbolize) {
         bool recording = SymMap::check_param_symbolized(handle);
-        handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymMap, need recording %c", recording ? 'Y' : 'N');
+        if (recording) {
+          handle.get_callee_method()->print_name(tty);
+          tty->print_cr(" skipped by SymMap, need recording Y");
+        }
       }
     } else {
       bool recording = SymMap::check_param_symbolized(handle);

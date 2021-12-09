@@ -12,7 +12,7 @@
 /**
  * The format of output of Symbol_Expression:
  *     {Y/M/N/V}_{Z/C/B/S/I/F/J/D/[xxx/Lxxx}_{self-defined part}
- *     1. Whether this exp is constant: "Y"->const, "M"->non-const
+ *     1. Whether this exp is constant: "Y"->const, "M"->non-const, "N" -> NULL, "V" -> Void
  *     2. The type of this exp
  *     3. self-defined part for each extended expression
  */

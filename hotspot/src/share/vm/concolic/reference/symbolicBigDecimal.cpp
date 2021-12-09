@@ -86,35 +86,31 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
   } else {
     Expression *left_exp = handle.get_param_list()[0];
     Expression *right_exp = handle.get_param_list()[1];
+    BasicType res_type = handle.get_result_type();
+
+    if (res_type == T_OBJECT) {
+      oop res_obj = handle.get_result<oop>(T_OBJECT);
+      SymBigDecimal *sym_res = (SymBigDecimal *)ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj);
+      Expression* res_exp = NULL;
+      if (callee_name == "add") {
+        res_exp = new OpSymExpression(left_exp, right_exp, op_add);
+      } else if (callee_name == "subtract") {
+        res_exp = new OpSymExpression(left_exp, right_exp, op_sub);
+      } else if (callee_name == "multiply") {
+        res_exp = new OpSymExpression(left_exp, right_exp, op_mul);
+      } else if (callee_name == "divide") {
+        res_exp = new OpSymExpression(left_exp, right_exp, op_div);
+      }
+      sym_res->set_ref_exp(res_exp);
+    }
+    //      oop res_obj = handle.get_result<oop>(T_OBJECT);
     if (callee_name == "equals") {
       exp = new OpSymExpression(left_exp, right_exp, op_eq);
     } else if (callee_name == "compareTo") {
       exp = new OpSymExpression(left_exp, right_exp, op_cmp);
-    } else if (callee_name == "add") {
-      exp = new OpSymExpression(left_exp, right_exp, op_add);
-    } else if (callee_name == "subtract") {
-      exp = new OpSymExpression(left_exp, right_exp, op_sub);
-    } else if (callee_name == "multiply") {
-      exp = new OpSymExpression(left_exp, right_exp, op_mul);
-    } else if (callee_name == "divide") {
-      exp = new OpSymExpression(left_exp, right_exp, op_div);
     }
   }
-//  ShouldNotCallThis();
-//  if (callee_name == "add") {
-//    oop left_obj = handle.get_param<oop>(0);
-//    oop right_obj = handle.get_param<oop>(1);
-//    if (left_obj->is_symbolic() || right_obj->is_symbolic()) {
-//      oop res_obj = handle.get_result<oop>(T_OBJECT);
-//      Expression *left_exp = SymBigDecimal::get_exp_of(left_obj);
-//      Expression *right_exp = SymBigDecimal::get_exp_of(right_obj);
-//      SymBigDecimal *sym_res = (SymBigDecimal *)ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj);
-//      exp = new OpSymExpression(left_exp, right_exp, op_add, true);
-//      sym_res->set_ref_exp(exp);
-//    }
-//  } else {
-//    ShouldNotCallThis();
-//  }
+
   return exp;
 }
 

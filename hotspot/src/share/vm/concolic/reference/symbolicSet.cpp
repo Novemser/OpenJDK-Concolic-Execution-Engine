@@ -22,10 +22,11 @@ std::set<std::string> SymSet::handle_method_names = init_handle_method_names();
 std::set<std::string> SymSet::init_handle_method_names() {
   std::set<std::string> set;
   set.insert("add");
+  set.insert("remove");
   set.insert("contains");
   set.insert("isEmpty");
-  set.insert("size");
   set.insert("clear");
+  set.insert("size");
   return set;
 }
 
@@ -37,8 +38,9 @@ std::map<std::string, bool> SymSet::init_skip_method_names() {
   map["iterator"] = true; // really???
   map["spliterator"] = true; // really???
   map["equalsSnapshot"] = true; // really???
+  map["entries"] = true; // really???
+  // not original List api, (belongs to hibernate.persistentBag)
   map["getSnapshot"] = false; // really???
-  map["entries"] = false; // really???
   return map;
 }
 
@@ -55,11 +57,6 @@ bool SymSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
-      if (!need_symbolize) {
-        bool recording = SymSet::check_param_symbolized(handle);
-        handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymSet, need recording %c", recording ? 'Y' : 'N');
-      }
     } else {
       bool recording = SymSet::check_param_symbolized(handle);
       handle.get_callee_method()->print_name(tty);

@@ -24,9 +24,14 @@ std::set<std::string> SymList::init_handle_method_names() {
   set.insert("add");
   set.insert("get");
   set.insert("remove");
+  set.insert("removeAll");
+  set.insert("addAll");
   set.insert("contains");
   set.insert("isEmpty");
   set.insert("clear");
+  set.insert("size");
+  set.insert("toArray");
+  set.insert("empty");
   return set;
 }
 
@@ -35,18 +40,20 @@ std::map<std::string, bool> SymList::skip_method_names = init_skip_method_names(
 std::map<std::string, bool> SymList::init_skip_method_names() {
   std::map<std::string, bool> map;
   map["<init>"] = true;// really?
-  map["iterator"] = true;
   map["sort"] = true;
+  map["iterator"] = true;
   map["listIterator"] = true; // really???
-  map["addAll"] = true; // really???
-  map["toArray"] = true; // really???
-  map["indexOf"] = true; // really???
   map["spliterator"] = true; // really???
-  map["equalsSnapshot"] = true; // really???
-  map["getSnapshot"] = true; // really???
+  map["indexOf"] = true; // really???
   map["entries"] = true; // really???
-  map["getOrphans"] = true; // really???
-  map["size"] = false; // really???
+  // not original List api, (belongs to hibernate.persistentBag)
+  map["getOrphans"] = false;
+  map["isSnapshotEmpty"] = false;
+  map["getSnapshot"] = false;
+  map["equalsSnapshot"] = false;
+  map["needsRecreate"] = false;
+  map["countOccurrences"] = false;
+  map["isWrapper"] = false;
   return map;
 }
 
@@ -63,11 +70,13 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
-      if (!need_symbolize) {
-        bool recording = handle.general_check_param_symbolized();
-        handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
-      }
+//      if (!need_symbolize) {
+//        bool recording = handle.general_check_param_symbolized();
+//        if (recording) {
+//          handle.get_callee_method()->print_name(tty);
+//          tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
+//        }
+//      }
     } else {
       bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
