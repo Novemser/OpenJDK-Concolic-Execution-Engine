@@ -32,6 +32,7 @@ enum SymbolicOp {
   op_2b = 25,
   op_2c = 26,
   op_2s = 27,
+  op_str = 28,
   op_num,
   op_null
 };
@@ -39,12 +40,13 @@ static const SymbolicOp NotSymbolicOp[op_num] = {
     op_null, op_null, op_null, op_null, op_null, op_null, op_null,
     op_null, op_ge,   op_le,   op_gt,   op_lt,   op_ne,   op_eq,
     op_null, op_null, op_null, op_null, op_null, op_null, op_null,
-    op_null, op_null, op_null, op_null, op_null, op_null, op_null};
+    op_null, op_null, op_null, op_null, op_null, op_null, op_null, 
+    op_null};
 
 static const char *SymbolicOpStr[op_num] = {
     "+",   "-",  "*",  "&",  "|",  "^",   "/",    "%",    "<",  ">",
     "<=",  ">=", "==", "!=", "-",  "cmp", "cmpl", "cmpg", "<<", ">>",
-    ">>u", "2i", "2f", "2l", "2d", "2b",  "2c",   "2s"};
+    ">>u", "2i", "2f", "2l", "2d", "2b",  "2c",   "2s", "str"};
 
 #endif
 
