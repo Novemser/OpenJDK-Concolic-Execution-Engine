@@ -198,7 +198,7 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
       exp = new MethodReturnSymbolExp();
   }
 
-  ConcolicMngr::record_path_condition(new MethodExpression(
+  ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
       handle.get_callee_holder_name(), handle.get_callee_name(),
       handle.get_param_list(), exp));
   return exp;

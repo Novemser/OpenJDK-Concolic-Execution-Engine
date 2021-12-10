@@ -41,8 +41,9 @@ static const SymbolicOp NotSymbolicOp[op_num] = {
     op_null, op_null, op_null, op_null, op_null, op_null, op_null,
     op_null, op_null, op_null, op_null, op_null, op_null, op_null};
 
+// '@' is divide...
 static const char *SymbolicOpStr[op_num] = {
-    "+",   "-",  "*",  "&",  "|",  "^",   "/",    "%",    "<",  ">",
+    "+",   "-",  "*",  "&",  "|",  "^",   "@",    "%",    "<",  ">",
     "<=",  ">=", "==", "!=", "-",  "cmp", "cmpl", "cmpg", "<<", ">>",
     ">>u", "2i", "2f", "2l", "2d", "2b",  "2c",   "2s"};
 

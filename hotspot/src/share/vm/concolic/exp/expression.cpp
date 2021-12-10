@@ -38,30 +38,13 @@ OpSymExpression::~OpSymExpression() {
 }
 
 void OpSymExpression::print() {
-#ifdef ONELINE
-  tty->print("(%s ", SymbolicOpStr[(int) _op]);
+  tty->print("(%c %s ", (_left != NULL) ? '2' : '1', SymbolicOpStr[(int) _op]);
   if (_left) {
     _left->print();
     tty->print(" ");
   }
-  _right->print();
+  Expression::print_on_maybe_null(_right);
   tty->print(")");
-#else
-  int pos = tty->indentation();
-  tty->indent().print("(");
-  // tty->set_indentation(tty->position());
-  // tty->indent().print("%s ", SymbolicOpStr[(int)_op]);
-  tty->indent().print_cr(SymbolicOpStr[(int)_op]);
-  tty->inc(2);
-  if (_left) {
-    _left->print();
-    tty->cr();
-  }
-  _right->print();
-  tty->cr();
-  tty->set_indentation(pos);
-  tty->indent().print(")");
-#endif
 }
 
 ConExpression::ConExpression(jboolean z) {

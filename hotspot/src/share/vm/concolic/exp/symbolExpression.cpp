@@ -45,10 +45,10 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
 
 FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
                                BasicType type) {
-  int length =
-      sprintf(str_buf, "S%c_%lu.%d", type2char(type), sym_rid, field_index);
-
-  set(str_buf, length);
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', type);
+  ss.print("%lu_field%d", sym_rid, field_index);
+  this->finalize(ss.size());
 }
 
 ArraySymbolExp::ArraySymbolExp(sym_rid_t sym_arr_oid, int version,
