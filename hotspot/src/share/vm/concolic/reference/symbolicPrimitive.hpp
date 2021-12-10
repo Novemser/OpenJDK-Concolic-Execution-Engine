@@ -39,7 +39,13 @@ public:
 public:
   static Expression *get_exp_of(oop obj);
   static Expression *get_exp_of_helper(oop obj);
+  static bool invoke_method_helper(MethodSymbolizerHandle &handle);
+  static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 };
+
+bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type);
+Expression *primitive_finish_method_helper(MethodSymbolizerHandle &handle,BasicType type);
+BasicType primitive_target(const std::string &class_name);
 
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICPRIMITIVE_HPP

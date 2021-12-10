@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/reference/symbolicPrimitive.hpp"
+#include "symbolicString.hpp"
 
 template <>
 const char *SymPrimitive<jchar>::ARRAY_TYPE_NAME = "[Ljava/lang/Character;";
@@ -112,5 +113,146 @@ template class SymPrimitive<jshort>;
 template class SymPrimitive<jlong>;
 template class SymPrimitive<jfloat>;
 template class SymPrimitive<jdouble>;
+
+template <> bool SymPrimitive<jchar>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jboolean>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jbyte>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    const std::string &callee_name = handle.get_callee_name();
+    bool need_symbolize = false;
+
+    if (callee_name == "toHexString") {
+        need_symbolize = handle.general_check_param_symbolized();
+        if (need_symbolize) {
+            handle.general_prepare_param();
+        }
+    }
+
+    return need_symbolize;
+}
+template <> bool SymPrimitive<jshort>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jlong>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jfloat>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+template <> bool SymPrimitive<jdouble>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    return false;
+}
+
+template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+
+template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    const std::string &callee_name = handle.get_callee_name();
+    Expression *exp = NULL;
+
+    if (callee_name == "toHexString") {
+        exp = handle.get_param_list()[0];
+        oop res_obj = handle.get_result<oop>(T_OBJECT);
+        guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
+        SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+        sym_res_str->set_ref_exp(new OpSymExpression(exp, op_str));
+    }
+
+    return exp;
+}
+
+template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression * SymPrimitive<jfloat>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+
+bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type){
+    switch (type) {
+        case T_CHAR:
+            return SymPrimitive<jchar>::invoke_method_helper(handle);
+        case T_BOOLEAN:
+            return SymPrimitive<jboolean>::invoke_method_helper(handle);
+        case T_BYTE:
+            return SymPrimitive<jbyte>::invoke_method_helper(handle);
+        case T_INT:
+            return SymPrimitive<jint>::invoke_method_helper(handle);
+        case T_SHORT:
+            return SymPrimitive<jshort>::invoke_method_helper(handle);
+        case T_LONG:
+            return SymPrimitive<jlong>::invoke_method_helper(handle);
+        case T_FLOAT:
+            return SymPrimitive<jfloat>::invoke_method_helper(handle);
+        case T_DOUBLE:
+            return SymPrimitive<jdouble>::invoke_method_helper(handle);
+        default:
+            ShouldNotReachHere();
+    }
+}
+
+Expression *primitive_finish_method_helper(MethodSymbolizerHandle &handle, BasicType type){
+    switch (type) {
+        case T_CHAR:
+            return SymPrimitive<jchar>::finish_method_helper(handle);
+        case T_BOOLEAN:
+            return SymPrimitive<jboolean>::finish_method_helper(handle);
+        case T_BYTE:
+            return SymPrimitive<jbyte>::finish_method_helper(handle);
+        case T_INT:
+            return SymPrimitive<jint>::finish_method_helper(handle);
+        case T_SHORT:
+            return SymPrimitive<jshort>::finish_method_helper(handle);
+        case T_LONG:
+            return SymPrimitive<jlong>::finish_method_helper(handle);
+        case T_FLOAT:
+            return SymPrimitive<jfloat>::finish_method_helper(handle);
+        case T_DOUBLE:
+            return SymPrimitive<jdouble>::finish_method_helper(handle);
+        default:
+            ShouldNotReachHere();
+    }
+}
+
+BasicType primitive_target(const std::string &class_name){
+    if (class_name == SymPrimitive<jchar>::TYPE_NAME){
+        return T_CHAR;
+    } else if(class_name == SymPrimitive<jboolean>::TYPE_NAME){
+        return T_BOOLEAN;
+    } else if (class_name == SymPrimitive<jbyte>::TYPE_NAME){
+        return T_BYTE;
+    } else if (class_name == SymPrimitive<jint>::TYPE_NAME){
+        return T_INT;
+    } else if(class_name == SymPrimitive<jshort>::TYPE_NAME){
+        return T_SHORT;
+    } else if (class_name == SymPrimitive<jlong>::TYPE_NAME){
+        return T_LONG;
+    } else if (class_name == SymPrimitive<jfloat>::TYPE_NAME){
+        return T_FLOAT;
+    } else if (class_name == SymPrimitive<jdouble>::TYPE_NAME){
+        return T_DOUBLE;
+    } else{
+        return T_ILLEGAL;
+    }
+}
 
 #endif

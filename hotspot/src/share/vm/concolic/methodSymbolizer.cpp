@@ -12,6 +12,7 @@
 #include "concolic/reference/symbolicSet.hpp"
 #include "concolic/reference/symbolicList.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
+#include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
@@ -69,8 +70,11 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   bool need_symbolize = false;
   SymMethodSet *sym_methods =
       this->get_sym_methods(_handle.get_callee_holder_name());
+  BasicType basicType = primitive_target(_handle.get_callee_holder_name());
 
-  if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
+  if (basicType != T_ILLEGAL) {
+    need_symbolize = primitive_invoke_method_helper(_handle, basicType);
+  } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
     need_symbolize = SymString::invoke_method_helper(_handle);
   } else if (SymConn::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymConn::invoke_method_helper(_handle);
@@ -107,9 +111,13 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
 void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
   if (caller_frame == _handle.get_caller_frame()) {
     Expression *exp = NULL;
-    if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
+    BasicType basicType = primitive_target(_handle.get_callee_holder_name());
+
+    if (basicType != T_ILLEGAL) {
+      exp = primitive_finish_method_helper(_handle, basicType);
+    } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
       exp = SymString::finish_method_helper(_handle);
-    }else if (SymConn::target(_handle.get_callee_holder_name())) {
+    } else if (SymConn::target(_handle.get_callee_holder_name())) {
       exp = SymConn::finish_method_helper(_handle);
     } else if (SymStmt::target(_handle.get_callee_holder_name())) {
       exp = SymStmt::finish_method_helper(_handle);
