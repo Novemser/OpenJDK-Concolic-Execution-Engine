@@ -1,6 +1,5 @@
 #ifdef ENABLE_CONCOLIC
 
-#include <concolic/exp/methodExpression.hpp>
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "symbolicString.hpp"
 
