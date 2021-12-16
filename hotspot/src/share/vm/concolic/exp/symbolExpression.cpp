@@ -43,6 +43,14 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   this->finalize(ss.size());
 }
 
+KeySymbolExp::KeySymbolExp(oop obj) {
+    stringStream ss(str_buf, BUF_SIZE);
+    // TODO: better print it
+    set_head(ss, 'K', T_OBJECT, obj);
+    ss.print("%lu", obj->get_sym_rid());
+    this->finalize(ss.size());
+}
+
 FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
                                BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
