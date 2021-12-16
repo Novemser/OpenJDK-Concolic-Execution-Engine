@@ -22,6 +22,9 @@ public:
     SymKey(sym_rid_t sym_rid, oop obj);
     ~SymKey();
 
+    void init_sym_exp(int field_offset, Expression *exp);
+    void set_sym_exp(int field_offset, Expression *exp);
+
     inline static bool target(const std::string &class_name) {
         return class_name == TYPE_NAME;
     }

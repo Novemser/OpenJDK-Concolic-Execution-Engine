@@ -2,6 +2,7 @@
 
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/reference/symbolicMap.hpp"
+#include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
 

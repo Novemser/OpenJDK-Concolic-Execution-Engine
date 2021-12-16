@@ -5,13 +5,13 @@
 #include "concolic/utils.hpp"
 
 const char *SymKey::TYPE_NAME = "org/hibernate/engine/spi/EntityKey";
-//method_set_t SymKey::symbolized_methods = init_symbolized_methods();
-//
-//method_set_t SymKey::init_symbolized_methods() {
-//    method_set_t m_set;
-////    m_set.insert("<init>");
-//    return m_set;
-//}
+method_set_t SymKey::symbolized_methods = init_symbolized_methods();
+
+method_set_t SymKey::init_symbolized_methods() {
+    method_set_t m_set;
+    m_set.insert("<init>");
+    return m_set;
+}
 
 SymKey::SymKey(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 SymKey::SymKey(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new KeySymbolExp(obj)) {}
@@ -35,6 +35,13 @@ Expression *SymKey::get_exp_of(oop obj) {
     return exp;
 }
 
+void SymKey::init_sym_exp(int field_offset, Expression *exp) {
+    ShouldNotCallThis();
+}
+void SymKey::set_sym_exp(int field_offset, Expression *exp) {
+    ShouldNotCallThis();
+}
+
 bool SymKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
     const std::string &callee_name = handle.get_callee_name();
     bool need_symbolize = false;
@@ -42,7 +49,7 @@ bool SymKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
         need_symbolize = true;
     } else {
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr("unhandled by SymKey:");
+        tty->print_cr(" unhandled by SymKey:");
     }
 
     return need_symbolize;
