@@ -1,14 +1,11 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "oops/oop.inline.hpp"
-#include "runtime/handles.hpp"
-#include "runtime/fieldDescriptor.hpp"
-#include "oops/instanceKlass.hpp"
-#include "precompiled/precompiled.hpp"
-#include "oops/klass.inline.hpp"
 #include "concolic/exp/symbolExpression.hpp"
-#include "utilities/ostream.hpp"
 #include "concolic/utils.hpp"
+#include "runtime/fieldDescriptor.hpp"
+#include "runtime/handles.hpp"
+#include "precompiled/precompiled.hpp"
+#include "utilities/ostream.hpp"
 
 char SymbolExpression::str_buf[SymbolExpression::BUF_SIZE];
 char SymbolExpression::temp_buf[SymbolExpression::BUF_SIZE];
@@ -91,7 +88,7 @@ KeySymbolExp::KeySymbolExp(oop obj) {
     tty->print_cr("---------- identifier ----------");
     oop identifier = OopUtils::obj_field_by_name(obj, "identifier", "Ljava/io/Serializable;");
     assert(identifier->klass()->name()->equals("Ljava/lang/Long"), "should be");
-    long identifier_value = OopUtils::long_field_by_name(identifier, "value", "I");
+    long identifier_value = OopUtils::long_field_by_name(identifier, "value", "J");
     tty->print_cr("identifier: %ld", identifier_value);
     ss.print("%ld", identifier_value);
 
