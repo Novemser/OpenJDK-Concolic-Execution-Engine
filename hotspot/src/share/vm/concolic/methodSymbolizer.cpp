@@ -136,6 +136,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymBigDecimal::finish_method_helper(_handle);
     } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
       exp = SymTimestamp::finish_method_helper(_handle);
+    } else if (SymKey::target(_handle.get_callee_holder_name())) {
+      exp = SymKey::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }

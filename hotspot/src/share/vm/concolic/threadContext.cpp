@@ -13,6 +13,7 @@
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/reference/symbolicKey.hpp"
 #include "utilities/vmError.hpp"
+#include "utilities/exceptions.hpp"
 
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
   init_sym_rid_counter();
@@ -90,12 +91,12 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
       sym_inst = new SymTimestamp(sym_rid, obj);
-  } else if (klass_symbol->equals(SymKey::TYPE_NAME)) {
-      sym_inst = new SymKey(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {
-    sym_inst = new SymResSet(sym_rid);
+      sym_inst = new SymResSet(sym_rid);
+  } else if (SymKey::target(class_name)) {
+      sym_inst = new SymKey(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);
   }
@@ -157,7 +158,24 @@ void ThreadContext::symbolize_recursive(oop obj) {
 //  SimpleFieldPrinter field_printer(obj);
 //   field_printer.do_recursive();
 
-  FieldSymbolizer field_symbolzier(obj, *this);
+    FieldSymbolizer field_symbolzier(obj, *this);
+//    tty->print_cr("++++++++++++++++++++++++");
+//    TempNewSymbol field_name = SymbolTable::new_symbol("b", 1, _thread);
+//    TempNewSymbol field_signature = SymbolTable::new_symbol("Ljava/lang/Byte;", 16, _thread);
+////    Symbol *field_name = SymbolTable::new_symbol("b", 1, _thread);
+////    Symbol *field_signature = SymbolTable::new_symbol("Ljava/lang/Byte;", 16, _thread);
+////    Symbol *field_signature = ((InstanceKlass*) obj->klass())->field_signature(0);
+//    field_name->print();
+//    tty->cr();
+//    field_signature->print();
+//    tty->cr();
+//    fieldDescriptor fd;
+//    obj->klass()->find_field(field_name, field_signature, &fd);
+//    fd.print();
+//    tty->cr();
+//    obj->obj_field(fd.offset())->print();
+//    tty->print_cr("++++++++++++++++++++++++");
+
   field_symbolzier.do_recursive();
   // OopTraverser oop_traverser;
   // tty->print_cr(CL_CYAN"================================================================="CNONE);

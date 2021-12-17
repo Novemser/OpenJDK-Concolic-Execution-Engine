@@ -12,9 +12,17 @@
 
 class SymKey : public SymInstance {
 public:
+
+  static bool need_recording;
     static const char *TYPE_NAME;
+
+    static std::set<std::string> target_class_names;
+    static std::set<std::string> init_target_class_names();
     static method_set_t symbolized_methods;
+    static method_set_t init_symbolized_methods();
+
 private:
+    exp_map_t _exps;
     Expression *_exp;
 
 public:
@@ -26,7 +34,7 @@ public:
     void set_sym_exp(int field_offset, Expression *exp);
 
     inline static bool target(const std::string &class_name) {
-        return class_name == TYPE_NAME;
+        return target_class_names.find(class_name) != target_class_names.end();
     }
 
     Expression *get_ref_exp() { return _exp; };
@@ -44,8 +52,6 @@ public:
     static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
     static Expression *get_exp_of(oop obj);
 
-private:
-    static method_set_t init_symbolized_methods();
 };
 
 
