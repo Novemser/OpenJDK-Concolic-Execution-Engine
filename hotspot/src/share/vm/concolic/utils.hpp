@@ -18,21 +18,39 @@
 
 namespace OopUtils {
 
-bool is_java_string_interned(oop str_obj);
+    bool is_java_string_interned(oop str_obj);
 
-typeArrayOop java_string_to_char_array(oop str_obj);
+    typeArrayOop java_string_to_char_array(oop str_obj);
+
+    Klass* get_fd_by_name(oop obj, const std::string &name, const std::string &signature, fieldDescriptor& ret_fd);
+
+#define DECLARE_GET_FIELD_BY_NAME(ret_type, field_type) \
+    ret_type field_type##_field_by_name(oop obj, const std::string &name, const std::string &signature)
+
+    DECLARE_GET_FIELD_BY_NAME(oop, obj);
+    DECLARE_GET_FIELD_BY_NAME(jbyte, byte);
+    DECLARE_GET_FIELD_BY_NAME(jchar, char);
+    DECLARE_GET_FIELD_BY_NAME(jboolean, bool);
+    DECLARE_GET_FIELD_BY_NAME(jint, int);
+    DECLARE_GET_FIELD_BY_NAME(jshort, short);
+    DECLARE_GET_FIELD_BY_NAME(jlong, long);
+    DECLARE_GET_FIELD_BY_NAME(jfloat, float);
+    DECLARE_GET_FIELD_BY_NAME(jdouble, double);
+    DECLARE_GET_FIELD_BY_NAME(address, address);
+
+
 /**
  * Do not forget to use ResourceMark before this function call!
  */
-const char *java_string_to_c(oop str_obj);
-jchar java_char_to_c(oop char_obj);
-jboolean java_boolean_to_c(oop bool_obj);
-jbyte java_byte_to_c(oop byte_obj);
-jint java_int_to_c(oop int_obj);
-jshort java_short_to_c(oop short_obj);
-jlong java_long_to_c(oop long_obj);
-jfloat java_float_to_c(oop float_obj);
-jdouble java_double_to_c(oop double_obj);
+    const char *java_string_to_c(oop str_obj);
+    jchar java_char_to_c(oop char_obj);
+    jboolean java_boolean_to_c(oop bool_obj);
+    jbyte java_byte_to_c(oop byte_obj);
+    jint java_int_to_c(oop int_obj);
+    jshort java_short_to_c(oop short_obj);
+    jlong java_long_to_c(oop long_obj);
+    jfloat java_float_to_c(oop float_obj);
+    jdouble java_double_to_c(oop double_obj);
 } // namespace OopUtils
 
 #endif // ENABLE_CONCOLIC
