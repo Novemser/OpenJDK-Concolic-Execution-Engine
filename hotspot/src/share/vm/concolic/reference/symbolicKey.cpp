@@ -1,8 +1,8 @@
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/concolicMngr.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/reference/symbolicKey.hpp"
-#include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
 
 

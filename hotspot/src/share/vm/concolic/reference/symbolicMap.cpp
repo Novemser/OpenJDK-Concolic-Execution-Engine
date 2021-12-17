@@ -1,11 +1,10 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/methodExpression.hpp"
-#include "concolic/reference/symbolicMap.hpp"
-#include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/concolicMngr.hpp"
+#include "concolic/exp/methodExpression.hpp"
+#include "concolic/reference/symbolicKey.hpp"
+#include "concolic/reference/symbolicMap.hpp"
 #include "concolic/utils.hpp"
-#include "symbolicKey.hpp"
 
 bool SymMap::need_recording = false;
 
