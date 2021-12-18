@@ -37,6 +37,7 @@ public:
         return target_class_names.find(class_name) != target_class_names.end();
     }
 
+    Expression *get(int field_offset);
     Expression *get_ref_exp() { return _exp; };
     void set_ref_exp(Expression *exp) {
         Expression::gc(_exp);

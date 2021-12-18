@@ -57,11 +57,6 @@ public:
     InstanceSymbolExp(oop obj);
 };
 
-class KeySymbolExp : public SymbolExpression {
-public:
-    KeySymbolExp(oop obj);
-};
-
 class FieldSymbolExp : public SymbolExpression {
 public:
   FieldSymbolExp(sym_rid_t sym_rid, int field_index, BasicType type);

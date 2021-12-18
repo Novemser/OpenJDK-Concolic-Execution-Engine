@@ -1,8 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/symbolExpression.hpp"
-#include "concolic/utils.hpp"
-#include "runtime/fieldDescriptor.hpp"
 #include "runtime/handles.hpp"
 #include "precompiled/precompiled.hpp"
 #include "utilities/ostream.hpp"
@@ -45,57 +43,6 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   set_head(ss, 'M', T_OBJECT, obj);
   ss.print("%lu", obj->get_sym_rid());
   this->finalize(ss.size());
-}
-
-KeySymbolExp::KeySymbolExp(oop obj) {
-    stringStream ss(str_buf, BUF_SIZE);
-    ss.print("K_");
-
-    tty->print_cr("KeySymbolExp::::::::::::::::::::::::::");
-    tty->print_cr("---------- persister ----------");
-    oop persister = OopUtils::obj_field_by_name(obj, "persister", "Lorg/hibernate/persister/entity/EntityPersister;");
-    tty->print_cr("---------- table names ----------");
-    Symbol *persister_klass_name = persister->klass()->name();
-    if (persister_klass_name->equals("org/hibernate/persister/entity/SingleTableEntityPersister")) {
-        objArrayOop table_names =
-                (objArrayOop)OopUtils::obj_field_by_name(persister, "qualifiedTableNames","[Ljava/lang/String;");
-        int table_names_length = table_names->length();
-        for (int i = 0; i < table_names_length; i++) {
-            oop table_name = table_names->obj_at(i);
-            const char *c_table_name = OopUtils::java_string_to_c(table_name);
-            tty->print("%s ", c_table_name);
-            ss.print("%s___", c_table_name);
-        }
-        tty->cr();
-    } else if (persister_klass_name->equals("org/hibernate/persister/entity/JoinedSubclassEntityPersister")) {
-        objArrayOop table_names =
-                (objArrayOop)OopUtils::obj_field_by_name(persister,"naturalOrderTableNames","[Ljava/lang/String;");
-        int table_names_length = table_names->length();
-        for (int i = 0; i < table_names_length; i++) {
-            oop table_name = table_names->obj_at(i);
-            const char *c_table_name = OopUtils::java_string_to_c(table_name);
-            tty->print("%s ", c_table_name);
-            ss.print("%s___", c_table_name);
-        }
-        tty->cr();
-    } else {
-        assert(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
-        oop tableName = OopUtils::obj_field_by_name(persister, "tableName", "Ljava/lang/String;");
-        const char *c_table_name = OopUtils::java_string_to_c(tableName);
-        tty->print("%s ", c_table_name);
-        ss.print("%s___", c_table_name);
-    }
-    tty->print_cr("---------- identifier ----------");
-    oop identifier = OopUtils::obj_field_by_name(obj, "identifier", "Ljava/io/Serializable;");
-    assert(identifier->klass()->name()->equals("Ljava/lang/Long"), "should be");
-    long identifier_value = OopUtils::long_field_by_name(identifier, "value", "J");
-    tty->print_cr("identifier: %ld", identifier_value);
-    ss.print("%ld", identifier_value);
-
-    tty->print_cr(":::::::::::::::::::::::::::");
-
-    ss.print("_%lu", obj->get_sym_rid());
-    this->finalize(ss.size());
 }
 
 FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,

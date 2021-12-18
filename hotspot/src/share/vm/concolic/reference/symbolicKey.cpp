@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/concolicMngr.hpp"
+#include "concolic/exp/keyExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/reference/symbolicKey.hpp"
 #include "concolic/utils.hpp"
@@ -19,7 +20,7 @@ std::set<std::string> SymKey::target_class_names = init_target_class_names();
 std::set<std::string> SymKey::init_target_class_names() {
     std::set<std::string> set;
     set.insert("org/hibernate/engine/spi/EntityKey");
-//    set.insert("org/hibernate/engine/spi/CollectionKey");
+    set.insert("org/hibernate/engine/spi/CollectionKey");
     return set;
 }
 
@@ -42,8 +43,14 @@ SymKey::~SymKey() {
     }
 }
 
+Expression *SymKey::get(int field_offset) {
+  exp_map_t::iterator iter = _exps.find(field_offset);
+  return iter == _exps.end() ? NULL : iter->second;
+}
+
 Expression *SymKey::get_exp_of(oop obj) {
-//    assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
+  ShouldNotCallThis();
+  ResourceMark rm;
     Expression *exp;
     if (obj->is_symbolic()) {
         SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);

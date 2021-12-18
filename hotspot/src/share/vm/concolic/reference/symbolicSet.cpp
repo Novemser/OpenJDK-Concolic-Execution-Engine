@@ -1,5 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
+#include "concolic/exp/keyExpression.hpp"
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/reference/symbolicKey.hpp"
 #include "concolic/reference/symbolicSet.hpp"
