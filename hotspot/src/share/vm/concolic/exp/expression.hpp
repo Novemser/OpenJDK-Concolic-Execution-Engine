@@ -34,7 +34,7 @@ public:
     if (exp) {
       exp->print();
     } else {
-      tty->print("??");
+      tty->print("?");
     }
   }
 
