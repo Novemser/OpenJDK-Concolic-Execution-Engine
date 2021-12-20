@@ -92,9 +92,9 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymBigDecimal::invoke_method_helper(_handle);
   } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
-      need_symbolize = SymTimestamp::invoke_method_helper(_handle);
+    need_symbolize = SymTimestamp::invoke_method_helper(_handle);
   } else if (SymKey::target(_handle.get_callee_holder_name())) {
-      need_symbolize = SymKey::invoke_method_helper(_handle);
+    need_symbolize = SymKey::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {

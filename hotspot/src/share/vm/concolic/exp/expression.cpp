@@ -63,17 +63,17 @@ ConExpression::ConExpression(jchar b) {
 }
 
 ConExpression::ConExpression(jint i) {
-  int ret = sprintf(_str, "Y_I_0x%x", i);
+  int ret = sprintf(_str, "Y_I_%d", i);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jshort s) {
-  int ret = sprintf(_str, "Y_S_0x%x", s);
+  int ret = sprintf(_str, "Y_S_%d", s);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jlong l) {
-  int ret = sprintf(_str, "Y_J_0x%lx", l);
+  int ret = sprintf(_str, "Y_J_%ld", l);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 

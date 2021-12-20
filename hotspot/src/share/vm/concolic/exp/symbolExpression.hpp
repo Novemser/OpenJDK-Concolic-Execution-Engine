@@ -54,7 +54,7 @@ public:
 
 class InstanceSymbolExp : public SymbolExpression {
 public:
-    InstanceSymbolExp(oop obj);
+  InstanceSymbolExp(oop obj);
 };
 
 class FieldSymbolExp : public SymbolExpression {

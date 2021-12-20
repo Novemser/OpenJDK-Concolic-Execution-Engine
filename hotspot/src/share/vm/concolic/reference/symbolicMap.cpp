@@ -113,9 +113,6 @@ int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
       if (exp == NULL) {
         ResourceMark rm;
         if (SymKey::target(obj->klass()->name()->as_C_string())) {
-          if (OopUtils::obj_field_by_name(obj, "identifier", "Ljava/io/Serializable;")->is_symbolic()) {
-            assert(false, "symbolic identifier is not handled now");
-          }
           exp = new KeySymbolExp(obj);
           sym_inst->set_ref_exp(exp);
         } else {

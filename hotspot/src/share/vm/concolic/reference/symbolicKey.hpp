@@ -51,8 +51,6 @@ public:
 public:
     static bool invoke_method_helper(MethodSymbolizerHandle &handle);
     static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
-    static Expression *get_exp_of(oop obj);
-
 };
 
 

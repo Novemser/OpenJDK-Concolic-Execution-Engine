@@ -7,13 +7,6 @@
 #include "concolic/utils.hpp"
 
 
-/**
- * org/hibernate/persister/entity/UnionSubclassEntityPersister: tableName
- * org/hibernate/persister/entity/JoinedSubclassEntityPersister: naturalOrderTableNames[j]
- * org/hibernate/persister/entity/SingleTableEntityPersister: qualifiedTableNames[j]
- *
- */
-
 bool SymKey::need_recording = false;
 std::set<std::string> SymKey::target_class_names = init_target_class_names();
 
@@ -28,7 +21,6 @@ method_set_t SymKey::symbolized_methods = init_symbolized_methods();
 
 method_set_t SymKey::init_symbolized_methods() {
     method_set_t m_set;
-//    m_set.insert("<init>");
     return m_set;
 }
 
@@ -48,31 +40,12 @@ Expression *SymKey::get(int field_offset) {
   return iter == _exps.end() ? NULL : iter->second;
 }
 
-Expression *SymKey::get_exp_of(oop obj) {
-  ShouldNotCallThis();
-  ResourceMark rm;
-    Expression *exp;
-    if (obj->is_symbolic()) {
-        SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-        exp = sym_inst->get_ref_exp();
-        assert(exp != NULL, "NOT NULL");
-    } else {
-        ResourceMark rm;
-        // TODO: check this
-        exp = new KeySymbolExp(obj);
-    }
-    return exp;
-}
-
-
 void SymKey::init_sym_exp(int field_offset, Expression *exp) {
-  // TODO
   exp->inc_ref();
   _exps[field_offset] = exp;
 }
 
 void SymKey::set_sym_exp(int field_offset, Expression *exp) {
-  // TODO
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   exp_map_t::iterator iter = _exps.find(field_offset);
@@ -97,10 +70,10 @@ bool SymKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
     if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
         need_symbolize = true;
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" handled by SymKey");
+//        tty->print_cr(" handled by SymKey");
     } else {
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" unhandled by SymKey");
+//        tty->print_cr(" unhandled by SymKey");
     }
 
     return need_symbolize;
