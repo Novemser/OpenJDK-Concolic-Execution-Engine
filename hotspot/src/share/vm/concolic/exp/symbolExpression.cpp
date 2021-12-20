@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/symbolExpression.hpp"
+#include "concolic/utils.hpp"
 #include "runtime/handles.hpp"
 #include "precompiled/precompiled.hpp"
 #include "utilities/ostream.hpp"
@@ -71,5 +72,13 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
                        version, load_count);
   set(str_buf, length);
 }
+
+ConStringSymbolExp::ConStringSymbolExp(oop obj) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'Y', T_OBJECT);
+  ss.print("%s", OopUtils::java_string_to_c(obj));
+  this->finalize(ss.size());
+}
+
 
 #endif

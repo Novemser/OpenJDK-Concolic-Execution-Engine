@@ -78,6 +78,11 @@ public:
                    BasicType type);
 };
 
+class ConStringSymbolExp : public SymbolExpression {
+public:
+  ConStringSymbolExp(oop obj);
+};
+
 
 #endif
 
