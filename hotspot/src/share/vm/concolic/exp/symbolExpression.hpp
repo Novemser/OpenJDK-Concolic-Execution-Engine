@@ -46,6 +46,7 @@ protected:
    * The following calls must be called in order!
    */
   static void set_head(stringStream& ss, char main_type, BasicType class_type, oop obj = NULL);
+  static void set_head(stringStream& ss, char main_type, BasicType class_type, const char* klass_name);
   void finalize(int length);
 
 public:
