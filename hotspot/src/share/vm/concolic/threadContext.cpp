@@ -11,7 +11,7 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
-#include "concolic/reference/symbolicKey.hpp"
+#include "concolic/reference/symbolicHibernateKey.hpp"
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
 
@@ -95,8 +95,8 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {
     sym_inst = new SymResSet(sym_rid);
-  } else if (SymKey::target(class_name)) {
-    sym_inst = new SymKey(sym_rid);
+  } else if (SymHibernateKey::target(class_name)) {
+    sym_inst = new SymHibernateKey(sym_rid);
   } else {
     sym_inst = new SymObj(sym_rid);
   }

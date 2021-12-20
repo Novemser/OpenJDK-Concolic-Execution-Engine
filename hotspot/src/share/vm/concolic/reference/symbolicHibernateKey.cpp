@@ -1,33 +1,33 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/concolicMngr.hpp"
-#include "concolic/exp/keyExpression.hpp"
+#include "concolic/exp/hibernateKeyExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
-#include "concolic/reference/symbolicKey.hpp"
+#include "concolic/reference/symbolicHibernateKey.hpp"
 #include "concolic/utils.hpp"
 
 
-bool SymKey::need_recording = false;
-std::set<std::string> SymKey::target_class_names = init_target_class_names();
+bool SymHibernateKey::need_recording = false;
+std::set<std::string> SymHibernateKey::target_class_names = init_target_class_names();
 
-std::set<std::string> SymKey::init_target_class_names() {
+std::set<std::string> SymHibernateKey::init_target_class_names() {
     std::set<std::string> set;
     set.insert("org/hibernate/engine/spi/EntityKey");
     set.insert("org/hibernate/engine/spi/CollectionKey");
     return set;
 }
 
-method_set_t SymKey::symbolized_methods = init_symbolized_methods();
+method_set_t SymHibernateKey::symbolized_methods = init_symbolized_methods();
 
-method_set_t SymKey::init_symbolized_methods() {
+method_set_t SymHibernateKey::init_symbolized_methods() {
     method_set_t m_set;
     return m_set;
 }
 
-SymKey::SymKey(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
-SymKey::SymKey(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new KeySymbolExp(obj)) {}
+SymHibernateKey::SymHibernateKey(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
+SymHibernateKey::SymHibernateKey(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new HibernateKeySymbolExp(obj)) {}
 
-SymKey::~SymKey() {
+SymHibernateKey::~SymHibernateKey() {
     Expression::gc(_exp);
     exp_map_t::iterator iter;
     for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
@@ -35,17 +35,17 @@ SymKey::~SymKey() {
     }
 }
 
-Expression *SymKey::get(int field_offset) {
+Expression *SymHibernateKey::get(int field_offset) {
   exp_map_t::iterator iter = _exps.find(field_offset);
   return iter == _exps.end() ? NULL : iter->second;
 }
 
-void SymKey::init_sym_exp(int field_offset, Expression *exp) {
+void SymHibernateKey::init_sym_exp(int field_offset, Expression *exp) {
   exp->inc_ref();
   _exps[field_offset] = exp;
 }
 
-void SymKey::set_sym_exp(int field_offset, Expression *exp) {
+void SymHibernateKey::set_sym_exp(int field_offset, Expression *exp) {
   assert(field_offset % 8 == 0,
          "we are turning to field_offset, this should be true");
   exp_map_t::iterator iter = _exps.find(field_offset);
@@ -63,34 +63,34 @@ void SymKey::set_sym_exp(int field_offset, Expression *exp) {
   }
 }
 
-bool SymKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
+bool SymHibernateKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
     const std::string &callee_name = handle.get_callee_name();
     bool need_symbolize = false;
     need_symbolize = false;
     if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
         need_symbolize = true;
         handle.get_callee_method()->print_name(tty);
-//        tty->print_cr(" handled by SymKey");
+//        tty->print_cr(" handled by SymHibernateKey");
     } else {
         handle.get_callee_method()->print_name(tty);
-//        tty->print_cr(" unhandled by SymKey");
+//        tty->print_cr(" unhandled by SymHibernateKey");
     }
 
     return need_symbolize;
 }
 
-Expression *SymKey::finish_method_helper(MethodSymbolizerHandle &handle) {
+Expression *SymHibernateKey::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (need_recording) {
     handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled done by SymKey, return %c", type2char(handle.get_result_type()));
+    tty->print_cr(" handled done by SymHibernateKey, return %c", type2char(handle.get_result_type()));
     return MethodSymbolizer::finish_method_helper(handle);
   } else {
     return NULL;
   }
 }
 
-void SymKey::print() {
-    tty->print_cr("SymKey: ");
+void SymHibernateKey::print() {
+    tty->print_cr("SymHibernateKey: ");
     _exp->print();
     tty->cr();
 }

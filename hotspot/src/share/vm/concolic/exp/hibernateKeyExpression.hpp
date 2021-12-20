@@ -9,15 +9,15 @@
 #include <vector>
 #include <string>
 
-class KeySymbolExp : public Expression {
+class HibernateKeySymbolExp : public Expression {
   typedef std::vector<std::string> TableNames;
 
 public:
   TableNames table_names;
   Expression *key_exp;
 
-  KeySymbolExp(oop obj);
-  ~KeySymbolExp();
+  HibernateKeySymbolExp(oop obj);
+  ~HibernateKeySymbolExp();
 
   void print();
 };

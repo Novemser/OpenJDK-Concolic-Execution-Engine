@@ -1,9 +1,9 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/concolicMngr.hpp"
-#include "concolic/exp/keyExpression.hpp"
+#include "concolic/exp/hibernateKeyExpression.hpp"
 #include "concolic/exp/methodExpression.hpp"
-#include "concolic/reference/symbolicKey.hpp"
+#include "concolic/reference/symbolicHibernateKey.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/utils.hpp"
 
@@ -112,8 +112,8 @@ int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
       exp = sym_inst->get_ref_exp();
       if (exp == NULL) {
         ResourceMark rm;
-        if (SymKey::target(obj->klass()->name()->as_C_string())) {
-          exp = new KeySymbolExp(obj);
+        if (SymHibernateKey::target(obj->klass()->name()->as_C_string())) {
+          exp = new HibernateKeySymbolExp(obj);
           sym_inst->set_ref_exp(exp);
         } else {
           exp = new InstanceSymbolExp(obj);

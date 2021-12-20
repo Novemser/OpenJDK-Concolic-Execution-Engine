@@ -1,17 +1,18 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "keyExpression.hpp"
+#include "hibernateKeyExpression.hpp"
 #include "concolic/utils.hpp"
 #include "runtime/fieldDescriptor.hpp"
 #include "concolic/concolicMngr.hpp"
 
 
-KeySymbolExp::KeySymbolExp(oop obj) {
+HibernateKeySymbolExp::HibernateKeySymbolExp(oop obj) {
   std::string key_field_name;
 
-  // tty->print_cr("KeySymbolExp::::::::::::::::::::::::::::::::::::::::::::::::");
+  // tty->print_cr("HibernateKeySymbolExp::::::::::::::::::::::::::::::::::::::::::::::::");
 
   if (obj->klass()->name()->equals("org/hibernate/engine/spi/EntityKey")) {
+    key_field_name = "identifier";
     // tty->print_cr("---------- persister ----------");
     oop persister = OopUtils::obj_field_by_name(obj, "persister", "Lorg/hibernate/persister/entity/EntityPersister;");
 
@@ -46,9 +47,8 @@ KeySymbolExp::KeySymbolExp(oop obj) {
       // tty->print("%s ", c_table_name);
       table_names.push_back(std::string(c_table_name));
     }
-
-    key_field_name = "identifier";
   } else {
+    key_field_name = "key";
     assert(obj->klass()->name()->equals("org/hibernate/engine/spi/CollectionKey"), "should be");
 
     // tty->print_cr("---------- role ----------");
@@ -56,38 +56,37 @@ KeySymbolExp::KeySymbolExp(oop obj) {
     const char *c_role = OopUtils::java_string_to_c(role);
     // tty->print_cr("%s ", c_role);
     table_names.push_back(std::string(c_role));
-
-    key_field_name = "key";
   }
 
   // tty->print_cr("---------- identifier/key ----------");
-  fieldDescriptor fd;
   oop key_obj = OopUtils::obj_field_by_name(obj, key_field_name, "Ljava/io/Serializable;");
-  assert(key_obj->klass()->name()->equals("Ljava/lang/Long"), "should be");
-  OopUtils::get_fd_by_name(key_obj, "value", "J", fd);
-  long key = key_obj->long_field(fd.offset());
   if (key_obj->is_symbolic()) {
     SymInstance *key_sym_inst = ConcolicMngr::ctx->get_sym_inst(key_obj);
-    key_exp = key_sym_inst->get(fd.offset());
+    key_exp = key_sym_inst->get_ref_exp();
     assert(key_exp, "should be");
     key_exp->inc_ref();
   } else {
+    assert(key_obj->klass()->name()->equals("Ljava/lang/Long"), "should be");
+    fieldDescriptor fd;
+    OopUtils::get_fd_by_name(key_obj, "value", "J", fd);
+    long key = key_obj->long_field(fd.offset());
     key_exp = new ConExpression(key);
     key_exp->inc_ref();
+    // tty->print("key: %d ", key);
   }
-  // tty->print("key value: %ld    key exp: ", key);
+  // tty->print("key exp: ");
   // key_exp->print();
   // tty->cr();
 
   // tty->print_cr(":::::::::::::::::::::::::::::::::::::::::::::::::");
 }
 
-KeySymbolExp::~KeySymbolExp() {
+HibernateKeySymbolExp::~HibernateKeySymbolExp() {
   Expression::gc(key_exp);
 }
 
-void KeySymbolExp::print() {
-  tty->print("(K ");
+void HibernateKeySymbolExp::print() {
+  tty->print("(k ");
   for (TableNames::iterator it = table_names.begin(); it != table_names.end(); it++) {
     tty->print("%s ", it->c_str());
   }

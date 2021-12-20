@@ -10,7 +10,7 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 
-class SymKey : public SymInstance {
+class SymHibernateKey : public SymInstance {
 public:
 
   static bool need_recording;
@@ -26,9 +26,9 @@ private:
     Expression *_exp;
 
 public:
-    SymKey(sym_rid_t sym_rid);
-    SymKey(sym_rid_t sym_rid, oop obj);
-    ~SymKey();
+    SymHibernateKey(sym_rid_t sym_rid);
+    SymHibernateKey(sym_rid_t sym_rid, oop obj);
+    ~SymHibernateKey();
 
     void init_sym_exp(int field_offset, Expression *exp);
     void set_sym_exp(int field_offset, Expression *exp);
