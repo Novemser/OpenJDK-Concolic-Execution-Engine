@@ -19,8 +19,7 @@ private:
 public:
   static ulong total_count;
 
-  static void
-  gc(Expression *exp) {
+  static void gc(Expression *exp) {
     if (exp && exp->dec_ref()) {
       delete exp;
     }
