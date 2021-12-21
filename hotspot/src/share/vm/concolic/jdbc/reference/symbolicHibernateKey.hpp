@@ -5,10 +5,40 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/exp/expression.hpp"
+#include "concolic/exp/symbolExpression.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/utils.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
+
+#include <vector>
+#include <string>
+
+
+class HibernateKeyExpression : public Expression {
+  typedef std::vector<ConStringSymbolExp*> TableNameExps;
+
+public:
+  TableNameExps table_name_exps;
+  Expression *key_exp;
+
+  HibernateKeyExpression(oop obj);
+  ~HibernateKeyExpression();
+
+  void print();
+
+private:
+  static const OopUtils::NameSignaturePair PERSISTER;
+  static const OopUtils::NameSignaturePair SINGLE_TABLE_NAMES;
+  static const OopUtils::NameSignaturePair JOINED_TABLE_NAMES;
+  static const OopUtils::NameSignaturePair UNION_TABLE;
+  static const OopUtils::NameSignaturePair ROLE;
+
+
+  void set_table_name_exps(objArrayOop j_string_vector);
+};
+
 
 class SymHibernateKey : public SymInstance {
 public:

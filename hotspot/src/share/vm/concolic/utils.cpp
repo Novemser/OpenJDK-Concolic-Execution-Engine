@@ -185,6 +185,16 @@ ret_type OopUtils::field_type##_field_by_name(oop obj, const std::string &name, 
   } else {                                                                                                      \
     return not_found;                                                                                           \
   }                                                                                                             \
+}                                                                                                               \
+                                                                                                                \
+ret_type OopUtils::field_type##_field_by_name(oop obj, const NameSignaturePair &name_signature) {               \
+  fieldDescriptor fd;                                                                                           \
+  Klass *klass = get_fd_by_name(obj, name_signature.first, name_signature.second, fd);                          \
+  if (klass != NULL) {                                                                                          \
+    return obj->field_type##_field(fd.offset());                                                                \
+  } else {                                                                                                      \
+    return not_found;                                                                                           \
+  }                                                                                                             \
 }
 
 DEFINE_GET_FIELD_BY_NAME(oop, obj, NULL)

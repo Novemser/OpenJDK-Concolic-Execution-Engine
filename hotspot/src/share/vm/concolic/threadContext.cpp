@@ -11,7 +11,7 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
-#include "concolic/reference/symbolicHibernateKey.hpp"
+#include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
 

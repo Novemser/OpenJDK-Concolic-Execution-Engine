@@ -24,8 +24,10 @@ typeArrayOop java_string_to_char_array(oop str_obj);
 
 Klass* get_fd_by_name(oop obj, const std::string &name, const std::string &signature, fieldDescriptor& ret_fd);
 
+typedef std::pair<const std::string, const std::string> NameSignaturePair;
 #define DECLARE_GET_FIELD_BY_NAME(ret_type, field_type) \
-    ret_type field_type##_field_by_name(oop obj, const std::string &name, const std::string &signature)
+  ret_type field_type##_field_by_name(oop obj, const std::string &name, const std::string &signature); \
+  ret_type field_type##_field_by_name(oop obj, const NameSignaturePair &name_signature);
 
     DECLARE_GET_FIELD_BY_NAME(oop, obj);
     DECLARE_GET_FIELD_BY_NAME(jbyte, byte);
