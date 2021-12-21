@@ -70,13 +70,6 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
-//      if (!need_symbolize) {
-//        bool recording = handle.general_check_param_symbolized();
-//        if (recording) {
-//          handle.get_callee_method()->print_name(tty);
-//          tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
-//        }
-//      }
     } else {
       bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
@@ -95,42 +88,7 @@ Expression *SymList::finish_method_helper(MethodSymbolizerHandle &handle) {
 
   Expression *exp = NULL;
   if (handle_method_names.find(handle.get_callee_name()) != handle_method_names.end()) {
-
-    BasicType type = handle.get_result_type();
-    oop obj = NULL;
-
-    switch (type) {
-      case T_VOID:
-        exp = SymbolExpression::get(Sym_VOID);
-        break;
-      case T_OBJECT:
-        obj = handle.get_result<oop>(type);
-        if (obj != NULL) {
-          if (obj->is_symbolic()) {
-            exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
-            SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-            if (exp == NULL) {
-              exp = new InstanceSymbolExp(obj);
-              sym_inst->set_ref_exp(exp);
-            }
-          }
-        } else {
-          exp = SymbolExpression::get(Sym_NULL);
-        }
-        break;
-      case T_BOOLEAN:
-      case T_INT:
-        exp = new MethodReturnSymbolExp();
-        break;
-      default:
-        tty->print_cr("%c", type2char(type));
-        ShouldNotCallThis();
-        break;
-    }
-
-    ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
-        handle.get_callee_holder_name(), handle.get_callee_name(),
-        handle.get_param_list(), exp));
+    exp = handle.general_prepare_result_helper();
   }
   return exp;
 }

@@ -52,7 +52,7 @@ class MethodReturnSymbolExp : public SymbolExpression {
   static sym_rid_t sym_method_count;
 
 public:
-  MethodReturnSymbolExp();
+  MethodReturnSymbolExp(BasicType type);
 };
 
 #endif

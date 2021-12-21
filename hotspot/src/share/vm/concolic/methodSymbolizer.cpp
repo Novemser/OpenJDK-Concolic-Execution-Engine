@@ -203,7 +203,7 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
       ShouldNotCallThis();
       break;
     default:
-      exp = new MethodReturnSymbolExp();
+      exp = new MethodReturnSymbolExp(type);
   }
 
   ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
@@ -293,9 +293,11 @@ void MethodSymbolizer::print() {
 
 sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
 
-MethodReturnSymbolExp::MethodReturnSymbolExp() {
-  int length = sprintf(str_buf, "M_%lu", sym_method_count++);
-  set(str_buf, length);
+MethodReturnSymbolExp::MethodReturnSymbolExp(BasicType type) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', type);
+  ss.print("return%lu", sym_method_count++);
+  this->finalize(ss.size());
 }
 
 #endif

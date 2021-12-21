@@ -105,10 +105,8 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 
     BasicType res_type = handle.get_result_type();
     oop res_obj = NULL;
-    {
-      if (res_type == T_OBJECT) {
-        res_obj = handle.get_result<oop>(T_OBJECT);
-      }
+    if (res_type == T_OBJECT) {
+      res_obj = handle.get_result<oop>(T_OBJECT);
     }
     if (col_type == T_OBJECT) {
       oop col_str_obj = handle.get_param<oop>(1);

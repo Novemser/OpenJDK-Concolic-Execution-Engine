@@ -1,5 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
+#include <concolic/exp/methodExpression.hpp>
 #include "concolic/concolicMngr.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 
@@ -102,9 +103,7 @@ bool MethodSymbolizerHandle::general_check_param_symbolized() {
     ++offset;
   }
   return recording;
-
 }
-
 
 bool MethodSymbolizerHandle::general_check_param_symbolized_helper(BasicType type, int &locals_offset) {
   bool recording = false;
@@ -124,6 +123,49 @@ bool MethodSymbolizerHandle::general_check_param_symbolized_helper(BasicType typ
   }
 
   return recording;
+}
+
+Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
+  Expression *exp = NULL;
+  BasicType type = this->get_result_type();
+  oop obj = NULL;
+
+  switch (type) {
+    case T_VOID:
+      exp = SymbolExpression::get(Sym_VOID);
+      break;
+    case T_OBJECT:
+      obj = this->get_result<oop>(type);
+      if (obj != NULL) {
+        if (obj->is_symbolic()) {
+          SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+          exp = sym_inst->get_ref_exp();
+          if (exp == NULL) {
+            exp = new InstanceSymbolExp(obj);
+            sym_inst->set_ref_exp(exp);
+          }
+        }
+      } else {
+        exp = SymbolExpression::get(Sym_NULL);
+      }
+      break;
+    case T_BOOLEAN:
+    case T_INT:
+      exp = new MethodReturnSymbolExp(type);
+      break;
+    default:
+      tty->print_cr("%c", type2char(type));
+      this->get_callee_method()->print_name(tty);
+      tty->cr();
+      ShouldNotCallThis();
+      break;
+  }
+
+  ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
+      this->get_callee_holder_name(), this->get_callee_name(),
+      this->get_param_list(), exp));
+
+  return exp;
 }
 
 
