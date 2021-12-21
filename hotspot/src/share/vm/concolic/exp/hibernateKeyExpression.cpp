@@ -93,6 +93,7 @@ HibernateKeySymbolExp::~HibernateKeySymbolExp() {
   for (TableNameExps::iterator it = table_name_exps.begin(); it != table_name_exps.end(); it++) {
     Expression::gc(*it);
   }
+  table_name_exps.clear();
   Expression::gc(key_exp);
 }
 

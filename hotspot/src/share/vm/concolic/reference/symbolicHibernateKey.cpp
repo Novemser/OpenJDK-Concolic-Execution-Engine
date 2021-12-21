@@ -33,6 +33,7 @@ SymHibernateKey::~SymHibernateKey() {
     for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
       Expression::gc(iter->second);
     }
+    _exps.clear();
 }
 
 Expression *SymHibernateKey::get(int field_offset) {
