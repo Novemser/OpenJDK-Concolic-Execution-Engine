@@ -29,13 +29,7 @@ public:
   void print();
 
 private:
-  static const OopUtils::NameSignaturePair PERSISTER;
-  static const OopUtils::NameSignaturePair SINGLE_TABLE_NAMES;
-  static const OopUtils::NameSignaturePair JOINED_TABLE_NAMES;
-  static const OopUtils::NameSignaturePair UNION_TABLE;
-  static const OopUtils::NameSignaturePair ROLE;
-
-
+  void set_key_exp(oop key_obj);
   void set_table_name_exps(objArrayOop j_string_vector);
 };
 
@@ -44,43 +38,43 @@ class SymHibernateKey : public SymInstance {
 public:
 
   static bool need_recording;
-    static const char *TYPE_NAME;
+  static const char *TYPE_NAME;
 
-    static std::set<std::string> target_class_names;
-    static std::set<std::string> init_target_class_names();
-    static method_set_t symbolized_methods;
-    static method_set_t init_symbolized_methods();
+  static std::set<std::string> target_class_names;
+  static std::set<std::string> init_target_class_names();
+  static std::set<std::string> handle_method_names;
+  static std::set<std::string> init_handle_method_names();
+  static std::map<std::string, bool> skip_method_names;
+  static std::map<std::string, bool> init_skip_method_names();
 
 private:
-    exp_map_t _exps;
-    Expression *_exp;
+  exp_map_t _exps;
+  Expression *_exp;
+
+  static void post_init(oop this_obj);
 
 public:
-    SymHibernateKey(sym_rid_t sym_rid);
-    SymHibernateKey(sym_rid_t sym_rid, oop obj);
-    ~SymHibernateKey();
+  SymHibernateKey(sym_rid_t sym_rid);
+  SymHibernateKey(sym_rid_t sym_rid, oop obj);
+  ~SymHibernateKey();
 
-    void init_sym_exp(int field_offset, Expression *exp);
-    void set_sym_exp(int field_offset, Expression *exp);
+  inline static bool target(const std::string &class_name) {
+      return target_class_names.find(class_name) != target_class_names.end();
+  }
 
-    inline static bool target(const std::string &class_name) {
-        return target_class_names.find(class_name) != target_class_names.end();
-    }
+  Expression *get_ref_exp() { return _exp; };
+  void set_ref_exp(Expression *exp) {
+      Expression::gc(_exp);
+      _exp = exp;
+      _exp->inc_ref();
+  };
 
-    Expression *get(int field_offset);
-    Expression *get_ref_exp() { return _exp; };
-    void set_ref_exp(Expression *exp) {
-        Expression::gc(_exp);
-        _exp = exp;
-        _exp->inc_ref();
-    };
-
-    bool need_recursive() { return false; }
-    void print();
+  bool need_recursive() { return false; }
+  void print();
 
 public:
-    static bool invoke_method_helper(MethodSymbolizerHandle &handle);
-    static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+  static bool invoke_method_helper(MethodSymbolizerHandle &handle);
+  static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 };
 
 

@@ -55,5 +55,12 @@ jfloat java_float_to_c(oop float_obj);
 jdouble java_double_to_c(oop double_obj);
 } // namespace OopUtils
 
+namespace SigName {
+  static const std::string String = "Ljava/lang/String;";
+  static const std::string StringArray = "[Ljava/lang/String;";
+  static const std::string EntityPersister = "Lorg/hibernate/persister/entity/EntityPersister;";
+
+}
+
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_UTILS_HPP

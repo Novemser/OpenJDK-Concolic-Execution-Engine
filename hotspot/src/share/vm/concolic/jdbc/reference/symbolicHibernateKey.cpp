@@ -1,67 +1,50 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/concolicMngr.hpp"
+#include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/utils.hpp"
 #include "runtime/fieldDescriptor.hpp"
 #include "symbolicHibernateKey.hpp"
 
-/*
- * HibernateKeyExpression:
+/* =============================================================
+ *                      HibernateKeyExpression
+ * =============================================================
  */
-const OopUtils::NameSignaturePair HibernateKeyExpression::PERSISTER = std::make_pair("persister", "Lorg/hibernate/persister/entity/EntityPersister;");
-const OopUtils::NameSignaturePair HibernateKeyExpression::SINGLE_TABLE_NAMES = std::make_pair("qualifiedTableNames","[Ljava/lang/String;");
-const OopUtils::NameSignaturePair HibernateKeyExpression::JOINED_TABLE_NAMES = std::make_pair("naturalOrderTableNames","[Ljava/lang/String;");
-const OopUtils::NameSignaturePair HibernateKeyExpression::UNION_TABLE = std::make_pair("tableName", "Ljava/lang/String;");
-const OopUtils::NameSignaturePair HibernateKeyExpression::ROLE = std::make_pair("role", "Ljava/lang/String;");
 
 HibernateKeyExpression::HibernateKeyExpression(oop obj) {
   std::string key_field_name;
 
   if (obj->klass()->name()->equals("org/hibernate/engine/spi/EntityKey")) {
     key_field_name = "identifier";
-    oop persister = OopUtils::obj_field_by_name(obj, PERSISTER);
+    oop persister = OopUtils::obj_field_by_name(obj, "persister", SigName::EntityPersister);
 
     Symbol *persister_klass_name = persister->klass()->name();
     if (persister_klass_name->equals("org/hibernate/persister/entity/SingleTableEntityPersister")) {
-      objArrayOop table_names_obj =
-          (objArrayOop)OopUtils::obj_field_by_name(persister, SINGLE_TABLE_NAMES);
+      objArrayOop table_names_obj = (objArrayOop)OopUtils::obj_field_by_name(persister, "qualifiedTableNames", SigName::StringArray);
       set_table_name_exps(table_names_obj);
     } else if (persister_klass_name->equals("org/hibernate/persister/entity/JoinedSubclassEntityPersister")) {
-      objArrayOop table_names_obj =
-          (objArrayOop)OopUtils::obj_field_by_name(persister,JOINED_TABLE_NAMES);
+      objArrayOop table_names_obj = (objArrayOop)OopUtils::obj_field_by_name(persister, "naturalOrderTableNames", SigName::StringArray);
       set_table_name_exps(table_names_obj);
     } else {
-      assert(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
-      oop table_name = OopUtils::obj_field_by_name(persister, UNION_TABLE);
+      guarantee(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
+      oop table_name = OopUtils::obj_field_by_name(persister, "tableName", SigName::String);
       ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
       table_name_exp->inc_ref();
       table_name_exps.push_back(table_name_exp);
     }
   } else {
     key_field_name = "key";
-    assert(obj->klass()->name()->equals("org/hibernate/engine/spi/CollectionKey"), "should be");
+    guarantee(obj->klass()->name()->equals("org/hibernate/engine/spi/CollectionKey"), "should be");
 
-    oop role = OopUtils::obj_field_by_name(obj, ROLE);
+    oop role = OopUtils::obj_field_by_name(obj, "role", SigName::String);
     ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(role);
     table_name_exp->inc_ref();
     table_name_exps.push_back(table_name_exp);
   }
 
   oop key_obj = OopUtils::obj_field_by_name(obj, key_field_name, "Ljava/io/Serializable;");
-  if (key_obj->is_symbolic()) {
-    SymInstance *key_sym_inst = ConcolicMngr::ctx->get_sym_inst(key_obj);
-    key_exp = key_sym_inst->get_ref_exp();
-    assert(key_exp, "should be");
-    key_exp->inc_ref();
-  } else {
-    assert(key_obj->klass()->name()->equals("Ljava/lang/Long"), "should be");
-    fieldDescriptor fd;
-    OopUtils::get_fd_by_name(key_obj, "value", "J", fd);
-    long key = key_obj->long_field(fd.offset());
-    key_exp = new ConExpression(key);
-    key_exp->inc_ref();
-  }
+  set_key_exp(key_obj);
 }
 
 HibernateKeyExpression::~HibernateKeyExpression() {
@@ -76,11 +59,31 @@ void HibernateKeyExpression::set_table_name_exps(objArrayOop j_string_vector) {
   int string_vector_length = j_string_vector->length();
   for (int i = 0; i < string_vector_length; i++) {
     oop table_name = j_string_vector->obj_at(i);
-    // const char *c_table_name = OopUtils::java_string_to_c(table_name);
-    // tty->print("%s ", c_table_name);
     ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
     table_name_exp->inc_ref();
     table_name_exps.push_back(table_name_exp);
+  }
+}
+
+void HibernateKeyExpression::set_key_exp(oop key_obj) {
+  if (key_obj->is_symbolic()) {
+    SymInstance *key_sym_inst = ConcolicMngr::ctx->get_sym_inst(key_obj);
+    key_exp = key_sym_inst->get_ref_exp();
+    guarantee(key_exp, "should be");
+    key_exp->inc_ref();
+  } else {
+    Symbol *key_obj_klass_name = key_obj->klass()->name();
+    if (key_obj_klass_name->equals("java/lang/Long")) {
+      fieldDescriptor fd;
+      OopUtils::get_fd_by_name(key_obj, "value", "J", fd);
+      long key = key_obj->long_field(fd.offset());
+      key_exp = new ConExpression(key);
+      key_exp->inc_ref();
+    } else {
+      guarantee(key_obj->klass()->name()->equals("java/lang/String"), "should be");
+      key_exp = new ConStringSymbolExp(key_obj);
+      key_exp->inc_ref();
+    }
   }
 }
 
@@ -94,97 +97,148 @@ void HibernateKeyExpression::print() {
   tty->print(")");
 }
 
-/*
- * SymHibernateKey:
+/* =============================================================
+ *                      SymHibernateKey
+ * =============================================================
  */
 
 bool SymHibernateKey::need_recording = false;
 std::set<std::string> SymHibernateKey::target_class_names = init_target_class_names();
 
 std::set<std::string> SymHibernateKey::init_target_class_names() {
-    std::set<std::string> set;
-    set.insert("org/hibernate/engine/spi/EntityKey");
-    set.insert("org/hibernate/engine/spi/CollectionKey");
-    return set;
+  std::set<std::string> set;
+  set.insert("org/hibernate/engine/spi/EntityKey");
+  set.insert("org/hibernate/engine/spi/CollectionKey");
+  return set;
 }
 
-method_set_t SymHibernateKey::symbolized_methods = init_symbolized_methods();
+std::set<std::string> SymHibernateKey::handle_method_names = init_handle_method_names();
 
-method_set_t SymHibernateKey::init_symbolized_methods() {
-    method_set_t m_set;
-    return m_set;
+std::set<std::string> SymHibernateKey::init_handle_method_names() {
+  std::set<std::string> set;
+  set.insert("<init>");
+  return set;
 }
+
+std::map<std::string, bool> SymHibernateKey::skip_method_names = init_skip_method_names();
+
+std::map<std::string, bool> SymHibernateKey::init_skip_method_names() {
+  std::map<std::string, bool> map;
+  map["generateHashCode"] = true;
+  return map;
+}
+
 
 SymHibernateKey::SymHibernateKey(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 SymHibernateKey::SymHibernateKey(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new HibernateKeyExpression(obj)) {}
 
 SymHibernateKey::~SymHibernateKey() {
-    Expression::gc(_exp);
-    exp_map_t::iterator iter;
-    for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
-      Expression::gc(iter->second);
-    }
-    _exps.clear();
-}
-
-Expression *SymHibernateKey::get(int field_offset) {
-  exp_map_t::iterator iter = _exps.find(field_offset);
-  return iter == _exps.end() ? NULL : iter->second;
-}
-
-void SymHibernateKey::init_sym_exp(int field_offset, Expression *exp) {
-  exp->inc_ref();
-  _exps[field_offset] = exp;
-}
-
-void SymHibernateKey::set_sym_exp(int field_offset, Expression *exp) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
-  exp_map_t::iterator iter = _exps.find(field_offset);
-  if (iter != _exps.end()) {
+  Expression::gc(_exp);
+  exp_map_t::iterator iter;
+  for (iter = _exps.begin(); iter != _exps.end(); ++iter) {
     Expression::gc(iter->second);
-    if (exp) {
-      exp->inc_ref();
-      iter->second = exp;
-    } else {
-      _exps.erase(iter);
-    }
-  } else if (exp) {
-    exp->inc_ref();
-    _exps[field_offset] = exp;
   }
+  _exps.clear();
 }
 
 bool SymHibernateKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    const std::string &callee_name = handle.get_callee_name();
-    bool need_symbolize = false;
-    need_symbolize = false;
-    if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
-        need_symbolize = true;
-        handle.get_callee_method()->print_name(tty);
-//        tty->print_cr(" handled by SymHibernateKey");
+  const std::string &callee_name = handle.get_callee_name();
+  bool need_symbolize = false;
+  need_recording = false;
+  if (handle_method_names.find(callee_name) != handle_method_names.end()) {
+    if (std::equal(callee_name.begin(), callee_name.end(), "<init>")) {
+      need_recording = false;
+      need_symbolize = true;
     } else {
-        handle.get_callee_method()->print_name(tty);
-//        tty->print_cr(" unhandled by SymHibernateKey");
+      need_recording = handle.general_check_param_symbolized();
     }
+    if (need_recording) {
+      handle.general_prepare_param();
+    }
+  } else {
+    std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
+    if (iter != skip_method_names.end()) {
+      need_symbolize = iter->second;
+//      if (!need_symbolize) {
+//        bool recording = handle.general_check_param_symbolized();
+//        if (recording) {
+//          handle.get_callee_method()->print_name(tty);
+//          tty->print_cr(" skipped by SymList, need recording %c", recording ? 'Y' : 'N');
+//        }
+//      }
+    } else {
+      bool recording = handle.general_check_param_symbolized();
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" handled by SymHibernateKey, need recording %c. callee_name: %s", recording ? 'Y' : 'N', callee_name.c_str());
+    }
+  }
 
-    return need_symbolize;
+  return need_symbolize;
+}
+
+void SymHibernateKey::post_init(oop this_obj) {
+  SymHibernateKey *this_sym_inst = (SymHibernateKey *)ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj);
+  Expression *exp = new HibernateKeyExpression(this_obj);
+  this_sym_inst->set_ref_exp(exp);
 }
 
 Expression *SymHibernateKey::finish_method_helper(MethodSymbolizerHandle &handle) {
-  if (need_recording) {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled done by SymHibernateKey, return %c", type2char(handle.get_result_type()));
-    return MethodSymbolizer::finish_method_helper(handle);
-  } else {
+  const std::string &callee_name = handle.get_callee_name();
+  if (std::equal(callee_name.begin(), callee_name.end(), "<init>")) {
+    need_recording = true;
+    post_init(handle.get_param<oop>(0));
+  }
+
+  if (!need_recording) {
     return NULL;
   }
+
+  Expression *exp = NULL;
+  if (handle_method_names.find(handle.get_callee_name()) != handle_method_names.end()) {
+
+    BasicType type = handle.get_result_type();
+    oop obj = NULL;
+
+    switch (type) {
+      case T_VOID:
+        exp = SymbolExpression::get(Sym_VOID);
+        break;
+      case T_OBJECT:
+        obj = handle.get_result<oop>(type);
+        if (obj != NULL) {
+          if (obj->is_symbolic()) {
+            exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
+            SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+            if (exp == NULL) {
+              exp = new InstanceSymbolExp(obj);
+              sym_inst->set_ref_exp(exp);
+            }
+          }
+        } else {
+          exp = SymbolExpression::get(Sym_NULL);
+        }
+        break;
+      case T_BOOLEAN:
+      case T_INT:
+        exp = new MethodReturnSymbolExp();
+        break;
+      default:
+        tty->print_cr("%c", type2char(type));
+        ShouldNotCallThis();
+        break;
+    }
+
+    ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
+        handle.get_callee_holder_name(), handle.get_callee_name(),
+        handle.get_param_list(), exp));
+  }
+  return exp;
 }
 
 void SymHibernateKey::print() {
-    tty->print_cr("SymHibernateKey: ");
-    _exp->print();
-    tty->cr();
+  tty->print_cr("SymHibernateKey: ");
+  _exp->print();
+  tty->cr();
 }
 
 #endif

@@ -100,7 +100,7 @@ void SymMap::prepare_param(MethodSymbolizerHandle &handle) {
   }
 }
 
-int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
+int __attribute__((optimize("O0"))) SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
                                  int locals_offset) {
   Expression *exp = NULL;
 
@@ -150,7 +150,7 @@ bool SymMap::check_param_symbolized(MethodSymbolizerHandle &handle) {
   return recording;
 }
 
-int SymMap::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
+int __attribute__((optimize("O0"))) SymMap::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type,
                                           int locals_offset,
                                           bool &recording) {
   oop obj = handle.get_param<oop>(locals_offset);
