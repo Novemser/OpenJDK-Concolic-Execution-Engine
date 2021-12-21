@@ -33,6 +33,10 @@ void SymbolExpression::set_head(stringStream &ss, char main_type, BasicType clas
   ss.print("_");
 }
 
+void SymbolExpression::set_head(stringStream &ss, char main_type, BasicType class_type, const char* klass_name) {
+  ss.print("%c_%c%s_", main_type, type2char(class_type), klass_name);
+}
+
 void SymbolExpression::finalize(int length) {
   _str = std::string(str_buf, length);
 }
@@ -75,7 +79,7 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
 
 ConStringSymbolExp::ConStringSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'Y', T_OBJECT);
+  set_head(ss, 'Y', T_OBJECT, "'String'");
   ss.print("%s", OopUtils::java_string_to_c(obj));
   this->finalize(ss.size());
 }

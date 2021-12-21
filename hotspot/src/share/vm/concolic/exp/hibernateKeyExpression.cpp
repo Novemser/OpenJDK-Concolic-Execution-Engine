@@ -24,9 +24,11 @@ HibernateKeySymbolExp::HibernateKeySymbolExp(oop obj) {
       int table_names_length = table_names_obj->length();
       for (int i = 0; i < table_names_length; i++) {
         oop table_name = table_names_obj->obj_at(i);
-        const char *c_table_name = OopUtils::java_string_to_c(table_name);
+        // const char *c_table_name = OopUtils::java_string_to_c(table_name);
         // tty->print("%s ", c_table_name);
-        table_names.push_back(std::string(c_table_name));
+        ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
+        table_name_exp->inc_ref();
+        table_name_exps.push_back(table_name_exp);
       }
       // tty->cr();
     } else if (persister_klass_name->equals("org/hibernate/persister/entity/JoinedSubclassEntityPersister")) {
@@ -35,17 +37,21 @@ HibernateKeySymbolExp::HibernateKeySymbolExp(oop obj) {
       int table_names_length = table_names_obj->length();
       for (int i = 0; i < table_names_length; i++) {
         oop table_name = table_names_obj->obj_at(i);
-        const char *c_table_name = OopUtils::java_string_to_c(table_name);
+        // const char *c_table_name = OopUtils::java_string_to_c(table_name);
         // tty->print("%s ", c_table_name);
-        table_names.push_back(std::string(c_table_name));
+        ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
+        table_name_exp->inc_ref();
+        table_name_exps.push_back(table_name_exp);
       }
       // tty->cr();
     } else {
       assert(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
-      oop tableName = OopUtils::obj_field_by_name(persister, "tableName", "Ljava/lang/String;");
-      const char *c_table_name = OopUtils::java_string_to_c(tableName);
+      oop table_name = OopUtils::obj_field_by_name(persister, "tableName", "Ljava/lang/String;");
+      // const char *c_table_name = OopUtils::java_string_to_c(tableName);
       // tty->print("%s ", c_table_name);
-      table_names.push_back(std::string(c_table_name));
+      ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
+      table_name_exp->inc_ref();
+      table_name_exps.push_back(table_name_exp);
     }
   } else {
     key_field_name = "key";
@@ -53,9 +59,11 @@ HibernateKeySymbolExp::HibernateKeySymbolExp(oop obj) {
 
     // tty->print_cr("---------- role ----------");
     oop role = OopUtils::obj_field_by_name(obj, "role", "Ljava/lang/String;");
-    const char *c_role = OopUtils::java_string_to_c(role);
+    // const char *c_role = OopUtils::java_string_to_c(role);
     // tty->print_cr("%s ", c_role);
-    table_names.push_back(std::string(c_role));
+    ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(role);
+    table_name_exp->inc_ref();
+    table_name_exps.push_back(table_name_exp);
   }
 
   // tty->print_cr("---------- identifier/key ----------");
@@ -82,13 +90,17 @@ HibernateKeySymbolExp::HibernateKeySymbolExp(oop obj) {
 }
 
 HibernateKeySymbolExp::~HibernateKeySymbolExp() {
+  for (TableNameExps::iterator it = table_name_exps.begin(); it != table_name_exps.end(); it++) {
+    Expression::gc(*it);
+  }
   Expression::gc(key_exp);
 }
 
 void HibernateKeySymbolExp::print() {
   tty->print("(k ");
-  for (TableNames::iterator it = table_names.begin(); it != table_names.end(); it++) {
-    tty->print("%s ", it->c_str());
+  for (TableNameExps::iterator it = table_name_exps.begin(); it != table_name_exps.end(); it++) {
+    (*it)->print();
+    tty->print(" ");
   }
   key_exp->print();
   tty->print(")");

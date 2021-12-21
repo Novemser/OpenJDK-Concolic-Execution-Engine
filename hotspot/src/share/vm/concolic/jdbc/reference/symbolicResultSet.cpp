@@ -82,7 +82,7 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" handled by SymResSet");
-     ShouldNotCallThis();
+    ShouldNotCallThis();
   }
 
   return need_symbolize;
@@ -143,10 +143,12 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'M', T_INT);
-  ss.print("RS_%lu", sym_res_set->_sql_id);
   if (is_size) {
-    ss.print("_size");
+    set_head(ss, 'M', T_INT);
+    ss.print("RS_size");
+  } else {
+    set_head(ss, 'M', T_OBJECT, "'ResultSet'");
+    ss.print("RS_%lu", sym_res_set->_sql_id);
   }
   this->finalize(ss.size());
 }

@@ -10,10 +10,10 @@
 #include <string>
 
 class HibernateKeySymbolExp : public Expression {
-  typedef std::vector<std::string> TableNames;
+  typedef std::vector<ConStringSymbolExp*> TableNameExps;
 
 public:
-  TableNames table_names;
+  TableNameExps table_name_exps;
   Expression *key_exp;
 
   HibernateKeySymbolExp(oop obj);
