@@ -30,7 +30,9 @@ public:
 
 private:
   void set_key_exp(oop key_obj);
+  void push_table_name_exp(oop table_name_obj);
   void set_table_name_exps(objArrayOop j_string_vector);
+  void set_table_name_exps(oop persister);
 };
 
 

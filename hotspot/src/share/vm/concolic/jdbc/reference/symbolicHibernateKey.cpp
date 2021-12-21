@@ -18,29 +18,13 @@ HibernateKeyExpression::HibernateKeyExpression(oop obj) {
   if (obj->klass()->name()->equals("org/hibernate/engine/spi/EntityKey")) {
     key_field_name = "identifier";
     oop persister = OopUtils::obj_field_by_name(obj, "persister", SigName::EntityPersister);
-
-    Symbol *persister_klass_name = persister->klass()->name();
-    if (persister_klass_name->equals("org/hibernate/persister/entity/SingleTableEntityPersister")) {
-      objArrayOop table_names_obj = (objArrayOop)OopUtils::obj_field_by_name(persister, "qualifiedTableNames", SigName::StringArray);
-      set_table_name_exps(table_names_obj);
-    } else if (persister_klass_name->equals("org/hibernate/persister/entity/JoinedSubclassEntityPersister")) {
-      objArrayOop table_names_obj = (objArrayOop)OopUtils::obj_field_by_name(persister, "naturalOrderTableNames", SigName::StringArray);
-      set_table_name_exps(table_names_obj);
-    } else {
-      guarantee(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
-      oop table_name = OopUtils::obj_field_by_name(persister, "tableName", SigName::String);
-      ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
-      table_name_exp->inc_ref();
-      table_name_exps.push_back(table_name_exp);
-    }
+    set_table_name_exps(persister);
   } else {
     key_field_name = "key";
     guarantee(obj->klass()->name()->equals("org/hibernate/engine/spi/CollectionKey"), "should be");
 
-    oop role = OopUtils::obj_field_by_name(obj, "role", SigName::String);
-    ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(role);
-    table_name_exp->inc_ref();
-    table_name_exps.push_back(table_name_exp);
+    oop role_obj = OopUtils::obj_field_by_name(obj, "role", SigName::String);
+    push_table_name_exp(role_obj);
   }
 
   oop key_obj = OopUtils::obj_field_by_name(obj, key_field_name, "Ljava/io/Serializable;");
@@ -55,14 +39,35 @@ HibernateKeyExpression::~HibernateKeyExpression() {
   Expression::gc(key_exp);
 }
 
-void HibernateKeyExpression::set_table_name_exps(objArrayOop j_string_vector) {
-  int string_vector_length = j_string_vector->length();
-  for (int i = 0; i < string_vector_length; i++) {
-    oop table_name = j_string_vector->obj_at(i);
+void HibernateKeyExpression::set_table_name_exps(oop persister) {
+  Symbol *persister_klass_name = persister->klass()->name();
+  if (persister_klass_name->equals("org/hibernate/persister/entity/SingleTableEntityPersister")) {
+    oop table_names_obj = OopUtils::obj_field_by_name(persister, "qualifiedTableNames", SigName::StringArray);
+    set_table_name_exps((objArrayOop)table_names_obj);
+  } else if (persister_klass_name->equals("org/hibernate/persister/entity/JoinedSubclassEntityPersister")) {
+    oop table_names_obj = OopUtils::obj_field_by_name(persister, "naturalOrderTableNames", SigName::StringArray);
+    set_table_name_exps((objArrayOop)table_names_obj);
+  } else {
+    guarantee(persister_klass_name->equals("org/hibernate/persister/entity/UnionSubclassEntityPersister"), "should be");
+    oop table_name = OopUtils::obj_field_by_name(persister, "tableName", SigName::String);
     ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
     table_name_exp->inc_ref();
     table_name_exps.push_back(table_name_exp);
   }
+}
+
+void HibernateKeyExpression::set_table_name_exps(objArrayOop j_string_vector) {
+  int string_vector_length = j_string_vector->length();
+  for (int i = 0; i < string_vector_length; i++) {
+    oop table_name_obj = j_string_vector->obj_at(i);
+    push_table_name_exp(table_name_obj);
+  }
+}
+
+void HibernateKeyExpression::push_table_name_exp(oop table_name_obj) {
+  ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name_obj);
+  table_name_exp->inc_ref();
+  table_name_exps.push_back(table_name_exp);
 }
 
 void HibernateKeyExpression::set_key_exp(oop key_obj) {
