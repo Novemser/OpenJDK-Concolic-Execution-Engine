@@ -38,8 +38,6 @@ private:
 
 class SymHibernateKey : public SymInstance {
 public:
-
-  static bool need_recording;
   static const char *TYPE_NAME;
 
   static std::set<std::string> target_class_names;
