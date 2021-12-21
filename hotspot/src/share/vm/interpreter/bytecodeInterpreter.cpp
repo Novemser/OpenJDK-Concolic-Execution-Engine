@@ -1754,12 +1754,13 @@ run:
 #define CONCOLIC_OPC_UNARY_CMP(off, value, op)                                 \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     int stack_offset = GET_STACK_OFFSET;                                       \
-    Expression *old_exp =                                                      \
+    Expression *left_exp =                                                     \
         ConcolicMngr::ctx->get_stack_slot(stack_offset + off);                 \
-    if (old_exp) {                                                             \
+    if (left_exp) {                                                            \
       Expression *const_exp = new ConExpression(value);                        \
-      Expression *new_exp = new OpSymExpression(old_exp, const_exp, op, cmp);  \
-      ConcolicMngr::record_path_condition(new_exp);                            \
+      Expression *right_exp =                                                  \
+                new OpSymExpression(left_exp, const_exp, op, cmp);             \
+      ConcolicMngr::record_path_condition(right_exp);                          \
     }                                                                          \
   }
 #else
@@ -1786,7 +1787,7 @@ run:
     int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
     address branch_pc = pc;                                                    \
                                                                                \
-    CONCOLIC_OPC_UNARY_CMP(-1, 0, op_##name);                                 \
+    CONCOLIC_OPC_UNARY_CMP(-1, (jboolean)0, op_##name);                        \
                                                                                \
     /* Profile branch. */                                                      \
     BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
