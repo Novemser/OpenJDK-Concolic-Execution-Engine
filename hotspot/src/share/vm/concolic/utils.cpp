@@ -162,4 +162,50 @@ jdouble OopUtils::java_double_to_c(oop double_obj) {
   return double_obj->double_field(field_offset);
 }
 
+Klass *OopUtils::get_fd_by_name(oop obj, const std::string &name, const std::string &signature, fieldDescriptor& ret_fd) {
+  Thread *thread = ConcolicMngr::ctx->get_thread();
+  TempNewSymbol field_name = SymbolTable::new_symbol(name.c_str(), thread);
+  TempNewSymbol field_signature = SymbolTable::new_symbol(signature.c_str(), thread);
+  Klass *klass = obj->klass()->find_field(field_name, field_signature, &ret_fd);
+  if (klass != NULL) {
+    ResourceMark rm;
+    ret_fd.print();
+//    tty->print_cr("Offset lookup: name: '%s', signature: '%s', klass: '%s', offset: %d, index: %d",
+//                  name.c_str(), signature.c_str(), klass->name()->as_C_string(), ret_fd.offset(), ret_fd.index());
+  }
+  return klass;
+}
+
+#define DEFINE_GET_FIELD_BY_NAME(ret_type, field_type, not_found)                                               \
+ret_type OopUtils::field_type##_field_by_name(oop obj, const std::string &name, const std::string &signature) { \
+  fieldDescriptor fd;                                                                                           \
+  Klass *klass = get_fd_by_name(obj, name, signature, fd);                                                      \
+  if (klass != NULL) {                                                                                          \
+    return obj->field_type##_field(fd.offset());                                                                \
+  } else {                                                                                                      \
+    return not_found;                                                                                           \
+  }                                                                                                             \
+}                                                                                                               \
+                                                                                                                \
+ret_type OopUtils::field_type##_field_by_name(oop obj, const NameSignaturePair &name_signature) {               \
+  fieldDescriptor fd;                                                                                           \
+  Klass *klass = get_fd_by_name(obj, name_signature.first, name_signature.second, fd);                          \
+  if (klass != NULL) {                                                                                          \
+    return obj->field_type##_field(fd.offset());                                                                \
+  } else {                                                                                                      \
+    return not_found;                                                                                           \
+  }                                                                                                             \
+}
+
+DEFINE_GET_FIELD_BY_NAME(oop, obj, NULL)
+DEFINE_GET_FIELD_BY_NAME(jbyte, byte, 0);
+DEFINE_GET_FIELD_BY_NAME(jchar, char, 0);
+DEFINE_GET_FIELD_BY_NAME(jboolean, bool, false);
+DEFINE_GET_FIELD_BY_NAME(jint, int, 0);
+DEFINE_GET_FIELD_BY_NAME(jshort, short, 0);
+DEFINE_GET_FIELD_BY_NAME(jlong, long, 0);
+DEFINE_GET_FIELD_BY_NAME(jfloat, float, 0.0);
+DEFINE_GET_FIELD_BY_NAME(jdouble, double, 0.0);
+DEFINE_GET_FIELD_BY_NAME(address, address, 0);
+
 #endif

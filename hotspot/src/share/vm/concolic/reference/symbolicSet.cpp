@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "concolic/reference/symbolicSet.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
@@ -100,8 +101,14 @@ int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       exp = sym_inst->get_ref_exp();
       if (exp == NULL) {
-        exp = new InstanceSymbolExp(obj);
-        sym_inst->set_ref_exp(exp);
+        ResourceMark rm;
+        if (SymHibernateKey::target(obj->klass()->name()->as_C_string())) {
+          exp = new HibernateKeyExpression(obj);
+          sym_inst->set_ref_exp(exp);
+        } else {
+          exp = new InstanceSymbolExp(obj);
+          sym_inst->set_ref_exp(exp);
+        }
       }
     }
   } else {
