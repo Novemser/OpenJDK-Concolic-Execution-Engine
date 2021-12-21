@@ -30,6 +30,11 @@ std::set<std::string> SymMap::init_handle_method_names() {
   set.insert("clear");
   set.insert("putAll");
   set.insert("size");
+  /**
+   * Please revise this operation when you have time!!!
+   * Although it is symbolized, it might call some methods which should not be symbolized...
+   */
+  set.insert("merge");
   return set;
 }
 
@@ -43,11 +48,6 @@ std::map<std::string, bool> SymMap::init_skip_method_names() {
   map["entrySet"] = true; // really?
   map["values"] = true; // really?
   map["forEach"] = false; // really?
-  /**
-   * Please revise this operation when you have time!!!
-   * Although it is symbolized, it might call some methods which should not be symbolized...
-   */
-  map["merge"] = false;
   return map;
 }
 

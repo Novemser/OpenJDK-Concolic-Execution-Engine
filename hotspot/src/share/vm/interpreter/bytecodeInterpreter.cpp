@@ -1787,7 +1787,7 @@ run:
     int skip = cmp ? (int16_t)Bytes::get_Java_u2(pc + 1) : 3;                  \
     address branch_pc = pc;                                                    \
                                                                                \
-    CONCOLIC_OPC_UNARY_CMP(-1, 0, op_##name);                        \
+    CONCOLIC_OPC_UNARY_CMP(-1, 0, op_##name);                                  \
                                                                                \
     /* Profile branch. */                                                      \
     BI_PROFILE_UPDATE_BRANCH(/*is_taken=*/cmp);                                \
