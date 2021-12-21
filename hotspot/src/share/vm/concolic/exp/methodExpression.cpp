@@ -27,6 +27,7 @@ MethodExpression::~MethodExpression() {
   for (int i = 0; i < size; ++i) {
     Expression::gc(_param_list[i]);
   }
+  Expression::gc(_res_exp);
 }
 
 void MethodExpression::print() {
