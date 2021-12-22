@@ -76,10 +76,6 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
              skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
-//    oop str_obj = handle.get_param<oop>(1);
-//    ResourceMark rm;
-//    tty->print_cr("%s", OopUtils::java_string_to_c(str_obj));
-
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" handled by SymResSet");
     ShouldNotCallThis();
@@ -121,10 +117,6 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
     } else {
       ShouldNotCallThis();
     }
-
-//    if (is_java_primitive(type)) {
-//    } else if (type == T_OBJECT) {
-//    }
   } else if (callee_name == "next") {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
