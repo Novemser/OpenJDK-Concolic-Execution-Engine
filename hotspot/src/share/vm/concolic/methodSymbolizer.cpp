@@ -8,6 +8,7 @@
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicStringBuilder.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/reference/symbolicSet.hpp"
 #include "concolic/reference/symbolicList.hpp"
@@ -77,6 +78,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
   } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
     need_symbolize = SymString::invoke_method_helper(_handle);
+  } else if (_handle.get_callee_holder_name() == SymStrBuilder::TYPE_NAME) {
+      need_symbolize = SymStrBuilder::invoke_method_helper(_handle);
   } else if (SymConn::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymConn::invoke_method_helper(_handle);
   } else if (SymStmt::target(_handle.get_callee_holder_name())) {
@@ -120,6 +123,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = primitive_finish_method_helper(_handle, basicType);
     } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
       exp = SymString::finish_method_helper(_handle);
+    } else if (_handle.get_callee_holder_name() == SymStrBuilder::TYPE_NAME) {
+        exp = SymStrBuilder::finish_method_helper(_handle);
     } else if (SymConn::target(_handle.get_callee_holder_name())) {
       exp = SymConn::finish_method_helper(_handle);
     } else if (SymStmt::target(_handle.get_callee_holder_name())) {
