@@ -121,7 +121,7 @@ bool MethodSymbolizerHandle::general_check_param_symbolized_helper(BasicType typ
   return recording;
 }
 
-Expression __attribute__((optimize("O0"))) *MethodSymbolizerHandle::general_prepare_result_helper() {
+Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
   Expression *exp = NULL;
   BasicType type = this->get_result_type();
   oop obj = NULL;

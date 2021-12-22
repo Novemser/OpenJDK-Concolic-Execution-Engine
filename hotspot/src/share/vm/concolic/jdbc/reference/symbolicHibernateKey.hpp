@@ -20,7 +20,7 @@ class HibernateKeyExpression : public Expression {
   typedef std::vector<ConStringSymbolExp*> TableNameExps;
 
 public:
-  TableNameExps table_name_exps;
+  Expression *table_name_exp;
   Expression *key_exp;
 
   HibernateKeyExpression(oop obj);
@@ -30,9 +30,8 @@ public:
 
 private:
   void set_key_exp(oop key_obj);
-  void push_table_name_exp(oop table_name_obj);
-  void set_table_name_exps(objArrayOop j_string_vector);
-  void set_table_name_exps(oop persister);
+  void set_table_name_exp(objArrayOop j_string_vector);
+  void set_table_name_exp(oop persister);
 };
 
 
