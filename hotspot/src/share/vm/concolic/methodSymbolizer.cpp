@@ -226,11 +226,7 @@ int MethodSymbolizer::prepare_param(MethodSymbolizerHandle &handle,
     oop obj = *(oop *) (locals - offset);
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-      if (!exp) {
-        exp = new InstanceSymbolExp(obj);
-        sym_inst->set_ref_exp(exp);
-      }
+      exp = sym_inst->get_or_create_ref_exp(obj);
     }
   } else if (type == T_ARRAY) {
     arrayOop arrObj = *(arrayOop *) (locals - offset);

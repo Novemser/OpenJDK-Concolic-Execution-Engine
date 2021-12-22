@@ -70,11 +70,7 @@ int MethodSymbolizerHandle::general_prepare_param_helper(BasicType type,
     oop obj = this->get_param<oop>(locals_offset);
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-      if (exp == NULL) {
-        exp = new InstanceSymbolExp(obj);
-        sym_inst->set_ref_exp(exp);
-      }
+      exp = sym_inst->get_or_create_ref_exp(obj);
     }
   } else {
     tty->print_cr("un_handled type %c", type2char(type));
@@ -125,7 +121,7 @@ bool MethodSymbolizerHandle::general_check_param_symbolized_helper(BasicType typ
   return recording;
 }
 
-Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
+Expression __attribute__((optimize("O0"))) *MethodSymbolizerHandle::general_prepare_result_helper() {
   Expression *exp = NULL;
   BasicType type = this->get_result_type();
   oop obj = NULL;
@@ -139,11 +135,7 @@ Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
       if (obj != NULL) {
         if (obj->is_symbolic()) {
           SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-          exp = sym_inst->get_ref_exp();
-          if (exp == NULL) {
-            exp = new InstanceSymbolExp(obj);
-            sym_inst->set_ref_exp(exp);
-          }
+          exp = sym_inst->get_or_create_ref_exp(obj);
         }
       } else {
         exp = SymbolExpression::get(Sym_NULL);

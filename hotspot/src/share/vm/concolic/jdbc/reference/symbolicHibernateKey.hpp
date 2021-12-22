@@ -63,6 +63,7 @@ public:
   }
 
   Expression *get_ref_exp() { return _exp; };
+  Expression *create_ref_exp(oop obj);
   void set_ref_exp(Expression *exp) {
       Expression::gc(_exp);
       _exp = exp;
