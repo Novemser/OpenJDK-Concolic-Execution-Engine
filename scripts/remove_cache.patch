@@ -1,0 +1,112 @@
+diff --git a/jdk/src/share/classes/java/lang/Boolean.java b/jdk/src/share/classes/java/lang/Boolean.java
+index a9293ba14..080b0286c 100644
+--- a/jdk/src/share/classes/java/lang/Boolean.java
++++ b/jdk/src/share/classes/java/lang/Boolean.java
+@@ -147,7 +147,8 @@ public final class Boolean implements java.io.Serializable,
+      * @since  1.4
+      */
+     public static Boolean valueOf(boolean b) {
+-        return (b ? TRUE : FALSE);
++        // return (b ? TRUE : FALSE);
++        return new Boolean(b);
+     }
+ 
+     /**
+@@ -160,7 +161,8 @@ public final class Boolean implements java.io.Serializable,
+      * @return  the {@code Boolean} value represented by the string.
+      */
+     public static Boolean valueOf(String s) {
+-        return parseBoolean(s) ? TRUE : FALSE;
++        // return parseBoolean(s) ? TRUE : FALSE;
++        return valueOf(parseBoolean(s));
+     }
+ 
+     /**
+diff --git a/jdk/src/share/classes/java/lang/Byte.java b/jdk/src/share/classes/java/lang/Byte.java
+index 3a894a5f5..c9eb26c6e 100644
+--- a/jdk/src/share/classes/java/lang/Byte.java
++++ b/jdk/src/share/classes/java/lang/Byte.java
+@@ -99,8 +99,9 @@ public final class Byte extends Number implements Comparable<Byte> {
+      * @since  1.5
+      */
+     public static Byte valueOf(byte b) {
+-        final int offset = 128;
+-        return ByteCache.cache[(int)b + offset];
++        // final int offset = 128;
++        // return ByteCache.cache[(int)b + offset];
++        return new Byte(b);
+     }
+ 
+     /**
+diff --git a/jdk/src/share/classes/java/lang/Character.java b/jdk/src/share/classes/java/lang/Character.java
+index 293a33c9a..75507d5e9 100644
+--- a/jdk/src/share/classes/java/lang/Character.java
++++ b/jdk/src/share/classes/java/lang/Character.java
+@@ -4585,9 +4585,9 @@ class Character implements java.io.Serializable, Comparable<Character> {
+      * @since  1.5
+      */
+     public static Character valueOf(char c) {
+-        if (c <= 127) { // must cache
+-            return CharacterCache.cache[(int)c];
+-        }
++        // if (c <= 127) { // must cache
++        //     return CharacterCache.cache[(int)c];
++        // }
+         return new Character(c);
+     }
+ 
+diff --git a/jdk/src/share/classes/java/lang/Integer.java b/jdk/src/share/classes/java/lang/Integer.java
+index baac00c79..e4f27e72c 100644
+--- a/jdk/src/share/classes/java/lang/Integer.java
++++ b/jdk/src/share/classes/java/lang/Integer.java
+@@ -827,8 +827,8 @@ public final class Integer extends Number implements Comparable<Integer> {
+      * @since  1.5
+      */
+     public static Integer valueOf(int i) {
+-        if (i >= IntegerCache.low && i <= IntegerCache.high)
+-            return IntegerCache.cache[i + (-IntegerCache.low)];
++        // if (i >= IntegerCache.low && i <= IntegerCache.high)
++        //     return IntegerCache.cache[i + (-IntegerCache.low)];
+         return new Integer(i);
+     }
+ 
+diff --git a/jdk/src/share/classes/java/lang/Long.java b/jdk/src/share/classes/java/lang/Long.java
+index 9e21cb853..43a70c75a 100644
+--- a/jdk/src/share/classes/java/lang/Long.java
++++ b/jdk/src/share/classes/java/lang/Long.java
+@@ -833,10 +833,10 @@ public final class Long extends Number implements Comparable<Long> {
+      * @since  1.5
+      */
+     public static Long valueOf(long l) {
+-        final int offset = 128;
+-        if (l >= -128 && l <= 127) { // will cache
+-            return LongCache.cache[(int)l + offset];
+-        }
++        // final int offset = 128;
++        // if (l >= -128 && l <= 127) { // will cache
++        //     return LongCache.cache[(int)l + offset];
++        // }
+         return new Long(l);
+     }
+ 
+diff --git a/jdk/src/share/classes/java/lang/Short.java b/jdk/src/share/classes/java/lang/Short.java
+index 9fb3913be..bf978b841 100644
+--- a/jdk/src/share/classes/java/lang/Short.java
++++ b/jdk/src/share/classes/java/lang/Short.java
+@@ -228,11 +228,11 @@ public final class Short extends Number implements Comparable<Short> {
+      * @since  1.5
+      */
+     public static Short valueOf(short s) {
+-        final int offset = 128;
+-        int sAsInt = s;
+-        if (sAsInt >= -128 && sAsInt <= 127) { // must cache
+-            return ShortCache.cache[sAsInt + offset];
+-        }
++        // final int offset = 128;
++        // int sAsInt = s;
++        // if (sAsInt >= -128 && sAsInt <= 127) { // must cache
++        //     return ShortCache.cache[sAsInt + offset];
++        // }
+         return new Short(s);
+     }
+ 
