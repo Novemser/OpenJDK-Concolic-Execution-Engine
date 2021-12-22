@@ -7,6 +7,8 @@
 #include "runtime/fieldDescriptor.hpp"
 #include "symbolicHibernateKey.hpp"
 
+#include <algorithm>
+
 /* =============================================================
  *                      HibernateKeyExpression
  * =============================================================
@@ -65,7 +67,10 @@ void HibernateKeyExpression::set_table_name_exps(objArrayOop j_string_vector) {
 }
 
 void HibernateKeyExpression::push_table_name_exp(oop table_name_obj) {
-  ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name_obj);
+  ResourceMark rm;
+  std::string table_name = std::string(OopUtils::java_string_to_c(table_name_obj));
+  std::replace(table_name.begin(), table_name.end(), '.', '/');
+  ConStringSymbolExp *table_name_exp = new ConStringSymbolExp(table_name);
   table_name_exp->inc_ref();
   table_name_exps.push_back(table_name_exp);
 }

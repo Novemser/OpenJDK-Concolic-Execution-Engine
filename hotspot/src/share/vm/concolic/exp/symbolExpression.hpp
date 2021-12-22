@@ -82,6 +82,7 @@ public:
 class ConStringSymbolExp : public SymbolExpression {
 public:
   ConStringSymbolExp(oop obj);
+  ConStringSymbolExp(const std::string& str);
 };
 
 

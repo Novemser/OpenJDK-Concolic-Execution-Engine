@@ -84,5 +84,13 @@ ConStringSymbolExp::ConStringSymbolExp(oop obj) {
   this->finalize(ss.size());
 }
 
+ConStringSymbolExp::ConStringSymbolExp(const std::string& str) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'Y', T_OBJECT, "'String'");
+  ss.print("%s", str.c_str());
+  this->finalize(ss.size());
+}
+
+
 
 #endif
