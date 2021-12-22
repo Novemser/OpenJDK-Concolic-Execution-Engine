@@ -99,17 +99,7 @@ int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
     oop obj = handle.get_param<oop>(locals_offset);
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-      if (exp == NULL) {
-        ResourceMark rm;
-        if (SymHibernateKey::target(obj->klass()->name()->as_C_string())) {
-          exp = new HibernateKeyExpression(obj);
-          sym_inst->set_ref_exp(exp);
-        } else {
-          exp = new InstanceSymbolExp(obj);
-          sym_inst->set_ref_exp(exp);
-        }
-      }
+      exp = sym_inst->get_or_create_ref_exp(obj);
     }
   } else {
     tty->print_cr("unhandled set parameter types!");
