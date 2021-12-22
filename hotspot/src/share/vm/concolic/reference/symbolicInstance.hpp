@@ -19,6 +19,17 @@ public:
   ~SymInstance() {}
 
   virtual Expression *get(int field_offset) { return NULL; }
+  virtual Expression *create_ref_exp(oop obj) {
+    return new InstanceSymbolExp(obj);
+  }
+  virtual Expression *get_or_create_ref_exp(oop obj) {
+    Expression *exp = get_ref_exp();
+    if (exp == NULL) {
+      exp = create_ref_exp(obj);
+      set_ref_exp(exp);
+    }
+    return exp;
+  }
   virtual Expression *get_ref_exp() {
     ShouldNotCallThis();
     return NULL;

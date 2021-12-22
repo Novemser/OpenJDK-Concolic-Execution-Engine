@@ -147,6 +147,10 @@ SymHibernateKey::~SymHibernateKey() {
   _exps.clear();
 }
 
+Expression *SymHibernateKey::create_ref_exp(oop obj) {
+  return new HibernateKeyExpression(obj);
+}
+
 bool SymHibernateKey::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
