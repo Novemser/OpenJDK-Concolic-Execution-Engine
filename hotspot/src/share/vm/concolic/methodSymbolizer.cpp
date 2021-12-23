@@ -3,7 +3,6 @@
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
-#include "concolic/exp/strExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"

@@ -1,7 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include <concolic/exp/methodExpression.hpp>
-#include <concolic/exp/strExpression.hpp>
+#include <concolic/exp/stringExpression.hpp>
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/arrayInitExpression.hpp"
@@ -169,16 +169,13 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
           case T_OBJECT:
               obj = handle.get_result<oop>(type);
               if (obj != NULL) {
-                  if (!obj->is_symbolic()) {
-                      ConcolicMngr::ctx->symbolize(obj);
-                  }
                   /*
                     We hope only symbolize the method whose return value
                     is the object we support like SymString and SymInterger.
                   */
-                  exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
-                  ConcolicMngr::ctx->get_sym_inst(obj)->set_ref_exp(new OpStrExpression(callee_name, handle.get_param_list()));
-                  assert(exp != NULL, "should be");
+                  tty->print_cr("obj type:%s",obj->klass()->name()->as_C_string());
+                  guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME),"should be");
+                  ConcolicMngr::ctx->get_or_alloc_sym_inst(obj)->set_ref_exp(new OpStrExpression(callee_name, handle.get_param_list()));
               } else {
                   exp = SymbolExpression::get(Sym_NULL);
               }

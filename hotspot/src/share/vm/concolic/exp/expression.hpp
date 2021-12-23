@@ -65,6 +65,26 @@ public:
   void print();
 };
 
+class ConExpression : public Expression {
+  static const int EXP_NAME_LENGTH = 32;
+
+private:
+  char _str[EXP_NAME_LENGTH];
+
+public:
+  ConExpression(jboolean b);
+  ConExpression(jbyte c);
+  ConExpression(jchar b);
+  ConExpression(jint i);
+  ConExpression(jshort s);
+  ConExpression(jlong l);
+  ConExpression(jfloat f);
+  ConExpression(jdouble d);
+
+public:
+  void print();
+};
+
 class ArrayExpression : public Expression {
   static const int EXP_NAME_LENGTH = 7;
 

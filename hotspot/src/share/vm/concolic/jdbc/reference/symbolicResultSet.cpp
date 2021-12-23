@@ -6,7 +6,6 @@
 #include "concolic/SymbolicOp.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
-#include "concolic/exp/strExpression.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/utils.hpp"
 

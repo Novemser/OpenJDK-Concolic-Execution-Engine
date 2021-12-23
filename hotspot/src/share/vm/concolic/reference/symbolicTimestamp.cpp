@@ -1,6 +1,5 @@
 #ifdef ENABLE_CONCOLIC
 
-#include "concolic/exp/strExpression.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/utils.hpp"
