@@ -1,5 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
+#include <concolic/exp/methodExpression.hpp>
+#include <concolic/exp/strExpression.hpp>
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/arrayInitExpression.hpp"
@@ -152,7 +154,44 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType ty
 
 Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (need_recording) {
-    return MethodSymbolizer::finish_method_helper(handle);
+      const std::string &callee_name = handle.get_callee_name();
+      BasicType type = handle.get_result_type();
+      Expression *exp = NULL;
+      oop obj = NULL;
+
+      switch (type) {
+          case T_VOID:
+              if (callee_name == "getChars"){
+                  ShouldNotReachHere();
+              }
+              exp = SymbolExpression::get(Sym_VOID);
+              break;
+          case T_OBJECT:
+              obj = handle.get_result<oop>(type);
+              if (obj != NULL) {
+                  if (!obj->is_symbolic()) {
+                      ConcolicMngr::ctx->symbolize(obj);
+                  }
+                  /*
+                    We hope only symbolize the method whose return value
+                    is the object we support like SymString and SymInterger.
+                  */
+                  exp = ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
+                  ConcolicMngr::ctx->get_sym_inst(obj)->set_ref_exp(new OpStrExpression(callee_name, handle.get_param_list()));
+                  assert(exp != NULL, "should be");
+              } else {
+                  exp = SymbolExpression::get(Sym_NULL);
+              }
+              break;
+          case T_ARRAY:
+              ShouldNotCallThis();
+              break;
+          default:
+              exp = new OpStrExpression(callee_name,handle.get_param_list());
+      }
+
+      return exp;
+
   } else {
     return NULL;
   }

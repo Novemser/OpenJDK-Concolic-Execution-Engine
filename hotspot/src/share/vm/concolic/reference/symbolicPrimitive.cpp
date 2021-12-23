@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/reference/symbolicPrimitive.hpp"
+#include "concolic/exp/strExpression.hpp"
 #include "symbolicString.hpp"
 
 template <>

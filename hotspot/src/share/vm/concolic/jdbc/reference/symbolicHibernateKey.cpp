@@ -2,6 +2,7 @@
 
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/methodExpression.hpp"
+#include "concolic/exp/strExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/utils.hpp"
 #include "runtime/fieldDescriptor.hpp"

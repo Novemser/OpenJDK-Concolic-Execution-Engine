@@ -47,49 +47,4 @@ void OpSymExpression::print() {
   tty->print(")");
 }
 
-ConExpression::ConExpression(jboolean z) {
-  int ret = sprintf(_str, "Y_Z_0x%x", z);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jbyte b) {
-  int ret = sprintf(_str, "Y_B_0x%x", b);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jchar b) {
-  int ret = sprintf(_str, "Y_C_%c", b);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jint i) {
-  int ret = sprintf(_str, "Y_I_%d", i);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jshort s) {
-  int ret = sprintf(_str, "Y_S_%d", s);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jlong l) {
-  int ret = sprintf(_str, "Y_J_%ld", l);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jfloat f) {
-  int ret = sprintf(_str, "Y_F_%e", f);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-ConExpression::ConExpression(jdouble d) {
-  int ret = sprintf(_str, "Y_D_%le", d);
-  assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
-}
-
-void ConExpression::print() {
-  // TODO: include primiteive type
-  tty->indent().print("%s", _str);
-}
-
 #endif

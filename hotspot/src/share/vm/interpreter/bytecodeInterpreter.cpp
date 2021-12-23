@@ -25,6 +25,7 @@
 // no precompiled headers
 #include "classfile/vmSymbols.hpp"
 #include "concolic/concolicMngr.hpp"
+#include "concolic/exp/strExpression.hpp"
 #include "gc_interface/collectedHeap.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
 #include "interpreter/bytecodeInterpreter.hpp"

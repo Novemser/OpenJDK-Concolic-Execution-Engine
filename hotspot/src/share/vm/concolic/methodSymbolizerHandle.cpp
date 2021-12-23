@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include <concolic/exp/methodExpression.hpp>
+#include "concolic/exp/strExpression.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 

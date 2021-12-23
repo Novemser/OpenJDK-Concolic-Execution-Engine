@@ -1,6 +1,7 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/arrayInitExpression.hpp"
+#include "concolic/exp/strExpression.hpp"
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "utilities/debug.hpp"
