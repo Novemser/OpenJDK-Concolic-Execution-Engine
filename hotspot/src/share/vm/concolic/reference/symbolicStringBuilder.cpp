@@ -22,6 +22,7 @@ method_set_t SymStrBuilder::init_handle_method_names() {
 
 std::map<std::string, bool> SymStrBuilder::init_skip_method_names() {
   std::map<std::string, bool> map;
+  map["<init>"] = true;
   return map;
 }
 

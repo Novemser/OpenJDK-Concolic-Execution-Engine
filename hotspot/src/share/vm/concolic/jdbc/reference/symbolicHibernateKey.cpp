@@ -7,6 +7,8 @@
 #include "runtime/fieldDescriptor.hpp"
 #include "symbolicHibernateKey.hpp"
 
+#include <algorithm>
+
 /* =============================================================
  *                      HibernateKeyExpression
  * =============================================================
@@ -24,7 +26,11 @@ HibernateKeyExpression::HibernateKeyExpression(oop obj) {
     guarantee(obj->klass()->name()->equals("org/hibernate/engine/spi/CollectionKey"), "should be");
 
     oop role_obj = OopUtils::obj_field_by_name(obj, "role", SigName::String);
-    table_name_exp = new ConStringSymbolExp(role_obj);
+
+    ResourceMark rm;
+    std::string table_name = OopUtils::java_string_to_c(role_obj);
+    std::replace(table_name.begin(), table_name.end(), '.', '/');
+    table_name_exp = new ConStringSymbolExp(table_name);
     table_name_exp->inc_ref();
   }
 
@@ -57,9 +63,10 @@ void HibernateKeyExpression::set_table_name_exp(objArrayOop j_string_vector) {
   std::string table_name = OopUtils::java_string_to_c(j_string_vector->obj_at(0));
   int string_vector_length = j_string_vector->length();
   for (int i = 1; i < string_vector_length; i++) {
-    table_name += "__";
+    table_name += "_";
     table_name += OopUtils::java_string_to_c(j_string_vector->obj_at(i));
   }
+  std::replace(table_name.begin(), table_name.end(), '.', '/');
   table_name_exp = new ConStringSymbolExp(table_name);
   table_name_exp->inc_ref();
 }
