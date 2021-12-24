@@ -35,6 +35,14 @@ public:
     _exp->inc_ref();
   };
 
+  /**
+   * TODO: try calling "toString" of bigdecimal
+   * this is an ugly workaround...
+   */
+  Expression * create_ref_exp(oop obj) {
+    return new ConExpression(1.0);
+  }
+
   bool need_recursive() { return false; }
   void print();
 

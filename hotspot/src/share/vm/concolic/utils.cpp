@@ -1,5 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
+#include <concolic/reference/symbolicStringBuilder.hpp>
 #include "concolic/utils.hpp"
 #include "classfile/symbolTable.hpp"
 #include "concolic/fieldTraverser.hpp"
@@ -18,10 +19,16 @@ bool OopUtils::is_java_string_interned(oop str_obj) {
 }
 
 typeArrayOop OopUtils::java_string_to_char_array(oop str_obj) {
-  Klass *klass = str_obj->klass();
-  assert(klass->name()->equals(SymString::TYPE_NAME), "should be String");
-  InstanceKlass *ik = (InstanceKlass *)klass;
-
+    Klass *klass;
+    InstanceKlass *ik;
+    if (str_obj->klass()->name()->equals(SymString::TYPE_NAME)) {
+        klass = str_obj->klass();
+    } else if (str_obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME)){
+        klass = str_obj->klass()->super();
+    } else{
+        ShouldNotReachHere();
+    }
+  ik = (InstanceKlass *)klass;
   const int value_field_index = 0;
   assert(ik->field_name(value_field_index)->equals("value"),
          "this field should be value");

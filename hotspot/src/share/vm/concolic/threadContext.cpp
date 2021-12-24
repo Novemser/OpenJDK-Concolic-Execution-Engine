@@ -9,6 +9,7 @@
 #include "concolic/reference/symbolicObject.hpp"
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicStringBuilder.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
@@ -56,16 +57,18 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   std::string class_name(klass_symbol->as_C_string());
 //  tty->print_cr("alloc_sym_inst for %s", klass_symbol->as_C_string());
 
-  if (klass_symbol->equals(SymString::TYPE_NAME)) {
-    if (OopUtils::is_java_string_interned(obj)) {
-      ResourceMark rm;
-      const char* str = OopUtils::java_string_to_c(obj);
-      tty->print_cr("Interned String!: %s", str);
-      /**
-       * we do not support symbolize interned Java string
-       */
-      return NULL;
-    }
+  if ((klass_symbol->equals(SymString::TYPE_NAME))||(klass_symbol->equals(SymStrBuilder::TYPE_NAME))) {
+      if (klass_symbol->equals(SymString::TYPE_NAME)){
+          if (OopUtils::is_java_string_interned(obj)) {
+              ResourceMark rm;
+              const char* str = OopUtils::java_string_to_c(obj);
+              tty->print_cr("Interned String!: %s", str);
+              /**
+               * we do not support symbolize interned Java string
+               */
+              return NULL;
+          }
+      }
     sym_inst = new SymString(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<jchar>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jchar>(sym_rid);

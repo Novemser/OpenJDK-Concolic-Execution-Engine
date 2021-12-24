@@ -4,19 +4,37 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/expression.hpp"
+#include "concolic/SymbolicOp.hpp"
+#include "concolic/defs.hpp"
+#include "oops/oop.inline.hpp"
+#include "utilities/debug.hpp"
+#include "utilities/ostream.hpp"
+#include "symbolExpression.hpp"
 
-#include <string>
+#include <map>
+#include <stdio.h>
+#include <vector>
 
-class StringExpression : public Expression {
-  std::string _str;
+class OpStrExpression : public Expression {
+    std::string _name;
+    exp_list_t _param_list;
 
 public:
-  StringExpression(const char *str) : _str(str) {}
-  ~StringExpression() {}
+
+    OpStrExpression(const std::string &method, exp_list_t &param_list);
+    ~OpStrExpression();
 
 public:
-  void print();
+    void print();
 };
 
-#endif // ENABLE_CONCOLIC
+class ConStringSymbolExp : public SymbolExpression {
+public:
+    ConStringSymbolExp(oop obj);
+    ConStringSymbolExp(const std::string& str);
+};
+
+
+#endif
+
 #endif // SHARE_VM_CONCOLIC_EXP_STRINGEXPRESSION_HPP

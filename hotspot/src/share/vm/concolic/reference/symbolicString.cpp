@@ -3,14 +3,15 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/arrayInitExpression.hpp"
-#include "concolic/exp/methodExpression.hpp"
-#include "concolic/exp/stringExpression.hpp"
 #include "concolic/utils.hpp"
+#include <concolic/exp/methodExpression.hpp>
+#include <concolic/exp/stringExpression.hpp>
 
 const char *SymString::ARRAY_TYPE_NAME = "[Ljava/lang/String;";
 const char *SymString::TYPE_NAME = "java/lang/String";
 method_set_t SymString::handle_method_names = init_handle_method_names();
-std::map<std::string, bool> SymString::skip_method_names = init_skip_method_names();
+std::map<std::string, bool> SymString::skip_method_names =
+    init_skip_method_names();
 bool SymString::need_recording = false;
 
 method_set_t SymString::init_handle_method_names() {
@@ -77,23 +78,26 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
   bool need_symbolize = true;
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
-      need_recording = handle.general_check_param_symbolized();
+    need_recording = handle.general_check_param_symbolized();
     if (need_recording) {
       SymString::prepare_param(handle);
     }
   } else {
-    std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
+    std::map<std::string, bool>::iterator iter =
+        skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {
       need_symbolize = iter->second;
       if (!need_symbolize) {
         bool recording = handle.general_check_param_symbolized();
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymString, need recording %c", recording ? 'Y' : 'N');
+        tty->print_cr(" skipped by SymString, need recording %c",
+                      recording ? 'Y' : 'N');
       }
     } else {
       bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymString, need recording %c", recording ? 'Y' : 'N');
+      tty->print_cr(" handled by SymString, need recording %c",
+                    recording ? 'Y' : 'N');
     }
   }
 
@@ -119,8 +123,8 @@ void SymString::prepare_param(MethodSymbolizerHandle &handle) {
   }
 }
 
-int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
-                                 int locals_offset) {
+int SymString::prepare_param_helper(MethodSymbolizerHandle &handle,
+                                    BasicType type, int locals_offset) {
   Expression *exp = NULL;
 
   if (is_java_primitive(type)) {
@@ -129,14 +133,7 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType ty
   } else if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);
     guarantee(obj != NULL, "should be");
-    if (obj->is_symbolic()) {
-      SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-    } else {
-      // only consider the situation that unsymbolized object is a string by now
-      guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME), "should be");
-      exp = SymString::get_exp_of(obj);
-    }
+    exp = SymString::get_exp_of(obj);
   } else if (type == T_ARRAY) {
     tty->print_cr("record string method having a array param: ");
     handle.get_callee_method()->print_name(tty);
@@ -161,24 +158,50 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType ty
 
 Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (need_recording) {
-    return MethodSymbolizer::finish_method_helper(handle);
+    const std::string &callee_name = handle.get_callee_name();
+    BasicType type = handle.get_result_type();
+    Expression *exp = NULL;
+    oop obj = NULL;
+
+    switch (type) {
+    case T_VOID:
+      if (callee_name == "getChars") {
+        ShouldNotReachHere();
+      }
+      exp = SymbolExpression::get(Sym_VOID);
+      break;
+    case T_OBJECT:
+      obj = handle.get_result<oop>(type);
+      if (obj != NULL) {
+        guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME),
+                  "should be");
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(obj)->set_ref_exp(
+            new OpStrExpression(callee_name, handle.get_param_list()));
+      } else {
+        exp = SymbolExpression::get(Sym_NULL);
+      }
+      break;
+    case T_ARRAY:
+      ShouldNotCallThis();
+      break;
+    default:
+      exp = new OpStrExpression(callee_name, handle.get_param_list());
+    }
+
+    return exp;
+
   } else {
     return NULL;
   }
 }
 
 Expression *SymString::get_exp_of(oop obj) {
-  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
-  Expression *exp;
   if (obj->is_symbolic()) {
     SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-    exp = sym_inst->get_ref_exp();
-    assert(exp != NULL, "NOT NULL");
+    return sym_inst->get_ref_exp();
   } else {
-    ResourceMark rm;
-    exp = new StringExpression(OopUtils::java_string_to_c(obj));
+    return new ConStringSymbolExp(obj);
   }
-  return exp;
 }
 
 sym_rid_t StringSymbolExp::sym_string_count = 0;
