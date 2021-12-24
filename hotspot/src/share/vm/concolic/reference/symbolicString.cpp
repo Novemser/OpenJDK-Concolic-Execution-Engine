@@ -3,8 +3,6 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/arrayInitExpression.hpp"
-#include "concolic/exp/methodExpression.hpp"
-#include "concolic/exp/stringExpression.hpp"
 #include "concolic/utils.hpp"
 
 const char *SymString::ARRAY_TYPE_NAME = "[Ljava/lang/String;";
@@ -129,14 +127,7 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType ty
   } else if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);
     guarantee(obj != NULL, "should be");
-    if (obj->is_symbolic()) {
-      SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-      exp = sym_inst->get_ref_exp();
-    } else {
-      // only consider the situation that unsymbolized object is a string by now
-      guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME), "should be");
-      exp = SymString::get_exp_of(obj);
-    }
+    exp = SymString::get_exp_of(obj);
   } else if (type == T_ARRAY) {
     tty->print_cr("record string method having a array param: ");
     handle.get_callee_method()->print_name(tty);
@@ -168,17 +159,12 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 Expression *SymString::get_exp_of(oop obj) {
-  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
-  Expression *exp;
   if (obj->is_symbolic()) {
     SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-    exp = sym_inst->get_ref_exp();
-    assert(exp != NULL, "NOT NULL");
+    return sym_inst->get_ref_exp();
   } else {
-    ResourceMark rm;
-    exp = new StringExpression(OopUtils::java_string_to_c(obj));
+    return new ConStringSymbolExp(obj);
   }
-  return exp;
 }
 
 sym_rid_t StringSymbolExp::sym_string_count = 0;
