@@ -77,21 +77,5 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
   set(str_buf, length);
 }
 
-ConStringSymbolExp::ConStringSymbolExp(oop obj) {
-  ResourceMark rm;
-  stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'Y', T_OBJECT, "'String'");
-  ss.print("%s", OopUtils::java_string_to_c(obj));
-  this->finalize(ss.size());
-}
-
-ConStringSymbolExp::ConStringSymbolExp(const std::string& str) {
-  stringStream ss(str_buf, BUF_SIZE);
-  set_head(ss, 'Y', T_OBJECT, "'String'");
-  ss.print("%s", str.c_str());
-  this->finalize(ss.size());
-}
-
-
 
 #endif

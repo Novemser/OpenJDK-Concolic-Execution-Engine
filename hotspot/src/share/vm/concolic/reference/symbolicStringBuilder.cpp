@@ -1,5 +1,6 @@
 #ifdef ENABLE_CONCOLIC
 
+#include <concolic/exp/stringExpression.hpp>
 #include "concolic/reference/symbolicStringBuilder.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/arrayInitExpression.hpp"
@@ -133,9 +134,8 @@ SymStrBuilder::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (callee_name == "append") {
     SymStrBuilder *sym_res_strBuilder =
         (SymStrBuilder *)ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-    sym_res_strBuilder->set_ref_exp(
-        new MethodExpression("String", "concat", handle.get_param_list(),
-                             SymbolExpression::get(Sym_VOID)));
+      sym_res_strBuilder->set_ref_exp(
+              new OpStrExpression("concat", handle.get_param_list()));
   } else if (callee_name == "toString") {
     SymString *sym_res_str =
         (SymString *)ConcolicMngr::ctx->alloc_sym_inst(obj);
