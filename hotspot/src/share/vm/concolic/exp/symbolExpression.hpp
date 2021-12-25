@@ -63,6 +63,12 @@ public:
   FieldSymbolExp(sym_rid_t sym_rid, int field_index, BasicType type);
 };
 
+class ConSymbolExp : public SymbolExpression {
+public:
+  ConSymbolExp(const char* str, BasicType type);
+};
+
+
 class ArraySymbolExp : public SymbolExpression {
 public:
   ArraySymbolExp(sym_rid_t sym_arr_oid, int arr_version, BasicType type);
@@ -78,8 +84,6 @@ public:
   ElementSymbolExp(sym_rid_t sym_arr_oid, int arr_version, int load_count,
                    BasicType type);
 };
-
-
 
 #endif
 

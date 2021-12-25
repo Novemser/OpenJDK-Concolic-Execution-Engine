@@ -127,6 +127,14 @@ Expression *SymBigDecimal::get_exp_of(oop obj) {
   return exp;
 }
 
+Expression * SymBigDecimal::create_ref_exp(oop obj) {
+  oop str_obj = OopUtils::bigd_to_java_string(obj);
+  ResourceMark rm;
+  const char* str = OopUtils::java_string_to_c(str_obj);
+  return new ConSymbolExp(str, T_DOUBLE);
+}
+
+
 void SymBigDecimal::print() {
   tty->print_cr("SymBigDecimal: ");
   _exp->print();

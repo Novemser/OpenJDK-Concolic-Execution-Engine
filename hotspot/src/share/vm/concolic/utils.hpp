@@ -53,6 +53,9 @@ jshort java_short_to_c(oop short_obj);
 jlong java_long_to_c(oop long_obj);
 jfloat java_float_to_c(oop float_obj);
 jdouble java_double_to_c(oop double_obj);
+
+oop bigd_to_java_string(oop bigd);
+
 } // namespace OopUtils
 
 namespace SigName {

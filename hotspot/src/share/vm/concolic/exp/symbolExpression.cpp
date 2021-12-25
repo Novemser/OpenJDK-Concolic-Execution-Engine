@@ -58,6 +58,14 @@ FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
   this->finalize(ss.size());
 }
 
+ConSymbolExp::ConSymbolExp(const char* str, BasicType type) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'Y', type);
+  ss.print("%s", str);
+  this->finalize(ss.size());
+}
+
+
 ArraySymbolExp::ArraySymbolExp(sym_rid_t sym_arr_oid, int version,
                                BasicType type) {
   int length =

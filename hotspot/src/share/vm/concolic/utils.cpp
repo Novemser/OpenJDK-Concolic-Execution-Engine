@@ -177,8 +177,6 @@ Klass *OopUtils::get_fd_by_name(oop obj, const std::string &name, const std::str
   if (klass != NULL) {
     ResourceMark rm;
     ret_fd.print();
-//    tty->print_cr("Offset lookup: name: '%s', signature: '%s', klass: '%s', offset: %d, index: %d",
-//                  name.c_str(), signature.c_str(), klass->name()->as_C_string(), ret_fd.offset(), ret_fd.index());
   }
   return klass;
 }
@@ -214,5 +212,33 @@ DEFINE_GET_FIELD_BY_NAME(jlong, long, 0);
 DEFINE_GET_FIELD_BY_NAME(jfloat, float, 0.0);
 DEFINE_GET_FIELD_BY_NAME(jdouble, double, 0.0);
 DEFINE_GET_FIELD_BY_NAME(address, address, 0);
+
+oop OopUtils::bigd_to_java_string(oop bigd) {
+  JavaThread* thread = ConcolicMngr::ctx->get_thread();
+  InstanceKlass* instKlass = (InstanceKlass*)bigd->klass();
+
+  Array<Method *> *methods = instKlass->methods();
+//  int size = methods->size();
+//  tty->print_cr("%d------", size);
+//  for (int i = 0; i < size - 1; ++i) {
+//    Method* method = methods->at(i);
+//    tty->print("%d %p", i, method);
+//    method->print_name();
+//    tty->cr();
+//  }
+
+  // 121 is the index of toString() in BigDecimal
+  Method* toStringMethod = methods->at(121);
+  JavaCallArguments java_args(1);
+  java_args.push_oop(bigd);
+
+  JavaValue result(T_OBJECT);
+  ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(true);
+  JavaCalls::call(&result, toStringMethod, &java_args, thread);
+  ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
+
+  return (oop)result.get_value_addr()->l;
+}
+
 
 #endif
