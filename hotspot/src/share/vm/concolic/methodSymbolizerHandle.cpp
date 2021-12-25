@@ -47,7 +47,7 @@ void MethodSymbolizerHandle::general_prepare_param() {
   int offset = this->get_callee_local_begin_offset();
 
   if (!callee_method->is_static()) {
-    this->general_prepare_param_helper(T_OBJECT, offset);
+    this->general_prepare_param_helper(T_OBJECT, offset, true);
     ++offset;
   }
   // handle this
@@ -55,22 +55,29 @@ void MethodSymbolizerHandle::general_prepare_param() {
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
   while (!ss.at_return_type()) {
-    offset = this->general_prepare_param_helper(ss.type(), offset);
+    offset = this->general_prepare_param_helper(ss.type(), offset, false);
     ss.next();
     ++offset;
   }
 }
 
 int MethodSymbolizerHandle::general_prepare_param_helper(BasicType type,
-                                                         int locals_offset) {
+                                                         int locals_offset, bool is_this) {
   Expression *exp = NULL;
   if (is_java_primitive(type)) {
     exp = this->get_primitive_exp(locals_offset, type);
   } else if (type == T_OBJECT) {
     oop obj = this->get_param<oop>(locals_offset);
     if (obj != NULL) {
-      SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      exp = sym_inst->get_or_create_ref_exp(obj);
+      if (obj->is_symbolic()) {
+        SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
+        exp = sym_inst->get_or_create_ref_exp(obj);
+      } else if (is_this) {
+        SymInstance *sym_inst = ConcolicMngr::ctx->alloc_sym_inst(obj);
+        exp = sym_inst->get_or_create_ref_exp(obj);
+      } else {
+        exp = SymInstance::get_exp_of(obj);
+      }
     }
   } else {
     tty->print_cr("un_handled type %c", type2char(type));

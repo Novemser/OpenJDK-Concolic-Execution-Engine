@@ -39,10 +39,7 @@ public:
    * TODO: try calling "toString" of bigdecimal
    * this is an ugly workaround...
    */
-  Expression * create_ref_exp(oop obj);
-//  Expression * create_ref_exp(oop obj) {
-//    return new ConExpression(1.0);
-//  }
+  inline Expression * create_ref_exp(oop obj) { return get_con_exp(obj); }
 
   bool need_recursive() { return false; }
   void print();
@@ -51,6 +48,7 @@ public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
   static Expression *get_exp_of(oop obj);
+  static Expression *get_con_exp(oop obj);
 
 private:
   static method_set_t init_symbolized_methods();

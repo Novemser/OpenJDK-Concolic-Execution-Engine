@@ -197,8 +197,7 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
 
 Expression *SymString::get_exp_of(oop obj) {
   if (obj->is_symbolic()) {
-    SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-    return sym_inst->get_ref_exp();
+    return ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
   } else {
     return new ConStringSymbolExp(obj);
   }

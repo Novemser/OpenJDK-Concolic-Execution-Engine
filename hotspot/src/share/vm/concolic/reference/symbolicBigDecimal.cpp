@@ -14,7 +14,6 @@ std::set<std::string> SymBigDecimal::handle_method_names = init_handle_method_na
 std::set<std::string> SymBigDecimal::init_handle_method_names() {
   std::set<std::string> set;
   set.insert("valueOf");
-  set.insert("setScale");
   set.insert("equals");
   set.insert("add");
   set.insert("multiply");
@@ -28,6 +27,7 @@ std::map<std::string, bool> SymBigDecimal::skip_method_names = init_skip_method_
 
 std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
   std::map<std::string, bool> map;
+  map["setScale"] = true;
   return map;
 }
 
@@ -115,25 +115,19 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
 }
 
 Expression *SymBigDecimal::get_exp_of(oop obj) {
-  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
-  Expression *exp;
   if (obj->is_symbolic()) {
-    SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
-    exp = sym_inst->get_ref_exp();
-    guarantee(exp != NULL, "NOT NULL");
+    return ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
   } else {
-    exp = new InstanceSymbolExp(obj);
+    return get_con_exp(obj);
   }
-  return exp;
 }
 
-Expression * SymBigDecimal::create_ref_exp(oop obj) {
+Expression *SymBigDecimal::get_con_exp(oop obj) {
   oop str_obj = OopUtils::bigd_to_java_string(obj);
   ResourceMark rm;
   const char* str = OopUtils::java_string_to_c(str_obj);
   return new ConSymbolExp(str, T_DOUBLE);
 }
-
 
 void SymBigDecimal::print() {
   tty->print_cr("SymBigDecimal: ");

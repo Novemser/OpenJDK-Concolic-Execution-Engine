@@ -50,6 +50,8 @@ public:
     return init_sym_exp(field_offset, new FieldSymbolExp(this->get_sym_rid(),
                                                          field_offset, type));
   }
+
+  static Expression* get_exp_of(oop obj);
 };
 
 #endif // ENABLE_CONCOLIC

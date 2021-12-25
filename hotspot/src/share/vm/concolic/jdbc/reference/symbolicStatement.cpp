@@ -25,15 +25,6 @@ std::set<std::string> SymStmt::skip_method_names = init_skip_method_names();
 
 std::set<std::string> SymStmt::init_skip_method_names() {
   std::set<std::string> set;
-  set.insert("setBoolean");
-  set.insert("setByte");
-  set.insert("setInt");
-  set.insert("setNull");
-  set.insert("setString");
-  set.insert("setShort");
-  set.insert("setLong");
-  set.insert("setFloat");
-  set.insert("setDouble");
   set.insert("close");
   set.insert("checkClosed");
   set.insert("<init>");
@@ -46,8 +37,6 @@ std::set<std::string> SymStmt::init_skip_method_names() {
   set.insert("setMaxRows");
   set.insert("getQueryTimeout");
   set.insert("setQueryTimeout");
-  set.insert("setTimestamp");
-  set.insert("setBigDecimal");
   return set;
 }
 
@@ -80,8 +69,6 @@ SymStmt::~SymStmt() {
 }
 
 void SymStmt::set_param(int index, Expression *exp) {
-//  assert(_param_exps.find(index) == _param_exps.end(),
-//         "currently, assume each parameter is only set once");
   exp->inc_ref();
   _param_exps.insert(std::make_pair(index, exp));
 }
@@ -135,7 +122,18 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
     int param_size = handle.get_callee_method()->size_of_parameters();
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
-  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
+  } else if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
+    ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
+    if (arg_cnt.size() > 3) {
+      tty->print_cr("Can't handle the set method having more than three params");
+      ShouldNotReachHere();
+    }
+    oop stmt_obj = handle.get_param<oop>(0);
+    jint index = handle.get_param<jint>(1);
+    Expression *value_exp = SymStmt::get_param_exp(handle, support_set_methods[callee_name], callee_name);
+    SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    sym_stmt->set_param(index, value_exp);
+  }else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" unhandled by SymStmt");
     // ShouldNotCallThis();
@@ -164,29 +162,12 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       exp = new ResultSetSymbolExp(sym_stmt);
       sym_stmt->set_row_count_exp(exp);
     }
-  } else if (strncmp("set", callee_name.c_str(), 3) == 0) {
-    ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
-    if (arg_cnt.size() > 3) {
-      tty->print_cr("Can't handle the set method having more than three params");
-      ShouldNotReachHere();
-    }
-    if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
-      oop stmt_obj = handle.get_param<oop>(0);
-      jint index = handle.get_param<jint>(1);
-      Expression *value_exp = SymStmt::get_param_exp(handle, support_set_methods[callee_name], callee_name);
-      SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
-      sym_stmt->set_param(index, value_exp);
-    } else {
-      handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymStmt");
-    }
   }
   return exp;
 }
 
 // this type mean the param type of ? in sql statement
 Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType type, const std::string &callee_name) {
-
   int offset = 2;
   Expression *value_exp;
   if (is_java_primitive(type)) {
