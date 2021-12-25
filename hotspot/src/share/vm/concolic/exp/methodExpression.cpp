@@ -5,7 +5,7 @@
 
 MethodExpression::MethodExpression(const std::string &holder, const std::string &method, exp_list_t &param_list,
                                    Expression *res_exp)
-    : _name(holder + '.' + method), _res_exp(res_exp) {
+    : _name(holder + ' ' + method), _res_exp(res_exp) {
 
   // all exp must be not null
 
@@ -34,7 +34,7 @@ void MethodExpression::print() {
   tty->print("(f %s ", _name.c_str());
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
-    tty->print(",");
+    tty->print(" ,");
     Expression::print_on_maybe_null(_param_list[i]);
   }
   tty->print(" ");

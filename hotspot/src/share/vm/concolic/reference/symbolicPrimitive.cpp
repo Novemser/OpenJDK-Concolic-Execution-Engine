@@ -2,6 +2,7 @@
 
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "symbolicString.hpp"
+#include "concolic/exp/stringExpression.hpp"
 
 template <>
 const char *SymPrimitive<jchar>::ARRAY_TYPE_NAME = "[Ljava/lang/Character;";
@@ -168,7 +169,7 @@ template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymboliz
         oop res_obj = handle.get_result<oop>(T_OBJECT);
         guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
         SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-        sym_res_str->set_ref_exp(new OpSymExpression(exp, op_str));
+        sym_res_str->set_ref_exp(OpStrExpression::to_string(exp));
     }
 
     return exp;

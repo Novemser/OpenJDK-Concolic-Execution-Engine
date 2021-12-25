@@ -94,8 +94,7 @@ int SymStrBuilder::prepare_param_helper(MethodSymbolizerHandle &handle,
   Expression *exp = NULL;
 
   if (is_java_primitive(type)) {
-    exp = new OpSymExpression(handle.get_primitive_exp(locals_offset, type),
-                              op_str);
+    exp = OpStrExpression::to_string(handle.get_primitive_exp(locals_offset, type));
     locals_offset += type2size[type] - 1;
   } else if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);

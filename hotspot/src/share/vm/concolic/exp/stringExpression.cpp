@@ -19,6 +19,14 @@ OpStrExpression::OpStrExpression(const std::string &method,
   }
 }
 
+OpStrExpression::OpStrExpression(const std::string &method, Expression *exp)
+    : _name(method) {
+  if (exp) {
+    exp->inc_ref();
+  }
+  _param_list.push_back(exp);
+}
+
 OpStrExpression::~OpStrExpression() {
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
@@ -30,10 +38,14 @@ void OpStrExpression::print() {
   tty->print("(s %s ", _name.c_str());
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
-    tty->print(",");
+    tty->print(" ,");
     Expression::print_on_maybe_null(_param_list[i]);
   }
   tty->print(" )");
+}
+
+OpStrExpression *OpStrExpression::to_string(Expression *exp) {
+  return new OpStrExpression("toString", exp);
 }
 
 ConStringSymbolExp::ConStringSymbolExp(oop obj) {

@@ -22,10 +22,13 @@ class OpStrExpression : public Expression {
 public:
 
     OpStrExpression(const std::string &method, exp_list_t &param_list);
+    OpStrExpression(const std::string &method, Expression* exp);
     ~OpStrExpression();
 
 public:
     void print();
+
+    static OpStrExpression* to_string(Expression* exp);
 };
 
 class ConStringSymbolExp : public SymbolExpression {
