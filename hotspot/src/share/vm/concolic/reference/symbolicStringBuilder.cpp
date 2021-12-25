@@ -17,12 +17,14 @@ method_set_t SymStrBuilder::init_handle_method_names() {
   method_set_t m_set;
   m_set.insert("append");
   m_set.insert("toString");
+  m_set.insert("length");
   return m_set;
 }
 
 std::map<std::string, bool> SymStrBuilder::init_skip_method_names() {
   std::map<std::string, bool> map;
   map["<init>"] = true;
+  map["setLength"] = true;
   return map;
 }
 

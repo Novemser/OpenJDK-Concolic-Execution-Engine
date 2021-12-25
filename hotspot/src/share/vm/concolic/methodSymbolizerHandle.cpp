@@ -42,7 +42,7 @@ Expression *MethodSymbolizerHandle::get_primitive_exp(int offset, BasicType type
 }
 
 
-void MethodSymbolizerHandle::general_prepare_param() {
+void MethodSymbolizerHandle::general_prepare_param(int max_param_num) {
   Method *callee_method = this->get_callee_method();
   int offset = this->get_callee_local_begin_offset();
 
@@ -54,7 +54,7 @@ void MethodSymbolizerHandle::general_prepare_param() {
 
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
-  while (!ss.at_return_type()) {
+  while (!ss.at_return_type() && offset < max_param_num) {
     offset = this->general_prepare_param_helper(ss.type(), offset, false);
     ss.next();
     ++offset;

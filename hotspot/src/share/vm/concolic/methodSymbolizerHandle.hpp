@@ -115,7 +115,7 @@ public:
 
   Expression *get_primitive_exp(int offset, BasicType type);
 
-  void general_prepare_param();
+  void general_prepare_param(int max_param_num = 100);
   int general_prepare_param_helper(BasicType type, int locals_offset, bool is_this);
 
   bool general_check_param_symbolized();
