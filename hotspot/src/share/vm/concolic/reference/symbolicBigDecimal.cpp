@@ -13,8 +13,10 @@ std::set<std::string> SymBigDecimal::handle_method_names = init_handle_method_na
 
 std::set<std::string> SymBigDecimal::init_handle_method_names() {
   std::set<std::string> set;
+  set.insert("<init>");
   set.insert("valueOf");
   set.insert("equals");
+  set.insert("setScale");
   set.insert("add");
   set.insert("multiply");
   set.insert("subtract");
@@ -27,7 +29,6 @@ std::map<std::string, bool> SymBigDecimal::skip_method_names = init_skip_method_
 
 std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
   std::map<std::string, bool> map;
-  map["setScale"] = true;
   return map;
 }
 
@@ -79,10 +80,11 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
   } else if (callee_name == "setScale") {
     oop res_obj = handle.get_result<oop>(T_OBJECT);
     SymBigDecimal *sym_bigd = (SymBigDecimal *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-
-    Expression *this_exp = handle.get_param_list()[0];
-    guarantee(this_exp != NULL, "should be");
-    sym_bigd->set_ref_exp(this_exp);
+    sym_bigd->set_ref_exp(handle.get_param_list()[0]);
+  } else if (callee_name == "<init>") {
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
+    SymBigDecimal *sym_bigd = (SymBigDecimal *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+    sym_bigd->set_ref_exp(new OpSymExpression(handle.get_param_list()[0], op_2d));
   } else {
     Expression *left_exp = handle.get_param_list()[0];
     Expression *right_exp = handle.get_param_list()[1];

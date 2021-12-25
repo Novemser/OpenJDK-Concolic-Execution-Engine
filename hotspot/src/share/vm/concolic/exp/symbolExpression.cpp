@@ -50,6 +50,12 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   this->finalize(ss.size());
 }
 
+PlaceHolderSymbolExp::PlaceHolderSymbolExp(oop obj) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'P', T_OBJECT, obj);
+  this->finalize(ss.size());
+}
+
 FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
                                BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
