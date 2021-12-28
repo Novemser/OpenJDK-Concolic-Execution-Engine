@@ -59,8 +59,8 @@ std::map<std::string, bool> SymString::init_skip_method_names() {
 }
 
 SymString::SymString(sym_rid_t sym_rid)
-    : SymInstance(sym_rid), _exp(NULL), _ref_exp(new StringSymbolExp()) {
-  _ref_exp->inc_ref();
+    : SymInstance(sym_rid), _exp(NULL), _ref_exp(NULL) {
+  this->set_ref_exp(new StringSymbolExp(_sym_rid));
 }
 
 SymString::~SymString() {
@@ -187,9 +187,7 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
     default:
       exp = new OpStrExpression(callee_name, handle.get_param_list());
     }
-
     return exp;
-
   } else {
     return NULL;
   }
@@ -201,13 +199,6 @@ Expression *SymString::get_exp_of(oop obj) {
   } else {
     return new ConStringSymbolExp(obj);
   }
-}
-
-sym_rid_t StringSymbolExp::sym_string_count = 0;
-
-StringSymbolExp::StringSymbolExp() {
-  int length = sprintf(str_buf, "STR_%lu", ++sym_string_count);
-  set(str_buf, length);
 }
 
 #endif

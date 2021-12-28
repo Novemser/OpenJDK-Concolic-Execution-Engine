@@ -47,12 +47,5 @@ private:
   static std::map<std::string, bool> init_skip_method_names();
 };
 
-class StringSymbolExp : public SymbolExpression {
-  static sym_rid_t sym_string_count;
-
-public:
-  StringSymbolExp();
-};
-
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_REFERENCE_SYMBOLICSTRING_HPP

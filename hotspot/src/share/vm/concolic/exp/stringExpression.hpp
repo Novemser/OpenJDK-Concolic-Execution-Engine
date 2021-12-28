@@ -31,6 +31,12 @@ public:
     static OpStrExpression* to_string(Expression* exp);
 };
 
+class StringSymbolExp : public SymbolExpression {
+public:
+  StringSymbolExp(sym_rid_t sym_rid);
+};
+
+
 class ConStringSymbolExp : public SymbolExpression {
 public:
     ConStringSymbolExp(oop obj);

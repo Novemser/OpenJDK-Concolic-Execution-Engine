@@ -48,6 +48,13 @@ OpStrExpression *OpStrExpression::to_string(Expression *exp) {
   return new OpStrExpression("toString", exp);
 }
 
+StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_OBJECT, "'String'");
+  ss.print("%lu", sym_rid);
+  this->finalize(ss.size());
+}
+
 ConStringSymbolExp::ConStringSymbolExp(oop obj) {
   ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);
