@@ -135,7 +135,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
   if (is_size) {
     set_head(ss, 'M', T_INT);
-    ss.print("RS_size");
+    ss.print("RS_%lu_size", sym_res_set->_sql_id);
   } else {
     set_head(ss, 'M', T_OBJECT, "'ResultSet'");
     ss.print("RS_%lu", sym_res_set->_sql_id);
