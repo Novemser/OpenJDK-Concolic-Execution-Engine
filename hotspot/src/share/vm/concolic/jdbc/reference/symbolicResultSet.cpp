@@ -46,6 +46,7 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   set.insert("checkColumnBounds");
   // do not handle clob~
   set.insert("getClob");
+  set.insert("wasNull");
   return set;
 }
 

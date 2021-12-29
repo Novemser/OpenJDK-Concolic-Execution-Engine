@@ -5,6 +5,7 @@
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
+#include "concolic/jdbc/reference/symbolicPersister.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
@@ -98,6 +99,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymTimestamp::invoke_method_helper(_handle);
   } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymHibernateKey::invoke_method_helper(_handle);
+  } else if (SymPersister::target(_handle.get_callee_holder_name())) {
+    need_symbolize = SymPersister::invoke_method_helper(_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -143,6 +146,8 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymTimestamp::finish_method_helper(_handle);
     } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
       exp = SymHibernateKey::finish_method_helper(_handle);
+    } else if (SymPersister::target(_handle.get_callee_holder_name())) {
+      exp = SymPersister::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }
