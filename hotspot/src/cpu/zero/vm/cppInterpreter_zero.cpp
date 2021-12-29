@@ -52,6 +52,7 @@
 #include "utilities/debug.hpp"
 #include "utilities/macros.hpp"
 #include "utilities/vmError.hpp"
+#include "concolic/native/nativeCallHandler.hpp"
 #ifdef SHARK
 #include "shark/shark_globals.hpp"
 #endif
@@ -465,6 +466,10 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
 
   // Pop our parameters
   stack->set_sp(stack->sp() + method->size_of_parameters());
+
+#ifdef ENABLE_CONCOLIC
+  NativeCallHandler::handle_native(method, locals);
+#endif
 
   // Push our result
   if (!HAS_PENDING_EXCEPTION) {

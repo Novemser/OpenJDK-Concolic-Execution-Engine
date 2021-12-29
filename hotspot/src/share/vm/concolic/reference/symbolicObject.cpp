@@ -25,8 +25,6 @@ void SymObj::init_sym_exp(int field_offset, Expression *exp) {
 }
 
 void SymObj::set_sym_exp(int field_offset, Expression *exp) {
-  assert(field_offset % 8 == 0,
-         "we are turning to field_offset, this should be true");
   exp_map_t::iterator iter = _exps.find(field_offset);
   if (iter != _exps.end()) {
     Expression::gc(iter->second);

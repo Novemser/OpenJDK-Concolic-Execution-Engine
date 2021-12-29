@@ -5,7 +5,9 @@
 #include "utilities/ostream.hpp"
 
 void __attribute__((optimize("O0"))) PathCondition::add(Expression *exp) {
-  Condition *cond = new Condition(ConcolicMngr::ctx->get_current_code_pos(), exp);
+  const std::string &code_pos = ConcolicMngr::ctx->get_current_code_pos();
+  guarantee(code_pos.find("valueOf") == std::string::npos, "we should permit cache when use valueOf");
+  Condition *cond = new Condition(code_pos, exp);
   _conds.push_back(cond);
 }
 
