@@ -16,6 +16,7 @@
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
+#include "concolic/jdbc/reference/symbolicHibernateMethod.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
@@ -98,6 +99,9 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = SymTimestamp::invoke_method_helper(_handle);
   } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymHibernateKey::invoke_method_helper(_handle);
+  } else if (SymHibernateMethod::target(callee_method->name_and_sig_as_C_string())) {
+    invoke_method_helper(_handle);
+    need_symbolize = true;
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
