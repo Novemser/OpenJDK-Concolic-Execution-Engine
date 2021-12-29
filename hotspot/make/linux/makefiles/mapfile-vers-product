@@ -253,6 +253,7 @@ SUNWprivate_1.1 {
                 JVM_handle_linux_signal;
 
                 #Concolic
+                JVM_PrintObjInfo;
                 JVM_StartConcolic;
                 JVM_EndConcolic;
                 JVM_Symbolize;

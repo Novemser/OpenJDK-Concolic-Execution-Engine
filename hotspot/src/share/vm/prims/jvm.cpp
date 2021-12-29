@@ -311,6 +311,17 @@ JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))
   return os::javaTimeNanos();
 JVM_END
 
+JVM_ENTRY(void, JVM_PrintObjInfo(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_PrintObjInfo");
+#ifdef ENABLE_CONCOLIC
+  oop o = JNIHandles::resolve_non_null(obj);
+  o->print();
+  o->klass()->print();
+#else
+  return;
+#endif
+JVM_END
+
 JVM_ENTRY(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_StartConcolic");
 #ifdef ENABLE_CONCOLIC

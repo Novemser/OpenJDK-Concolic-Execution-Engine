@@ -38,6 +38,7 @@
 static JNINativeMethod methods[] = {
     {"currentTimeMillis", "()J",                     (void *)&JVM_CurrentTimeMillis},
     {"nanoTime",          "()J",                     (void *)&JVM_NanoTime},
+    {"printObjInfo",      "(" OBJ ")V",              (void *)&JVM_PrintObjInfo},
     {"startConcolic",     "()J",                     (void *)&JVM_StartConcolic},
     {"endConcolic",       "()J",                     (void *)&JVM_EndConcolic},
     {"symbolize",         "(" OBJ ")V",              (void *)&JVM_Symbolize},
