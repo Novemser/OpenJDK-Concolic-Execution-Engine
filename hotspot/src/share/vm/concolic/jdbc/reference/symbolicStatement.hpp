@@ -43,10 +43,10 @@ private:
   std::string _sql_template;
   exp_map_t _param_exps;
   Expression *_row_count_exp;
+  int _row_count;
 
 public:
   SymStmt(sym_rid_t sym_rid);
-
   ~SymStmt();
 
 public:
@@ -62,7 +62,11 @@ public:
 
   void set_param(int index, Expression *exp);
 
-  void set_row_count_exp(Expression *row_count_exp);
+  inline Expression *get_row_count_exp() { return _row_count_exp; }
+
+  void set_row_count_exp(Expression *row_count_exp, int row_count);
+
+  inline void inc_row_count() { ++ _row_count;}
 
 public:
   bool need_recursive() { return false; }

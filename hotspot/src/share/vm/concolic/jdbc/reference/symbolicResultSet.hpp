@@ -35,11 +35,10 @@ private:
   static std::set<std::string> init_skip_method_names();
 
 private:
-  sym_rid_t _sym_stmt_rid;
   sym_rid_t _sql_id;
   int _row_id;
+  SymStmt* _sym_stmt;
 
-  Expression *_size_exp;
   Expression* _ref_exp;
 
 public:
@@ -57,20 +56,13 @@ public:
     _ref_exp->inc_ref();
   };
 public:
-  inline void set_stmt_rid(sym_rid_t sym_stmt_rid) {
-    _sym_stmt_rid = sym_stmt_rid;
-    _sql_id = sym_stmt_rid;
-    _ref_exp = new ResultSetSymbolExp(this);
-    _ref_exp->inc_ref();
-    _size_exp = new ResultSetSymbolExp(this, true);
-    _size_exp->inc_ref();
-  }
-
-  inline Expression *get_size_exp() { return _size_exp; }
+  void set_sym_stmt(SymStmt* sym_stmt);
 
   inline int get_row_id() { return _row_id; }
 
   inline void next() { ++_row_id; }
+
+  SymStmt *get_sym_stmt();
 
 public:
   bool need_recursive() { return false; }

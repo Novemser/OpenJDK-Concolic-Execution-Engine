@@ -58,7 +58,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   return map;
 }
 
-SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL) {}
+SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL),_row_count(0) {}
 
 SymStmt::~SymStmt() {
   exp_map_t::iterator iter;
@@ -73,9 +73,10 @@ void SymStmt::set_param(int index, Expression *exp) {
   _param_exps.insert(std::make_pair(index, exp));
 }
 
-void SymStmt::set_row_count_exp(Expression *row_count_exp) {
+void SymStmt::set_row_count_exp(Expression *row_count_exp, int row_count) {
   this->_row_count_exp = row_count_exp;
   this->_row_count_exp->inc_ref();
+  this->_row_count = row_count;
 }
 
 void SymStmt::print() {
@@ -89,7 +90,7 @@ void SymStmt::print() {
     }
   }
   if (_row_count_exp) {
-    tty->print("row_count: ");
+    tty->print("row_count: %d, ", _row_count);
     _row_count_exp->print();
     tty->cr();
   }
@@ -157,10 +158,11 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       oop res_obj = handle.get_result<oop>(T_OBJECT);
       SymResSet *sym_res_set =
           (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-      sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
+      sym_res_set->set_sym_stmt(sym_stmt);
     } else if (callee_name == "executeUpdate") {
+      jint row_count = handle.get_result<jint>(T_INT);
       exp = new ResultSetSymbolExp(sym_stmt);
-      sym_stmt->set_row_count_exp(exp);
+      sym_stmt->set_row_count_exp(exp, row_count);
     }
   }
   return exp;

@@ -2,10 +2,10 @@
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
-#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/SymbolicOp.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "concolic/exp/expression.hpp"
+#include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/utils.hpp"
 
@@ -18,7 +18,8 @@ std::set<std::string> SymResSet::init_target_class_names() {
   return set;
 }
 
-std::set<std::string> SymResSet::handle_method_names = init_handle_method_names();
+std::set<std::string> SymResSet::handle_method_names =
+    init_handle_method_names();
 
 std::set<std::string> SymResSet::init_handle_method_names() {
   std::set<std::string> set;
@@ -50,15 +51,23 @@ std::set<std::string> SymResSet::init_skip_method_names() {
 }
 
 SymResSet::SymResSet(sym_rid_t sym_rid)
-    : SymInstance(sym_rid), _ref_exp(NULL), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
+    : SymInstance(sym_rid), _sym_stmt(NULL), _ref_exp(NULL), _sql_id(0),
+      _row_id(0) {}
 
 SymResSet::~SymResSet() {
-  Expression::gc(_size_exp);
   Expression::gc(_ref_exp);
 }
 
 void SymResSet::print() {
-  tty->print_cr("SymResSet of SymStmt %lu", _sym_stmt_rid);
+  tty->print_cr("SymResSet of SymStmt %lu", _sym_stmt->get_sym_rid());
+}
+
+void SymResSet::set_sym_stmt(SymStmt *sym_stmt) {
+  _sym_stmt = sym_stmt;
+  _sql_id = sym_stmt->get_sym_rid();
+  _ref_exp = new ResultSetSymbolExp(this);
+  _ref_exp->inc_ref();
+  sym_stmt->set_row_count_exp(new ResultSetSymbolExp(this, true), 0);
 }
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
@@ -68,11 +77,12 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (callee_name == "next") {
     oop res_set_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(res_set_obj);
+        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
 
     need_symbolize = true;
-  } else if (handle_method_names.find(callee_name) != handle_method_names.end() ||
+  } else if (handle_method_names.find(callee_name) !=
+                 handle_method_names.end() ||
              skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
@@ -90,7 +100,7 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (strncmp("get", callee_name.c_str(), 3) == 0) {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(this_obj);
+        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
 
     BasicType col_type;
     {
@@ -120,16 +130,22 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   } else if (callee_name == "next") {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
-        (SymResSet *) ConcolicMngr::ctx->get_sym_inst(this_obj);
+        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
     jboolean ret = handle.get_result<jboolean>(T_BOOLEAN);
 
+    if (ret) {
+      sym_res_set->get_sym_stmt()->inc_row_count();
+    }
+
     ConcolicMngr::record_path_condition(new OpSymExpression(
-        sym_res_set->get_size_exp(),
+        sym_res_set->get_sym_stmt()->get_row_count_exp(),
         new ConExpression(sym_res_set->get_row_id()), op_ge, ret));
   }
 
   return exp;
 }
+
+SymStmt *SymResSet::get_sym_stmt() { return _sym_stmt; }
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
@@ -150,22 +166,22 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymStmt *sym_stmt) {
   this->finalize(ss.size());
 }
 
-
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
-                                       const char *col_name, BasicType type, oop obj) {
+                                       const char *col_name, BasicType type,
+                                       oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type, obj);
-  ss.print("RS_%lu_%d_%s", sym_res_set->_sql_id,
-           sym_res_set->_row_id, col_name);
+  ss.print("RS_%lu_%d_%s", sym_res_set->_sql_id, sym_res_set->_row_id,
+           col_name);
   this->finalize(ss.size());
 }
 
-ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
-                                       int col_i, BasicType type, oop obj) {
+ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, int col_i,
+                                       BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type, obj);
-  ss.print("RS_%lu_%d_col%d", sym_res_set->_sql_id,
-           sym_res_set->_row_id, col_i);
+  ss.print("RS_%lu_%d_col%d", sym_res_set->_sql_id, sym_res_set->_row_id,
+           col_i);
   this->finalize(ss.size());
 }
 
