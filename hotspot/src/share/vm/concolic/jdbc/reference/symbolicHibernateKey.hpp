@@ -7,6 +7,7 @@
 #include "concolic/exp/expression.hpp"
 #include "concolic/exp/stringExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
+#include "concolic/methodSymbolizer.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
 #include "concolic/utils.hpp"
@@ -76,6 +77,7 @@ public:
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+  static void init_register_class(MethodSymbolizer *m_symbolizer);
 };
 
 

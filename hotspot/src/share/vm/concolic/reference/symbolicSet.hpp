@@ -5,6 +5,7 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymSet {
 public:
@@ -33,6 +34,8 @@ public:
   static void prepare_param(MethodSymbolizerHandle &handle);
   static int prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
                                   int locals_offset);
+
+  static void init_register_class(MethodSymbolizer *m_symbolizer);
 };
 
 #endif // ENABLE_CONCOLIC

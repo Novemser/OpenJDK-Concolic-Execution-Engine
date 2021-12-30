@@ -18,13 +18,17 @@ class MethodSymbolizer {
   typedef SymMethodSet::iterator SymMethodSetIt;
   typedef std::map<std::string, SymMethodSet *> SymClassMap;
   typedef SymClassMap::iterator SymClassMapIt;
+  typedef std::map<std::string, bool(*)(MethodSymbolizerHandle&)> invoke_helper_method_map_t;
+  typedef std::map<std::string, Expression*(*)(MethodSymbolizerHandle&)> finish_helper_method_map_t;
 
   bool _symbolizing_method;
   SymClassMap _symbolicMethods;
   MethodSymbolizerHandle _handle;
+  invoke_helper_method_map_t _invoke_helper_methods;
+  finish_helper_method_map_t _finish_helper_methods;
 
 public:
-  MethodSymbolizer() : _symbolizing_method(false) {}
+  MethodSymbolizer();
   ~MethodSymbolizer();
 
 
@@ -41,6 +45,7 @@ public:
 
 private:
   SymMethodSet *get_sym_methods(const std::string &class_name);
+  void init_helper_methods();
 
 public:
   static void invoke_method_helper(MethodSymbolizerHandle &handle);
@@ -48,6 +53,8 @@ public:
 
   static int prepare_param(MethodSymbolizerHandle &handle, BasicType type,
                            intptr_t *locals, int locals_offset);
+  void add_invoke_helper_methods(const std::string class_name, bool(*invoke_helper_func)(MethodSymbolizerHandle&));
+  void add_finish_helper_methods(const std::string class_name, Expression*(*finish_helper_func)(MethodSymbolizerHandle&));
 };
 
 class MethodReturnSymbolExp : public SymbolExpression {

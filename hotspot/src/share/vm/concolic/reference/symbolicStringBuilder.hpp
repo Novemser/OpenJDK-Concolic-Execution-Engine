@@ -6,6 +6,7 @@
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymStrBuilder : public SymInstance {
 public:
@@ -41,6 +42,8 @@ public:
                                   BasicType type, int locals_offset);
 
   static Expression *get_exp_of(oop obj);
+
+  static void init_register_class(MethodSymbolizer* m_symbolizer);
 
 private:
   static method_set_t init_handle_method_names();

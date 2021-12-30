@@ -49,6 +49,13 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   return set;
 }
 
+void SymResSet::init_register_class(MethodSymbolizer *m_symbolizer) {
+  for(std::set<std::string>::iterator it = target_class_names.begin(); it != target_class_names.end(); it++) {
+    m_symbolizer->add_invoke_helper_methods(*it, invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(*it, finish_method_helper);
+  }
+}
+
 SymResSet::SymResSet(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _ref_exp(NULL), _sym_stmt_rid(0), _sql_id(0), _row_id(0) {}
 

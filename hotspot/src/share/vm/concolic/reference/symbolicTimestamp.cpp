@@ -17,6 +17,11 @@ method_set_t SymTimestamp::init_symbolized_methods() {
   return m_set;
 }
 
+void SymTimestamp::init_register_class(MethodSymbolizer *m_symbolizer) {
+  m_symbolizer->add_invoke_helper_methods(SymTimestamp::TYPE_NAME, invoke_method_helper);
+  m_symbolizer->add_finish_helper_methods(SymTimestamp::TYPE_NAME, finish_method_helper);
+}
+
 SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)) {}
 

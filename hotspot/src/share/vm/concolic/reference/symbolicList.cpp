@@ -57,6 +57,13 @@ std::map<std::string, bool> SymList::init_skip_method_names() {
   return map;
 }
 
+void SymList::init_register_class(MethodSymbolizer *m_symbolizer) {
+  for(std::set<std::string>::iterator it = target_class_names.begin(); it != target_class_names.end(); it++) {
+    m_symbolizer->add_invoke_helper_methods(*it, invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(*it, finish_method_helper);
+  }
+}
+
 bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;

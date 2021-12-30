@@ -28,6 +28,11 @@ std::map<std::string, bool> SymStrBuilder::init_skip_method_names() {
   return map;
 }
 
+void SymStrBuilder::init_register_class(MethodSymbolizer *m_symbolizer) {
+  m_symbolizer->add_invoke_helper_methods(SymStrBuilder::TYPE_NAME, invoke_method_helper);
+  m_symbolizer->add_finish_helper_methods(SymStrBuilder::TYPE_NAME, finish_method_helper);
+}
+
 SymStrBuilder::SymStrBuilder(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _exp(NULL), _ref_exp(NULL) {
 }

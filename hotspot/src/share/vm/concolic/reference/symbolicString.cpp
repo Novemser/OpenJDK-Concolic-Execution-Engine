@@ -58,6 +58,11 @@ std::map<std::string, bool> SymString::init_skip_method_names() {
   return map;
 }
 
+void SymString::init_register_class(MethodSymbolizer *m_symbolizer) {
+  m_symbolizer->add_invoke_helper_methods(SymString::TYPE_NAME, invoke_method_helper);
+  m_symbolizer->add_finish_helper_methods(SymString::TYPE_NAME, finish_method_helper);
+}
+
 SymString::SymString(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _exp(NULL), _ref_exp(NULL) {
   this->set_ref_exp(new StringSymbolExp(_sym_rid));

@@ -5,6 +5,7 @@
 
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymList {
 public:
@@ -24,6 +25,8 @@ private:
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+
+  static void init_register_class(MethodSymbolizer *m_symbolizer);
 };
 
 #endif // ENABLE_CONCOLIC

@@ -40,6 +40,13 @@ std::set<std::string> SymStmt::init_skip_method_names() {
   return set;
 }
 
+void SymStmt::init_register_class(MethodSymbolizer *m_symbolizer) {
+  for(std::set<std::string>::iterator it = target_class_names.begin(); it != target_class_names.end(); it++) {
+    m_symbolizer->add_invoke_helper_methods(*it, invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(*it, finish_method_helper);
+  }
+}
+
 std::map<std::string, BasicType> SymStmt::support_set_methods = init_support_set_methods();
 
 std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
