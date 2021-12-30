@@ -22,6 +22,36 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
+MethodSymbolizer::MethodSymbolizer() {
+  _symbolizing_method = false;
+  init_helper_methods();
+}
+
+void MethodSymbolizer::init_helper_methods() {
+  SymString::init_register_class(this);
+  SymStrBuilder::init_register_class(this);
+  SymConn::init_register_class(this);
+  SymStmt::init_register_class(this);
+  SymResSet::init_register_class(this);
+  SymMap::init_register_class(this);
+  SymSet::init_register_class(this);
+  SymList::init_register_class(this);
+  SymBigDecimal::init_register_class(this);
+  SymTimestamp::init_register_class(this);
+  SymHibernateKey::init_register_class(this);
+  SymHibernateMethod::init_register_class(this);
+}
+
+void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,
+                                                 bool (*invoke_helper_func)(MethodSymbolizerHandle &)) {
+  _invoke_helper_methods[class_name] = invoke_helper_func;
+}
+
+void MethodSymbolizer::add_finish_helper_methods(const std::string class_name,
+                                                 Expression *(*finish_helper_func)(MethodSymbolizerHandle &)) {
+  _finish_helper_methods[class_name] = finish_helper_func;
+}
+
 MethodSymbolizer::~MethodSymbolizer() {
   for (SymClassMapIt sym_class_map_it = _symbolicMethods.begin();
        sym_class_map_it != _symbolicMethods.end(); ++sym_class_map_it) {
@@ -74,34 +104,12 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   SymMethodSet *sym_methods =
       this->get_sym_methods(_handle.get_callee_holder_name());
   BasicType basicType = primitive_target(_handle.get_callee_holder_name());
+  const std::string& callee_holder_name = _handle.get_callee_holder_name();
 
   if (basicType != T_ILLEGAL) {
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
-  } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
-    need_symbolize = SymString::invoke_method_helper(_handle);
-  } else if (_handle.get_callee_holder_name() == SymStrBuilder::TYPE_NAME) {
-      need_symbolize = SymStrBuilder::invoke_method_helper(_handle);
-  } else if (SymConn::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymConn::invoke_method_helper(_handle);
-  } else if (SymStmt::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymStmt::invoke_method_helper(_handle);
-  } else if (SymResSet::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymResSet::invoke_method_helper(_handle);
-  } else if (SymMap::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymMap::invoke_method_helper(_handle);
-  } else if (SymSet::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymSet::invoke_method_helper(_handle);
-  } else if (SymList::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymList::invoke_method_helper(_handle);
-  } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymBigDecimal::invoke_method_helper(_handle);
-  } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymTimestamp::invoke_method_helper(_handle);
-  } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymHibernateKey::invoke_method_helper(_handle);
-  } else if (SymHibernateMethod::target(callee_method->name_and_sig_as_C_string())) {
-    invoke_method_helper(_handle);
-    need_symbolize = true;
+  } else if (_invoke_helper_methods.find(callee_holder_name) != _invoke_helper_methods.end()) {
+    need_symbolize = _invoke_helper_methods[callee_holder_name](_handle);
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -122,31 +130,12 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
   if (caller_frame == _handle.get_caller_frame()) {
     Expression *exp = NULL;
     BasicType basicType = primitive_target(_handle.get_callee_holder_name());
+    const std::string& callee_holder_name = _handle.get_callee_holder_name();
 
     if (basicType != T_ILLEGAL) {
       exp = primitive_finish_method_helper(_handle, basicType);
-    } else if (_handle.get_callee_holder_name() == SymString::TYPE_NAME) {
-      exp = SymString::finish_method_helper(_handle);
-    } else if (_handle.get_callee_holder_name() == SymStrBuilder::TYPE_NAME) {
-        exp = SymStrBuilder::finish_method_helper(_handle);
-    } else if (SymConn::target(_handle.get_callee_holder_name())) {
-      exp = SymConn::finish_method_helper(_handle);
-    } else if (SymStmt::target(_handle.get_callee_holder_name())) {
-      exp = SymStmt::finish_method_helper(_handle);
-    } else if (SymResSet::target(_handle.get_callee_holder_name())) {
-      exp = SymResSet::finish_method_helper(_handle);
-    } else if (SymMap::target(_handle.get_callee_holder_name())) {
-      exp = SymMap::finish_method_helper(_handle);
-    } else if (SymSet::target(_handle.get_callee_holder_name())) {
-      exp = SymSet::finish_method_helper(_handle);
-    } else if (SymList::target(_handle.get_callee_holder_name())) {
-      exp = SymList::finish_method_helper(_handle);
-    } else if (SymBigDecimal::target(_handle.get_callee_holder_name())) {
-      exp = SymBigDecimal::finish_method_helper(_handle);
-    } else if (SymTimestamp::target(_handle.get_callee_holder_name())) {
-      exp = SymTimestamp::finish_method_helper(_handle);
-    } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
-      exp = SymHibernateKey::finish_method_helper(_handle);
+    } else if (_finish_helper_methods.find(callee_holder_name) != _finish_helper_methods.end()) {
+      exp = _finish_helper_methods[callee_holder_name](_handle);
     } else {
       exp = finish_method_helper(_handle);
     }

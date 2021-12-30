@@ -132,6 +132,13 @@ std::map<std::string, bool> SymHibernateKey::init_skip_method_names() {
   return map;
 }
 
+void SymHibernateKey::init_register_class(MethodSymbolizer *m_symbolizer) {
+  for(std::set<std::string>::iterator it = target_class_names.begin(); it != target_class_names.end(); it++) {
+    m_symbolizer->add_invoke_helper_methods(*it, invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(*it, finish_method_helper);
+  }
+}
+
 
 SymHibernateKey::SymHibernateKey(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 

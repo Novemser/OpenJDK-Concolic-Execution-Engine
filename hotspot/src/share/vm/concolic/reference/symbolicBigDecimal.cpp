@@ -32,6 +32,11 @@ std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
   return map;
 }
 
+void SymBigDecimal::init_register_class(MethodSymbolizer *m_symbolizer) {
+  m_symbolizer->add_invoke_helper_methods(SymBigDecimal::TYPE_NAME, invoke_method_helper);
+  m_symbolizer->add_finish_helper_methods(SymBigDecimal::TYPE_NAME, finish_method_helper);
+}
+
 SymBigDecimal::SymBigDecimal(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 
 SymBigDecimal::~SymBigDecimal() { Expression::gc(_exp); }

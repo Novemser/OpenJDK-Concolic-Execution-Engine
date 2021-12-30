@@ -8,6 +8,7 @@
 #include "concolic/reference/symbolicInstance.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymStmt;
 
@@ -75,6 +76,8 @@ public:
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+
+  static void init_register_class(MethodSymbolizer* m_symbolizer);
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

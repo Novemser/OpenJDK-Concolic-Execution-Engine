@@ -30,6 +30,11 @@ method_set_t SymConn::init_skip_method_names() {
   return m_set;
 }
 
+void SymConn::init_register_class(MethodSymbolizer *m_symbolizer) {
+  m_symbolizer->add_invoke_helper_methods(SymConn::TYPE_NAME, invoke_method_helper);
+  m_symbolizer->add_finish_helper_methods(SymConn::TYPE_NAME, finish_method_helper);
+}
+
 bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;

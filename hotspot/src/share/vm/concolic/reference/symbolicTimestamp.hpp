@@ -6,6 +6,7 @@
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymTimestamp : public SymInstance {
 public:
@@ -37,6 +38,7 @@ public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
   static Expression *get_exp_of(oop obj);
+  static void init_register_class(MethodSymbolizer *m_symbolizer);
 
 private:
   static method_set_t init_symbolized_methods();

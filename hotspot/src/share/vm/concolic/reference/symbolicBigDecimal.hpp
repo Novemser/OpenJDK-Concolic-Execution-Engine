@@ -6,6 +6,7 @@
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/methodSymbolizer.hpp"
 
 class SymBigDecimal : public SymInstance {
 public:
@@ -49,6 +50,7 @@ public:
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
   static Expression *get_exp_of(oop obj);
   static Expression *get_con_exp(oop obj);
+  static void init_register_class(MethodSymbolizer *m_symbolizer);
 
 private:
   static method_set_t init_symbolized_methods();
