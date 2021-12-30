@@ -26,10 +26,12 @@ std::set<std::string> SymPersister::handle_method_names = init_handle_method_nam
 
 std::set<std::string> SymPersister::init_handle_method_names() {
   std::set<std::string> set;
+  // entity
   set.insert("forceVersionIncrement");
   set.insert("insert");
   set.insert("update");
   set.insert("delete");
+  // TODO: collection
   return set;
 }
 
@@ -70,29 +72,14 @@ bool SymPersister::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymPersister::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   if (is_executing && execute_counter + 1 == SymStmt::getExecuteCounter()) {
+    // this indicates a SQL is executed, let's record it!
     tty->print_cr("<<<<<<<<<<<<<<<<< %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
+
   } else {
     tty->print_cr("<<<<<<<<<<<<<<<<< didn't execute %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
   }
   is_executing = false;
   return NULL;
-}
-
-bool SymPersister::check_param_symbolized(MethodSymbolizerHandle &handle) {
-  return false;
-}
-
-int SymPersister::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicType type, int locals_offset,
-                                                     bool &recording) {
-  return 0;
-}
-
-void SymPersister::prepare_param(MethodSymbolizerHandle &handle) {
-
-}
-
-int SymPersister::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type, int locals_offset) {
-  return 0;
 }
 
 #endif
