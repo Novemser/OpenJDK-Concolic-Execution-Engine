@@ -4,8 +4,8 @@
 #include "utilities/ostream.hpp"
 
 MethodExpression::MethodExpression(const std::string &holder, const std::string &method, exp_list_t &param_list,
-                                   Expression *res_exp)
-    : _name(holder + ' ' + method), _res_exp(res_exp) {
+                                   Expression *res_exp, bool ignorable)
+    : _name(holder + ' ' + method), _res_exp(res_exp), _ignorable(ignorable) {
 
   // all exp must be not null
 
@@ -31,6 +31,9 @@ MethodExpression::~MethodExpression() {
 }
 
 void MethodExpression::print() {
+  if(_ignorable) {
+    tty->print("$");
+  }
   tty->print("(f %s ", _name.c_str());
   int size = _param_list.size();
   for (int i = 0; i < size; ++i) {
@@ -41,11 +44,5 @@ void MethodExpression::print() {
   Expression::print_on_maybe_null(_res_exp);
   tty->print(")");
 }
-
-Expression *MethodExpression::get_return_pc(const std::string &holder, const std::string &method,
-                                 exp_list_t &param_list, Expression *res_exp) {
-  return new MethodExpression(holder, method, param_list, res_exp);
-}
-
 
 #endif

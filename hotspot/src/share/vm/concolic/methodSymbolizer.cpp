@@ -220,9 +220,9 @@ MethodSymbolizer::finish_method_helper(MethodSymbolizerHandle &handle) {
       exp = new MethodReturnSymbolExp(type);
   }
 
-  ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
+  ConcolicMngr::record_path_condition(new MethodExpression(
       handle.get_callee_holder_name(), handle.get_callee_name(),
-      handle.get_param_list(), exp));
+      handle.get_param_list(), exp, true));
   return exp;
 }
 

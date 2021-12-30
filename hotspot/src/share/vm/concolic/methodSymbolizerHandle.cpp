@@ -160,7 +160,7 @@ Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
       break;
   }
 
-  ConcolicMngr::record_path_condition(MethodExpression::get_return_pc(
+  ConcolicMngr::record_path_condition(new MethodExpression(
       this->get_callee_holder_name(), this->get_callee_name(),
       this->get_param_list(), exp));
 

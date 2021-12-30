@@ -15,14 +15,13 @@ class MethodExpression : public Expression {
   std::string _name;
   exp_list_t _param_list;
   Expression* _res_exp;
+  // ignore this expression!
+  bool _ignorable;
 
 public:
   MethodExpression(const std::string &holder, const std::string &method, exp_list_t &param_list,
-                   Expression *res_exp);
+                   Expression *res_exp, bool ignorable = false);
   ~MethodExpression();
-
-  static Expression* get_return_pc(const std::string &holder, const std::string &method,
-                   exp_list_t &param_list, Expression* res_exp);
 
 public:
   void print();
