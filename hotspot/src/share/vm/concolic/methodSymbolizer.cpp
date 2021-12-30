@@ -100,7 +100,11 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
     need_symbolize = SymHibernateKey::invoke_method_helper(_handle);
   } else if (SymPersister::target(_handle.get_callee_holder_name())) {
-    need_symbolize = SymPersister::invoke_method_helper(_handle);
+    need_symbolize = false;
+    bool need_handling = SymPersister::invoke_method_helper(_handle);
+    if (need_handling) {
+      handling_methods.push_back(_handle);
+    }
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -146,8 +150,6 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
       exp = SymTimestamp::finish_method_helper(_handle);
     } else if (SymHibernateKey::target(_handle.get_callee_holder_name())) {
       exp = SymHibernateKey::finish_method_helper(_handle);
-    } else if (SymPersister::target(_handle.get_callee_holder_name())) {
-      exp = SymPersister::finish_method_helper(_handle);
     } else {
       exp = finish_method_helper(_handle);
     }
@@ -159,6 +161,25 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
         _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
     this->_symbolizing_method = false;
+  }
+}
+
+// only for those are not symbolized method
+bool MethodSymbolizer::has_handling_methods() {
+  return !handling_methods.empty();
+}
+
+void MethodSymbolizer::finish_handling_method(ZeroFrame *caller_frame) {
+  guarantee(has_handling_methods(), "should be");
+  MethodSymbolizerHandle &handle = handling_methods.back();
+  if (caller_frame == handle.get_caller_frame()) {
+    Expression *exp;
+    if (SymPersister::target(handle.get_callee_holder_name())) {
+      exp = SymPersister::finish_method_helper(_handle);
+    } else {
+//      ShouldNotReachHere();
+    }
+    handling_methods.pop_back();
   }
 }
 

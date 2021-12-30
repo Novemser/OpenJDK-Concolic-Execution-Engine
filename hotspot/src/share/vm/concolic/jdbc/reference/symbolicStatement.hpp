@@ -71,6 +71,13 @@ public:
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+
+// counter: for symbolicPersister
+private:
+  static long execute_counter;
+public:
+  static long getExecuteCounter() { return execute_counter; }
+  static long resetExecuteCounter() { execute_counter = 0; }
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

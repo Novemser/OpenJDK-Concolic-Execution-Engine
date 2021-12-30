@@ -20,11 +20,12 @@ class MethodSymbolizer {
   typedef SymClassMap::iterator SymClassMapIt;
 
   bool _symbolizing_method;
+  std::vector<MethodSymbolizerHandle> handling_methods;
   SymClassMap _symbolicMethods;
   MethodSymbolizerHandle _handle;
 
 public:
-  MethodSymbolizer() : _symbolizing_method(false) {}
+  MethodSymbolizer() : _symbolizing_method(false) { handling_methods.clear(); }
   ~MethodSymbolizer();
 
 
@@ -36,6 +37,9 @@ public:
   void add_method(const char *class_name, const char *method_name);
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);
   void finish_method(ZeroFrame *caller_frame);
+  // only for those are not symbolized method
+  bool has_handling_methods();
+  void finish_handling_method(ZeroFrame *caller_frame);
 
   void print();
 

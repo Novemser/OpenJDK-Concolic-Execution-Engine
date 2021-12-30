@@ -11,6 +11,8 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 
+long SymStmt::execute_counter = 0;
+
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
 std::set<std::string> SymStmt::init_target_class_names() {
@@ -121,6 +123,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
     int param_size = handle.get_callee_method()->size_of_parameters();
+    execute_counter++;
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
   } else if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
     ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
@@ -158,10 +161,13 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       SymResSet *sym_res_set =
           (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
       sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
+      tty->print_cr("================= executeQuery: rid: %ld", sym_stmt->get_sym_rid());
     } else if (callee_name == "executeUpdate") {
       exp = new ResultSetSymbolExp(sym_stmt);
       sym_stmt->set_row_count_exp(exp);
+      tty->print_cr("================= executeUpdate: rid: %ld", sym_stmt->get_sym_rid());
     }
+
   }
   return exp;
 }

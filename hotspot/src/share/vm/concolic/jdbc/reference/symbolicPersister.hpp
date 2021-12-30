@@ -13,12 +13,20 @@ public:
   }
 
 private:
+  typedef std::map<std::string, std::string>::iterator NameSignaturePairIt;
+
   static std::set<std::string> target_class_names;
   static std::set<std::string> init_target_class_names();
   static std::set<std::string> handle_method_names;
   static std::set<std::string> init_handle_method_names();
+  static std::map<std::string, std::string> handle_method_signatures;
+  static std::map<std::string, std::string> init_handle_method_signatures();
   static std::map<std::string, bool> skip_method_names;
   static std::map<std::string, bool> init_skip_method_names();
+
+  // indicating is executing something like insert, update, delete
+  static bool is_executing;
+  static long execute_counter;
 
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);

@@ -31,6 +31,10 @@ public:
     return ctx && !ctx->is_symbolizing_method();
   }
 
+  inline static bool __attribute__((optimize("O0"))) should_try_handle_method() {
+    return ctx && ctx->get_method_symbolizer().has_handling_methods();
+  }
+
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
     if (can_do_concolic()) {
       tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
