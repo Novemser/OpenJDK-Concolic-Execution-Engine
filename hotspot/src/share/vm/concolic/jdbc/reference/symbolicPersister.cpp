@@ -63,7 +63,7 @@ bool SymPersister::invoke_method_helper(MethodSymbolizerHandle &handle) {
       execute_counter = SymStmt::getExecuteCounter();
       need_handling = true;
       is_executing = true;
-      tty->print_cr(">>>>>>>>>>>>>>>>> got a method call(%d): %s %s %s", need_handling, handle.get_callee_holder_name().c_str(), callee_name.c_str(), signature.c_str());
+      tty->print_cr(">>>>>>>>>>>>>>>>> got a Persister method call(%d): %s %s %s", need_handling, handle.get_callee_holder_name().c_str(), callee_name.c_str(), signature.c_str());
     }
   }
   return need_handling;

@@ -50,6 +50,10 @@ public:
   ~SymStmt();
 
 public:
+  inline std::string &get_sql_template() {
+    return _sql_template;
+  }
+
   inline void swap_sql_template(std::string &sql_template) {
     _sql_template.swap(sql_template);
   }

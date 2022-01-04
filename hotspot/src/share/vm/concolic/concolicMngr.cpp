@@ -61,6 +61,13 @@ void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
   tty->print_cr("added symbolic method: %s.%s", holder_name, callee_name);
 }
 
+void ConcolicMngr::recordStmtObj(Handle stmt, Handle obj) {
+  if (ctx == NULL) {
+   tty->print_cr(CL_RED"[warning] You should only call `recordStmtObj` after start concolic" CNONE);
+  }
+  ctx->record_stmt_obj(stmt(), obj());
+}
+
 #else
 
 jlong ConcolicMngr::startConcolic() {

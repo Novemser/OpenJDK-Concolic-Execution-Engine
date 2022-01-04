@@ -45,6 +45,10 @@ public:
                                const char *method_name) {
     _method_symbolizer.add_method(class_name, method_name);
   }
+  inline void record_stmt_obj(oop stmt, oop obj) {
+    _jdbc_mngr.record_stmt_obj_pair(stmt, obj);
+  }
+
 
 public:
   inline JdbcMngr &get_jdbc_mngr() { return _jdbc_mngr; }
