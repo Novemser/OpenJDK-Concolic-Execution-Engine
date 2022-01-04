@@ -36,8 +36,11 @@ private:
   typedef std::map<sym_rid_t, sym_rid_t>::iterator StmtToObjIt;
   std::map<sym_rid_t, sym_rid_t> stmt_to_obj;
 
+  std::set<sym_rid_t> persistentObjSet;
+
 public:
   void record_stmt_obj_pair(oop stmt, oop obj);
+  void record_persistent_obj(oop obj);
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

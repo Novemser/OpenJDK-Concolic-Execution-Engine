@@ -48,6 +48,9 @@ public:
   inline void record_stmt_obj(oop stmt, oop obj) {
     _jdbc_mngr.record_stmt_obj_pair(stmt, obj);
   }
+  inline void record_persistent_obj(oop obj) {
+    _jdbc_mngr.record_persistent_obj(obj);
+  }
 
 
 public:

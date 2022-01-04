@@ -63,9 +63,16 @@ void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
 
 void ConcolicMngr::recordStmtObj(Handle stmt, Handle obj) {
   if (ctx == NULL) {
-   tty->print_cr(CL_RED"[warning] You should only call `recordStmtObj` after start concolic" CNONE);
+    tty->print_cr(CL_RED"[warning] You should only call `recordStmtObj` after start concolic" CNONE);
   }
   ctx->record_stmt_obj(stmt(), obj());
+}
+
+void ConcolicMngr::recordPersistentObj(Handle obj) {
+  if (ctx == NULL) {
+    tty->print_cr(CL_RED"[warning] You should only call `recordPersistentObj` after start concolic" CNONE);
+  }
+  ctx->record_persistent_obj(obj());
 }
 
 #else

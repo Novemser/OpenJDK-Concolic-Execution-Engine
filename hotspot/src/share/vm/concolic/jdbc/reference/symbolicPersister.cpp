@@ -63,7 +63,7 @@ bool SymPersister::invoke_method_helper(MethodSymbolizerHandle &handle) {
       execute_counter = SymStmt::getExecuteCounter();
       need_handling = true;
       is_executing = true;
-      tty->print_cr(">>>>>>>>>>>>>>>>> got a Persister method call(%d): %s %s %s", need_handling, handle.get_callee_holder_name().c_str(), callee_name.c_str(), signature.c_str());
+      // tty->print_cr(">>>>>>>>>>>>>>>>> got a Persister method call(%d): %s %s %s", need_handling, handle.get_callee_holder_name().c_str(), callee_name.c_str(), signature.c_str());
     }
   }
   return need_handling;
@@ -73,10 +73,9 @@ Expression *SymPersister::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   if (is_executing && execute_counter + 1 == SymStmt::getExecuteCounter()) {
     // this indicates a SQL is executed, let's record it!
-    tty->print_cr("<<<<<<<<<<<<<<<<< %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
-
+    // tty->print_cr("<<<<<<<<<<<<<<<<< %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
   } else {
-    tty->print_cr("<<<<<<<<<<<<<<<<< didn't execute %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
+    // tty->print_cr("<<<<<<<<<<<<<<<<< didn't execute %ld -> %ld", execute_counter, SymStmt::getExecuteCounter());
   }
   is_executing = false;
   return NULL;

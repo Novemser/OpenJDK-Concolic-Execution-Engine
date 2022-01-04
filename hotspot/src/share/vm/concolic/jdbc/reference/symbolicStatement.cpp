@@ -162,11 +162,11 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       SymResSet *sym_res_set =
           (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
       sym_res_set->set_stmt_rid(this_obj->get_sym_rid());
-      tty->print_cr("================= executeQuery: rid: %ld", sym_stmt->get_sym_rid());
+//      tty->print_cr("================= executeQuery: rid: %ld", sym_stmt->get_sym_rid());
     } else if (callee_name == "executeUpdate") {
       exp = new ResultSetSymbolExp(sym_stmt);
       sym_stmt->set_row_count_exp(exp);
-      tty->print_cr("================= executeUpdate: rid: %ld", sym_stmt->get_sym_rid());
+//      tty->print_cr("================= executeUpdate: rid: %ld", sym_stmt->get_sym_rid());
     }
 
   }

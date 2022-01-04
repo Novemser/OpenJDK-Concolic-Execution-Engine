@@ -35,11 +35,8 @@ void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
 }
 
 void JdbcMngr::print() {
-  ulong size = _txs.size();
-  for (ulong i = 0; i < size; ++i) {
-    _txs[i]->print();
-  }
   // stmt and obj
+  tty->print("statement - object relation:");
   for (StmtToObjIt pair = stmt_to_obj.begin(); pair != stmt_to_obj.end(); pair++) {
     sym_rid_t stmt_rid = pair->first;
     sym_rid_t obj_rid = pair->second;
@@ -47,6 +44,18 @@ void JdbcMngr::print() {
     tty->print("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", stmt_rid, stmt->get_obj_rid(), obj_rid);
     guarantee(stmt->get_obj_rid() == obj_rid, "should be");
     tty->print("\n* %s\n", stmt->get_sql_template().c_str());
+  }
+  // persistent obj
+  tty->print("persistent objects:");
+  for (std::set<sym_rid_t>::iterator rid = persistentObjSet.begin(); rid != persistentObjSet.end(); rid++) {
+    tty->print(" %ld", *rid);
+  }
+  tty->cr();
+  // txns
+  tty->print("txns:");
+  ulong size = _txs.size();
+  for (ulong i = 0; i < size; ++i) {
+    _txs[i]->print();
   }
 }
 
@@ -70,33 +79,32 @@ void __attribute__((optimize("O0"))) JdbcMngr::record_stmt_obj_pair(oop stmt_or_
   if (strncmp(stmt_or_proxy_klass_name, "com/sun/proxy/$Proxy", 20) == 0) {
     // offset = 24
     oop h = OopUtils::obj_field_by_name(stmt, "h", "Ljava/lang/reflect/InvocationHandler;");
+    guarantee(h, "should be");
     // offset = 32
-    if (h == NULL) {
-      tty->print_cr("h is NULL");
-      return;
-    }
     stmt = OopUtils::obj_field_by_name(h, "delegate", "Ljava/lang/Object;");
-    if (stmt == NULL) {
-      tty->print_cr("stmt is NULL");
-      return;
-    }
+    guarantee(stmt, "should be");
   }
 
-  if (stmt->is_symbolic()) {
-    tty->print_cr("stmt is symbolic");
-  } else {
-    tty->print_cr("stmt is not symbolic");
-  }
-  if (obj->is_symbolic()) {
-    ConcolicMngr::ctx->get_sym_inst(obj)->print();
-  }
   if (stmt->is_symbolic() && obj->is_symbolic()) {
     guarantee(stmt_to_obj.find(stmt->get_sym_rid()) == stmt_to_obj.end(), "should be");
     stmt_to_obj[stmt->get_sym_rid()] = obj->get_sym_rid();
     SymStmt *sym_stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt);
     sym_stmt->set_obj_rid(obj->get_sym_rid());
-    tty->print_cr("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", sym_stmt->get_sym_rid(), sym_stmt->get_obj_rid(), obj->get_sym_rid());
   }
+}
+
+void JdbcMngr::record_persistent_obj(oop obj) {
+  if (obj == NULL) {
+    tty->print_cr("--- NULL record");
+    return;
+  }
+  if (obj->is_symbolic()) {
+    tty->print_cr("--- record: ");
+    persistentObjSet.insert(obj->get_sym_rid());
+  } else {
+    tty->print_cr("--- not record: ");
+  }
+  obj->print();
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
