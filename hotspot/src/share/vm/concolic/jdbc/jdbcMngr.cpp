@@ -95,16 +95,16 @@ void __attribute__((optimize("O0"))) JdbcMngr::record_stmt_obj_pair(oop stmt_or_
 
 void JdbcMngr::record_persistent_obj(oop obj) {
   if (obj == NULL) {
-    tty->print_cr("--- NULL record");
+    // tty->print_cr("--- NULL record");
     return;
   }
   if (obj->is_symbolic()) {
-    tty->print_cr("--- record: ");
+    // tty->print_cr("--- record: ");
     persistentObjSet.insert(obj->get_sym_rid());
   } else {
-    tty->print_cr("--- not record: ");
+    // tty->print_cr("--- not record: ");
   }
-  obj->print();
+  // obj->print();
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
