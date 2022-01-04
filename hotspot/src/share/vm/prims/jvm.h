@@ -150,6 +150,9 @@ JNIEXPORT void JNICALL
 JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, jobject obj);
 
 JNIEXPORT void JNICALL
+JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj);
+
+JNIEXPORT void JNICALL
 JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
               jobject dst, jint dst_pos, jint length);
 

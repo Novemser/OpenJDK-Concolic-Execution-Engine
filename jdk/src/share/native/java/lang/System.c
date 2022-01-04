@@ -36,15 +36,16 @@
 
 /* Only register the performance-critical methods */
 static JNINativeMethod methods[] = {
-    {"currentTimeMillis", "()J",                     (void *)&JVM_CurrentTimeMillis},
-    {"nanoTime",          "()J",                     (void *)&JVM_NanoTime},
-    {"printObjInfo",      "(" OBJ ")V",              (void *)&JVM_PrintObjInfo},
-    {"startConcolic",     "()J",                     (void *)&JVM_StartConcolic},
-    {"endConcolic",       "()J",                     (void *)&JVM_EndConcolic},
-    {"symbolize",         "(" OBJ ")V",              (void *)&JVM_Symbolize},
-    {"symbolizeMethod",   "(" OBJ OBJ ")V",          (void *)&JVM_SymbolizeMethod},
-    {"arraycopy",         "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
-    {"recordStmtObj",     "(" OBJ OBJ ")V",          (void *)&JVM_RecordStmtObj},
+    {"currentTimeMillis",   "()J",                     (void *)&JVM_CurrentTimeMillis},
+    {"nanoTime",            "()J",                     (void *)&JVM_NanoTime},
+    {"printObjInfo",        "(" OBJ ")V",              (void *)&JVM_PrintObjInfo},
+    {"startConcolic",       "()J",                     (void *)&JVM_StartConcolic},
+    {"endConcolic",         "()J",                     (void *)&JVM_EndConcolic},
+    {"symbolize",           "(" OBJ ")V",              (void *)&JVM_Symbolize},
+    {"symbolizeMethod",     "(" OBJ OBJ ")V",          (void *)&JVM_SymbolizeMethod},
+    {"arraycopy",           "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
+    {"recordStmtObj",       "(" OBJ OBJ ")V",          (void *)&JVM_RecordStmtObj},
+    {"recordPersistentObj", "(" OBJ ")V",              (void *)&JVM_RecordPersistentObj},
 };
 
 #undef OBJ

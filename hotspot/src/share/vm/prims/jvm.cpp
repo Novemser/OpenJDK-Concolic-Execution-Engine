@@ -395,7 +395,6 @@ JVM_ENTRY(void, JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, job
     // TODO: use THROW instead of assertion
     assert(false, "JVM_Symbolize: obj is null");
   }
-  // TODO: check behaviors when facing like `arrayOop`
   oop s = JNIHandles::resolve_non_null(stmt);
   oop o = JNIHandles::resolve_non_null(obj);
 
@@ -407,6 +406,28 @@ JVM_ENTRY(void, JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, job
     assert(handle_s()->is_oop(), "JVM_Symbolize: stmt not an oop");
     assert(handle_o()->is_oop(), "JVM_Symbolize: obj not an oop");
     ConcolicMngr::recordStmtObj(handle_s, handle_o);
+  }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_RecordPersistentObj");
+#ifdef ENABLE_CONCOLIC
+  if (obj == NULL) {
+    // TODO: use THROW instead of assertion
+    assert(false, "JVM_Symbolize: obj is null");
+  }
+  oop o = JNIHandles::resolve_non_null(obj);
+
+  {
+    HandleMark hm;
+
+    Handle handle_o(THREAD, o);
+    assert(handle_o()->is_oop(), "JVM_Symbolize: obj not an oop");
+    tty->print_cr("TODO: handle recordPersistentObj");
+    // ConcolicMngr::recordPersistentObj(handle_o);
   }
 #else
   return;

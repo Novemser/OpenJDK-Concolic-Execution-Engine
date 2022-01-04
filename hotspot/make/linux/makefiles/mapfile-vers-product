@@ -259,6 +259,7 @@ SUNWprivate_1.1 {
                 JVM_Symbolize;
                 JVM_SymbolizeMethod;
                 JVM_RecordStmtObj;
+                JVM_RecordPersistentObj;
 
                 # miscellaneous functions
                 jio_fprintf;
