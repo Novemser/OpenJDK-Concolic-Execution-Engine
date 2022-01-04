@@ -36,7 +36,8 @@ private:
   typedef std::map<sym_rid_t, sym_rid_t>::iterator StmtToObjIt;
   std::map<sym_rid_t, sym_rid_t> stmt_to_obj;
 
-  std::set<sym_rid_t> persistentObjSet;
+  typedef std::map<sym_rid_t, std::string>::iterator RidToStringIt;
+  std::map<sym_rid_t, std::string> persistentObjStackTrace;
 
 public:
   void record_stmt_obj_pair(oop stmt, oop obj);

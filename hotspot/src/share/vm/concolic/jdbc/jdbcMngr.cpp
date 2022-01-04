@@ -46,11 +46,10 @@ void JdbcMngr::print() {
     tty->print("\n* %s\n", stmt->get_sql_template().c_str());
   }
   // persistent obj
-  tty->print("persistent objects:");
-  for (std::set<sym_rid_t>::iterator rid = persistentObjSet.begin(); rid != persistentObjSet.end(); rid++) {
-    tty->print(" %ld", *rid);
+  tty->print_cr("persistent objects:");
+  for (RidToStringIt pair = persistentObjStackTrace.begin(); pair != persistentObjStackTrace.end(); pair++) {
+    tty->print_cr("%ld: %s", pair->first, pair->second.c_str());
   }
-  tty->cr();
   // txns
   tty->print("txns:");
   ulong size = _txs.size();
@@ -68,7 +67,7 @@ void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
   }
 }
 
-void __attribute__((optimize("O0"))) JdbcMngr::record_stmt_obj_pair(oop stmt_or_proxy, oop obj) {
+void JdbcMngr::record_stmt_obj_pair(oop stmt_or_proxy, oop obj) {
   ResourceMark rm;
   oop stmt = stmt_or_proxy;
   // try to get stmt from proxy
@@ -95,16 +94,16 @@ void __attribute__((optimize("O0"))) JdbcMngr::record_stmt_obj_pair(oop stmt_or_
 
 void JdbcMngr::record_persistent_obj(oop obj) {
   if (obj == NULL) {
-    // tty->print_cr("--- NULL record");
+//     tty->print_cr("--- NULL record");
     return;
   }
   if (obj->is_symbolic()) {
     // tty->print_cr("--- record: ");
-    persistentObjSet.insert(obj->get_sym_rid());
+    // obj->print();
+    persistentObjStackTrace[obj->get_sym_rid()] = ConcolicMngr::ctx->get_code_pos_for_first("broadleaf");
   } else {
-    // tty->print_cr("--- not record: ");
+//     tty->print_cr("--- not record: ");
   }
-  // obj->print();
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

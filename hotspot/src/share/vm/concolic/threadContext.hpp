@@ -66,6 +66,7 @@ public:
 
 public:
   std::string get_current_code_pos();
+  std::string get_code_pos_for_first(const std::string &str);
 
 public:
   SymInstance *get_or_alloc_sym_inst(oop obj);
