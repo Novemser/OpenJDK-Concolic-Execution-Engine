@@ -43,9 +43,10 @@ void JdbcMngr::print() {
   for (StmtToObjIt pair = stmt_to_obj.begin(); pair != stmt_to_obj.end(); pair++) {
     sym_rid_t stmt_rid = pair->first;
     sym_rid_t obj_rid = pair->second;
-    tty->print("StmtObjRidPair: stmt[%ld]-obj[%ld](", stmt_rid, obj_rid);
-    ConcolicMngr::ctx->get_sym_inst(obj_rid)->print();
-    tty->print(")\n* %s\n", ((SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt_rid))->get_sql_template().c_str());
+    SymStmt *stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt_rid);
+    tty->print("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", stmt_rid, stmt->get_obj_rid(), obj_rid);
+    guarantee(stmt->get_obj_rid() == obj_rid, "should be");
+    tty->print("\n* %s\n", stmt->get_sql_template().c_str());
   }
 }
 
@@ -90,9 +91,11 @@ void __attribute__((optimize("O0"))) JdbcMngr::record_stmt_obj_pair(oop stmt_or_
     ConcolicMngr::ctx->get_sym_inst(obj)->print();
   }
   if (stmt->is_symbolic() && obj->is_symbolic()) {
-//    tty->print_cr("StmtObjRidPair: stmt(%ld)-obj(%ld)", stmt->get_sym_rid(), obj->get_sym_rid());
     guarantee(stmt_to_obj.find(stmt->get_sym_rid()) == stmt_to_obj.end(), "should be");
     stmt_to_obj[stmt->get_sym_rid()] = obj->get_sym_rid();
+    SymStmt *sym_stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt);
+    sym_stmt->set_obj_rid(obj->get_sym_rid());
+    tty->print_cr("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", sym_stmt->get_sym_rid(), sym_stmt->get_obj_rid(), obj->get_sym_rid());
   }
 }
 

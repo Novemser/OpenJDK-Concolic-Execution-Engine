@@ -60,7 +60,8 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   return map;
 }
 
-SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL) {}
+SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid),
+    _sql_template(""), _row_count_exp(NULL), obj_rid(NULL_SYM_RID) {}
 
 SymStmt::~SymStmt() {
   exp_map_t::iterator iter;

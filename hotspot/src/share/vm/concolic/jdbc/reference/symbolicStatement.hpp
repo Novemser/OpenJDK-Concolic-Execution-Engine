@@ -43,6 +43,7 @@ private:
   std::string _sql_template;
   exp_map_t _param_exps;
   Expression *_row_count_exp;
+  sym_rid_t obj_rid;
 
 public:
   SymStmt(sym_rid_t sym_rid);
@@ -67,6 +68,12 @@ public:
   void set_param(int index, Expression *exp);
 
   void set_row_count_exp(Expression *row_count_exp);
+
+  sym_rid_t get_obj_rid() { return obj_rid; }
+  sym_rid_t set_obj_rid(sym_rid_t id) {
+    guarantee(obj_rid == NULL_SYM_RID, "should be");
+    obj_rid = id;
+  }
 
 public:
   bool need_recursive() { return false; }
