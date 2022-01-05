@@ -7,6 +7,7 @@
 #include "concolic/utils.hpp"
 #include "runtime/fieldDescriptor.hpp"
 #include "symbolicHibernateKey.hpp"
+#include "concolic/fieldTraverser.hpp"
 
 #include <algorithm>
 
@@ -86,9 +87,11 @@ void HibernateKeyExpression::set_key_exp(oop key_obj) {
       long key = key_obj->long_field(fd.offset());
       key_exp = new ConExpression(key);
       key_exp->inc_ref();
-    } else {
-      guarantee(key_obj->klass()->name()->equals("java/lang/String"), "should be");
+    } else if (key_obj->klass()->name()->equals("java/lang/String")) {
       key_exp = new ConStringSymbolExp(key_obj);
+      key_exp->inc_ref();
+    } else {
+      key_exp = get_composite_key_exp(key_obj);
       key_exp->inc_ref();
     }
   }
@@ -100,6 +103,12 @@ void HibernateKeyExpression::print() {
   tty->print(" ");
   key_exp->print();
   tty->print(")");
+}
+
+Expression* HibernateKeyExpression::get_composite_key_exp(oop obj) {
+  CompositeKeyGenerator key_generator(obj);
+  key_generator.do_once();
+  return key_generator.get_key_exp();
 }
 
 /* =============================================================

@@ -77,5 +77,21 @@ protected:
   bool do_element_helper(int index, arrayOop array_obj);
 };
 
+class CompositeKeyGenerator : public FieldTraverser {
+public:
+  CompositeKeyGenerator(oop obj) : FieldTraverser(obj), _first(true) {}
+  Expression* get_key_exp() {
+    return _exp;
+  }
+
+protected:
+  bool do_field_helper(fieldDescriptor *fd, oop obj);
+
+private:
+  bool _first;
+  Expression *_exp;
+  exp_list_t _param_list;
+};
+
 #endif // ENABLE_CONCOLIC
 #endif // SHARE_VM_CONCOLIC_FIELDTRAVERSER_HPP
