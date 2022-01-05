@@ -2,8 +2,13 @@
 
 #include "concolic/fieldTraverser.hpp"
 #include "concolic/reference/symbolicString.hpp"
+#include "concolic/reference/symbolicPrimitive.hpp"
 #include "oops/klass.hpp"
 #include "utilities/ostream.hpp"
+#include "concolic/utils.hpp"
+#include "concolic/exp/stringExpression.hpp"
+
+#include <sstream>
 
 void FieldTraverser::do_recursive() {
   this->_target_depth = 5; // TODO: unlimited
@@ -280,6 +285,49 @@ bool SimpleFieldPrinter::do_element_helper(int index, arrayOop array_obj) {
   /**
    * TODO: complete this
    */
+}
+
+bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
+  this->print_indent();
+  Expression *exp;
+
+  if (!_first) {
+    _param_list.push_back(_exp);
+    _param_list.push_back(new ConStringSymbolExp("-"));
+    _exp = new OpStrExpression("concat", _param_list);
+    _param_list.clear();
+  }
+
+  switch (fd->field_type()) {
+    case T_OBJECT: {
+      oop key_obj = obj->obj_field(fd->offset());
+      Symbol *key_obj_klass_name = key_obj->klass()->name();
+      if(key_obj_klass_name->equals("java/lang/Long")) {
+        jlong val = OopUtils::java_long_to_c(key_obj);
+        tty->print_cr("long value:%ld", val);
+        exp = OpStrExpression::to_string(SymPrimitive<jlong>::get_exp_of(key_obj));
+      } else if (key_obj_klass_name->equals("java/lang/String")) {
+        exp = SymString::get_exp_of(key_obj);
+      } else {
+        ShouldNotReachHere();
+      }
+      break;
+    }
+    default:
+      ShouldNotReachHere();
+  }
+
+  if (!_first) {
+    _param_list.push_back(_exp);
+    _param_list.push_back(exp);
+    _exp = new OpStrExpression("concat", _param_list);
+    _param_list.clear();
+  } else {
+    _exp = exp;
+    _first = false;
+  }
+
+  return false;
 }
 
 bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj)  {

@@ -13,6 +13,7 @@
 #include "concolic/utils.hpp"
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
+#include "concolic/fieldTraverser.hpp"
 
 #include <vector>
 #include <string>
@@ -34,8 +35,8 @@ private:
   void set_key_exp(oop key_obj);
   void set_table_name_exp(objArrayOop j_string_vector);
   void set_table_name_exp(oop persister);
+  Expression* get_composite_key_exp(oop obj);
 };
-
 
 class SymHibernateKey : public SymInstance {
 public:
