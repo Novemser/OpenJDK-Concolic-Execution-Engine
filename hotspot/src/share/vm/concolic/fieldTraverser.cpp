@@ -295,7 +295,6 @@ bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
     _param_list.push_back(_exp);
     _param_list.push_back(new ConStringSymbolExp("-"));
     _exp = new OpStrExpression("concat", _param_list);
-    _param_list.clear();
   }
 
   switch (fd->field_type()) {
@@ -304,7 +303,6 @@ bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
       Symbol *key_obj_klass_name = key_obj->klass()->name();
       if(key_obj_klass_name->equals("java/lang/Long")) {
         jlong val = OopUtils::java_long_to_c(key_obj);
-        tty->print_cr("long value:%ld", val);
         exp = OpStrExpression::to_string(SymPrimitive<jlong>::get_exp_of(key_obj));
       } else if (key_obj_klass_name->equals("java/lang/String")) {
         exp = SymString::get_exp_of(key_obj);
@@ -321,7 +319,6 @@ bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
     _param_list.push_back(_exp);
     _param_list.push_back(exp);
     _exp = new OpStrExpression("concat", _param_list);
-    _param_list.clear();
   } else {
     _exp = exp;
     _first = false;
