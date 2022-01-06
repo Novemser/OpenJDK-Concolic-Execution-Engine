@@ -19,6 +19,7 @@ private:
   static std::set<std::string> init_handle_method_names();
   static std::map<std::string, bool> skip_method_names;
   static std::map<std::string, bool> init_skip_method_names();
+  static Expression *finish_remove_node_helper(MethodSymbolizerHandle &handle);
   static bool need_recording;
 
 public:
