@@ -14,7 +14,6 @@ std::set<std::string> SymSet::init_target_class_names() {
   std::set<std::string> set;
   set.insert("java/util/HashSet");
   set.insert("java/util/LinkedHashSet");
-  set.insert("org/hibernate/collection/internal/PersistentSet");
   return set;
 }
 
