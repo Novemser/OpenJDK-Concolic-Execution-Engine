@@ -468,7 +468,9 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
   stack->set_sp(stack->sp() + method->size_of_parameters());
 
 #ifdef ENABLE_CONCOLIC
-  NativeCallHandler::handle_native(method, locals);
+  if (ConcolicMngr::can_do_concolic()) {
+    NativeCallHandler::handle_native(method, locals);
+  }
 #endif
 
   // Push our result
