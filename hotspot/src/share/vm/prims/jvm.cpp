@@ -318,6 +318,9 @@ JVM_ENTRY(void, JVM_PrintObjInfo(JNIEnv *env, jclass ignored, jobject obj))
   o->print();
   o->klass()->print();
   tty->print_cr("symbolic?: %s", o->is_symbolic() ? "true" : "false");
+  if (o->is_symbolic()) {
+    ConcolicMngr::ctx->get_sym_inst(o)->print();
+  }
 #else
   return;
 #endif

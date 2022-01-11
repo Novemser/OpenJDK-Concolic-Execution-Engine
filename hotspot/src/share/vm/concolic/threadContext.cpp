@@ -240,8 +240,7 @@ std::string ThreadContext::get_code_pos_for_first(const std::string &str) {
   tty->print_cr("trying: %s", top_name.c_str());
 
   // if not containing, use a loop to find it
-  buf[ss.size()] = '\0';
-  if (!strstr(buf, c_str)) {
+  if (!strstr(ss.as_string(), c_str)) {
     zero_frame = zero_frame->next();
     while (zero_frame) {
       while (zero_frame && !zero_frame->is_interpreter_frame()) {
@@ -252,9 +251,8 @@ std::string ThreadContext::get_code_pos_for_first(const std::string &str) {
       }
       ss.reset();
       print_method_name_and_line(zero_frame, &ss);
-      buf[ss.size()] = '\0';
-      tty->print_cr("trying: %s", buf);
-      if (strstr(buf, c_str)) {
+      // tty->print_cr("trying: %s", ss.as_string());
+      if (strstr(ss.as_string(), c_str)) {
         break;
       }
       zero_frame = zero_frame->next();
