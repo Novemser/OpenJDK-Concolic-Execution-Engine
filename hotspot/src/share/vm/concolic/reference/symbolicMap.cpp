@@ -117,6 +117,8 @@ int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       exp = sym_inst->get_or_create_ref_exp(obj);
+    } else {
+      exp = SymbolExpression::get(Sym_NULL);
     }
   }
 
