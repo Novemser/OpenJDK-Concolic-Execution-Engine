@@ -43,6 +43,7 @@ static JNINativeMethod methods[] = {
     {"symbolize",         "(" OBJ ")V",              (void *)&JVM_Symbolize},
     {"symbolizeMethod",   "(" OBJ OBJ ")V",          (void *)&JVM_SymbolizeMethod},
     {"arraycopy",         "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
+    {"printSymExp",       "(" OBJ ")V",              (void *)&JVM_PrintSymExp}
 };
 
 #undef OBJ

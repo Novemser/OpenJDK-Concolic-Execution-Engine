@@ -257,6 +257,7 @@ SUNWprivate_1.1 {
                 JVM_EndConcolic;
                 JVM_Symbolize;
                 JVM_SymbolizeMethod;
+                JVM_PrintSymExp;
 
                 # miscellaneous functions
                 jio_fprintf;

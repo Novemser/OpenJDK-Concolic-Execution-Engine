@@ -43,6 +43,20 @@ jlong ConcolicMngr::endConcolic() {
   return 0;
 }
 
+void ConcolicMngr::printSymExp(Handle handle) {
+  if (can_do_concolic()) {
+    oop obj = handle();
+    obj->print();
+    tty->print_cr("is symbolic: %d", (int)obj->is_symbolic());
+    if (obj->is_symbolic()) {
+      SymInstance*sym_inst = ctx->get_sym_inst(obj);
+//      Expression *exp = sym_inst->get_ref_exp();
+//      exp->print();
+      sym_inst->print();
+    }
+  }
+}
+
 void ConcolicMngr::symbolize(Handle handle) {
   if (can_do_concolic()) {
     tty->print("Symbolize!\n");

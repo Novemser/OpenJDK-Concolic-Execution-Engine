@@ -411,6 +411,11 @@ public final class System {
     public static native long endConcolic();
 
     /**
+     * Print the symbol expression of obj
+    */
+    public static native void printSymExp(Object obj);
+
+    /**
      * make an Object symbolic
      */
     public static native void symbolize(Object obj);

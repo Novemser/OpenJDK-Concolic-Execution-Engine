@@ -351,6 +351,28 @@ JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
 #endif
 JVM_END
 
+JVM_ENTRY(void, JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_PrintSymExp");
+#ifdef ENABLE_CONCOLIC
+  if (obj == NULL) {
+    // TODO: use THROW instead of assertion
+    assert(false, "JVM_Symbolize: obj is null");
+  }
+  // TODO: check behaviors when facing like `arrayOop`
+  oop o = JNIHandles::resolve_non_null(obj);
+
+  {
+    HandleMark hm;
+
+    Handle handle(THREAD, o);
+    assert(handle()->is_oop(), "JVM_Symbolize: obj not an oop");
+    ConcolicMngr::printSymExp(handle);
+  }
+#else
+  return;
+#endif
+JVM_END
+
 JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored, 
                                     jobject holder_name, jobject callee_name))
   JVMWrapper("JVM_SymbolizeMethod");
