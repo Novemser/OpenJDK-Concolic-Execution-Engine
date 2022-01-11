@@ -401,6 +401,11 @@ public final class System {
     public static native long nanoTime();
 
     /**
+     * Print Object Infomation
+     */
+    public static native void printObjInfo(Object obj);
+
+    /**
      * Start Entry of our concolic execution
      */
     public static native long startConcolic();
@@ -425,6 +430,16 @@ public final class System {
      */
     public static native void symbolizeMethod(Object holder_name, Object callee_name);
 
+    /**
+     * record statement-object pair
+     */
+    public static native void recordStmtObj(Object stmt, Object obj);
+
+    /**
+     * record statement-object pair
+     */
+    public static native void recordPersistentObj(Object obj);
+    
     /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.

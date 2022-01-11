@@ -5,6 +5,7 @@
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
+#include "concolic/jdbc/reference/symbolicPersister.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
@@ -25,6 +26,7 @@
 MethodSymbolizer::MethodSymbolizer() {
   _symbolizing_method = false;
   init_helper_methods();
+  handling_methods.clear();
 }
 
 void MethodSymbolizer::init_helper_methods() {
@@ -110,6 +112,12 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
   } else if (_invoke_helper_methods.find(callee_holder_name) != _invoke_helper_methods.end()) {
     need_symbolize = _invoke_helper_methods[callee_holder_name](_handle);
+  } else if (SymPersister::target(_handle.get_callee_holder_name())) {
+    need_symbolize = false;
+    bool need_handling = SymPersister::invoke_method_helper(_handle);
+    if (need_handling) {
+      handling_methods.push_back(_handle);
+    }
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -147,6 +155,25 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
         _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
     this->_symbolizing_method = false;
+  }
+}
+
+// only for those are not symbolized method
+bool MethodSymbolizer::has_handling_methods() {
+  return !handling_methods.empty();
+}
+
+void MethodSymbolizer::finish_handling_method(ZeroFrame *caller_frame) {
+  guarantee(has_handling_methods(), "should be");
+  MethodSymbolizerHandle &handle = handling_methods.back();
+  if (caller_frame == handle.get_caller_frame()) {
+    Expression *exp;
+    if (SymPersister::target(handle.get_callee_holder_name())) {
+      exp = SymPersister::finish_method_helper(_handle);
+    } else {
+//      ShouldNotReachHere();
+    }
+    handling_methods.pop_back();
   }
 }
 
