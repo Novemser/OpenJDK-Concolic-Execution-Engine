@@ -1101,6 +1101,7 @@ run:
 
       CASE(_aload):
           VERIFY_OOP(LOCALS_OBJECT(pc[1]));
+          CONCOLIC_CONST(0);
           SET_STACK_OBJECT(LOCALS_OBJECT(pc[1]), 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
