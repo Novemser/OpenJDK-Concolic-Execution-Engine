@@ -62,6 +62,7 @@ void ConcolicMngr::symbolize(Handle handle) {
     tty->print("Symbolize!\n");
     ctx->symbolize(handle);
   }
+//  tty->print_cr("----- %s", ctx->get_code_pos_for_first("main").c_str());
 }
 
 void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
@@ -73,6 +74,22 @@ void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
   ctx->symbolize_method(holder_name, callee_name);
 
   tty->print_cr("added symbolic method: %s.%s", holder_name, callee_name);
+}
+
+void ConcolicMngr::recordStmtObj(Handle stmt, Handle obj) {
+  if (ctx == NULL) {
+    // tty->print_cr(CL_RED"[warning] You should only call `recordStmtObj` after start concolic" CNONE);
+    return;
+  }
+  ctx->record_stmt_obj(stmt(), obj());
+}
+
+void ConcolicMngr::recordPersistentObj(Handle obj) {
+  if (ctx == NULL) {
+    // tty->print_cr(CL_RED"[warning] You should only call `recordPersistentObj` after start concolic" CNONE);
+    return;
+  }
+  ctx->record_persistent_obj(obj());
 }
 
 #else

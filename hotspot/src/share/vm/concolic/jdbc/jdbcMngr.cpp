@@ -1,6 +1,9 @@
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
+#include <concolic/fieldTraverser.hpp>
+#include "concolic/concolicMngr.hpp"
 #include "concolic/jdbc/jdbcMngr.hpp"
+#include "concolic/utils.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
@@ -32,6 +35,23 @@ void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
 }
 
 void JdbcMngr::print() {
+  // stmt and obj
+  tty->print("statement - object relation:");
+  for (StmtToObjIt pair = stmt_to_obj.begin(); pair != stmt_to_obj.end(); pair++) {
+    sym_rid_t stmt_rid = pair->first;
+    sym_rid_t obj_rid = pair->second;
+    SymStmt *stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt_rid);
+    tty->print("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", stmt_rid, stmt->get_obj_rid(), obj_rid);
+    guarantee(stmt->get_obj_rid() == obj_rid, "should be");
+    tty->print("\n* %s\n", stmt->get_sql_template().c_str());
+  }
+  // persistent obj
+  tty->print_cr("persistent objects:");
+  for (RidToStringIt pair = persistentObjStackTrace.begin(); pair != persistentObjStackTrace.end(); pair++) {
+    tty->print_cr("%ld: %s", pair->first, pair->second.c_str());
+  }
+  // txns
+  tty->print("txns:");
   ulong size = _txs.size();
   for (ulong i = 0; i < size; ++i) {
     _txs[i]->print();
@@ -44,6 +64,45 @@ void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
     // There's no ongoing transaction in conn_id connection
     guarantee(iter->second, "should be");
     iter->second->record_stmt(stmt);
+  }
+}
+
+void JdbcMngr::record_stmt_obj_pair(oop stmt_or_proxy, oop obj) {
+  ResourceMark rm;
+  oop stmt = stmt_or_proxy;
+  // try to get stmt from proxy
+  const char *stmt_or_proxy_klass_name = stmt_or_proxy->klass()->name()->as_C_string();
+  if (strlen(stmt_or_proxy_klass_name) < 20) {
+    tty->print_cr("strange: %s", stmt_or_proxy_klass_name);
+  }
+  if (strncmp(stmt_or_proxy_klass_name, "com/sun/proxy/$Proxy", 20) == 0) {
+    // offset = 24
+    oop h = OopUtils::obj_field_by_name(stmt, "h", "Ljava/lang/reflect/InvocationHandler;");
+    guarantee(h, "should be");
+    // offset = 32
+    stmt = OopUtils::obj_field_by_name(h, "delegate", "Ljava/lang/Object;");
+    guarantee(stmt, "should be");
+  }
+
+  if (stmt->is_symbolic() && obj->is_symbolic()) {
+    guarantee(stmt_to_obj.find(stmt->get_sym_rid()) == stmt_to_obj.end(), "should be");
+    stmt_to_obj[stmt->get_sym_rid()] = obj->get_sym_rid();
+    SymStmt *sym_stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt);
+    sym_stmt->set_obj_rid(obj->get_sym_rid());
+  }
+}
+
+void JdbcMngr::record_persistent_obj(oop obj) {
+  if (obj == NULL) {
+//     tty->print_cr("--- NULL record");
+    return;
+  }
+  if (obj->is_symbolic()) {
+    // tty->print_cr("--- record: ");
+    // obj->print();
+    persistentObjStackTrace[obj->get_sym_rid()] = ConcolicMngr::ctx->get_code_pos_for_first("broadleaf");
+  } else {
+//     tty->print_cr("--- not record: ");
   }
 }
 

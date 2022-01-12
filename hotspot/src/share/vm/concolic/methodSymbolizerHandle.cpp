@@ -61,7 +61,7 @@ void MethodSymbolizerHandle::general_prepare_param(int max_param_num) {
   }
 }
 
-int MethodSymbolizerHandle::general_prepare_param_helper(BasicType type,
+int __attribute__((optimize("O0"))) MethodSymbolizerHandle::general_prepare_param_helper(BasicType type,
                                                          int locals_offset, bool is_this) {
   Expression *exp = NULL;
   if (is_java_primitive(type)) {
@@ -128,7 +128,7 @@ bool MethodSymbolizerHandle::general_check_param_symbolized_helper(BasicType typ
   return recording;
 }
 
-Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
+Expression __attribute__((optimize("O0")))  *MethodSymbolizerHandle::general_prepare_result_helper() {
   Expression *exp = NULL;
   BasicType type = this->get_result_type();
   oop obj = NULL;
@@ -143,6 +143,8 @@ Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
         if (obj->is_symbolic()) {
           SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
           exp = sym_inst->get_or_create_ref_exp(obj);
+        } else {
+          exp = SymbolExpression::get(Sym_NULL);
         }
       } else {
         exp = SymbolExpression::get(Sym_NULL);
@@ -158,6 +160,11 @@ Expression *MethodSymbolizerHandle::general_prepare_result_helper() {
       tty->cr();
       ShouldNotCallThis();
       break;
+  }
+
+  if (exp == NULL) {
+    tty->print_cr("exp is NULL for ");
+    obj->print();
   }
 
   ConcolicMngr::record_path_condition(new MethodExpression(
