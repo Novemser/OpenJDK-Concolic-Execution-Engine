@@ -7,6 +7,8 @@
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
 
+#include <string>
+
 JdbcMngr::~JdbcMngr() {
   ulong size = _txs.size();
   for (ulong i = 0; i < size; ++i) {
@@ -35,21 +37,40 @@ void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
 }
 
 void JdbcMngr::print() {
-  // stmt and obj
-  tty->print("statement - object relation:");
-  for (StmtToObjIt pair = stmt_to_obj.begin(); pair != stmt_to_obj.end(); pair++) {
-    sym_rid_t stmt_rid = pair->first;
-    sym_rid_t obj_rid = pair->second;
-    SymStmt *stmt = (SymStmt*)ConcolicMngr::ctx->get_sym_inst(stmt_rid);
-    tty->print("StmtObjRidPair: stmt(%ld -> %ld)-obj(%ld)", stmt_rid, stmt->get_obj_rid(), obj_rid);
-    guarantee(stmt->get_obj_rid() == obj_rid, "should be");
-    tty->print("\n* %s\n", stmt->get_sql_template().c_str());
-  }
   // persistent obj
   tty->print_cr("persistent objects:");
   for (RidToStringIt pair = persistentObjStackTrace.begin(); pair != persistentObjStackTrace.end(); pair++) {
     tty->print_cr("%ld: %s", pair->first, pair->second.c_str());
   }
+
+  // checker
+  ulong unrecorded_select_count = 0;
+  ulong unrecorded_nonselect_count = 0;
+  ulong num_txs = _txs.size();
+  for (ulong i = 0; i < num_txs; ++i) {
+    TxInfo *tx = _txs[i];
+    std::vector<SymStmt*> stmts = tx->get_stmts();
+    ulong num_stmts = stmts.size();
+    tty->print_cr("|txn: %-8lu =====================================", i);
+    for (ulong j = 0; j < num_stmts; j++) {
+      if (stmts[j]->get_obj_rid() == 0) {
+        tty->print_cr("|%-8lu|  ????  |%-128s...|", stmts[j]->get_sym_rid(), stmts[j]->get_sql_template().c_str());
+        if (stmts[j]->get_sql_template().find("select") == 0) {
+          unrecorded_select_count++;
+        } else {
+          unrecorded_nonselect_count++;
+        }
+      } else {
+        tty->print_cr("|%-8lu|%-8lu|%-32s...|", stmts[j]->get_sym_rid(), stmts[j]->get_obj_rid(), stmts[j]->get_sql_template().c_str());
+      }
+    }
+    tty->print_cr("|===================================================");
+  }
+  tty->print_cr("total number of stmts that doesn't have a corresponding object: %lu",
+                unrecorded_select_count + unrecorded_nonselect_count);
+  tty->print_cr("among them %lu are select, %lu are non-select", unrecorded_select_count, unrecorded_nonselect_count);
+  tty->print_cr("note that if non-select is not 0, then you may need to check the process of collections (I didn't deal with them)!\n");
+
   // txns
   tty->print("txns:");
   ulong size = _txs.size();
