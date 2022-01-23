@@ -43,7 +43,6 @@ public:
     ConStringSymbolExp(const std::string& str);
 };
 
-
 #endif
 
 #endif // SHARE_VM_CONCOLIC_EXP_STRINGEXPRESSION_HPP

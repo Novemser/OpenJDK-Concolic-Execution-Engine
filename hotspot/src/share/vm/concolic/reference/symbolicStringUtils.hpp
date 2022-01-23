@@ -8,22 +8,12 @@
 #include "concolic/reference/symbolicInstance.hpp"
 #include "concolic/methodSymbolizer.hpp"
 
-class SymStrUtils : public SymInstance {
+class SymStrUtils {
 public:
   static const char *TYPE_NAME;
   static method_set_t handle_method_names;
   static std::map<std::string, bool> skip_method_names;
   static bool need_recording;
-
-private:
-  Expression *_ref_exp;
-  Expression *_exp;
-
-public:
-  SymStrUtils(sym_rid_t sym_rid);
-  ~SymStrUtils();
-
-  bool need_recursive() { return false; }
 
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);

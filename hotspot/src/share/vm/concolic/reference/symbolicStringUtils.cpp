@@ -35,16 +35,9 @@ void SymStrUtils::init_register_class(MethodSymbolizer *m_symbolizer) {
   m_symbolizer->add_finish_helper_methods(SymStrUtils::TYPE_NAME, finish_method_helper);
 }
 
-SymStrUtils::SymStrUtils(sym_rid_t sym_rid)
-    : SymInstance(sym_rid), _exp(NULL), _ref_exp(NULL) {
-}
-
-SymStrUtils::~SymStrUtils() {
-  Expression::gc(_exp);
-  Expression::gc(_ref_exp);
-}
-
 bool SymStrUtils::invoke_method_helper(MethodSymbolizerHandle &handle) {
+  guarantee(handle.get_callee_method()->is_static(), "should be");
+
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
   need_recording = false;
@@ -153,7 +146,7 @@ Expression *SymStrUtils::finish_method_helper(MethodSymbolizerHandle &handle) {
         ShouldNotCallThis();
         break;
       default:
-        exp = new OpStrUtilsExpression(callee_name, handle.get_param_list());
+        exp = new OpStrExpression(callee_name, handle.get_param_list());
     }
     return exp;
   } else {
