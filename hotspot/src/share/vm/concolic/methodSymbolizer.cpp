@@ -10,6 +10,7 @@
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicStringBuilder.hpp"
+#include "concolic/reference/symbolicStringUtils.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/reference/symbolicSet.hpp"
 #include "concolic/reference/symbolicList.hpp"
@@ -32,6 +33,7 @@ MethodSymbolizer::MethodSymbolizer() {
 void MethodSymbolizer::init_helper_methods() {
   SymString::init_register_class(this);
   SymStrBuilder::init_register_class(this);
+  SymStrUtils::init_register_class(this);
   SymConn::init_register_class(this);
   SymStmt::init_register_class(this);
   SymResSet::init_register_class(this);
@@ -93,11 +95,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   _handle.set_callee_holder_name(
       callee_method->method_holder()->name()->as_C_string());
   _handle.set_callee_name(callee_method->name()->as_C_string());
-
-//  if (_handle.get_callee_name().find("prepareStatement") != std::string::npos) {
-//    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-//                  _handle.get_callee_name().c_str());
-//  }
 
   /**
    * Whether we need to symbolize the process of this function
