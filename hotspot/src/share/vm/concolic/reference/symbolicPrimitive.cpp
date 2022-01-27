@@ -125,17 +125,7 @@ template <> bool SymPrimitive<jbyte>::invoke_method_helper(MethodSymbolizerHandl
     return false;
 }
 template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    const std::string &callee_name = handle.get_callee_name();
-    bool need_symbolize = false;
-
-    if (callee_name == "toHexString") {
-        need_symbolize = handle.general_check_param_symbolized();
-        if (need_symbolize) {
-            handle.general_prepare_param();
-        }
-    }
-
-    return need_symbolize;
+  return false;
 }
 template <> bool SymPrimitive<jshort>::invoke_method_helper(MethodSymbolizerHandle &handle) {
     return false;
@@ -161,18 +151,7 @@ template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymboliz
 }
 
 template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    const std::string &callee_name = handle.get_callee_name();
-    Expression *exp = NULL;
-
-    if (callee_name == "toHexString") {
-        exp = handle.get_param_list()[0];
-        oop res_obj = handle.get_result<oop>(T_OBJECT);
-        guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
-        SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-        sym_res_str->set_ref_exp(OpStrExpression::to_string(exp));
-    }
-
-    return exp;
+  return NULL;
 }
 
 template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
@@ -189,6 +168,14 @@ template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbo
 }
 
 bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type){
+    const std::string &callee_name = handle.get_callee_name();
+    if (callee_name == "toHexString" || callee_name == "toString") {
+        bool need_symbolize = handle.general_check_param_symbolized();
+        if (need_symbolize) {
+          handle.general_prepare_param();
+        }
+        return need_symbolize;
+    }
     switch (type) {
         case T_CHAR:
             return SymPrimitive<jchar>::invoke_method_helper(handle);
@@ -212,6 +199,18 @@ bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType typ
 }
 
 Expression *primitive_finish_method_helper(MethodSymbolizerHandle &handle, BasicType type){
+
+    const std::string &callee_name = handle.get_callee_name();
+    if (callee_name == "toHexString" || callee_name == "toString") {
+        Expression *exp = handle.get_param_list()[0];
+        oop res_obj = handle.get_result<oop>(T_OBJECT);
+        guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
+        SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+        sym_res_str->set_ref_exp(OpStrExpression::to_string(exp));
+
+        return NULL;
+    }
+
     switch (type) {
         case T_CHAR:
             return SymPrimitive<jchar>::finish_method_helper(handle);
