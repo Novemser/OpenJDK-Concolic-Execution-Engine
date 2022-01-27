@@ -10,7 +10,7 @@
 
 class SymStrUtils {
 public:
-  static const char *TYPE_NAME;
+  static std::set<std::string> target_class_names;
   static method_set_t handle_method_names;
   static std::map<std::string, bool> skip_method_names;
   static bool need_recording;
@@ -24,6 +24,7 @@ public:
                                   int locals_offset);
 
   static void init_register_class(MethodSymbolizer* m_symbolizer);
+  static std::set<std::string> init_target_class_names();
 
 private:
   static method_set_t init_handle_method_names();

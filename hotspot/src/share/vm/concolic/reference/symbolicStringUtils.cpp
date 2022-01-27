@@ -8,8 +8,7 @@
 #include <concolic/exp/methodExpression.hpp>
 #include <concolic/exp/stringExpression.hpp>
 
-
-const char *SymStrUtils::TYPE_NAME = "org/apache/commons/lang/StringUtils";
+std::set<std::string> SymStrUtils::target_class_names = init_target_class_names();
 
 method_set_t SymStrUtils::handle_method_names = init_handle_method_names();
 std::map<std::string, bool> SymStrUtils::skip_method_names =
@@ -20,6 +19,7 @@ method_set_t SymStrUtils::init_handle_method_names() {
   method_set_t m_set;
   m_set.insert("isNotBlank");
   m_set.insert("isEmpty");
+  m_set.insert("hasNext");
 
   return m_set;
 }
@@ -30,9 +30,18 @@ std::map<std::string, bool> SymStrUtils::init_skip_method_names() {
   return map;
 }
 
+std::set<std::string> SymStrUtils::init_target_class_names() {
+  std::set<std::string> target_class_names;
+  target_class_names.insert("org/apache/commons/lang/StringUtils");
+  target_class_names.insert("org/springframework/util/StringUtils");
+  return target_class_names;
+}
+
 void SymStrUtils::init_register_class(MethodSymbolizer *m_symbolizer) {
-  m_symbolizer->add_invoke_helper_methods(SymStrUtils::TYPE_NAME, invoke_method_helper);
-  m_symbolizer->add_finish_helper_methods(SymStrUtils::TYPE_NAME, finish_method_helper);
+  for(std::set<std::string>::iterator it = target_class_names.begin(); it != target_class_names.end(); it++) {
+    m_symbolizer->add_invoke_helper_methods(*it, invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(*it, finish_method_helper);
+  }
 }
 
 bool SymStrUtils::invoke_method_helper(MethodSymbolizerHandle &handle) {
