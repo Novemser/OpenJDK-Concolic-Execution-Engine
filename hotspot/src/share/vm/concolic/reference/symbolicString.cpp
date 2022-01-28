@@ -137,8 +137,12 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle,
     locals_offset += type2size[type] - 1;
   } else if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);
-    guarantee(obj != NULL, "should be");
-    exp = SymString::get_exp_of(obj);
+//    guarantee(obj != NULL, "should be");
+    if (obj == NULL) {
+      exp = SymbolExpression::get(Sym_NULL);
+    } else {
+      exp = SymString::get_exp_of(obj);
+    }
   } else if (type == T_ARRAY) {
     tty->print_cr("record string method having a array param: ");
     handle.get_callee_method()->print_name(tty);
@@ -170,9 +174,9 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
 
     switch (type) {
     case T_VOID:
-      if (callee_name == "getChars") {
-        ShouldNotReachHere();
-      }
+//      if (callee_name == "getChars") {
+//        ShouldNotReachHere();
+//      }
       exp = SymbolExpression::get(Sym_VOID);
       break;
     case T_OBJECT:

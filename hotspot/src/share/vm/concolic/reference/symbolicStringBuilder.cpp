@@ -130,7 +130,7 @@ int SymStrBuilder::prepare_param_helper(MethodSymbolizerHandle &handle,
   return locals_offset;
 }
 
-void SymStrBuilder::add_to_string_for_param_list(MethodSymbolizerHandle &handle, exp_list_t &ret) {
+void __attribute__((optimize("O0"))) SymStrBuilder::add_to_string_for_param_list(MethodSymbolizerHandle &handle, exp_list_t &ret) {
   exp_list_t &param_list = handle.get_param_list();
 
   Method *callee_method = handle.get_callee_method();
@@ -139,7 +139,8 @@ void SymStrBuilder::add_to_string_for_param_list(MethodSymbolizerHandle &handle,
 
   ResourceMark rm;
   SignatureStream ss(callee_method->signature());
-  callee_method->signature()->print();
+//  callee_method->signature()->print();
+//  tty->cr();
   // skip `this`
   offset += 1;
   int i = 1;
@@ -148,8 +149,8 @@ void SymStrBuilder::add_to_string_for_param_list(MethodSymbolizerHandle &handle,
     BasicType type = ss.type();
     offset = SymString::prepare_param_helper(handle, ss.type(), offset);
     oop obj = handle.get_param<oop>(offset);
-    if (type == T_OBJECT && obj->is_instance() &&
-        (obj->klass()->name()->equals(SymString::TYPE_NAME) || obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME))) {
+    if (type == T_OBJECT && obj->is_instance() && (obj->klass()->name()->equals(SymString::TYPE_NAME) || obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME))
+        || (param_list[i]->is_op_str_expression() && strncmp("toString", ((OpStrExpression*)param_list[i])->get_name().c_str(), 8) == 0)) {
       ret.push_back(param_list[i]);
     } else {
       ret.push_back(new OpStrExpression("toString", param_list[i]));

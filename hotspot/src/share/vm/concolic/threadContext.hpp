@@ -54,6 +54,15 @@ public:
 
 
 public:
+  void __attribute__((optimize("O0"))) printSymExp(oop obj) {
+    obj->print();
+    tty->print_cr("is symbolic: %d", (int)obj->is_symbolic());
+    if (obj->is_symbolic()) {
+      SymInstance* sym_inst = this->get_sym_inst(obj);
+      sym_inst->print();
+    }
+  }
+
   inline JdbcMngr &get_jdbc_mngr() { return _jdbc_mngr; }
 
   inline MethodSymbolizer &get_method_symbolizer() {

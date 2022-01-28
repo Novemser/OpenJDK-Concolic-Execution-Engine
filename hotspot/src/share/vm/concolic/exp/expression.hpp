@@ -29,6 +29,7 @@ public:
   virtual ~Expression() { total_count--; }
   virtual void print();
   void print_cr();
+  virtual bool is_op_str_expression() { return false; }
 
   static void print_on_maybe_null(Expression *exp) {
     if (exp) {
@@ -86,7 +87,7 @@ public:
 };
 
 class ArrayExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 10;
+  static const int EXP_NAME_LENGTH = 16;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
