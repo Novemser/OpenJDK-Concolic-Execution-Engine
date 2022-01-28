@@ -86,7 +86,7 @@ public:
 };
 
 class ArrayExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 7;
+  static const int EXP_NAME_LENGTH = 10;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
