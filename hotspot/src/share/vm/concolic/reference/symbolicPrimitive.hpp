@@ -15,7 +15,6 @@ public:
 
 private:
   static sym_rid_t sym_count;
-
   Expression *_exp;
 
 public:

@@ -72,9 +72,6 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymString(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<jchar>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jchar>(sym_rid);
-  } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
-    sym_inst = new SymBigDecimal(sym_rid);
-//    sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymPrimitive<jboolean>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jboolean>(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<jbyte>::TYPE_NAME)) {
@@ -91,7 +88,6 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
   } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
     sym_inst = new SymBigDecimal(sym_rid);
-    sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
     sym_inst = new SymTimestamp(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {

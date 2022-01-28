@@ -15,6 +15,7 @@ std::set<std::string> SymMap::init_target_class_names() {
   set.insert("java/util/HashMap");
   set.insert("java/util/LinkedHashMap");
   set.insert("org/hibernate/internal/util/collections/ConcurrentReferenceHashMap");
+  set.insert("java/util/Hashtable");
   return set;
 }
 
@@ -129,20 +130,25 @@ int SymMap::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
 
 bool SymMap::check_param_symbolized(MethodSymbolizerHandle &handle) {
   Method *callee_method = handle.get_callee_method();
-  guarantee(!callee_method->is_static(), "should be");
-  int offset = handle.get_callee_local_begin_offset();
+//  guarantee(!callee_method->is_static(), "should be");
   bool recording = false;
+  if (callee_method->is_static()) {
+    recording = handle.general_check_param_symbolized();
+    guarantee(!recording, "should be");
+  } else {
+    int offset = handle.get_callee_local_begin_offset();
 
-  SymMap::check_param_symbolized_helper(handle, T_OBJECT, offset,
-                                        recording);
-  ++offset;
-
-  ResourceMark rm;
-  SignatureStream ss(callee_method->signature());
-  // Only when this or key object is symbolized, we symbolize Map
-  if (!ss.at_return_type()) {
-    SymMap::check_param_symbolized_helper(handle, ss.type(), offset,
+    SymMap::check_param_symbolized_helper(handle, T_OBJECT, offset,
                                           recording);
+    ++offset;
+
+    ResourceMark rm;
+    SignatureStream ss(callee_method->signature());
+    // Only when this or key object is symbolized, we symbolize Map
+    if (!ss.at_return_type()) {
+      SymMap::check_param_symbolized_helper(handle, ss.type(), offset,
+                                            recording);
+    }
   }
   return recording;
 }
@@ -153,6 +159,7 @@ int SymMap::check_param_symbolized_helper(MethodSymbolizerHandle &handle, BasicT
   if (type == T_OBJECT) {
     oop obj = handle.get_param<oop>(locals_offset);
     if (obj != NULL && obj->is_symbolic()) {
+      obj->print();
       recording = true;
     }
   }
