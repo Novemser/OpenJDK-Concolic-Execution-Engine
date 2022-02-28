@@ -111,12 +111,17 @@ bool SymString::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 void SymString::prepare_param(MethodSymbolizerHandle &handle) {
   Method *callee_method = handle.get_callee_method();
+  const std::string callee_name = handle.get_callee_name();
 
   int offset = handle.get_callee_local_begin_offset();
 
   if (!callee_method->is_static()) {
     SymString::prepare_param_helper(handle, T_OBJECT, offset);
     ++offset;
+  }
+
+  if (callee_name == "toLowerCase" || callee_name == "toUpperCase" ) {
+    return;
   }
 
   ResourceMark rm;

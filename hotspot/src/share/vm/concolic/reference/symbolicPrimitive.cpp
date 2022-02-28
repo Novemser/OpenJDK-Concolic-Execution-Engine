@@ -3,6 +3,7 @@
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "symbolicString.hpp"
 #include "concolic/exp/stringExpression.hpp"
+#include "concolic/exp/methodExpression.hpp"
 
 template <>
 const char *SymPrimitive<jchar>::ARRAY_TYPE_NAME = "[Ljava/lang/Character;";
@@ -125,12 +126,19 @@ template <> bool SymPrimitive<jbyte>::invoke_method_helper(MethodSymbolizerHandl
     return false;
 }
 template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-  return false;
+    return false;
 }
 template <> bool SymPrimitive<jshort>::invoke_method_helper(MethodSymbolizerHandle &handle) {
     return false;
 }
 template <> bool SymPrimitive<jlong>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    if (handle.get_callee_name() == "parseLong") {
+      bool need_symbolize = handle.general_check_param_symbolized();
+      if (need_symbolize) {
+        handle.general_prepare_param();
+      }
+      return need_symbolize;
+    }
     return false;
 }
 template <> bool SymPrimitive<jfloat>::invoke_method_helper(MethodSymbolizerHandle &handle) {
@@ -158,6 +166,13 @@ template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbol
     return NULL;
 }
 template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    if (handle.get_callee_name() == "parseLong") {
+      Expression *exp = new MethodReturnSymbolExp(T_LONG);
+      ConcolicMngr::record_path_condition(new MethodExpression(
+          handle.get_callee_holder_name(), handle.get_callee_name(),
+          handle.get_param_list(), exp, false));
+      return exp;
+    }
     return NULL;
 }
 template <> Expression * SymPrimitive<jfloat>::finish_method_helper(MethodSymbolizerHandle &handle) {

@@ -147,7 +147,7 @@ public final class Boolean implements java.io.Serializable,
      * @since  1.4
      */
     public static Boolean valueOf(boolean b) {
-        return (b ? TRUE : FALSE);
+        return new Boolean(b);
     }
 
     /**
@@ -160,7 +160,7 @@ public final class Boolean implements java.io.Serializable,
      * @return  the {@code Boolean} value represented by the string.
      */
     public static Boolean valueOf(String s) {
-        return parseBoolean(s) ? TRUE : FALSE;
+        return new Boolean(parseBoolean(s));
     }
 
     /**
@@ -174,7 +174,8 @@ public final class Boolean implements java.io.Serializable,
      * @since 1.4
      */
     public static String toString(boolean b) {
-        return b ? "true" : "false";
+//        return b ? "true" : "false"';
+        return b ? new String("true") : new String("false");
     }
 
     /**
