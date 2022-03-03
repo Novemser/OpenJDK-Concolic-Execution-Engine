@@ -8,6 +8,7 @@
 #include "concolic/jdbc/reference/symbolicPersister.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
+#include "concolic/reference/symbolicEmailValidator.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicStringBuilder.hpp"
 #include "concolic/reference/symbolicStringUtils.hpp"
@@ -33,6 +34,7 @@ MethodSymbolizer::MethodSymbolizer() {
 void MethodSymbolizer::init_helper_methods() {
   SymString::init_register_class(this);
   SymStrBuilder::init_register_class(this);
+  SymEmailValidator::init_register_class(this);
   SymStrUtils::init_register_class(this);
   SymConn::init_register_class(this);
   SymStmt::init_register_class(this);
