@@ -64,6 +64,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   map["setNull"] = T_OBJECT;
   map["setTimestamp"] = T_OBJECT;
   map["setBigDecimal"] = T_OBJECT;
+  map["setCharacterStream"] = T_OBJECT;
   return map;
 }
 
@@ -144,7 +145,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     Expression *value_exp = SymStmt::get_param_exp(handle, support_set_methods[callee_name], callee_name);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
     sym_stmt->set_param(index, value_exp);
-  }else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
+  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" unhandled by SymStmt");
     // ShouldNotCallThis();
@@ -193,6 +194,15 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setBigDecimal") {
     value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));
+  } else if (callee_name == "setCharacterStream") {
+    oop reader_obj = handle.get_param<oop>(offset);
+    const std::string &cname = std::string(reader_obj->klass()->name()->as_C_string());
+    if (cname == "java/io/StringReader") {
+      oop str_obj = reader_obj->obj_field(56);
+      value_exp = SymString::get_exp_of(str_obj);
+    } else {
+      ShouldNotReachHere();
+    }
   } else {
     ShouldNotReachHere();
   }
