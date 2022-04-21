@@ -19,7 +19,6 @@ method_set_t SymStrUtils::init_handle_method_names() {
   method_set_t m_set;
   m_set.insert("isNotBlank");
   m_set.insert("isEmpty");
-  m_set.insert("hasNext");
 
   return m_set;
 }

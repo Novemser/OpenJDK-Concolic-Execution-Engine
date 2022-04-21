@@ -106,6 +106,9 @@ int SymSet::prepare_param_helper(MethodSymbolizerHandle &handle, BasicType type,
     if (obj != NULL) {
       SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
       exp = sym_inst->get_or_create_ref_exp(obj);
+    } else {
+      // if one param of the method is null, we ignore this method now.
+      need_recording = false;
     }
   } else {
     tty->print_cr("unhandled set parameter types!");
