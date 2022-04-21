@@ -833,10 +833,10 @@ public final class Long extends Number implements Comparable<Long> {
      * @since  1.5
      */
     public static Long valueOf(long l) {
-        final int offset = 128;
-        if (l >= -128 && l <= 127) { // will cache
-            return LongCache.cache[(int)l + offset];
-        }
+        // final int offset = 128;
+        // if (l >= -128 && l <= 127) { // will cache
+        //     return LongCache.cache[(int)l + offset];
+        // }
         return new Long(l);
     }
 
