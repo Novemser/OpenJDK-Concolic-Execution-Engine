@@ -237,7 +237,7 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
   JavaCalls::call(&result, toStringMethod, &java_args, thread);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
 
-  return (oop)result.get_value_addr()->l;
+  return reinterpret_cast<oop&>(result.get_value_addr()->l);
 }
 
 

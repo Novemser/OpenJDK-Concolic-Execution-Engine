@@ -293,7 +293,7 @@ bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
 
   if (!_first) {
     _param_list.push_back(_exp);
-    _param_list.push_back(new ConStringSymbolExp("-"));
+    _param_list.push_back(new ConStringSymbolExp(std::string("-")));
     _exp = new OpStrExpression("concat", _param_list);
     _param_list.clear();
   }
