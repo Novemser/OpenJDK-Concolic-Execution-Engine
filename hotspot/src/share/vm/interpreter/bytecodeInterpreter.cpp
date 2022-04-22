@@ -2811,7 +2811,7 @@ run:
     guarantee (exp == NULL, "do not support");                                 \
   }
 #else
-#define CONCOLIC_NEW_ARRAY()
+#define CONCOLIC_NEW_MULTIARRAY()
 #endif
 
       CASE(_multianewarray): {
