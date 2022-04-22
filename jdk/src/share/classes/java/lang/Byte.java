@@ -99,9 +99,8 @@ public final class Byte extends Number implements Comparable<Byte> {
      * @since  1.5
      */
     public static Byte valueOf(byte b) {
-        // final int offset = 128;
-        // return ByteCache.cache[(int)b + offset];
-        return new Byte(b);
+        final int offset = 128;
+        return ByteCache.cache[(int)b + offset];
     }
 
     /**
