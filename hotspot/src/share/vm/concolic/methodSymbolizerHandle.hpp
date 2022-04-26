@@ -51,7 +51,8 @@ public:
       char *callee_method_name_c_str = callee_method->method_holder()->name()->as_C_string();
       // for lambda expressions(where the call site might locate in java/lang/invoke),
       // caller_istate->callee() == callee_method might not hold
-      if (!strstr(callee_method_name_c_str, "java/lang/invoke")) {
+      if (!strstr(callee_method_name_c_str, "java/lang/invoke") &&
+          !strstr(callee_method_name_c_str, "$$Lambda")) {
         assert(caller_istate->callee() == callee_method, "should be");
       }
     } else if (_callee_frame->is_entry_frame()) {
