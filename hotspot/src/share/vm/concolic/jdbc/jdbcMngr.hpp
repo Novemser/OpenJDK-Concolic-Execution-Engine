@@ -13,6 +13,7 @@ class JdbcMngr {
 private:
   std::vector<TxInfo *> _txs;
   std::map<jlong, TxInfo *> _conn_ongoing_tx;
+  std::vector<std::pair<SymStmt*, jlong> > _sym_stmt_list;
 public:
   JdbcMngr() {}
 

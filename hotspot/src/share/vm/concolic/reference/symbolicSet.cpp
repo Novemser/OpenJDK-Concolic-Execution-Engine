@@ -42,6 +42,7 @@ std::map<std::string, bool> SymSet::init_skip_method_names() {
   map["entries"] = true; // really???
   // not original List api, (belongs to hibernate.persistentBag)
   map["getSnapshot"] = false; // really???
+  map["<clinit>"] = true;
   return map;
 }
 

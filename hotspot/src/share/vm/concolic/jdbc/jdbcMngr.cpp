@@ -32,18 +32,29 @@ void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
 }
 
 void JdbcMngr::print() {
-  ulong size = _txs.size();
-  for (ulong i = 0; i < size; ++i) {
-    _txs[i]->print();
-  }
+    ulong size = _txs.size();
+    tty->print_cr("[Print] Txn size:%lu, sql list size:%lu", size, _sym_stmt_list.size());
+    for (ulong i = 0; i < _sym_stmt_list.size(); i++) {
+        std::pair<SymStmt *, jlong> &pair = _sym_stmt_list[i];
+        tty->print("[Connection %lu] ", pair.second);
+        pair.first->print();
+    }
+//  for (ulong i = 0; i < size; ++i) {
+//    _txs[i]->print();
+//  }
 }
 
 void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
+  tty->print_cr("[Recorder] Try recording stmt, printing");
+  stmt->print();
+  _sym_stmt_list.push_back(std::make_pair(stmt, conn_id));
+
   std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
   if (iter != _conn_ongoing_tx.end()) {
     // There's no ongoing transaction in conn_id connection
     guarantee(iter->second, "should be");
     iter->second->record_stmt(stmt);
+    tty->print_cr("Recorded stmt into txn %lu", iter->first);
   }
 }
 
