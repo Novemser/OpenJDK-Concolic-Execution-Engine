@@ -45,12 +45,17 @@ private:
   exp_map_t _param_exps;
   Expression *_row_count_exp;
   int _row_count;
+  sym_rid_t obj_rid;
 
 public:
   SymStmt(sym_rid_t sym_rid);
   ~SymStmt();
 
 public:
+  inline std::string &get_sql_template() {
+    return _sql_template;
+  }
+
   inline void swap_sql_template(std::string &sql_template) {
     _sql_template.swap(sql_template);
   }
@@ -69,6 +74,12 @@ public:
 
   inline void inc_row_count() { ++ _row_count;}
 
+  sym_rid_t get_obj_rid() { return obj_rid; }
+  sym_rid_t set_obj_rid(sym_rid_t id) {
+    guarantee(obj_rid == NULL_SYM_RID, "should be");
+    obj_rid = id;
+  }
+
 public:
   bool need_recursive() { return false; }
   void print();
@@ -78,6 +89,13 @@ public:
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
   static void init_register_class(MethodSymbolizer* m_symbolizer);
+  
+// counter: for symbolicPersister
+private:
+  static long execute_counter;
+public:
+  static long getExecuteCounter() { return execute_counter; }
+  static long resetExecuteCounter() { execute_counter = 0; }
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

@@ -60,6 +60,9 @@ void JavaThread::pop_zero_frame() {
   }
   if (ConcolicMngr::has_symbolized_method()) {
     ConcolicMngr::ctx->get_method_symbolizer().finish_method(_top_zero_frame);
+  } else if (ConcolicMngr::should_try_handle_method()) {
+    // this is for those are not symbolized method
+    ConcolicMngr::ctx->get_method_symbolizer().finish_handling_method(_top_zero_frame);
   }
 #endif
 }

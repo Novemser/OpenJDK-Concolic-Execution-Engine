@@ -468,7 +468,9 @@ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
   stack->set_sp(stack->sp() + method->size_of_parameters());
 
 #ifdef ENABLE_CONCOLIC
-  NativeCallHandler::handle_native(method, locals);
+  if (ConcolicMngr::can_do_concolic()) {
+    NativeCallHandler::handle_native(method, locals);
+  }
 #endif
 
   // Push our result
@@ -668,15 +670,22 @@ int CppInterpreter::accessor_entry(Method* method, intptr_t UNUSED, TRAPS) {
   }
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
-    if (object->is_symbolic()) {
-      interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
-      int stack_offset = istate->stack_base() - locals - 1;
+    if (object->is_symbolic() && entry->flag_state() != atos) {
+      ZeroFrame *top_frame = thread->top_zero_frame();
       int field_offset = entry->f2_as_index();
       sym_rid_t sym_rid = object->get_sym_rid();
-
       SymInstance* sym_inst = ConcolicMngr::ctx->get_sym_inst(sym_rid);
       Expression* sym_exp = sym_inst->get(field_offset);
-      ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_rid, field_offset);
+      if (top_frame->is_interpreter_frame()) {
+        interpreterState istate = thread->top_zero_frame()->as_interpreter_frame()->interpreter_state();
+        int stack_offset = istate->stack_base() - locals - 1;
+        ConcolicMngr::ctx->set_stack_slot(stack_offset, sym_exp, sym_rid, field_offset);
+      } else if (top_frame->is_entry_frame()){
+        int offset = type2size[as_BasicType(entry->flag_state())] - 1;
+        ConcolicMngr::ctx->set_stack_slot(offset, sym_exp, sym_rid, field_offset);
+      } else {
+        ShouldNotReachHere();
+      }
     }
   }
 #endif

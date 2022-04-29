@@ -1101,6 +1101,7 @@ run:
 
       CASE(_aload):
           VERIFY_OOP(LOCALS_OBJECT(pc[1]));
+          CONCOLIC_CONST(0);
           SET_STACK_OBJECT(LOCALS_OBJECT(pc[1]), 0);
           UPDATE_PC_AND_TOS_AND_CONTINUE(2, 1);
 
@@ -1123,6 +1124,7 @@ run:
 #undef  OPC_LOAD_n
 #define OPC_LOAD_n(num)                                                 \
       CASE(_aload_##num):                                               \
+          CONCOLIC_CONST(0)                                             \
           VERIFY_OOP(LOCALS_OBJECT(num));                               \
           SET_STACK_OBJECT(LOCALS_OBJECT(num), 0);                      \
           UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);                         \
@@ -2643,6 +2645,12 @@ run:
                 SymInstance *sym_inst =
                     ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
                 sym_inst->set_sym_exp(field_offset, sym_exp);
+              } else {
+                if (obj->is_symbolic()) {
+                  SymInstance *sym_inst =
+                      ConcolicMngr::ctx->get_sym_inst(obj);
+                      sym_inst->set_sym_exp(field_offset, NULL);
+                }
               }
             }
           }

@@ -45,8 +45,24 @@ public:
                                const char *method_name) {
     _method_symbolizer.add_method(class_name, method_name);
   }
+  inline void record_stmt_obj(oop stmt, oop obj) {
+    _jdbc_mngr.record_stmt_obj_pair(stmt, obj);
+  }
+  inline void record_persistent_obj(oop obj) {
+    _jdbc_mngr.record_persistent_obj(obj);
+  }
+
 
 public:
+  void __attribute__((optimize("O0"))) printSymExp(oop obj) {
+    obj->print();
+    tty->print_cr("is symbolic: %d", (int)obj->is_symbolic());
+    if (obj->is_symbolic()) {
+      SymInstance* sym_inst = this->get_sym_inst(obj);
+      sym_inst->print();
+    }
+  }
+
   inline JdbcMngr &get_jdbc_mngr() { return _jdbc_mngr; }
 
   inline MethodSymbolizer &get_method_symbolizer() {
@@ -59,6 +75,7 @@ public:
 
 public:
   std::string get_current_code_pos();
+  std::string get_code_pos_for_first(const std::string &str);
 
 public:
   SymInstance *get_or_alloc_sym_inst(oop obj);

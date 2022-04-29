@@ -48,6 +48,7 @@ public:
 private:
   static method_set_t init_handle_method_names();
   static std::map<std::string, bool> init_skip_method_names();
+  static void add_to_string_for_param_list(MethodSymbolizerHandle &handle, exp_list_t &ret);
 };
 
 #endif // ENABLE_CONCOLIC

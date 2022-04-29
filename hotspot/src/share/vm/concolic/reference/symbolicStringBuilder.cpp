@@ -130,6 +130,37 @@ int SymStrBuilder::prepare_param_helper(MethodSymbolizerHandle &handle,
   return locals_offset;
 }
 
+void __attribute__((optimize("O0"))) SymStrBuilder::add_to_string_for_param_list(MethodSymbolizerHandle &handle, exp_list_t &ret) {
+  exp_list_t &param_list = handle.get_param_list();
+
+  Method *callee_method = handle.get_callee_method();
+
+  int offset = handle.get_callee_local_begin_offset();
+
+  ResourceMark rm;
+  SignatureStream ss(callee_method->signature());
+//  callee_method->signature()->print();
+//  tty->cr();
+  // skip `this`
+  offset += 1;
+  int i = 1;
+  ret.push_back(param_list[0]);
+  while (!ss.at_return_type()) {
+    BasicType type = ss.type();
+    offset = SymString::prepare_param_helper(handle, ss.type(), offset);
+    oop obj = handle.get_param<oop>(offset);
+    if (type == T_OBJECT && obj->is_instance() && (obj->klass()->name()->equals(SymString::TYPE_NAME) || obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME))
+        || (param_list[i]->is_op_str_expression() && strncmp("toString", ((OpStrExpression*)param_list[i])->get_name().c_str(), 8) == 0)) {
+      ret.push_back(param_list[i]);
+    } else {
+      ret.push_back(new OpStrExpression("toString", param_list[i]));
+    }
+    i++;
+    ss.next();
+    offset += type2size[type];
+  }
+}
+
 Expression *
 SymStrBuilder::finish_method_helper(MethodSymbolizerHandle &handle) {
   BasicType type = handle.get_result_type();
@@ -140,8 +171,10 @@ SymStrBuilder::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (callee_name == "append") {
     SymStrBuilder *sym_res_strBuilder =
         (SymStrBuilder *)ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-      sym_res_strBuilder->set_ref_exp(
-              new OpStrExpression("concat", handle.get_param_list()));
+    exp_list_t string_exp_list;
+    add_to_string_for_param_list(handle, string_exp_list);
+    sym_res_strBuilder->set_ref_exp(
+        new OpStrExpression("concat", string_exp_list));
   } else if (callee_name == "toString") {
     SymString *sym_res_str =
         (SymString *)ConcolicMngr::ctx->alloc_sym_inst(obj);

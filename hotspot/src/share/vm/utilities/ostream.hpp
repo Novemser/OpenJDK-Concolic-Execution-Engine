@@ -349,7 +349,7 @@ class bufferedStream : public outputStream {
 };
 
 #ifdef ENABLE_CONCOLIC
-#define O_BUFLEN 4096   // max size of output of individual print() methods
+#define O_BUFLEN 8192   // max size of output of individual print() methods
 #else
 #define O_BUFLEN 2048
 #endif

@@ -104,6 +104,9 @@ JVM_CurrentTimeMillis(JNIEnv *env, jclass ignored);
 JNIEXPORT jlong JNICALL
 JVM_NanoTime(JNIEnv *env, jclass ignored);
 
+JNIEXPORT void JNICALL
+JVM_PrintObjInfo(JNIEnv *env, jclass ignored, jobject obj);
+
 JNIEXPORT jlong JNICALL
 JVM_StartConcolic(JNIEnv *env, jclass ignored);
 
@@ -117,8 +120,17 @@ JNIEXPORT void JNICALL
 JVM_SymbolizeMethod(JNIEnv *env, jclass ignored, jobject holder_name, jobject callee_name);
 
 JNIEXPORT void JNICALL
+JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, jobject obj);
+
+JNIEXPORT void JNICALL
+JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj);
+
+JNIEXPORT void JNICALL
 JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,
               jobject dst, jint dst_pos, jint length);
+
+JNIEXPORT void JNICALL
+JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj);
 
 JNIEXPORT jobject JNICALL
 JVM_InitProperties(JNIEnv *env, jobject p);
