@@ -44,8 +44,8 @@ void MethodSymbolizer::init_helper_methods() {
   SymList::init_register_class(this);
   SymBigDecimal::init_register_class(this);
   SymTimestamp::init_register_class(this);
-  SymHibernateKey::init_register_class(this);
-  SymHibernateMethod::init_register_class(this);
+//  SymHibernateKey::init_register_class(this);
+//  SymHibernateMethod::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,

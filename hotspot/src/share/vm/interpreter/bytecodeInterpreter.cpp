@@ -194,7 +194,7 @@
 // initialization (which is is the initialization of the table pointer...)
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
 #define DISPATCH(opcode)\
-  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
+//  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
   goto *(void*)dispatch_table[opcode]
 #else
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
@@ -1015,7 +1015,7 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if not defined(USELABELS) && defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
+//      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
 #endif
 
 #ifdef USELABELS
@@ -1030,7 +1030,7 @@ run:
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_CONST(off)                                                    \
   if (ConcolicMngr::can_do_concolic()) {                                       \
-    ConcolicMngr::ctx->clear_stack_slot(GET_STACK_OFFSET + off);               \
+    ConcolicMngr::ctx->clear_stack_slot(GET_STACK_OFFSET + (off));               \
   }
 #else
 #define CONCOLIC_CONST(off)
@@ -1093,7 +1093,7 @@ run:
 #define CONCOLIC_LOAD(local_off, delta_stack_off)                              \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     ConcolicMngr::ctx->copy_entry_from_local_to_stack(                         \
-        local_off, GET_STACK_OFFSET + delta_stack_off);                        \
+        local_off, GET_STACK_OFFSET + (delta_stack_off));                        \
   }
 #else
 #define CONCOLIC_LOAD(local_off, stack_off)
@@ -1154,7 +1154,7 @@ run:
 #define CONCOLIC_STORE(delta_stack_off, local_off)                             \
   if (ConcolicMngr::can_do_concolic()) {                                       \
     ConcolicMngr::ctx->copy_entry_from_stack_to_local(                         \
-        GET_STACK_OFFSET + delta_stack_off, local_off);                        \
+        GET_STACK_OFFSET + (delta_stack_off), local_off);                        \
   }
 #else
 #define CONCOLIC_STORE(stack_off, local_off)

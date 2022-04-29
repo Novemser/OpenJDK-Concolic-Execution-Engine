@@ -447,9 +447,10 @@ JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj
     Handle handle_o(THREAD, o);
     assert(handle_o()->is_oop(), "JVM_RecordPersistentObj: obj not an oop");
     ConcolicMngr::recordPersistentObj(handle_o);
-  } else {
-    ConcolicMngr::recordPersistentObj(NULL);
   }
+//  else {
+//    ConcolicMngr::recordPersistentObj(NULL);
+//  }
 #else
   return;
 #endif
