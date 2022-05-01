@@ -98,5 +98,26 @@ public:
   static long resetExecuteCounter() { execute_counter = 0; }
 };
 
+class SymSetAutoCommit : public SymStmt {
+private:
+  bool autoCommit;
+public:
+  SymSetAutoCommit(bool autoCommit) : SymStmt(Sym_NULL) {
+    this->autoCommit = autoCommit;
+  }
+
+  bool getAutoCommit() {
+    return autoCommit;
+  }
+
+  void print();
+};
+
+class SymCommit : public SymStmt {
+public:
+  SymCommit() : SymStmt(Sym_NULL) {}
+
+  void print();
+};
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
 #endif // SHARE_VM_CONCOLIC_JDBC_REFERENCE_SYMBOLIC_STATEMENT_HPP

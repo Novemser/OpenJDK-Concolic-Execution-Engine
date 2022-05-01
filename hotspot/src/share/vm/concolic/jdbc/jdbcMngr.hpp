@@ -22,6 +22,8 @@ public:
 
   void set_auto_commit(jboolean auto_commit, jlong conn_id);
 
+  void commit(jlong conn_id);
+
 public:
 //  bool has_ongoing_tx(jlong conn_id) {
 //    return _conn_ongoing_tx[conn_id] != NULL;

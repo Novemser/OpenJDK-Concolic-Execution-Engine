@@ -26,7 +26,8 @@ method_set_t SymConn::skip_method_names = init_skip_method_names();
 method_set_t SymConn::init_skip_method_names() {
   method_set_t m_set;
   m_set.insert("getAutoCommit");
-  m_set.insert("commit");
+  m_set.insert("getProxy");
+  m_set.insert("getServerCharset");
   return m_set;
 }
 
@@ -38,6 +39,7 @@ void SymConn::init_register_class(MethodSymbolizer *m_symbolizer) {
 bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
+  tty->print_cr("callee_name in sym Connection:%s", callee_name.c_str());
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     if (callee_name == "prepareStatement") {
       oop obj = handle.get_param<oop>(1);
@@ -51,6 +53,9 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
       jboolean auto_commit = handle.get_param<jboolean>(1);
       ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(auto_commit, conn_id);
     } else if (callee_name == "createStatement") {
+    } else if (callee_name == "commit") {
+      long conn_id = JdbcUtils::get_conn_connection_id(handle.get_param<oop>(0));
+      ConcolicMngr::ctx->get_jdbc_mngr().commit(conn_id);
     } else {
       ShouldNotCallThis();
     }

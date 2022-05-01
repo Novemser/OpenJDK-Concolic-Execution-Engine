@@ -157,6 +157,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
+
   if (strncmp("execute", callee_name.c_str(), 7) == 0) {
     oop this_obj = handle.get_param<oop>(0);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
@@ -213,6 +214,14 @@ StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) 
 
 void StatementSymbolExp::print() {
   tty->print("#SymStmt(%lu): %s", _sym_stmt->get_sym_rid(), _sym_stmt->_sql_template.c_str());
+}
+
+void SymSetAutoCommit::print() {
+  tty->print_cr("#setAutocommit=%d", getAutoCommit());
+}
+
+void SymCommit::print() {
+  tty->print_cr("#commit");
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

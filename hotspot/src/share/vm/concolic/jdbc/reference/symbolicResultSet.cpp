@@ -30,6 +30,7 @@ std::set<std::string> SymResSet::init_handle_method_names() {
   set.insert("getLong");
   set.insert("getFloat");
   set.insert("getDouble");
+  set.insert("getDate");
   set.insert("getString");
   set.insert("getTimestamp");
   set.insert("getBigDecimal");
@@ -45,6 +46,7 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   set.insert("checkRowPos");
   set.insert("checkClosed");
   set.insert("checkColumnBounds");
+  set.insert("getInstance");
   // do not handle clob~
   set.insert("getClob");
   set.insert("wasNull");  // TODO: check this
@@ -106,6 +108,10 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
   if (strncmp("get", callee_name.c_str(), 3) == 0) {
+    if (callee_name == "getInstance") {
+      return exp;
+    }
+
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
@@ -133,6 +139,8 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
       jint col_i = handle.get_param<int>(1);
       exp = new ResultSetSymbolExp(sym_res_set, col_i, res_type, res_obj);
     } else {
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" should handled by SymResSet");
       ShouldNotCallThis();
     }
   } else if (callee_name == "next") {

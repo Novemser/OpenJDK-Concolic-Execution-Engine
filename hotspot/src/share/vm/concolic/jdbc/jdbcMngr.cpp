@@ -20,6 +20,7 @@ JdbcMngr::~JdbcMngr() {
 void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
   tty->print_cr("[Txn] set_auto_commit: %us, conn_id:%ld", auto_commit, conn_id);
   std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
+  _sym_stmt_list.push_back(std::make_pair(new SymSetAutoCommit(auto_commit), conn_id));
 
   if (!auto_commit) {
     tx_id_t tx_id = _txs.size();
@@ -34,6 +35,11 @@ void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
       _conn_ongoing_tx.erase(iter);
     }
   }
+}
+
+void JdbcMngr::commit(jlong conn_id) {
+  tty->print_cr("[Txn] explicit commit:%ld", conn_id);
+  _sym_stmt_list.push_back(std::make_pair(new SymCommit(), conn_id));
 }
 
 void JdbcMngr::print() {
