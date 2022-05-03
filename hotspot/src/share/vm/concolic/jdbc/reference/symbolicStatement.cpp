@@ -161,8 +161,9 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   if (strncmp("execute", callee_name.c_str(), 7) == 0) {
     oop this_obj = handle.get_param<oop>(0);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
+    // set current path conditon for statement
+    sym_stmt->set_pc(ConcolicMngr::ctx->get_path_condition());
     ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
-
     jlong conn_id = JdbcUtils::get_stmt_connection_id(this_obj);
     ConcolicMngr::ctx->get_jdbc_mngr().record_stmt(sym_stmt, conn_id);
 

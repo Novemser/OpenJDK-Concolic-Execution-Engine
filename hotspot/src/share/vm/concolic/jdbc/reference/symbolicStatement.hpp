@@ -4,6 +4,7 @@
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
 #include "concolic/defs.hpp"
+#include "concolic/pathCondition.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
 #include "oops/oop.inline.hpp"
@@ -46,6 +47,7 @@ private:
   Expression *_row_count_exp;
   int _row_count;
   sym_rid_t obj_rid;
+  PathCondition _pc;
 
 public:
   SymStmt(sym_rid_t sym_rid);
@@ -80,6 +82,10 @@ public:
     obj_rid = id;
   }
 
+  PathCondition getPc() const { return _pc; }
+
+  void set_pc(PathCondition pc) { _pc = pc; }
+
 public:
   bool need_recursive() { return false; }
   void print();
@@ -89,7 +95,7 @@ public:
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
   static void init_register_class(MethodSymbolizer* m_symbolizer);
-  
+
 // counter: for symbolicPersister
 private:
   static long execute_counter;

@@ -52,6 +52,7 @@ public:
     _jdbc_mngr.record_persistent_obj(obj);
   }
 
+  const PathCondition &get_path_condition() const;
 
 public:
   void __attribute__((optimize("O0"))) printSymExp(oop obj) {

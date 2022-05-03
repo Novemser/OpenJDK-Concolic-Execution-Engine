@@ -30,16 +30,55 @@ public:
   }
 
 private:
-  unsigned sqlNo;
-  unsigned connectionId;
+  uint _sqlNo;
+  uint _connectionId;
 
-  SqlType sqlType;
-  std::string sqlTemplate;
-  std::vector<std::string> parameterExprs;
-  std::vector<Expression> parameterSymbolics;
-  std::vector<std::string> concreteParameters;
+  SqlType _sqlType;
+  std::string _sqlTemplate;
+  std::vector<std::string> _parameterExprs;
+  std::vector<Expression*> _parameterSymbolics;
+  std::vector<std::string> _concreteParameters;
 
-  PathCondition pc;
+  PathCondition _pc;
+
+public:
+  inline void setSqlNo(uint sqlNo) { _sqlNo = sqlNo; }
+
+  inline void setConnectionId(uint id) { _connectionId = id; }
+
+  inline void setSqlTemplate(const std::string &sqlTemplate) { _sqlTemplate = sqlTemplate; }
+
+  uint getSqlNo() const {
+    return _sqlNo;
+  }
+
+  uint getConnectionId() const {
+    return _connectionId;
+  }
+
+  SqlType getSqlType() const {
+    return _sqlType;
+  }
+
+  const std::string &getSqlTemplate() const {
+    return _sqlTemplate;
+  }
+
+  const std::vector<std::string> &getParameterExprs() const {
+    return _parameterExprs;
+  }
+
+  const std::vector<Expression*> &getParameterSymbolics() const {
+    return _parameterSymbolics;
+  }
+
+  const std::vector<std::string> &getConcreteParameters() const {
+    return _concreteParameters;
+  }
+
+  const PathCondition &getPc() const {
+    return _pc;
+  }
 };
 
 

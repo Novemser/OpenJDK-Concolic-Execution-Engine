@@ -24,6 +24,12 @@ private:
   std::vector<Condition *> _conds;
 
 public:
+  PathCondition(const PathCondition& original) {
+    for (size_t index = 0; index < original._conds.size(); ++index) {
+      this->_conds.push_back(original._conds[index]);
+    }
+  }
+
   void add(Expression *exp);
   void gc();
   void print();
