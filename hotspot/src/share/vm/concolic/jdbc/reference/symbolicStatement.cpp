@@ -104,6 +104,7 @@ void SymStmt::print() {
     _row_count_exp->print();
     tty->cr();
   }
+  _pc.print();
 }
 
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {

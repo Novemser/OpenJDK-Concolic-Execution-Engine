@@ -95,8 +95,8 @@ void JdbcMngr::print() {
 }
 
 void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
-  tty->print_cr("[Recorder] Try recording stmt, printing");
-  stmt->print();
+//  tty->print_cr("[Recorder] Try recording stmt, printing");
+//  stmt->print();
   _sym_stmt_list.push_back(std::make_pair(stmt, conn_id));
 
   std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
@@ -145,6 +145,10 @@ void JdbcMngr::record_persistent_obj(oop obj) {
   } else {
 //     tty->print_cr("--- not record: ");
   }
+}
+
+const std::vector<std::pair<SymStmt *, jlong> > &JdbcMngr::get_sym_stmt_list() const {
+  return _sym_stmt_list;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

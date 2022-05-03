@@ -3,11 +3,14 @@
 //
 
 #include "webridgeMngr.hpp"
-#ifdef ENABLE_WEBRIDGE
-void webridgeMngr::analyse(ThreadContext *ctx) {
-    // 1. Construct a "SQL graph" from concolic execution manager.
-//    auto jdbc_mgr = ctx->get_jdbc_mngr();
 
-    // 2. Translate the graph into Stored procedure.
+#ifdef ENABLE_WEBRIDGE
+
+void webridgeMngr::analyse(ThreadContext *ctx) {
+  JdbcMngr jdbc_mgr = ctx->get_jdbc_mngr();
+  std::vector<std::pair<SymStmt *, jlong> > sym_stmt_list =
+      jdbc_mgr.get_sym_stmt_list();
+  tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
 }
+
 #endif

@@ -17,11 +17,11 @@ class webridgeMngr {
 //private:
 
 public:
-    static void analyse(ThreadContext *ctx);
+  static void analyse(ThreadContext *ctx);
 
 #else
-    public:
-        static void analyse(ThreadContext *ctx) {}
+  public:
+      static void analyse(ThreadContext *ctx) {}
 #endif
 };
 

@@ -24,6 +24,8 @@ public:
 
   void commit(jlong conn_id);
 
+  const std::vector<std::pair<SymStmt *, jlong> > &get_sym_stmt_list() const;
+
 public:
 //  bool has_ongoing_tx(jlong conn_id) {
 //    return _conn_ongoing_tx[conn_id] != NULL;
