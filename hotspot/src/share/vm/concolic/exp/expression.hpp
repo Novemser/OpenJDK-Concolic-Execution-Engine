@@ -10,7 +10,7 @@
 #include "utilities/ostream.hpp"
 
 #include <map>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 class Expression {
 private:
