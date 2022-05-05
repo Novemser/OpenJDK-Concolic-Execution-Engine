@@ -5,7 +5,11 @@
 #ifndef WEBRIDGE_DEFS_HPP
 #define WEBRIDGE_DEFS_HPP
 
-#ifdef DENABLE_WEBRIDGE
-#endif //DENABLE_WEBRIDGE
+#include <map>
+
+#ifdef ENABLE_WEBRIDGE
+typedef std::map<std::string, std::set<std::string> > class_method_map_t;
+
+#endif //ENABLE_WEBRIDGE
 
 #endif //WEBRIDGE_DEFS_HPP

@@ -27,6 +27,7 @@
 #include "precompiled.hpp"
 #include "runtime/frame.inline.hpp"
 #include "runtime/thread.inline.hpp"
+#include "webridge/pathCondition/pathConditionPruner.hpp"
 
 void JavaThread::cache_global_variables() {
   // nothing to do
@@ -44,6 +45,11 @@ void JavaThread::push_zero_frame(ZeroFrame *zframe) {
     ConcolicMngr::ctx->get_shadow_stack().push(
         _top_zero_frame, *(ZeroFrame **)zframe, zero_stack()->sp());
   }
+#ifdef ENABLE_WEBRIDGE
+  if (ConcolicMngr::can_do_concolic()) {
+    PathConditionPruner::method_enter(_top_zero_frame);
+  }
+#endif
 #endif
 }
 
@@ -64,5 +70,10 @@ void JavaThread::pop_zero_frame() {
     // this is for those are not symbolized method
     ConcolicMngr::ctx->get_method_symbolizer().finish_handling_method(_top_zero_frame);
   }
+#ifdef ENABLE_WEBRIDGE
+  if (ConcolicMngr::can_do_concolic()) {
+    PathConditionPruner::method_exit(_top_zero_frame);
+  }
+#endif
 #endif
 }

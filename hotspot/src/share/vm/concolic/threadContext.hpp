@@ -34,6 +34,7 @@ private:
   sym_rid_t _sym_rid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
 
+  bool _path_condition_enabled;
 public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();
@@ -53,6 +54,8 @@ public:
   }
 
   const PathCondition &get_path_condition() const;
+
+  void set_pc_enabled(bool pathConditionEnabled);
 
 public:
   void __attribute__((optimize("O0"))) printSymExp(oop obj) {
@@ -98,6 +101,10 @@ public:
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
 
   inline void __attribute__((optimize("O0"))) record_path_condition(Expression *sym_exp) {
+    if (!_path_condition_enabled) {
+      return;
+    }
+
     _path_condition.add(sym_exp);
   }
 

@@ -16,7 +16,8 @@
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
 
-ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
+ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt), _sym_rid_counter(), _sym_tmp_id_counter(),
+                                               _path_condition_enabled(true) {
   init_sym_rid_counter();
   init_sym_tmp_id_counter();
 
@@ -293,6 +294,10 @@ void ThreadContext::memory_leak_check() {
 
 const PathCondition &ThreadContext::get_path_condition() const {
   return _path_condition;
+}
+
+void ThreadContext::set_pc_enabled(bool pathConditionEnabled) {
+  _path_condition_enabled = pathConditionEnabled;
 }
 
 #endif
