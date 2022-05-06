@@ -36,11 +36,6 @@ jlong ConcolicMngr::endConcolic() {
   assert(_num_threads_in_concolic == 1, "should be");
   --_num_threads_in_concolic;
 
-#ifdef ENABLE_WEBRIDGE
-  // WeBridge related processing code
-  webridgeMngr::analyse(ctx);
-#endif
-
   ctx->print();
   delete ctx;
   ctx = NULL;

@@ -439,7 +439,8 @@ public final class System {
      * record statement-object pair
      */
     public static native void recordPersistentObj(Object obj);
-    
+
+    public static native void weBridgeAnalysis();
     /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.

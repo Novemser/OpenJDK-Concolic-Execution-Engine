@@ -46,6 +46,7 @@ static JNINativeMethod methods[] = {
     {"arraycopy",           "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
     {"recordStmtObj",       "(" OBJ OBJ ")V",          (void *)&JVM_RecordStmtObj},
     {"recordPersistentObj", "(" OBJ ")V",              (void *)&JVM_RecordPersistentObj},
+    {"weBridgeAnalysis",    "()V",                    (void *)&JVM_WeBridgeAnalysis},
     {"printSymExp",         "(" OBJ ")V",              (void *)&JVM_PrintSymExp},
 };
 

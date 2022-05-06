@@ -1188,8 +1188,10 @@ void LinkResolver::runtime_resolve_virtual_method(CallInfo& result,
   // Virtual methods cannot be resolved before its klass has been linked, for otherwise the Method*'s
   // has not been rewritten, and the vtable initialized. Make sure to do this after the nullcheck, since
   // a missing receiver might result in a bogus lookup.
+  if (!resolved_method->method_holder()->is_linked()) {
+    tty->print_cr("hi");
+  }
   assert(resolved_method->method_holder()->is_linked(), "must be linked");
-
   // do lookup based on receiver klass using the vtable index
   if (resolved_method->method_holder()->is_interface()) { // default or miranda method
     vtable_index = vtable_index_of_interface_method(resolved_klass,

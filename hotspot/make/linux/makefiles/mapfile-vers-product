@@ -261,6 +261,7 @@ SUNWprivate_1.1 {
                 JVM_PrintSymExp;
                 JVM_RecordStmtObj;
                 JVM_RecordPersistentObj;
+                JVM_WeBridgeAnalysis;
 
                 # miscellaneous functions
                 jio_fprintf;

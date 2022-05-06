@@ -98,7 +98,7 @@
 #endif // INCLUDE_ALL_GCS
 
 #include <errno.h>
-
+#include "webridge/webridgeMngr.hpp"
 #ifndef USDT2
 HS_DTRACE_PROBE_DECL1(hotspot, thread__sleep__begin, long long);
 HS_DTRACE_PROBE_DECL1(hotspot, thread__sleep__end, int);
@@ -451,6 +451,15 @@ JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj
 //  else {
 //    ConcolicMngr::recordPersistentObj(NULL);
 //  }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored))
+  JVMWrapper("JVM_WeBridgeAnalysis");
+#ifdef ENABLE_WEBRIDGE
+  webridgeMngr::analyse(ConcolicMngr::ctx);
 #else
   return;
 #endif

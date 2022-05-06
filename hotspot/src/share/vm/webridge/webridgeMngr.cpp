@@ -6,10 +6,16 @@
 #include "webridgeMngr.hpp"
 
 #ifdef ENABLE_WEBRIDGE
+
 #include "jni.h"
 #include "runtime/interfaceSupport.hpp"
 
 void webridgeMngr::analyse(ThreadContext *ctx) {
+  if (!ctx) {
+    tty->print_cr("[WeBridge] No associated thread context found, concolic execution might not enabled!");
+    return;
+  }
+
   JdbcMngr jdbc_mgr = ctx->get_jdbc_mngr();
   const std::vector<std::pair<SymStmt *, jlong> > &sym_stmt_list =
       jdbc_mgr.get_sym_stmt_list();
@@ -36,35 +42,32 @@ void webridgeMngr::analyse(ThreadContext *ctx) {
     return;
   }
 
-  jvm->GetEnv((void **)&env, JNI_VERSION_1_8);
+  jvm->GetEnv((void **) &env, JNI_VERSION_1_8);
   if (env == NULL) {
     tty->print_cr("JNI env not initialized. Exiting WeBridge");
     return;
   }
 
   // 0. Calling version
-  tty->print_cr("JVM load successded: version ");
   jint ver = env->GetVersion();
+  tty->print_cr("JVM load successded: version %d.%d", (ver >> 16) & 0x0f, ver & 0x0f);
 //  ResourceMark rm(Thread::current());
 //  ThreadToNativeFromVM ttn(JavaThread::thread_from_jni_environment(env));
 
-  std::cout << ((ver>>16)&0x0f) << "." << (ver&0x0f) << std::endl;
-
   // 1. Calling MyTest
-  jclass cls2 = env->FindClass("MyTest");
-  if (cls2 == NULL) {
-    std::cerr << "Class not found" << std::endl;
-  } else {
-    std::cout << "Class MyTest found" << std::endl;
-    jmethodID mid = env->GetStaticMethodID(cls2, "mymain", "()V");
-    if (mid != NULL) {
-      env->CallStaticVoidMethod(cls2, mid);
-      std::cout << std::endl;
-    } else {
-      std::cerr << "No method found" << std::endl;
-    }
-  }
-  jvm->DestroyJavaVM();
+//  jclass cls2 = env->FindClass("MyTest");
+//  if (cls2 == NULL) {
+//    std::cerr << "Class not found" << std::endl;
+//  } else {
+//    std::cout << "Class MyTest found" << std::endl;
+//    jmethodID mid = env->GetStaticMethodID(cls2, "mymain", "()V");
+//    if (mid != NULL) {
+//      env->CallStaticVoidMethod(cls2, mid);
+//      std::cout << std::endl;
+//    } else {
+//      std::cerr << "No method found" << std::endl;
+//    }
+//  }
 }
 
 #endif
