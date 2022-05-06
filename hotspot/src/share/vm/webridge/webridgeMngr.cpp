@@ -22,6 +22,17 @@ void webridgeMngr::analyse(ThreadContext *ctx) {
   tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
   JavaVM *jvm;
   JNIEnv *env;
+  JavaValue result(T_LONG);
+  KlassHandle klass(Thread::current(), SystemDictionary::System_klass());
+
+  // TODO: replace the stub with WeBridge processing methods
+  JavaCalls::call_static(
+      &result, klass,
+      vmSymbols::currentTimeMillis_name(),
+      vmSymbols::void_long_signature(),
+      Thread::current()
+  );
+  jlong val = result.get_jlong();
 
 //  JavaVMInitArgs vm_args;
 //  JavaVMOption *options = new JavaVMOption[1];
