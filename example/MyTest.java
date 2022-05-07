@@ -4,7 +4,7 @@ public class MyTest {
     }
 
     public static void mymain() {
-        System.out.println("Hello, caller!");
+        System.out.println("Hello, caller!" + MyTest.class.getCanonicalName());
         System.weBridgeAnalysis();
     }
 }

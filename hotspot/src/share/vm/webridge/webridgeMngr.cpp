@@ -9,8 +9,9 @@
 
 #include "jni.h"
 #include "runtime/interfaceSupport.hpp"
+#include "jvm_misc.hpp"
 
-void webridgeMngr::analyse(ThreadContext *ctx) {
+void webridgeMngr::analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {
   if (!ctx) {
     tty->print_cr("[WeBridge] No associated thread context found, concolic execution might not enabled!");
     return;
@@ -22,17 +23,22 @@ void webridgeMngr::analyse(ThreadContext *ctx) {
   tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
   JavaVM *jvm;
   JNIEnv *env;
-  JavaValue result(T_LONG);
-  KlassHandle klass(Thread::current(), SystemDictionary::System_klass());
-
+//  JavaValue result(T_LONG);
+  Thread *currentThread = Thread::current();
+  KlassHandle klass(currentThread, myTestClz);
+  if (klass.is_null()) {
+    tty->print_cr("Oh no");
+  } else {
+    tty->print_cr("Oh yes");
+  }
   // TODO: replace the stub with WeBridge processing methods
-  JavaCalls::call_static(
-      &result, klass,
-      vmSymbols::currentTimeMillis_name(),
-      vmSymbols::void_long_signature(),
-      Thread::current()
-  );
-  jlong val = result.get_jlong();
+//  JavaCalls::call_static(
+//      &result, klass,
+//      vmSymbols::currentTimeMillis_name(),
+//      vmSymbols::void_long_signature(),
+//      currentThread
+//  );
+//  jlong val = result.get_jlong();
 
 //  JavaVMInitArgs vm_args;
 //  JavaVMOption *options = new JavaVMOption[1];
@@ -62,7 +68,7 @@ void webridgeMngr::analyse(ThreadContext *ctx) {
   // 0. Calling version
   jint ver = env->GetVersion();
   tty->print_cr("JVM load successded: version %d.%d", (ver >> 16) & 0x0f, ver & 0x0f);
-//  ResourceMark rm(Thread::current());
+//  ResourceMark rm(currentThread);
 //  ThreadToNativeFromVM ttn(JavaThread::thread_from_jni_environment(env));
 
   // 1. Calling MyTest

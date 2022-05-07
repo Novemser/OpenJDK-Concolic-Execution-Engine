@@ -126,7 +126,7 @@ JNIEXPORT void JNICALL
 JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj);
 
 JNIEXPORT void JNICALL
-JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored);
+JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader);
 
 JNIEXPORT void JNICALL
 JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src_pos,

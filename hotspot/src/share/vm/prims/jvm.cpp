@@ -388,7 +388,7 @@ JVM_ENTRY(void, JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj))
 #endif
 JVM_END
 
-JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored, 
+JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored,
                                     jobject holder_name, jobject callee_name))
   JVMWrapper("JVM_SymbolizeMethod");
 #ifdef ENABLE_CONCOLIC
@@ -404,7 +404,7 @@ JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored,
 
     Handle holder_name_handle(THREAD, holder_name_o);
     Handle callee_name_handle(THREAD, callee_name_o);
-    assert(holder_name_handle()->is_oop() && callee_name_handle->is_oop(), 
+    assert(holder_name_handle()->is_oop() && callee_name_handle->is_oop(),
            "JVM_Symbolize: class_name_o or method_name_o is not an oop");
     ConcolicMngr::symbolizeMethod(holder_name_handle, callee_name_handle);
   }
@@ -456,10 +456,15 @@ JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj
 #endif
 JVM_END
 
-JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored))
+JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader))
   JVMWrapper("JVM_WeBridgeAnalysis");
 #ifdef ENABLE_WEBRIDGE
-  webridgeMngr::analyse(ConcolicMngr::ctx);
+  Handle h_loader(THREAD, JNIHandles::resolve(classLoader));
+  jclass result = find_class_from_class_loader(env, vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
+                                               true, h_loader,
+                                               Handle(), true, THREAD);
+  oop clz = JNIHandles::resolve(result);
+  webridgeMngr::analyse(ConcolicMngr::ctx, clz->klass());
 #else
   return;
 #endif
