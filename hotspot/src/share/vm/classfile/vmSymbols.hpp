@@ -1159,7 +1159,7 @@
                                                                                                                         \
   /* WeBridge related symbols */                                                                                        \
   do_intrinsic(_add_SQLTemplate_intrinsic, _wbridge_storedprocedure_StoredProcedureManager, _add_SQLTemplate, _add_SQLTemplate_signature, F_S)  \
-   do_name(_add_SQLTemplate_signature, "()V;") \
+   do_signature(_add_SQLTemplate_signature, "(Ledu/sjtu/ipads/wbridge/sql/SymbolicSQLTemplate;)V") \
     /*end*/
 
 

@@ -23,21 +23,19 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {
   tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
   JavaVM *jvm;
   JNIEnv *env;
-//  JavaValue result(T_LONG);
+  JavaValue result(T_VOID);
   Thread *currentThread = Thread::current();
-  KlassHandle klass(currentThread, myTestClz);
-  if (klass.is_null()) {
-    tty->print_cr("Oh no");
-  } else {
-    tty->print_cr("Oh yes");
-  }
+  ResourceMark rm;
+  KlassHandle klass(currentThread, weBridgeSPEntryKlass);
+  assert(!klass.is_null(), "Invalid WeBridgeSPEntryKlass!");
   // TODO: replace the stub with WeBridge processing methods
-//  JavaCalls::call_static(
-//      &result, klass,
-//      vmSymbols::currentTimeMillis_name(),
-//      vmSymbols::void_long_signature(),
-//      currentThread
-//  );
+  Handle arg;
+  JavaCalls::call_static(
+      &result, klass,
+      vmSymbols::_add_SQLTemplate(),
+      vmSymbols::_add_SQLTemplate_signature(),
+      arg, currentThread
+  );
 //  jlong val = result.get_jlong();
 
 //  JavaVMInitArgs vm_args;

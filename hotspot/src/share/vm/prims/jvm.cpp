@@ -460,11 +460,27 @@ JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classL
   JVMWrapper("JVM_WeBridgeAnalysis");
 #ifdef ENABLE_WEBRIDGE
   Handle h_loader(THREAD, JNIHandles::resolve(classLoader));
-  jclass result = find_class_from_class_loader(env, vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
-                                               true, h_loader,
-                                               Handle(), true, THREAD);
-  oop clz = JNIHandles::resolve(result);
-  webridgeMngr::analyse(ConcolicMngr::ctx, clz->klass());
+  Klass* klass = SystemDictionary::resolve_or_fail(vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
+                                                   h_loader,
+                                                   Handle(),
+                                                   true,
+                                                   THREAD);
+
+  KlassHandle klass_handle(THREAD, klass);
+  // Check if we should initialize the class
+  if (klass_handle->oop_is_instance()) {
+    klass_handle->initialize(THREAD);
+  }
+
+//  jclass result = find_class_from_class_loader(env, vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
+//                                               true, h_loader,
+//                                               Handle(), true, THREAD);
+//  oop clz = JNIHandles::resolve(result);
+//  if (clz == NULL) {
+//    tty->print_cr("WeBridge initialized failed! Could not find main StoredProcedure manager");
+//    return;
+//  }
+  webridgeMngr::analyse(ConcolicMngr::ctx, klass);
 #else
   return;
 #endif
