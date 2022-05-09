@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "webridgeMngr.hpp"
+#include "utils/jsonUtils.hpp"
 
 #ifdef ENABLE_WEBRIDGE
 
@@ -11,7 +12,7 @@
 #include "runtime/interfaceSupport.hpp"
 #include "jvm_misc.hpp"
 
-void webridgeMngr::analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {
+void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
   if (!ctx) {
     tty->print_cr("[WeBridge] No associated thread context found, concolic execution might not enabled!");
     return;
@@ -21,6 +22,10 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {
   const std::vector<std::pair<SymStmt *, jlong> > &sym_stmt_list =
       jdbc_mgr.get_sym_stmt_list();
   tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
+  if (sym_stmt_list.empty()) {
+    return;
+  }
+
   JavaVM *jvm;
   JNIEnv *env;
   JavaValue result(T_VOID);
@@ -29,6 +34,7 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {
   KlassHandle klass(currentThread, weBridgeSPEntryKlass);
   assert(!klass.is_null(), "Invalid WeBridgeSPEntryKlass!");
   // TODO: replace the stub with WeBridge processing methods
+  std::string argCppStr = jsonUtils::statementsToJsonString(sym_stmt_list);
   Handle arg;
   JavaCalls::call_static(
       &result, klass,

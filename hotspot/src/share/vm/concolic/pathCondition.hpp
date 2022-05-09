@@ -18,6 +18,10 @@ class PathCondition {
     }
 
     ~Condition() { Expression::gc(_exp); }
+
+    Expression *getExp() const {
+      return _exp;
+    }
   };
 
 private:
@@ -30,6 +34,10 @@ public:
     for (size_t index = 0; index < original._conds.size(); ++index) {
       this->_conds.push_back(original._conds[index]);
     }
+  }
+
+  const std::vector<Condition *> &getConds() const {
+    return _conds;
   }
 
   void add(Expression *exp);

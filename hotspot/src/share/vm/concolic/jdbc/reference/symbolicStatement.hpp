@@ -54,6 +54,8 @@ public:
   ~SymStmt();
 
 public:
+  const exp_map_t &get_param_exps() const;
+
   inline std::string &get_sql_template() {
     return _sql_template;
   }

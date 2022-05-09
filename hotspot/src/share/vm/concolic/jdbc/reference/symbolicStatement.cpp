@@ -212,6 +212,10 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   return value_exp;
 }
 
+const exp_map_t &SymStmt::get_param_exps() const {
+  return _param_exps;
+}
+
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
 
 void StatementSymbolExp::print() {
