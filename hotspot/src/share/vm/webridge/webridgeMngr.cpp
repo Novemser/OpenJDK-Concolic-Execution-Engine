@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+#include <fstream>
+
 #include "webridgeMngr.hpp"
 #include "utils/jsonUtils.hpp"
 
@@ -12,7 +14,7 @@
 #include "runtime/interfaceSupport.hpp"
 #include "jvm_misc.hpp"
 
-void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
+void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env) {
   if (!ctx) {
     tty->print_cr("[WeBridge] No associated thread context found, concolic execution might not enabled!");
     return;
@@ -27,7 +29,6 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
   }
 
   JavaVM *jvm;
-  JNIEnv *env;
   JavaValue result(T_VOID);
   Thread *currentThread = Thread::current();
   ResourceMark rm;
@@ -35,6 +36,9 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
   assert(!klass.is_null(), "Invalid WeBridgeSPEntryKlass!");
   // TODO: replace the stub with WeBridge processing methods
   std::string argCppStr = jsonUtils::statementsToJsonString(sym_stmt_list);
+
+  saveTemp(argCppStr);
+
   Handle arg;
   JavaCalls::call_static(
       &result, klass,
@@ -63,7 +67,7 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
     return;
   }
 
-  jvm->GetEnv((void **) &env, JNI_VERSION_1_8);
+//  jvm->GetEnv((void **) &env, JNI_VERSION_1_8);
   if (env == NULL) {
     tty->print_cr("JNI env not initialized. Exiting WeBridge");
     return;
@@ -89,6 +93,19 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass) {
 //      std::cerr << "No method found" << std::endl;
 //    }
 //  }
+}
+
+static std::string tmp_file_location = "/tmp/webridgeMngr.tmp.sp.string";
+
+void webridgeMngr::saveTemp(const std::string &str) {
+  std::fstream out_file;
+  out_file.open(tmp_file_location.c_str(), std::ios::out);
+  if (!out_file) {
+    tty->print_cr("[WeBridge] Failed to store temporary string!");
+    assert(false, (std::string("Check") + tmp_file_location).c_str());
+  }
+  out_file << str;
+  out_file.close();
 }
 
 #endif

@@ -14,14 +14,15 @@ class ThreadContext;
  */
 class webridgeMngr {
 #ifdef ENABLE_WEBRIDGE
-//private:
+private:
+  static void saveTemp(const std::string &str);
 
 public:
-  static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass);
+  static void analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env);
 
 #else
   public:
-      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass) {}
+      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass, JNIEnv *env) {}
 #endif
 };
 

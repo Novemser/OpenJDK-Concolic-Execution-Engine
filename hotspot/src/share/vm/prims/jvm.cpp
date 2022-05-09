@@ -480,7 +480,7 @@ JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classL
 //    tty->print_cr("WeBridge initialized failed! Could not find main StoredProcedure manager");
 //    return;
 //  }
-  webridgeMngr::analyse(ConcolicMngr::ctx, klass);
+  webridgeMngr::analyse(ConcolicMngr::ctx, klass, env);
 #else
   return;
 #endif
