@@ -43,6 +43,17 @@ public:
   void add(Expression *exp);
   void gc();
   void print();
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+    writer.StartArray();
+    for (size_t index = 0; index < _conds.size(); index++) {
+      Condition* cond = _conds[index];
+      Expression* expr = cond->_exp;
+      if (expr) {
+        expr->serialize(writer);
+      }
+    }
+    writer.EndArray();
+  }
 };
 
 #endif

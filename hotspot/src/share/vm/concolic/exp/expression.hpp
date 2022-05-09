@@ -49,11 +49,12 @@ protected:
     total_count++;
   }
 
-public:
+protected:
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
     ShouldNotCallThis();
   }
 
+public:
   void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
     writer.StartObject();
     serialize_internal(writer);

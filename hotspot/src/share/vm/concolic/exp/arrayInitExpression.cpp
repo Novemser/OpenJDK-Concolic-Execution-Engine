@@ -127,7 +127,7 @@ void ArrayInitExpression::serialize_internal(rapidjson::Writer<rapidjson::String
   for (size_t index = 0; index < _arr_exps.size(); ++index) {
     Expression* expr = _arr_exps[index];
     if (expr) {
-      expr->serialize_internal(writer);
+      expr->serialize(writer);
     } else {
       writer.Null();
     }

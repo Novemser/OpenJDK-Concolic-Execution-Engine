@@ -53,7 +53,7 @@ void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
 
   writer.Key("_left");
   if (_left) {
-    _left->serialize_internal(writer);
+    _left->serialize(writer);
   } else {
     writer.Null();
   }
@@ -63,7 +63,7 @@ void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
 
   writer.Key("_right");
   if (_right) {
-    _right->serialize_internal(writer);
+    _right->serialize(writer);
   } else {
     writer.Null();
   }

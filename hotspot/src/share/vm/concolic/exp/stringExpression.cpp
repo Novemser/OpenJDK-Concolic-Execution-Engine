@@ -58,7 +58,7 @@ void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   for (size_t index = 0; index < _param_list.size(); ++index) {
     Expression *expr = _param_list[index];
     if (expr) {
-      expr->serialize_internal(writer);
+      expr->serialize(writer);
     } else {
       writer.Null();
     }

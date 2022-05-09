@@ -49,13 +49,13 @@ void ArrayExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   writer.Bool(_is_load);
   writer.Key("_index_exp");
   if (_index_exp) {
-    _index_exp->serialize_internal(writer);
+    _index_exp->serialize(writer);
   } else {
     writer.Null();
   }
   writer.Key("_value_exp");
   if (_value_exp) {
-    _value_exp->serialize_internal(writer);
+    _value_exp->serialize(writer);
   } else {
     writer.Null();
   }

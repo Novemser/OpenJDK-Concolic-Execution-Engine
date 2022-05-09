@@ -31,7 +31,10 @@ public:
       writer.Int64(elem.second);
       writer.Key("sqlTemplate");
       writer.String(stmt->get_sql_template().c_str());
-      // parameters
+
+      // SQL parameters
+      writer.Key("parameterExprs");
+      writer.StartArray();
       exp_map_t param_exprs = stmt->get_param_exps();
       exp_map_t::iterator iter;
       std::vector<int> expr_position_index;
@@ -49,8 +52,15 @@ public:
       for (size_t param_index = 0; param_index < expr_position_index.size(); ++param_index) {
         int pos = expr_position_index[param_index];
         Expression * expr = param_exprs[pos];
+        if (expr) {
+          expr->serialize(writer);
+        } else {
+          writer.Null();
+        }
       }
-      // path condition
+      writer.EndArray();
+      // path conditions
+      PathCondition pc = stmt->getPc();
 
       writer.EndObject();
     }
