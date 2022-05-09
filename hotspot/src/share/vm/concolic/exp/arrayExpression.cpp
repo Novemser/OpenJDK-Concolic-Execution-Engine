@@ -40,4 +40,25 @@ void ArrayExpression::print() {
   // _value_exp->print();
 }
 
+void ArrayExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("_array_expr");
+  writer.Key("_arr_str");
+  writer.String(_arr_str);
+  writer.Key("_is_load");
+  writer.Bool(_is_load);
+  writer.Key("_index_exp");
+  if (_index_exp) {
+    _index_exp->serialize_internal(writer);
+  } else {
+    writer.Null();
+  }
+  writer.Key("_value_exp");
+  if (_value_exp) {
+    _value_exp->serialize_internal(writer);
+  } else {
+    writer.Null();
+  }
+}
+
 #endif

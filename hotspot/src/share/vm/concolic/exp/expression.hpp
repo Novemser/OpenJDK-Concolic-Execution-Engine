@@ -8,6 +8,7 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
+#include "webridge/utils/rapidjson/writer.h"
 
 #include <map>
 #include <cstdio>
@@ -47,6 +48,17 @@ protected:
   Expression() : _ref_count(0) {
     total_count++;
   }
+
+public:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+    ShouldNotCallThis();
+  }
+
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+    writer.StartObject();
+    serialize_internal(writer);
+    writer.EndObject();
+  }
 };
 
 class OpSymExpression : public Expression {
@@ -64,6 +76,9 @@ public:
 
 public:
   void print();
+
+protected:
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class ConExpression : public Expression {
@@ -84,6 +99,8 @@ public:
 
 public:
   void print();
+
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class ArrayExpression : public Expression {
@@ -102,6 +119,8 @@ public:
 
 public:
   void print();
+
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 typedef std::vector<Expression *> exp_list_t;

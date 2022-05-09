@@ -51,6 +51,8 @@ protected:
 
 public:
   void print();
+
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class InstanceSymbolExp : public SymbolExpression {

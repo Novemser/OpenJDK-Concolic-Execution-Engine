@@ -31,6 +31,8 @@ public:
     static OpStrExpression* to_string(Expression* exp);
     bool is_op_str_expression() { return true; }
     std::string &get_name() { return _name; }
+
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class StringSymbolExp : public SymbolExpression {

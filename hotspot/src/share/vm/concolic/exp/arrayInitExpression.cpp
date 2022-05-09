@@ -117,4 +117,22 @@ oop ArrayInitExpression::get_obj(arrayOop array, BasicType T, int i) {
   return *(oop *)(((address)array->base(T)) + i * sizeof(oop));
 }
 
+void ArrayInitExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("array_init_expr");
+  writer.Key("_arr_str");
+  writer.String(_arr_str);
+  writer.Key("_arr_exps");
+  writer.StartArray();
+  for (size_t index = 0; index < _arr_exps.size(); ++index) {
+    Expression* expr = _arr_exps[index];
+    if (expr) {
+      expr->serialize_internal(writer);
+    } else {
+      writer.Null();
+    }
+  }
+  writer.EndArray();
+}
+
 #endif

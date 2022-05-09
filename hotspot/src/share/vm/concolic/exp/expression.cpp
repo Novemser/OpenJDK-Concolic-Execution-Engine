@@ -47,6 +47,28 @@ void OpSymExpression::print() {
   tty->print(")");
 }
 
+void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("BinaryExpression");
+
+  writer.Key("_left");
+  if (_left) {
+    _left->serialize_internal(writer);
+  } else {
+    writer.Null();
+  }
+
+  writer.Key("_op");
+  writer.String(SymbolicOpStr[(int) _op]);
+
+  writer.Key("_right");
+  if (_right) {
+    _right->serialize_internal(writer);
+  } else {
+    writer.Null();
+  }
+}
+
 ConExpression::ConExpression(jboolean z) {
   int ret = sprintf(_str, "Y_Z_%u", z);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
@@ -90,6 +112,13 @@ ConExpression::ConExpression(jdouble d) {
 void ConExpression::print() {
   // TODO: include primiteive type
   tty->indent().print("%s", _str);
+}
+
+void ConExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("ConstExpr");
+  writer.Key("_expr");
+  writer.String(_str);
 }
 
 #endif

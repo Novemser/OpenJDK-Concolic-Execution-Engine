@@ -43,6 +43,13 @@ void SymbolExpression::finalize(int length) {
 
 void SymbolExpression::print() { tty->indent().print("%s", _str.c_str()); }
 
+void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("SymbolExpression");
+  writer.Key("_exp");
+  writer.String(str_buf);
+}
+
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, obj);
