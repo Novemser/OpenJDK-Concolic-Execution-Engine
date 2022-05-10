@@ -47,7 +47,7 @@ void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuf
   writer.Key("_type");
   writer.String("SymbolExpression");
   writer.Key("_exp");
-  writer.String(str_buf);
+  writer.String(_str.c_str());
 }
 
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
