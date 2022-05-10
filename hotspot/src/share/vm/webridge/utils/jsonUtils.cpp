@@ -32,10 +32,14 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     }
     std::sort(expr_position_index.begin(), expr_position_index.end());
     if (!expr_position_index.empty()) {
-      if (expr_position_index[0] != 0) {
+      if (expr_position_index[0] != 1) {
         tty->print_cr("Parameter index starts from %d rather than 0. SQL:%s", expr_position_index[0],
                       stmt->get_sql_template().c_str());
         assert(false, "Parameter index must starts from 0!");
+      }
+      if (expr_position_index[expr_position_index.size() - 1] != (int) expr_position_index.size()) {
+        tty->print_cr("Parameter index should be consequent. SQL:%s", stmt->get_sql_template().c_str());
+        assert(false, "Non-consequent parameter index");
       }
     }
     for (size_t param_index = 0; param_index < expr_position_index.size(); ++param_index) {
