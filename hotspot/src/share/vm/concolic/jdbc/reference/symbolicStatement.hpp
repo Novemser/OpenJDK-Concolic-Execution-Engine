@@ -112,6 +112,11 @@ private:
 public:
   SymSetAutoCommit(bool autoCommit) : SymStmt(Sym_NULL) {
     this->autoCommit = autoCommit;
+    if (autoCommit) {
+      set_sql_template("set autocommit=true");
+    } else {
+      set_sql_template("set autocommit=false");
+    }
   }
 
   bool getAutoCommit() {
@@ -123,9 +128,12 @@ public:
 
 class SymCommit : public SymStmt {
 public:
-  SymCommit() : SymStmt(Sym_NULL) {}
+  SymCommit() : SymStmt(Sym_NULL) {
+    set_sql_template("commit");
+  }
 
   void print();
 };
+
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
 #endif // SHARE_VM_CONCOLIC_JDBC_REFERENCE_SYMBOLIC_STATEMENT_HPP
