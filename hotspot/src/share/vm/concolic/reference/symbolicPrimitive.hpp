@@ -40,6 +40,7 @@ public:
   static Expression *get_exp_of_helper(oop obj);
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
+  static void set_symbolic_field(oop obj, Symbol* fld_name, Symbol* fld_tp_sig, MethodSymbolizerHandle &handle);
 };
 
 bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type);

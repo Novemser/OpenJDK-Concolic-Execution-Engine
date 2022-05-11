@@ -1,15 +1,28 @@
 #ifdef ENABLE_CONCOLIC
 
 #include "concolic/exp/expression.hpp"
+#include "concolic/concolicMngr.hpp"
 #include "utilities/ostream.hpp"
 
 ulong Expression::total_count = 0;
 
-void Expression::print() { tty->indent().print("ref_count: %u", _ref_count); }
+Expression::Expression() : _ref_count(0) {
+  total_count++;
+}
+
+void Expression::print() { tty->indent().print("ref_count: %u at code %s", _ref_count, _java_code_position.c_str()); }
 
 void Expression::print_cr() {
   print();
   tty->cr();
+}
+
+void Expression::set_java_code_position(const std::string &javaCodePosition) {
+  _java_code_position = javaCodePosition;
+}
+
+const std::string &Expression::getJavaCodePosition() const {
+  return _java_code_position;
 }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,

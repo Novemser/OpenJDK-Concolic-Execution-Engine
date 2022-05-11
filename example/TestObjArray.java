@@ -20,12 +20,13 @@ public class TestObjArray {
     };
     MyInteger i = new MyInteger(63);
     System.startConcolic();
-    System.symbolize(a);
+//     System.symbolize(a);
     System.symbolize(i);
 
     a[5].value = i.value;
     long b = a[3].value + a[5].value;
     int c = a.length + 9;
+    if (a[5].value > 0) {}
 
     System.endConcolic();
     System.out.println(b);

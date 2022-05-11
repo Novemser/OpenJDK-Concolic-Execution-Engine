@@ -16,6 +16,7 @@
 class Expression {
 private:
   uint _ref_count;
+  std::string _java_code_position;
 
 public:
   static ulong total_count;
@@ -44,10 +45,12 @@ public:
   inline bool dec_ref() { return --_ref_count == 0; }
   inline bool able_to_gc() { return _ref_count == 0; }
 
+  void set_java_code_position(const std::string &javaCodePosition);
+
+  const std::string &getJavaCodePosition() const;
+
 protected:
-  Expression() : _ref_count(0) {
-    total_count++;
-  }
+  Expression();
 
 protected:
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
@@ -57,6 +60,10 @@ protected:
 public:
   void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
     writer.StartObject();
+    if (!_java_code_position.empty()) {
+      writer.Key("_code_position");
+      writer.String(_java_code_position.c_str());
+    }
     serialize_internal(writer);
     writer.EndObject();
   }

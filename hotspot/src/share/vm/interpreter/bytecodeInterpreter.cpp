@@ -1964,7 +1964,26 @@ run:
       CASE(_lcmp):
       {
         int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
-        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
+//        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
+//        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp)
+        if (ConcolicMngr::can_do_concolic()) {
+          int stack_offset = GET_STACK_OFFSET;
+          Expression *left =
+              ConcolicMngr::ctx->get_stack_slot(stack_offset + -3);
+          Expression *right =
+              ConcolicMngr::ctx->get_stack_slot(stack_offset + -1);
+          if (left || right) {
+            if (!left) {
+              left = new ConExpression(STACK_LONG(-3));
+            }
+            if (!right) {
+              right = new ConExpression(STACK_LONG(-1));
+            }
+            Expression *new_exp = new OpSymExpression(left, right, op_cmp);
+            ConcolicMngr::ctx->set_stack_slot(stack_offset + -4, new_exp);
+          }
+        }
+
         MORE_STACK(-4);
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
@@ -2099,6 +2118,7 @@ run:
               SymbolExpression *value_exp = new ElementSymbolExp(
                   sym_arr_oid, sym_arr->get_version(),
                   sym_arr->get_and_inc_load_count(), T_OBJECT);
+              value_exp->set_java_code_position(ConcolicMngr::ctx->get_current_code_pos());
 
               oop obj = ((objArrayOop) arrObj)->obj_at(index);
               SymInstance* sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
