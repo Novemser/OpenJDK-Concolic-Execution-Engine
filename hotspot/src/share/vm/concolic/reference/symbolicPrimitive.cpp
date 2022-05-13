@@ -117,13 +117,22 @@ template class SymPrimitive<jfloat>;
 template class SymPrimitive<jdouble>;
 
 template <> bool SymPrimitive<jchar>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(C)Ljava/lang/Character;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jboolean>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(Z)Ljava/lang/Boolean;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jbyte>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(B)Ljava/lang/Byte;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (handle.get_callee_name() == "valueOf") {
@@ -132,7 +141,10 @@ template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle
   return false;
 }
 template <> bool SymPrimitive<jshort>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(S)Ljava/lang/Short;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jlong>::invoke_method_helper(MethodSymbolizerHandle &handle) {
     if (handle.get_callee_name() == "parseLong") {
@@ -154,6 +166,103 @@ template <> bool SymPrimitive<jdouble>::invoke_method_helper(MethodSymbolizerHan
 }
 
 template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(C)Ljava/lang/Character;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::short_signature(),
+        handle
+    );
+  }
+  return NULL;
+}
+
+template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(Z)Ljava/lang/Boolean;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::bool_signature(),
+        handle
+    );
+  }
+    return NULL;
+}
+template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(B)Ljava/lang/Byte;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::byte_signature(),
+        handle
+    );
+  }
+    return NULL;
+}
+
+template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(I)Ljava/lang/Integer;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::int_signature(),
+        handle
+    );
+  }
+
+  return NULL;
+}
+
+template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(S)Ljava/lang/Short;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::short_signature(),
+        handle
+    );
+  }
+    return NULL;
+}
+
+template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    if (handle.get_callee_name() == "parseLong") {
+      Expression *exp = new MethodReturnSymbolExp(T_LONG);
+      ConcolicMngr::record_path_condition(new MethodExpression(
+          handle.get_callee_holder_name(), handle.get_callee_name(),
+          handle.get_param_list(), exp, false));
+      return exp;
+    }
+
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(J)Ljava/lang/Long;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::long_signature(),
+        handle
+    );
+    return NULL;
+  }
+
+  return NULL;
+}
+
+template <> Expression * SymPrimitive<jfloat>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    return NULL;
+}
+template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbolizerHandle &handle) {
     return NULL;
 }
 
@@ -186,81 +295,6 @@ bool SymPrimitive<T>::match_callee_and_do_sym(MethodSymbolizerHandle &handle, co
   }
 
   return false;
-}
-
-template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
-}
-template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
-}
-
-template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
-  if (handle.get_callee_name() == "valueOf" &&
-      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(I)Ljava/lang/Integer;")) {
-    // get result object from stack
-    set_symbolic_field(
-        handle.get_result<oop>(handle.get_result_type()),
-        vmSymbols::value_name(),
-        vmSymbols::int_signature(),
-        handle
-    );
-  }
-
-  return NULL;
-}
-
-template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
-}
-template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    if (handle.get_callee_name() == "parseLong") {
-      Expression *exp = new MethodReturnSymbolExp(T_LONG);
-      ConcolicMngr::record_path_condition(new MethodExpression(
-          handle.get_callee_holder_name(), handle.get_callee_name(),
-          handle.get_param_list(), exp, false));
-      return exp;
-    }
-
-  if (handle.get_callee_name() == "valueOf" &&
-      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(J)Ljava/lang/Long;")) {
-    // get result object from stack
-    set_symbolic_field(
-        handle.get_result<oop>(handle.get_result_type()),
-        vmSymbols::value_name(),
-        vmSymbols::long_signature(),
-        handle
-    );
-    return NULL;
-  }
-
-  return NULL;
-}
-
-//void set_valueOf_result(MethodSymbolizerHandle &handle) {
-//  assert(!handle.get_param_list().empty(), "Should contain at least 1 parameter");
-//  ResourceMark rm;
-//  Expression *exp = handle.get_param_list()[0];
-//  // get result object from stack
-//  BasicType type = handle.get_result_type();
-//  oop obj = handle.get_result<oop>(type);
-//  assert(obj, "Should get result long object");
-//  SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
-//  fieldDescriptor fd;
-//  obj->klass()->find_field(
-//      vmSymbols::value_name(),
-//      vmSymbols::long_signature(),
-//      &fd
-//  );
-//  assert(std::string(fd.name()->as_C_string()) == "value", "Should find value field");
-//  sym_inst->set_sym_exp(fd.offset(), exp);
-//}
-
-template <> Expression * SymPrimitive<jfloat>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
-}
-template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
 }
 
 bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type){
