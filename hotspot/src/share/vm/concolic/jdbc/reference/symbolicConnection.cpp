@@ -28,6 +28,7 @@ method_set_t SymConn::init_skip_method_names() {
   m_set.insert("getAutoCommit");
   m_set.insert("getProxy");
   m_set.insert("getServerCharset");
+  m_set.insert("getCharsetConverter");
   return m_set;
 }
 

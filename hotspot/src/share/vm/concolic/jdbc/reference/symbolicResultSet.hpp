@@ -41,6 +41,7 @@ private:
   SymStmt* _sym_stmt;
 
   Expression* _ref_exp;
+  jint _last_got_index; // used to store the index of result attribute accessed by getXXX(String)
 
 public:
   SymResSet(sym_rid_t sym_rid);
