@@ -320,6 +320,7 @@ sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
 
 MethodReturnSymbolExp::MethodReturnSymbolExp(BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
+  _type = type2char(type);
   set_head(ss, 'M', type);
   ss.print("return%lu", sym_method_count++);
   this->finalize(ss.size());

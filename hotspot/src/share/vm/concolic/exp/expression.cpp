@@ -83,41 +83,49 @@ void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
 }
 
 ConExpression::ConExpression(jboolean z) {
+  _type = type2char(T_BOOLEAN);
   int ret = sprintf(_str, "Y_Z_%u", z);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jbyte b) {
+  _type = type2char(T_BYTE);
   int ret = sprintf(_str, "Y_B_%d", b);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jchar b) {
+  _type = type2char(T_CHAR);
   int ret = sprintf(_str, "Y_C_%c", b);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jint i) {
+  _type = type2char(T_INT);
   int ret = sprintf(_str, "Y_I_%d", i);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jshort s) {
+  _type = type2char(T_SHORT);
   int ret = sprintf(_str, "Y_S_%d", s);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jlong l) {
+  _type = type2char(T_LONG);
   int ret = sprintf(_str, "Y_J_%ld", l);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jfloat f) {
+  _type = type2char(T_FLOAT);
   int ret = sprintf(_str, "Y_F_%e", f);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
 
 ConExpression::ConExpression(jdouble d) {
+  _type = type2char(T_DOUBLE);
   int ret = sprintf(_str, "Y_D_%le", d);
   assert(ret <= EXP_NAME_LENGTH, "SYM_NAME_LENGTH exceeded!");
 }
@@ -130,6 +138,8 @@ void ConExpression::print() {
 void ConExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
   writer.Key("_type");
   writer.String("ConstExpr");
+  writer.Key("_java_type");
+  writer.String(_type.c_str());
   writer.Key("_expr");
   writer.String(_str);
 }

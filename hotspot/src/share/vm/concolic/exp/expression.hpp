@@ -92,6 +92,7 @@ class ConExpression : public Expression {
 
 private:
   char _str[EXP_NAME_LENGTH];
+  std::string _type;
 
 public:
   ConExpression(jboolean b);
