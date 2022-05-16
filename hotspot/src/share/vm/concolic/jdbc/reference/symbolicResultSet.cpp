@@ -223,9 +223,11 @@ SymStmt *SymResSet::get_sym_stmt() { return _sym_stmt; }
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
   if (is_size) {
+    _type = type2char(T_INT);
     set_head(ss, 'M', T_INT);
     ss.print("RS_%lu_size", sym_res_set->_sql_id);
   } else {
+    _type = type2char(T_OBJECT);
     set_head(ss, 'M', T_OBJECT, "'ResultSet'");
     ss.print("RS_%lu", sym_res_set->_sql_id);
   }
@@ -234,6 +236,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymStmt *sym_stmt) {
   stringStream ss(str_buf, BUF_SIZE);
+  _type = type2char(T_INT);
   set_head(ss, 'M', T_INT);
   ss.print("RS_%lu_rowCount", sym_stmt->get_sym_rid());
   this->finalize(ss.size());
@@ -252,6 +255,11 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, int col_i,
                                        BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
+  if (obj) {
+    _type = obj->klass()->name()->as_C_string();
+  } else {
+    _type = type2char(type);
+  }
   set_head(ss, 'M', type, obj);
   ss.print("RS_q%lu_r%d_col%d", sym_res_set->_sql_id, sym_res_set->_row_id,
            col_i);

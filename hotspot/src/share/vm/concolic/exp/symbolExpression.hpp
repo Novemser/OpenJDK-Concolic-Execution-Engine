@@ -39,6 +39,7 @@ public:
 
 protected:
   std::string _str;
+  std::string _type;
 
   void set(const char *buf, int length);
 
