@@ -24,6 +24,12 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     writer.Bool(stmt->is_txn_control());
     writer.Key("sqlId");
     writer.Int(stmt->get_sym_rid());
+    writer.Key("rowCountExp");
+    if (stmt->get_row_count_exp()) {
+      stmt->get_row_count_exp()->serialize(writer);
+    } else {
+      writer.Null();
+    }
 
     // SQL parameters
     writer.Key("parameterExprs");
