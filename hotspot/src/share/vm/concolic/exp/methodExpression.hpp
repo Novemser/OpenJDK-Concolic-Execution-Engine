@@ -25,6 +25,9 @@ public:
 
 public:
   void print();
+
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 #endif

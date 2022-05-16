@@ -19,6 +19,9 @@ private:
 public:
   StatementSymbolExp(SymStmt *sym_stmt);
 
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+
 public:
   void print();
 };
@@ -88,6 +91,8 @@ public:
 
   void set_pc(PathCondition pc) { _pc = pc; }
 
+  virtual bool is_txn_control() { return false; }
+
 public:
   bool need_recursive() { return false; }
   void print();
@@ -124,6 +129,8 @@ public:
   }
 
   void print();
+
+  virtual bool is_txn_control();
 };
 
 class SymCommit : public SymStmt {
@@ -133,6 +140,8 @@ public:
   }
 
   void print();
+
+  virtual bool is_txn_control();
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

@@ -164,7 +164,7 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
     // set current path conditon for statement
     sym_stmt->set_pc(ConcolicMngr::ctx->get_path_condition());
-    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
+//    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
     jlong conn_id = JdbcUtils::get_stmt_connection_id(this_obj);
     ConcolicMngr::ctx->get_jdbc_mngr().record_stmt(sym_stmt, conn_id);
 
@@ -222,12 +222,24 @@ void StatementSymbolExp::print() {
   tty->print("#SymStmt(%lu): %s", _sym_stmt->get_sym_rid(), _sym_stmt->_sql_template.c_str());
 }
 
+void StatementSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  ShouldNotCallThis();
+}
+
 void SymSetAutoCommit::print() {
   tty->print_cr("#setAutocommit=%d", getAutoCommit());
 }
 
+bool SymSetAutoCommit::is_txn_control() {
+  return true;
+}
+
 void SymCommit::print() {
   tty->print_cr("#commit");
+}
+
+bool SymCommit::is_txn_control() {
+  return true;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

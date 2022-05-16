@@ -20,6 +20,10 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     writer.Int64(elem.second);
     writer.Key("sqlTemplate");
     writer.String(stmt->get_sql_template().c_str());
+    writer.Key("isTxnControl");
+    writer.Bool(stmt->is_txn_control());
+    writer.Key("sqlId");
+    writer.Int(stmt->get_sym_rid());
 
     // SQL parameters
     writer.Key("parameterExprs");
@@ -54,6 +58,8 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     writer.EndArray();
     // path conditions
     PathCondition pc = stmt->getPc();
+    writer.Key("pathCondition");
+    pc.serialize(writer);
 
     writer.EndObject();
   }

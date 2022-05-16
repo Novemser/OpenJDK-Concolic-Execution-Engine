@@ -31,6 +31,9 @@ public:
 
   void print();
 
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+
 private:
   void set_key_exp(oop key_obj);
   void set_table_name_exp(objArrayOop j_string_vector);

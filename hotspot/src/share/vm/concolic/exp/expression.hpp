@@ -53,9 +53,7 @@ protected:
   Expression();
 
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
-    ShouldNotCallThis();
-  }
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const = 0;
 
 public:
   void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
