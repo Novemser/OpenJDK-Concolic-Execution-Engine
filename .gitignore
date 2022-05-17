@@ -1,5 +1,6 @@
 a.out
 build/
+builds/
 .hg/
 */.hg/
 .vscode/
