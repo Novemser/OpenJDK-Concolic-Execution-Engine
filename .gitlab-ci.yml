@@ -1,0 +1,5 @@
+build:
+  stage: build
+  script:
+    - ./scripts/configure.sh
+    - make hotspot jdk JOBS=24 CONF=linux-x86_64-normal-zero-release
