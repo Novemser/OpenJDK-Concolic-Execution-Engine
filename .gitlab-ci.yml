@@ -7,18 +7,20 @@ build-jdk:
   script:
     - ./scripts/configure.sh
     - make hotspot jdk JOBS=24 CONF=linux-x86_64-normal-zero-release
-    - pwd
 
-build-shopizer:
-  stage: build
-  script:
-    - git clone git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
-    - cd shopizer
-    - git checkout 73747973c0d938df18caa366a8bd8a20906a9e2a
+#build-shopizer:
+#  stage: build
+#  script:
+#    - git clone git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
+#    - cd shopizer
+#    - git checkout 73747973c0d938df18caa366a8bd8a20906a9e2a
 
 test-shopizer:
   stage: test
   script:
+    - git clone git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
+    - cd shopizer
+    - git checkout 73747973c0d938df18caa366a8bd8a20906a9e2a
     - export JAVA_HOME=$CI_PROJECT_DIR/build/linux-x86_64-normal-zero-release/jdk
     - cd $CI_PROJECT_DIR/shopizer/sm-shop
     - mvn test
