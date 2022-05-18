@@ -415,6 +415,8 @@ public final class System {
      */
     public static native long endConcolic();
 
+    public static native String getPathCondition();
+
     /**
      * Print the symbol expression of obj
     */

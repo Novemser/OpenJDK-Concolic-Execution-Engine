@@ -262,6 +262,7 @@ SUNWprivate_1.1 {
                 JVM_RecordStmtObj;
                 JVM_RecordPersistentObj;
                 JVM_WeBridgeAnalysis;
+        JVM_GetPcStr;
 
                 # debug JVM
                 JVM_AccessVMBooleanFlag;

@@ -54,6 +54,14 @@ public:
     }
     writer.EndArray();
   }
+
+  const char* toString() const {
+    using namespace rapidjson;
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    serialize(writer);
+    return s.GetString();
+  }
 };
 
 #endif

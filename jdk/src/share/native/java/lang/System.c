@@ -47,6 +47,7 @@ static JNINativeMethod methods[] = {
     {"recordStmtObj",       "(" OBJ OBJ ")V",          (void *)&JVM_RecordStmtObj},
     {"recordPersistentObj", "(" OBJ ")V",              (void *)&JVM_RecordPersistentObj},
     {"weBridgeAnalysis0",    "(Ljava/lang/ClassLoader;)V", (void *)&JVM_WeBridgeAnalysis},
+    {"getPathCondition",     "()Ljava/lang/String;",    (void *)&JVM_GetPcStr},
     {"printSymExp",         "(" OBJ ")V",              (void *)&JVM_PrintSymExp},
 };
 

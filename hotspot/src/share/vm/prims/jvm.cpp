@@ -501,6 +501,22 @@ JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src
   s->klass()->copy_array(s, src_pos, d, dst_pos, length, thread);
 JVM_END
 
+JVM_ENTRY(jstring, JVM_GetPcStr(JNIEnv *env, jclass ignored))
+  JVMWrapper("JVM_GetPcStr");
+#ifdef ENABLE_CONCOLIC
+  const char* pcStr;
+  ResourceMark rm(THREAD);
+  if (ConcolicMngr::can_do_concolic()) {
+    pcStr = ConcolicMngr::ctx->get_path_condition().toString();
+  } else {
+    pcStr = "ERROR: Concolic execution is disabled";
+  }
+  Handle str = java_lang_String::create_from_platform_dependent_str(pcStr, THREAD);
+  return (jstring) JNIHandles::make_local(env, str());
+#else
+  ShouldNotReachHere();
+#endif
+JVM_END
 
 static void set_property(Handle props, const char* key, const char* value, TRAPS) {
   JavaValue r(T_OBJECT);

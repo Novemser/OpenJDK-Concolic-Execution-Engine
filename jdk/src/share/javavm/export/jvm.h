@@ -138,6 +138,8 @@ JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj);
 JNIEXPORT jobject JNICALL
 JVM_InitProperties(JNIEnv *env, jobject p);
 
+JNIEXPORT jstring JNICALL
+JVM_GetPcStr(JNIEnv *env, jclass ignored);
 /*
  * java.io.File
  */

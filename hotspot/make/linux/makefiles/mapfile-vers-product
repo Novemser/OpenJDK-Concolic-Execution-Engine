@@ -262,6 +262,7 @@ SUNWprivate_1.1 {
                 JVM_RecordStmtObj;
                 JVM_RecordPersistentObj;
                 JVM_WeBridgeAnalysis;
+                JVM_GetPcStr;
 
                 # miscellaneous functions
                 jio_fprintf;
