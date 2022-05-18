@@ -71,7 +71,7 @@ ArrayInternal *ThreadContext::get_or_create_array_internal(arrayOop oop) {
     return NULL;
   }
 
-  if (_array_store.find(oop) != _array_store.end()) {
+  if (_array_store.find(oop) == _array_store.end()) {
     _array_store[oop] = new ArrayInternal(oop->length());
   }
 
