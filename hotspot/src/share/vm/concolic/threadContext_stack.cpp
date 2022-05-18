@@ -66,5 +66,17 @@ void ThreadContext::copy_entry_from_stack_to_local(int stack_offset,
   this->get_last_local().set_slot(local_offset, entry);
 }
 
+ArrayInternal *ThreadContext::get_or_create_array_internal(arrayOop oop) {
+  if (!oop) {
+    return NULL;
+  }
+
+  if (_array_store.find(oop) != _array_store.end()) {
+    _array_store[oop] = new ArrayInternal(oop->length());
+  }
+
+  return _array_store[oop];
+}
+
 
 #endif
