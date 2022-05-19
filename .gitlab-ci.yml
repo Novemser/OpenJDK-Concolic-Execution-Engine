@@ -5,6 +5,12 @@ stages:
 .export_build_jdk: &export_build_jdk
   - export JAVA_HOME=$CI_PROJECT_DIR/build/linux-x86_64-normal-zero-release/images/j2sdk-image
 
+cache:
+  paths:
+    - build/
+    - concolic-test/.gradle/caches
+    - concolic-test/.gradle/wrapper
+
 build-jdk:
  stage: build
  script:
@@ -12,7 +18,7 @@ build-jdk:
   - make hotspot jdk images JOBS=24 CONF=linux-x86_64-normal-zero-release
  artifacts:
    paths:
-     - build/
+     - build/linux-x86_64-normal-zero-release/images/j2sdk-image
 
 #build-shopizer:
 #  stage: build
