@@ -56,6 +56,8 @@ jdouble java_double_to_c(oop double_obj);
 
 oop bigd_to_java_string(oop bigd);
 
+oop value_of_map_node(oop node_obj);
+
 } // namespace OopUtils
 
 namespace SigName {

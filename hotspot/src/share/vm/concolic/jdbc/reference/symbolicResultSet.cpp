@@ -30,6 +30,7 @@ std::set<std::string> SymResSet::init_handle_method_names() {
   set.insert("getLong");
   set.insert("getFloat");
   set.insert("getDouble");
+  set.insert("getDate");
   set.insert("getString");
   set.insert("getTimestamp");
   set.insert("getBigDecimal");
@@ -42,11 +43,14 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   std::set<std::string> set;
   set.insert("close");
   set.insert("realClose");
+  set.insert("findColumn");
   set.insert("checkRowPos");
   set.insert("checkClosed");
+  set.insert("getInstance");
   set.insert("checkColumnBounds");
   // do not handle clob~
   set.insert("getClob");
+  set.insert("wasNull");  // TODO: check this
   return set;
 }
 
@@ -59,7 +63,7 @@ void SymResSet::init_register_class(MethodSymbolizer *m_symbolizer) {
 
 SymResSet::SymResSet(sym_rid_t sym_rid)
     : SymInstance(sym_rid), _sym_stmt(NULL), _ref_exp(NULL), _sql_id(0),
-      _row_id(0) {}
+      _row_id(0), _last_got_index(-1) {}
 
 SymResSet::~SymResSet() {
   Expression::gc(_ref_exp);
@@ -81,16 +85,67 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
 
+  oop res_set_obj = handle.get_param<oop>(0);
+  SymResSet *sym_res_set =
+      (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
+//  tty->print_cr("invoke_method_helper:%s", callee_name.c_str());
   if (callee_name == "next") {
-    oop res_set_obj = handle.get_param<oop>(0);
-    SymResSet *sym_res_set =
-        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
-
     need_symbolize = true;
   } else if (handle_method_names.find(callee_name) !=
                  handle_method_names.end() ||
              skip_method_names.find(callee_name) != skip_method_names.end()) {
+    if (strncmp("get", callee_name.c_str(), 3) == 0) {
+      if (callee_name == "getInstance") {
+        return need_symbolize = true;
+      }
+
+      oop this_obj = res_set_obj;
+      BasicType col_type;
+      {
+        ResourceMark rm;
+        SignatureStream ss(handle.get_callee_method()->signature());
+        col_type = ss.type();
+      }
+
+      if (col_type != T_OBJECT) {
+        return need_symbolize = true;
+      }
+      oop col_str_obj = handle.get_param<oop>(1);
+      JavaThread* thread = JavaThread::current();
+      guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
+                "should be string");
+
+      // use index to name the symbolic result set result
+      // prepare calling parameters
+      //  - calling param: 1. resultSet obj 2. the same string as calling the getXXX. They are already ready in stack.
+      JavaValue res(T_INT);
+      KlassHandle klass(thread, this_obj->klass());
+      const char* signature = "(Ljava/lang/String;)I";
+      const char* func_name = "findColumn";
+      JavaThreadState lastState = thread->thread_state();
+      // must transfer thread state to state_VM
+      thread->set_thread_state(_thread_in_vm);
+      tty->print_cr("Calling virtual %s.findColumn,result set class:%s", handle.get_callee_holder_name().c_str(),
+                    this_obj->klass()->name()->as_C_string());
+      // temporally disable concolic execution flag to avoid corruption of MethodSymbolizerHandle
+      ThreadContext* tc = ConcolicMngr::ctx;
+      ConcolicMngr::ctx = NULL;
+      JavaCalls::call_virtual(
+          &res,
+          Handle(this_obj),
+          klass,
+          SymbolTable::lookup(func_name, (int) strlen(func_name), thread),
+          SymbolTable::lookup(signature, (int) strlen(signature), thread),
+          Handle(col_str_obj),
+          thread
+      );
+      ConcolicMngr::ctx = tc;
+      // don't forget to restore the thread state
+      thread->set_thread_state(lastState);
+      assert(sym_res_set->_last_got_index == -1, "Should not be any pending index recording");
+      sym_res_set->_last_got_index = res.get_jint();
+    }
     need_symbolize = true;
   } else {
     handle.get_callee_method()->print_name(tty);
@@ -105,6 +160,10 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
   if (strncmp("get", callee_name.c_str(), 3) == 0) {
+    if (callee_name == "getInstance") {
+      return exp;
+    }
+
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
@@ -126,12 +185,19 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
       guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
                 "should be");
 
-      const char *col_name = OopUtils::java_string_to_c(col_str_obj);
-      exp = new ResultSetSymbolExp(sym_res_set, col_name, res_type, res_obj);
+//      const char *col_name = OopUtils::java_string_to_c(col_str_obj);
+      assert(sym_res_set->_last_got_index != -1, "Should set correctly");
+//      exp = new ResultSetSymbolExp(sym_res_set, res.get_jint(), res_type, res_obj);
+      // multiple String name could corresponds to one column in the result, this can cause ambiguous symbolic names.
+      // use index as unique identifier!
+      exp = new ResultSetSymbolExp(sym_res_set, sym_res_set->_last_got_index, res_type, res_obj);
+      sym_res_set->_last_got_index = -1;
     } else if (col_type == T_INT) {
       jint col_i = handle.get_param<int>(1);
       exp = new ResultSetSymbolExp(sym_res_set, col_i, res_type, res_obj);
     } else {
+      handle.get_callee_method()->print_name(tty);
+      tty->print_cr(" should handled by SymResSet");
       ShouldNotCallThis();
     }
   } else if (callee_name == "next") {
@@ -157,9 +223,11 @@ SymStmt *SymResSet::get_sym_stmt() { return _sym_stmt; }
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
   if (is_size) {
+    _type = type2char(T_INT);
     set_head(ss, 'M', T_INT);
     ss.print("RS_%lu_size", sym_res_set->_sql_id);
   } else {
+    _type = type2char(T_OBJECT);
     set_head(ss, 'M', T_OBJECT, "'ResultSet'");
     ss.print("RS_%lu", sym_res_set->_sql_id);
   }
@@ -168,6 +236,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymStmt *sym_stmt) {
   stringStream ss(str_buf, BUF_SIZE);
+  _type = type2char(T_INT);
   set_head(ss, 'M', T_INT);
   ss.print("RS_%lu_rowCount", sym_stmt->get_sym_rid());
   this->finalize(ss.size());
@@ -178,7 +247,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
                                        oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type, obj);
-  ss.print("RS_%lu_%d_%s", sym_res_set->_sql_id, sym_res_set->_row_id,
+  ss.print("RS_q%lu_r%d_%s", sym_res_set->_sql_id, sym_res_set->_row_id,
            col_name);
   this->finalize(ss.size());
 }
@@ -186,8 +255,13 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set,
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, int col_i,
                                        BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
+  if (obj != NULL) {
+    _type = obj->klass()->name()->as_C_string();
+  } else {
+    _type = type2char(type);
+  }
   set_head(ss, 'M', type, obj);
-  ss.print("RS_%lu_%d_col%d", sym_res_set->_sql_id, sym_res_set->_row_id,
+  ss.print("RS_q%lu_r%d_col%d", sym_res_set->_sql_id, sym_res_set->_row_id,
            col_i);
   this->finalize(ss.size());
 }

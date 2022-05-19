@@ -20,6 +20,9 @@ public:
   static void symbolize(Handle handle);
   static void symbolizeMethod(Handle holder_name_handle,
                               Handle callee_name_handle);
+  static void printSymExp(Handle handle);
+  static void recordStmtObj(Handle stmt, Handle obj);
+  static void recordPersistentObj(Handle obj);
 
   /* let compiler not optimize this  code!! */
   inline static bool __attribute__((optimize("O0"))) has_symbolized_method() {
@@ -31,6 +34,10 @@ public:
     return ctx && !ctx->is_symbolizing_method();
   }
 
+  inline static bool __attribute__((optimize("O0"))) should_try_handle_method() {
+    return ctx && ctx->get_method_symbolizer().has_handling_methods();
+  }
+
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
     if (can_do_concolic()) {
       tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
@@ -40,6 +47,7 @@ public:
   /** unoptimize for breakpoint */
   inline static void __attribute__((optimize("O0"))) record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
+
   }
 #else
   static jlong startConcolic();
@@ -47,6 +55,8 @@ public:
   static void symbolize(Handle handle);
   static void symbolizeMethod(Handle holder_name_handle,
                               Handle callee_name_handle);
+  static void recordStmtObj(Handle stmt, Handle obj) {};
+  static void recordPersistentObj(Handle obj) {};
 #endif // ENABLE_CONCOLIC
 };
 

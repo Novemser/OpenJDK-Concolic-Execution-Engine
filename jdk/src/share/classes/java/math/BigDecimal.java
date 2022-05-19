@@ -1218,38 +1218,41 @@ public class BigDecimal extends Number implements Comparable<BigDecimal> {
      * @return a {@code BigDecimal} whose value is {@code val}.
      */
     public static BigDecimal valueOf(long val) {
-        if (val >= 0 && val < zeroThroughTen.length)
-            return zeroThroughTen[(int)val];
-        else if (val != INFLATED)
+//        if (val >= 0 && val < zeroThroughTen.length)
+//            return zeroThroughTen[(int)val];
+//        else if (val != INFLATED)
+//            return new BigDecimal(null, val, 0, 0);
+//        return new BigDecimal(INFLATED_BIGINT, val, 0, 0);
+        if (val != INFLATED)
             return new BigDecimal(null, val, 0, 0);
         return new BigDecimal(INFLATED_BIGINT, val, 0, 0);
     }
 
     static BigDecimal valueOf(long unscaledVal, int scale, int prec) {
-        if (scale == 0 && unscaledVal >= 0 && unscaledVal < zeroThroughTen.length) {
-            return zeroThroughTen[(int) unscaledVal];
-        } else if (unscaledVal == 0) {
-            return zeroValueOf(scale);
-        }
+//        if (scale == 0 && unscaledVal >= 0 && unscaledVal < zeroThroughTen.length) {
+//            return zeroThroughTen[(int) unscaledVal];
+//        } else if (unscaledVal == 0) {
+//            return zeroValueOf(scale);
+//        }
         return new BigDecimal(unscaledVal == INFLATED ? INFLATED_BIGINT : null,
                 unscaledVal, scale, prec);
     }
 
     static BigDecimal valueOf(BigInteger intVal, int scale, int prec) {
         long val = compactValFor(intVal);
-        if (val == 0) {
-            return zeroValueOf(scale);
-        } else if (scale == 0 && val >= 0 && val < zeroThroughTen.length) {
-            return zeroThroughTen[(int) val];
-        }
+//        if (val == 0) {
+//            return zeroValueOf(scale);
+//        } else if (scale == 0 && val >= 0 && val < zeroThroughTen.length) {
+//            return zeroThroughTen[(int) val];
+//        }
         return new BigDecimal(intVal, val, scale, prec);
     }
 
     static BigDecimal zeroValueOf(int scale) {
-        if (scale >= 0 && scale < ZERO_SCALED_BY.length)
-            return ZERO_SCALED_BY[scale];
-        else
-            return new BigDecimal(BigInteger.ZERO, 0, scale, 1);
+//        if (scale >= 0 && scale < ZERO_SCALED_BY.length)
+//            return ZERO_SCALED_BY[scale];
+//        else
+        return new BigDecimal(BigInteger.ZERO, 0, scale, 1);
     }
 
     /**

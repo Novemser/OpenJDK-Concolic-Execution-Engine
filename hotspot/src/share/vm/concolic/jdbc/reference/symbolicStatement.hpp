@@ -4,6 +4,7 @@
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_JDBC)
 
 #include "concolic/defs.hpp"
+#include "concolic/pathCondition.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
 #include "oops/oop.inline.hpp"
@@ -17,6 +18,9 @@ private:
   SymStmt *_sym_stmt;
 public:
   StatementSymbolExp(SymStmt *sym_stmt);
+
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 
 public:
   void print();
@@ -45,12 +49,20 @@ private:
   exp_map_t _param_exps;
   Expression *_row_count_exp;
   int _row_count;
+  sym_rid_t obj_rid;
+  PathCondition _pc;
 
 public:
   SymStmt(sym_rid_t sym_rid);
   ~SymStmt();
 
 public:
+  const exp_map_t &get_param_exps() const;
+
+  inline std::string &get_sql_template() {
+    return _sql_template;
+  }
+
   inline void swap_sql_template(std::string &sql_template) {
     _sql_template.swap(sql_template);
   }
@@ -69,6 +81,18 @@ public:
 
   inline void inc_row_count() { ++ _row_count;}
 
+  sym_rid_t get_obj_rid() { return obj_rid; }
+  sym_rid_t set_obj_rid(sym_rid_t id) {
+    guarantee(obj_rid == NULL_SYM_RID, "should be");
+    obj_rid = id;
+  }
+
+  PathCondition getPc() const { return _pc; }
+
+  void set_pc(PathCondition pc) { _pc = pc; }
+
+  virtual bool is_txn_control() { return false; }
+
 public:
   bool need_recursive() { return false; }
   void print();
@@ -78,6 +102,46 @@ public:
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
 
   static void init_register_class(MethodSymbolizer* m_symbolizer);
+
+// counter: for symbolicPersister
+private:
+  static long execute_counter;
+public:
+  static long getExecuteCounter() { return execute_counter; }
+  static long resetExecuteCounter() { execute_counter = 0; }
+};
+
+class SymSetAutoCommit : public SymStmt {
+private:
+  bool autoCommit;
+public:
+  SymSetAutoCommit(bool autoCommit) : SymStmt(Sym_NULL) {
+    this->autoCommit = autoCommit;
+    if (autoCommit) {
+      set_sql_template("set autocommit=true");
+    } else {
+      set_sql_template("set autocommit=false");
+    }
+  }
+
+  bool getAutoCommit() {
+    return autoCommit;
+  }
+
+  void print();
+
+  virtual bool is_txn_control();
+};
+
+class SymCommit : public SymStmt {
+public:
+  SymCommit() : SymStmt(Sym_NULL) {
+    set_sql_template("commit");
+  }
+
+  void print();
+
+  virtual bool is_txn_control();
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

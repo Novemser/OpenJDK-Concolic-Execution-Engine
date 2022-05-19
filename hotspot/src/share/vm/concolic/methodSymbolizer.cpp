@@ -5,10 +5,13 @@
 #include "concolic/exp/methodExpression.hpp"
 #include "concolic/exp/symbolExpression.hpp"
 #include "concolic/jdbc/reference/symbolicConnection.hpp"
+#include "concolic/jdbc/reference/symbolicPersister.hpp"
 #include "concolic/jdbc/reference/symbolicResultSet.hpp"
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
+#include "concolic/reference/symbolicEmailValidator.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicStringBuilder.hpp"
+#include "concolic/reference/symbolicStringUtils.hpp"
 #include "concolic/reference/symbolicMap.hpp"
 #include "concolic/reference/symbolicSet.hpp"
 #include "concolic/reference/symbolicList.hpp"
@@ -25,11 +28,14 @@
 MethodSymbolizer::MethodSymbolizer() {
   _symbolizing_method = false;
   init_helper_methods();
+  handling_methods.clear();
 }
 
 void MethodSymbolizer::init_helper_methods() {
   SymString::init_register_class(this);
   SymStrBuilder::init_register_class(this);
+  SymEmailValidator::init_register_class(this);
+  SymStrUtils::init_register_class(this);
   SymConn::init_register_class(this);
   SymStmt::init_register_class(this);
   SymResSet::init_register_class(this);
@@ -38,8 +44,8 @@ void MethodSymbolizer::init_helper_methods() {
   SymList::init_register_class(this);
   SymBigDecimal::init_register_class(this);
   SymTimestamp::init_register_class(this);
-  SymHibernateKey::init_register_class(this);
-  SymHibernateMethod::init_register_class(this);
+//  SymHibernateKey::init_register_class(this);
+//  SymHibernateMethod::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,
@@ -92,11 +98,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
       callee_method->method_holder()->name()->as_C_string());
   _handle.set_callee_name(callee_method->name()->as_C_string());
 
-//  if (_handle.get_callee_name().find("prepareStatement") != std::string::npos) {
-//    tty->print_cr("%s: %s", _handle.get_callee_holder_name().c_str(),
-//                  _handle.get_callee_name().c_str());
-//  }
-
   /**
    * Whether we need to symbolize the process of this function
    */
@@ -110,6 +111,12 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
   } else if (_invoke_helper_methods.find(callee_holder_name) != _invoke_helper_methods.end()) {
     need_symbolize = _invoke_helper_methods[callee_holder_name](_handle);
+  } else if (SymPersister::target(_handle.get_callee_holder_name())) {
+    need_symbolize = false;
+    bool need_handling = SymPersister::invoke_method_helper(_handle);
+    if (need_handling) {
+      handling_methods.push_back(_handle);
+    }
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
@@ -147,6 +154,25 @@ void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
         _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
     this->_symbolizing_method = false;
+  }
+}
+
+// only for those are not symbolized method
+bool MethodSymbolizer::has_handling_methods() {
+  return !handling_methods.empty();
+}
+
+void MethodSymbolizer::finish_handling_method(ZeroFrame *caller_frame) {
+  guarantee(has_handling_methods(), "should be");
+  MethodSymbolizerHandle &handle = handling_methods.back();
+  if (caller_frame == handle.get_caller_frame()) {
+    Expression *exp;
+    if (SymPersister::target(handle.get_callee_holder_name())) {
+      exp = SymPersister::finish_method_helper(_handle);
+    } else {
+//      ShouldNotReachHere();
+    }
+    handling_methods.pop_back();
   }
 }
 
@@ -294,6 +320,7 @@ sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
 
 MethodReturnSymbolExp::MethodReturnSymbolExp(BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
+  _type = type2char(type);
   set_head(ss, 'M', type);
   ss.print("return%lu", sym_method_count++);
   this->finalize(ss.size());

@@ -401,6 +401,11 @@ public final class System {
     public static native long nanoTime();
 
     /**
+     * Print Object Infomation
+     */
+    public static native void printObjInfo(Object obj);
+
+    /**
      * Start Entry of our concolic execution
      */
     public static native long startConcolic();
@@ -409,6 +414,13 @@ public final class System {
      * End of our concolic execution
      */
     public static native long endConcolic();
+
+    public static native String getPathCondition();
+
+    /**
+     * Print the symbol expression of obj
+    */
+    public static native void printSymExp(Object obj);
 
     /**
      * make an Object symbolic
@@ -420,6 +432,31 @@ public final class System {
      */
     public static native void symbolizeMethod(Object holder_name, Object callee_name);
 
+    /**
+     * record statement-object pair
+     */
+    public static native void recordStmtObj(Object stmt, Object obj);
+
+    /**
+     * record statement-object pair
+     */
+    public static native void recordPersistentObj(Object obj);
+
+    public static void weBridgeAnalysis(ClassLoader classLoader) {
+    /** TODO: currently JVM is unable to call Class.forName inside java.lang.System.
+      *   this is due to implementation specific restrictions of openjdk 8. Consider
+      *   relax the restriction.
+      */
+//         String className = new Exception().getStackTrace()[1].getClassName();
+//         try {
+//           weBridgeAnalysis0(Class.forName(className).getClassLoader());
+//         } catch (ClassNotFoundException e) {
+//           throw new RuntimeException(e);
+//         }
+        weBridgeAnalysis0(classLoader);
+    }
+
+    private static native void weBridgeAnalysis0(ClassLoader classLoader);
     /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.

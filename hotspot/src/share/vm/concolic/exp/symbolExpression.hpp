@@ -39,6 +39,7 @@ public:
 
 protected:
   std::string _str;
+  std::string _type;
 
   void set(const char *buf, int length);
 
@@ -51,6 +52,8 @@ protected:
 
 public:
   void print();
+
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class InstanceSymbolExp : public SymbolExpression {

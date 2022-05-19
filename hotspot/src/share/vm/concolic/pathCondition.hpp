@@ -18,15 +18,50 @@ class PathCondition {
     }
 
     ~Condition() { Expression::gc(_exp); }
+
+    Expression *getExp() const {
+      return _exp;
+    }
   };
 
 private:
   std::vector<Condition *> _conds;
 
 public:
+  PathCondition() {}
+
+  PathCondition(const PathCondition& original) {
+    for (size_t index = 0; index < original._conds.size(); ++index) {
+      this->_conds.push_back(original._conds[index]);
+    }
+  }
+
+  const std::vector<Condition *> &getConds() const {
+    return _conds;
+  }
+
   void add(Expression *exp);
   void gc();
   void print();
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+    writer.StartArray();
+    for (size_t index = 0; index < _conds.size(); index++) {
+      Condition* cond = _conds[index];
+      Expression* expr = cond->_exp;
+      if (expr) {
+        expr->serialize(writer);
+      }
+    }
+    writer.EndArray();
+  }
+
+  const char* toString() const {
+    using namespace rapidjson;
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    serialize(writer);
+    return s.GetString();
+  }
 };
 
 #endif

@@ -48,3 +48,5 @@ add_definitions(-DCONCOLIC_JDBC)
 #add_definitions(-DCOMPILER2)
 #add_definitions(-DCOMPILER1)
 #add_definitions(-DAMD64)
+
+add_definitions(-DENABLE_WEBRIDGE)

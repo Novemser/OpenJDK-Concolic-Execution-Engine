@@ -8,13 +8,15 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 #include "utilities/ostream.hpp"
+#include "webridge/utils/rapidjson/writer.h"
 
 #include <map>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 class Expression {
 private:
   uint _ref_count;
+  std::string _java_code_position;
 
 public:
   static ulong total_count;
@@ -29,6 +31,7 @@ public:
   virtual ~Expression() { total_count--; }
   virtual void print();
   void print_cr();
+  virtual bool is_op_str_expression() { return false; }
 
   static void print_on_maybe_null(Expression *exp) {
     if (exp) {
@@ -42,9 +45,25 @@ public:
   inline bool dec_ref() { return --_ref_count == 0; }
   inline bool able_to_gc() { return _ref_count == 0; }
 
+  void set_java_code_position(const std::string &javaCodePosition);
+
+  const std::string &getJavaCodePosition() const;
+
 protected:
-  Expression() : _ref_count(0) {
-    total_count++;
+  Expression();
+
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const = 0;
+
+public:
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+    writer.StartObject();
+    if (!_java_code_position.empty()) {
+      writer.Key("_code_position");
+      writer.String(_java_code_position.c_str());
+    }
+    serialize_internal(writer);
+    writer.EndObject();
   }
 };
 
@@ -63,6 +82,9 @@ public:
 
 public:
   void print();
+
+protected:
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class ConExpression : public Expression {
@@ -70,6 +92,7 @@ class ConExpression : public Expression {
 
 private:
   char _str[EXP_NAME_LENGTH];
+  std::string _type;
 
 public:
   ConExpression(jboolean b);
@@ -83,10 +106,12 @@ public:
 
 public:
   void print();
+
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 class ArrayExpression : public Expression {
-  static const int EXP_NAME_LENGTH = 7;
+  static const int EXP_NAME_LENGTH = 16;
 
 private:
   char _arr_str[EXP_NAME_LENGTH];
@@ -101,6 +126,8 @@ public:
 
 public:
   void print();
+
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 typedef std::vector<Expression *> exp_list_t;

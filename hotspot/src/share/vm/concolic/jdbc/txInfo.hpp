@@ -25,6 +25,10 @@ public:
     _stmts.push_back(stmt);
   }
 
+  std::vector<SymStmt *> &get_stmts() {
+    return _stmts;
+  }
+
 public:
   void print();
 };

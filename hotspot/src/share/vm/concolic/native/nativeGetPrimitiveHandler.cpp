@@ -23,7 +23,7 @@ bool NativeGetPrimitiveHandler::target(const std::string& name_sig) {
 }
 
 void NativeGetPrimitiveHandler::handle_native(intptr_t *locals, BasicType result_type) {
-  oop obj = (oop)locals[-1];
+  oop obj = reinterpret_cast<oop&>(locals[-1]);
   jlong offset = (jlong)locals[-3];
 
   if (obj->is_symbolic()) {

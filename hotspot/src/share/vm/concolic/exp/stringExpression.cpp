@@ -48,6 +48,24 @@ OpStrExpression *OpStrExpression::to_string(Expression *exp) {
   return new OpStrExpression("toString", exp);
 }
 
+void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("OpStrExpression");
+  writer.Key("_name");
+  writer.String(_name.c_str());
+  writer.Key("_param_list");
+  writer.StartArray();
+  for (size_t index = 0; index < _param_list.size(); ++index) {
+    Expression *expr = _param_list[index];
+    if (expr) {
+      expr->serialize(writer);
+    } else {
+      writer.Null();
+    }
+  }
+  writer.EndArray();
+}
+
 StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, "'String'");

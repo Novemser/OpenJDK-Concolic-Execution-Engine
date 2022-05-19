@@ -98,7 +98,7 @@
 #endif // INCLUDE_ALL_GCS
 
 #include <errno.h>
-
+#include "webridge/webridgeMngr.hpp"
 #ifndef USDT2
 HS_DTRACE_PROBE_DECL1(hotspot, thread__sleep__begin, long long);
 HS_DTRACE_PROBE_DECL1(hotspot, thread__sleep__end, int);
@@ -311,6 +311,21 @@ JVM_LEAF(jlong, JVM_NanoTime(JNIEnv *env, jclass ignored))
   return os::javaTimeNanos();
 JVM_END
 
+JVM_ENTRY(void, JVM_PrintObjInfo(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_PrintObjInfo");
+#ifdef ENABLE_CONCOLIC
+  oop o = JNIHandles::resolve_non_null(obj);
+  o->print();
+  o->klass()->print();
+  tty->print_cr("symbolic?: %s", o->is_symbolic() ? "true" : "false");
+  if (o->is_symbolic()) {
+    ConcolicMngr::ctx->get_sym_inst(o)->print();
+  }
+#else
+  return;
+#endif
+JVM_END
+
 JVM_ENTRY(jlong, JVM_StartConcolic(JNIEnv *env, jclass ignored))
   JVMWrapper("JVM_StartConcolic");
 #ifdef ENABLE_CONCOLIC
@@ -351,7 +366,29 @@ JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
 #endif
 JVM_END
 
-JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored, 
+JVM_ENTRY(void, JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_PrintSymExp");
+#ifdef ENABLE_CONCOLIC
+  if (obj == NULL) {
+    // TODO: use THROW instead of assertion
+    assert(false, "JVM_Symbolize: obj is null");
+  }
+  // TODO: check behaviors when facing like `arrayOop`
+  oop o = JNIHandles::resolve_non_null(obj);
+
+  {
+    HandleMark hm;
+
+    Handle handle(THREAD, o);
+    assert(handle()->is_oop(), "JVM_Symbolize: obj not an oop");
+    ConcolicMngr::printSymExp(handle);
+  }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored,
                                     jobject holder_name, jobject callee_name))
   JVMWrapper("JVM_SymbolizeMethod");
 #ifdef ENABLE_CONCOLIC
@@ -367,10 +404,83 @@ JVM_ENTRY(void, JVM_SymbolizeMethod(JNIEnv *env, jclass ignored,
 
     Handle holder_name_handle(THREAD, holder_name_o);
     Handle callee_name_handle(THREAD, callee_name_o);
-    assert(holder_name_handle()->is_oop() && callee_name_handle->is_oop(), 
+    assert(holder_name_handle()->is_oop() && callee_name_handle->is_oop(),
            "JVM_Symbolize: class_name_o or method_name_o is not an oop");
     ConcolicMngr::symbolizeMethod(holder_name_handle, callee_name_handle);
   }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, jobject obj))
+  JVMWrapper("JVM_RecordStmtObj");
+#ifdef ENABLE_CONCOLIC
+  if (stmt == NULL || obj == NULL) {
+    // TODO: use THROW instead of assertion
+    assert(false, "JVM_RecordStmtObj: obj is null");
+  }
+  oop s = JNIHandles::resolve_non_null(stmt);
+  oop o = JNIHandles::resolve_non_null(obj);
+
+  {
+    HandleMark hm;
+
+    Handle handle_s(THREAD, s);
+    Handle handle_o(THREAD, o);
+    assert(handle_s()->is_oop(), "JVM_RecordStmtObj: stmt not an oop");
+    assert(handle_o()->is_oop(), "JVM_RecordStmtObj: obj not an oop");
+    ConcolicMngr::recordStmtObj(handle_s, handle_o);
+  }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj))
+  JVMWrapper("JVM_RecordPersistentObj");
+#ifdef ENABLE_CONCOLIC
+  if (obj != NULL) {
+    oop o = JNIHandles::resolve_non_null(obj);
+    HandleMark hm;
+
+    Handle handle_o(THREAD, o);
+    assert(handle_o()->is_oop(), "JVM_RecordPersistentObj: obj not an oop");
+    ConcolicMngr::recordPersistentObj(handle_o);
+  }
+//  else {
+//    ConcolicMngr::recordPersistentObj(NULL);
+//  }
+#else
+  return;
+#endif
+JVM_END
+
+JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader))
+  JVMWrapper("JVM_WeBridgeAnalysis");
+#ifdef ENABLE_WEBRIDGE
+  Handle h_loader(THREAD, JNIHandles::resolve(classLoader));
+  Klass* klass = SystemDictionary::resolve_or_fail(vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
+                                                   h_loader,
+                                                   Handle(),
+                                                   true,
+                                                   THREAD);
+
+  KlassHandle klass_handle(THREAD, klass);
+  // Check if we should initialize the class
+  if (klass_handle->oop_is_instance()) {
+    klass_handle->initialize(THREAD);
+  }
+
+//  jclass result = find_class_from_class_loader(env, vmSymbols::_wbridge_storedprocedure_StoredProcedureManager(),
+//                                               true, h_loader,
+//                                               Handle(), true, THREAD);
+//  oop clz = JNIHandles::resolve(result);
+//  if (clz == NULL) {
+//    tty->print_cr("WeBridge initialized failed! Could not find main StoredProcedure manager");
+//    return;
+//  }
+  webridgeMngr::analyse(ConcolicMngr::ctx, klass, env);
 #else
   return;
 #endif
@@ -391,6 +501,22 @@ JVM_ENTRY(void, JVM_ArrayCopy(JNIEnv *env, jclass ignored, jobject src, jint src
   s->klass()->copy_array(s, src_pos, d, dst_pos, length, thread);
 JVM_END
 
+JVM_ENTRY(jstring, JVM_GetPcStr(JNIEnv *env, jclass ignored))
+  JVMWrapper("JVM_GetPcStr");
+#ifdef ENABLE_CONCOLIC
+  const char* pcStr;
+  ResourceMark rm(THREAD);
+  if (ConcolicMngr::can_do_concolic()) {
+    pcStr = ConcolicMngr::ctx->get_path_condition().toString();
+  } else {
+    pcStr = "ERROR: Concolic execution is disabled";
+  }
+  Handle str = java_lang_String::create_from_platform_dependent_str(pcStr, THREAD);
+  return (jstring) JNIHandles::make_local(env, str());
+#else
+  ShouldNotReachHere();
+#endif
+JVM_END
 
 static void set_property(Handle props, const char* key, const char* value, TRAPS) {
   JavaValue r(T_OBJECT);

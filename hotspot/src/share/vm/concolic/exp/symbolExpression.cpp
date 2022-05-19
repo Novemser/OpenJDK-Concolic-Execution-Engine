@@ -43,9 +43,21 @@ void SymbolExpression::finalize(int length) {
 
 void SymbolExpression::print() { tty->indent().print("%s", _str.c_str()); }
 
+void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("SymbolExpression");
+  writer.Key("_java_type");
+  writer.String(_type.c_str());
+  writer.Key("_exp");
+  writer.String(_str.c_str());
+}
+
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, obj);
+  if (obj != NULL) {
+    _type = obj->klass()->name()->as_C_string();
+  }
   ss.print("%lu", obj->get_sym_rid());
   this->finalize(ss.size());
 }
@@ -53,6 +65,9 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
 PlaceHolderSymbolExp::PlaceHolderSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'P', T_OBJECT, obj);
+  if (obj != NULL) {
+    _type = obj->klass()->name()->as_C_string();
+  }
   this->finalize(ss.size());
 }
 
@@ -61,6 +76,7 @@ FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type);
   ss.print("%lu_field%d", sym_rid, field_index);
+  _type = type2char(type);
   this->finalize(ss.size());
 }
 
@@ -68,6 +84,7 @@ ConSymbolExp::ConSymbolExp(const char* str, BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'Y', type);
   ss.print("%s", str);
+  _type = type2char(type);
   this->finalize(ss.size());
 }
 
@@ -77,11 +94,13 @@ ArraySymbolExp::ArraySymbolExp(sym_rid_t sym_arr_oid, int version,
   int length =
       sprintf(str_buf, "A%c_%lu-%d", type2char(type), sym_arr_oid, version);
   set(str_buf, length);
+  _type = type2char(type);
 }
 
 ArrayLengthExp::ArrayLengthExp(sym_rid_t sym_arr_oid, BasicType type) {
   int length = sprintf(str_buf, "A%c_%lu.length", type2char(type), sym_arr_oid);
   set(str_buf, length);
+  _type = type2char(T_INT);
 }
 
 ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
@@ -89,6 +108,7 @@ ElementSymbolExp::ElementSymbolExp(sym_rid_t sym_arr_oid, int version,
   int length = sprintf(str_buf, "E%c_%lu-%d-%d", type2char(type), sym_arr_oid,
                        version, load_count);
   set(str_buf, length);
+  _type = type2char(type);
 }
 
 

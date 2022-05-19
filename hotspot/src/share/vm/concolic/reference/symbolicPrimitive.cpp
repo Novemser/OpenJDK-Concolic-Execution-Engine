@@ -3,6 +3,7 @@
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "symbolicString.hpp"
 #include "concolic/exp/stringExpression.hpp"
+#include "concolic/exp/methodExpression.hpp"
 
 template <>
 const char *SymPrimitive<jchar>::ARRAY_TYPE_NAME = "[Ljava/lang/Character;";
@@ -116,31 +117,45 @@ template class SymPrimitive<jfloat>;
 template class SymPrimitive<jdouble>;
 
 template <> bool SymPrimitive<jchar>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(C)Ljava/lang/Character;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jboolean>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(Z)Ljava/lang/Boolean;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jbyte>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(B)Ljava/lang/Byte;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jint>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    const std::string &callee_name = handle.get_callee_name();
-    bool need_symbolize = false;
-
-    if (callee_name == "toHexString") {
-        need_symbolize = handle.general_check_param_symbolized();
-        if (need_symbolize) {
-            handle.general_prepare_param();
-        }
-    }
-
-    return need_symbolize;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(I)Ljava/lang/Integer;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jshort>::invoke_method_helper(MethodSymbolizerHandle &handle) {
-    return false;
+  if (handle.get_callee_name() == "valueOf") {
+    return match_callee_and_do_sym(handle, "(S)Ljava/lang/Short;");
+  }
+  return false;
 }
 template <> bool SymPrimitive<jlong>::invoke_method_helper(MethodSymbolizerHandle &handle) {
+    if (handle.get_callee_name() == "parseLong") {
+      bool need_symbolize = handle.general_check_param_symbolized();
+      if (need_symbolize) {
+        handle.general_prepare_param();
+      }
+      return need_symbolize;
+    } else if (handle.get_callee_name() == "valueOf") {
+      return match_callee_and_do_sym(handle, "(J)Ljava/lang/Long;");
+    }
     return false;
 }
 template <> bool SymPrimitive<jfloat>::invoke_method_helper(MethodSymbolizerHandle &handle) {
@@ -151,36 +166,99 @@ template <> bool SymPrimitive<jdouble>::invoke_method_helper(MethodSymbolizerHan
 }
 
 template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    return NULL;
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(C)Ljava/lang/Character;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::short_signature(),
+        handle
+    );
+  }
+  return NULL;
 }
+
 template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(Z)Ljava/lang/Boolean;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::bool_signature(),
+        handle
+    );
+  }
     return NULL;
 }
 template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(B)Ljava/lang/Byte;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::byte_signature(),
+        handle
+    );
+  }
     return NULL;
 }
 
 template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
-    const std::string &callee_name = handle.get_callee_name();
-    Expression *exp = NULL;
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(I)Ljava/lang/Integer;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::int_signature(),
+        handle
+    );
+  }
 
-    if (callee_name == "toHexString") {
-        exp = handle.get_param_list()[0];
-        oop res_obj = handle.get_result<oop>(T_OBJECT);
-        guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
-        SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
-        sym_res_str->set_ref_exp(OpStrExpression::to_string(exp));
-    }
-
-    return exp;
+  return NULL;
 }
 
 template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(S)Ljava/lang/Short;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::short_signature(),
+        handle
+    );
+  }
     return NULL;
 }
+
 template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymbolizerHandle &handle) {
+    if (handle.get_callee_name() == "parseLong") {
+      Expression *exp = new MethodReturnSymbolExp(T_LONG);
+      ConcolicMngr::record_path_condition(new MethodExpression(
+          handle.get_callee_holder_name(), handle.get_callee_name(),
+          handle.get_param_list(), exp, false));
+      return exp;
+    }
+
+  if (handle.get_callee_name() == "valueOf" &&
+      !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(J)Ljava/lang/Long;")) {
+    // get result object from stack
+    set_symbolic_field(
+        handle.get_result<oop>(handle.get_result_type()),
+        vmSymbols::value_name(),
+        vmSymbols::long_signature(),
+        handle
+    );
     return NULL;
+  }
+
+  return NULL;
 }
+
 template <> Expression * SymPrimitive<jfloat>::finish_method_helper(MethodSymbolizerHandle &handle) {
     return NULL;
 }
@@ -188,7 +266,46 @@ template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbo
     return NULL;
 }
 
+template<class T>
+void
+SymPrimitive<T>::set_symbolic_field(oop obj, Symbol *fld_name, Symbol *fld_tp_sig, MethodSymbolizerHandle &handle) {
+  assert(!handle.get_param_list().empty(), "Should contain at least 1 parameter");
+  Expression *exp = handle.get_param_list()[0];
+  assert(obj, "Should get result long object");
+  SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+  fieldDescriptor fd;
+  Klass *fld_klass = obj->klass()->find_field(
+      fld_name,
+      fld_tp_sig,
+      &fd
+  );
+  assert(fld_klass != NULL, "Field not found!");
+  sym_inst->set_sym_exp(fd.offset(), exp);
+}
+
+template<class T>
+bool SymPrimitive<T>::match_callee_and_do_sym(MethodSymbolizerHandle &handle, const char* callee_signature) {
+  ResourceMark rm;
+  if (!strcmp(handle.get_callee_method()->signature()->as_C_string(), callee_signature)) {
+    bool need_symbolize = handle.general_check_param_symbolized();
+    if (need_symbolize) {
+      handle.general_prepare_param();
+    }
+    return need_symbolize;
+  }
+
+  return false;
+}
+
 bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType type){
+    const std::string &callee_name = handle.get_callee_name();
+    if (callee_name == "toHexString" || callee_name == "toString") {
+        bool need_symbolize = handle.general_check_param_symbolized();
+        if (need_symbolize) {
+          handle.general_prepare_param();
+        }
+        return need_symbolize;
+    }
     switch (type) {
         case T_CHAR:
             return SymPrimitive<jchar>::invoke_method_helper(handle);
@@ -212,6 +329,18 @@ bool primitive_invoke_method_helper(MethodSymbolizerHandle &handle,BasicType typ
 }
 
 Expression *primitive_finish_method_helper(MethodSymbolizerHandle &handle, BasicType type){
+
+    const std::string &callee_name = handle.get_callee_name();
+    if (callee_name == "toHexString" || callee_name == "toString") {
+        Expression *exp = handle.get_param_list()[0];
+        oop res_obj = handle.get_result<oop>(T_OBJECT);
+        guarantee(!res_obj->is_symbolic(),"res obj is symbolic!");
+        SymString *sym_res_str = (SymString *)ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+        sym_res_str->set_ref_exp(OpStrExpression::to_string(exp));
+
+        return NULL;
+    }
+
     switch (type) {
         case T_CHAR:
             return SymPrimitive<jchar>::finish_method_helper(handle);

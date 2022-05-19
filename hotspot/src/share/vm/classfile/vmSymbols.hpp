@@ -607,6 +607,8 @@
   template(classRedefinedCount_name,                   "classRedefinedCount")                                     \
   template(classLoader_name,                           "classLoader")                                             \
                                                                                                                   \
+  template(_wbridge_storedprocedure_StoredProcedureManager, "edu/sjtu/ipads/wbridge/storedprocedure/StoredProcedureManager")           \
+  template(_add_SQLTemplate, "addSQLTemplate")                                                                     \
   /* jfr signatures */                                                                                            \
   JFR_TEMPLATES(template)                                                                                         \
                                                                                                                   \
@@ -1154,6 +1156,10 @@
   do_intrinsic(_Double_valueOf,           java_lang_Double,       valueOf_name, Double_valueOf_signature, F_S)          \
    do_name(     Double_valueOf_signature,                        "(D)Ljava/lang/Double;")                               \
                                                                                                                         \
+                                                                                                                        \
+  /* WeBridge related symbols */                                                                                        \
+  do_intrinsic(_add_SQLTemplate_intrinsic, _wbridge_storedprocedure_StoredProcedureManager, _add_SQLTemplate, _add_SQLTemplate_signature, F_S)  \
+   do_signature(_add_SQLTemplate_signature, "(Ledu/sjtu/ipads/wbridge/sql/SymbolicSQLTemplate;)V") \
     /*end*/
 
 

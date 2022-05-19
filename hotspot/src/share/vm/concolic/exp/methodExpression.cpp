@@ -45,4 +45,29 @@ void MethodExpression::print() {
   tty->print(")");
 }
 
+void MethodExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("MethodExpression");
+  writer.Key("_name");
+  writer.String(_name.c_str());
+
+  writer.Key("_param_list");
+  writer.StartArray();
+  for (size_t param_index = 0; param_index < _param_list.size(); ++param_index) {
+    if (_param_list[param_index]) {
+      _param_list[param_index]->serialize(writer);
+    } else {
+      writer.Null();
+    }
+  }
+  writer.EndArray();
+
+  writer.Key("_res_exp");
+  if (_res_exp) {
+    _res_exp->serialize(writer);
+  } else {
+    writer.Null();
+  }
+}
+
 #endif

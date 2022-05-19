@@ -13,7 +13,6 @@ std::set<std::string> SymList::init_target_class_names() {
   std::set<std::string> set;
   set.insert("java/util/List");
   set.insert("java/util/ArrayList");
-  set.insert("org/hibernate/collection/internal/PersistentBag");
   return set;
 }
 

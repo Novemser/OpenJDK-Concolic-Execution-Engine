@@ -237,8 +237,11 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
   JavaCalls::call(&result, toStringMethod, &java_args, thread);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
 
-  return (oop)result.get_value_addr()->l;
+  return reinterpret_cast<oop&>(result.get_value_addr()->l);
 }
 
+oop OopUtils::value_of_map_node(oop node_obj) {
+  return node_obj->obj_field(40);
+}
 
 #endif

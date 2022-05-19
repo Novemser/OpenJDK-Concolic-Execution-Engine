@@ -253,10 +253,16 @@ SUNWprivate_1.1 {
                 JVM_handle_linux_signal;
 
                 #Concolic
+                JVM_PrintObjInfo;
                 JVM_StartConcolic;
                 JVM_EndConcolic;
                 JVM_Symbolize;
                 JVM_SymbolizeMethod;
+                JVM_PrintSymExp;
+                JVM_RecordStmtObj;
+                JVM_RecordPersistentObj;
+                JVM_WeBridgeAnalysis;
+        JVM_GetPcStr;
 
                 # debug JVM
                 JVM_AccessVMBooleanFlag;

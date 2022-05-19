@@ -16,7 +16,8 @@
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
 
-ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt) {
+ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt), _sym_rid_counter(), _sym_tmp_id_counter(),
+                                               _path_condition_enabled(true) {
   init_sym_rid_counter();
   init_sym_tmp_id_counter();
 
@@ -62,7 +63,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
           if (OopUtils::is_java_string_interned(obj)) {
               ResourceMark rm;
               const char* str = OopUtils::java_string_to_c(obj);
-              tty->print_cr("Interned String!: %s", str);
+              tty->print_cr("Unsupported symbolizing behavior of interned String!: %s", str);
               /**
                * we do not support symbolize interned Java string
                */
@@ -72,9 +73,6 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymString(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<jchar>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jchar>(sym_rid);
-  } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
-    sym_inst = new SymBigDecimal(sym_rid);
-//    sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymPrimitive<jboolean>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jboolean>(sym_rid);
   } else if (klass_symbol->equals(SymPrimitive<jbyte>::TYPE_NAME)) {
@@ -91,16 +89,17 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
   } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
     sym_inst = new SymBigDecimal(sym_rid);
-    sym_inst->set_ref_exp(new InstanceSymbolExp(obj));
   } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
     sym_inst = new SymTimestamp(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {
     sym_inst = new SymResSet(sym_rid);
-  } else if (SymHibernateKey::target(class_name)) {
-    sym_inst = new SymHibernateKey(sym_rid);
-  } else {
+  }
+//  else if (SymHibernateKey::target(class_name)) {
+//    sym_inst = new SymHibernateKey(sym_rid);
+//  }
+  else {
     sym_inst = new SymObj(sym_rid);
   }
 
@@ -200,11 +199,67 @@ std::string ThreadContext::get_current_code_pos() {
   address bcp = istate->bcp();
 
   Method *method = istate->method();
-  int bci = method->bci_from(bcp);
-  int line = method->line_number_from_bci(bci);
+  int line = -1;
+  if (bcp != NULL) {
+    int bci = method->bci_from(bcp);
+    line = method->line_number_from_bci(bci);
+  }
 
   method->print_name(&ss);
   ss.print(":%d", line);
+
+  return std::string(buf, ss.size());
+}
+
+static void print_method_name_and_line(const ZeroFrame *zero_frame, stringStream *ss) {
+  interpreterState istate = zero_frame->as_interpreter_frame()->interpreter_state();
+  Method *method = istate->method();
+  address bcp = istate->bcp();
+
+  method->print_name(ss);
+  if (bcp) {
+    int bci = method->bci_from(bcp);
+    int line = method->line_number_from_bci(bci);
+    ss->print(":%d", line);
+  }
+}
+
+std::string ThreadContext::get_code_pos_for_first(const std::string &str) {
+  static const int SIZE = 2048;
+  static char buf[SIZE];
+
+  stringStream ss(buf, SIZE);
+
+  const char *c_str = str.c_str();
+  const ZeroFrame *zero_frame = get_shadow_stack().get_last_frame().get_zero_frame();
+
+  // generate top method name and line string
+  while (!zero_frame->is_interpreter_frame()) {
+    zero_frame = zero_frame->next();
+  }
+  print_method_name_and_line(zero_frame, &ss);
+  std::string top_name(buf, ss.size());
+  tty->print_cr("trying: %s", top_name.c_str());
+
+  // if not containing, use a loop to find it
+  if (!strstr(ss.as_string(), c_str)) {
+    zero_frame = zero_frame->next();
+    while (zero_frame) {
+      while (zero_frame && !zero_frame->is_interpreter_frame()) {
+        zero_frame = zero_frame->next();
+      }
+      if (!zero_frame) {
+        break;
+      }
+      ss.reset();
+      print_method_name_and_line(zero_frame, &ss);
+      // tty->print_cr("trying: %s", ss.as_string());
+      if (strstr(ss.as_string(), c_str)) {
+        break;
+      }
+      zero_frame = zero_frame->next();
+    }
+  }
 
   return std::string(buf, ss.size());
 }
@@ -238,6 +293,14 @@ void ThreadContext::print_stack_trace() {
 void ThreadContext::memory_leak_check() {
   tty->print_cr("Checking memory leaks for Expression, %lu remains...",
                 Expression::total_count);
+}
+
+const PathCondition &ThreadContext::get_path_condition() const {
+  return _path_condition;
+}
+
+void ThreadContext::set_pc_enabled(bool pathConditionEnabled) {
+  _path_condition_enabled = pathConditionEnabled;
 }
 
 #endif

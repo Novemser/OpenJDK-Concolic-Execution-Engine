@@ -44,17 +44,26 @@ public:
   // inline int get_end_offset() {
   //   return _caller_istate->stack_base() - _caller_istate->stack() - 1;
   // }
-
-  Method *get_callee_method() {
+  void sanityCheck() {
     Method *callee_method = _callee_istate->method();
     if (_caller_frame->is_interpreter_frame()) {
       interpreterState caller_istate = _caller_frame->as_interpreter_frame()->interpreter_state();
-      assert(caller_istate->callee() == callee_method, "should be");
+      char *callee_method_name_c_str = callee_method->method_holder()->name()->as_C_string();
+      // for lambda expressions(where the call site might locate in java/lang/invoke),
+      // caller_istate->callee() == callee_method might not hold
+      if (!strstr(callee_method_name_c_str, "java/lang/invoke") &&
+          !strstr(callee_method_name_c_str, "$$Lambda")) {
+        assert(caller_istate->callee() == callee_method, "should be");
+      }
     } else if (_callee_frame->is_entry_frame()) {
       JavaCallWrapper *call_wrapper = *_caller_frame->as_entry_frame()->call_wrapper();
       assert(call_wrapper->callee_method() == callee_method, "should be");
     }
-    return callee_method;
+  }
+
+  Method *get_callee_method() {
+    sanityCheck();
+    return _callee_istate->method();
   }
 
   inline intptr_t *get_locals_ptr() { return _callee_istate->locals(); }
@@ -116,10 +125,13 @@ public:
   Expression *get_primitive_exp(int offset, BasicType type);
 
   void general_prepare_param(int max_param_num = 100);
+
   int general_prepare_param_helper(BasicType type, int locals_offset, bool is_this);
 
   bool general_check_param_symbolized();
+
   bool general_check_param_symbolized_helper(BasicType type, int &locals_offset);
+
   Expression *general_prepare_result_helper();
 
 public:

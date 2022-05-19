@@ -11,6 +11,8 @@
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 
+long SymStmt::execute_counter = 0;
+
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
 std::set<std::string> SymStmt::init_target_class_names() {
@@ -62,10 +64,11 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   map["setNull"] = T_OBJECT;
   map["setTimestamp"] = T_OBJECT;
   map["setBigDecimal"] = T_OBJECT;
+  map["setCharacterStream"] = T_OBJECT;
   return map;
 }
 
-SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL),_row_count(0) {}
+SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL),_row_count(0), obj_rid(NULL_SYM_RID) {}
 
 SymStmt::~SymStmt() {
   exp_map_t::iterator iter;
@@ -101,6 +104,7 @@ void SymStmt::print() {
     _row_count_exp->print();
     tty->cr();
   }
+  _pc.print();
 }
 
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
@@ -129,6 +133,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
     int param_size = handle.get_callee_method()->size_of_parameters();
+    execute_counter++;
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
   } else if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
     ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
@@ -141,7 +146,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     Expression *value_exp = SymStmt::get_param_exp(handle, support_set_methods[callee_name], callee_name);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
     sym_stmt->set_param(index, value_exp);
-  }else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
+  } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr(" unhandled by SymStmt");
     // ShouldNotCallThis();
@@ -153,11 +158,13 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
+
   if (strncmp("execute", callee_name.c_str(), 7) == 0) {
     oop this_obj = handle.get_param<oop>(0);
     SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
-    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
-
+    // set current path conditon for statement
+    sym_stmt->set_pc(ConcolicMngr::ctx->get_path_condition());
+//    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));
     jlong conn_id = JdbcUtils::get_stmt_connection_id(this_obj);
     ConcolicMngr::ctx->get_jdbc_mngr().record_stmt(sym_stmt, conn_id);
 
@@ -171,6 +178,7 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       exp = new ResultSetSymbolExp(sym_stmt);
       sym_stmt->set_row_count_exp(exp, row_count);
     }
+
   }
   return exp;
 }
@@ -189,16 +197,49 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setBigDecimal") {
     value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));
+  } else if (callee_name == "setCharacterStream") {
+    oop reader_obj = handle.get_param<oop>(offset);
+    const std::string &cname = std::string(reader_obj->klass()->name()->as_C_string());
+    if (cname == "java/io/StringReader") {
+      oop str_obj = reader_obj->obj_field(56);
+      value_exp = SymString::get_exp_of(str_obj);
+    } else {
+      ShouldNotReachHere();
+    }
   } else {
     ShouldNotReachHere();
   }
   return value_exp;
 }
 
+const exp_map_t &SymStmt::get_param_exps() const {
+  return _param_exps;
+}
+
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
 
 void StatementSymbolExp::print() {
   tty->print("#SymStmt(%lu): %s", _sym_stmt->get_sym_rid(), _sym_stmt->_sql_template.c_str());
+}
+
+void StatementSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  ShouldNotCallThis();
+}
+
+void SymSetAutoCommit::print() {
+  tty->print_cr("#setAutocommit=%d", getAutoCommit());
+}
+
+bool SymSetAutoCommit::is_txn_control() {
+  return true;
+}
+
+void SymCommit::print() {
+  tty->print_cr("#commit");
+}
+
+bool SymCommit::is_txn_control() {
+  return true;
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

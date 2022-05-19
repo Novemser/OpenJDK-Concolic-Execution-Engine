@@ -8,6 +8,7 @@
 #include "concolic/pathCondition.hpp"
 #include "concolic/reference/symbolicArray.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
+#include "concolic/reference/array/arrayInternal.hpp"
 #include "concolic/shadow/shadowStack.hpp"
 #include "oops/oop.inline.hpp"
 #include "runtime/handles.hpp"
@@ -21,6 +22,7 @@ class ThreadContext {
    */
   typedef std::map<sym_rid_t, SymRef *> SymStore;
   typedef std::vector<Expression *> SymTmpExpStore;
+  typedef std::map<arrayOop, ArrayInternal *> ArrayStore;
 
 private:
   JavaThread *_thread;
@@ -30,10 +32,12 @@ private:
   PathCondition _path_condition;
   MethodSymbolizer _method_symbolizer;
   JdbcMngr _jdbc_mngr;
+  ArrayStore _array_store;
 
   sym_rid_t _sym_rid_counter;
   sym_tmp_id_t _sym_tmp_id_counter;
 
+  bool _path_condition_enabled;
 public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();
@@ -45,8 +49,27 @@ public:
                                const char *method_name) {
     _method_symbolizer.add_method(class_name, method_name);
   }
+  inline void record_stmt_obj(oop stmt, oop obj) {
+    _jdbc_mngr.record_stmt_obj_pair(stmt, obj);
+  }
+  inline void record_persistent_obj(oop obj) {
+    _jdbc_mngr.record_persistent_obj(obj);
+  }
+
+  const PathCondition &get_path_condition() const;
+
+  void set_pc_enabled(bool pathConditionEnabled);
 
 public:
+  void __attribute__((optimize("O0"))) printSymExp(oop obj) {
+    obj->print();
+    tty->print_cr("is symbolic: %d", (int)obj->is_symbolic());
+    if (obj->is_symbolic()) {
+      SymInstance* sym_inst = this->get_sym_inst(obj);
+      sym_inst->print();
+    }
+  }
+
   inline JdbcMngr &get_jdbc_mngr() { return _jdbc_mngr; }
 
   inline MethodSymbolizer &get_method_symbolizer() {
@@ -57,8 +80,13 @@ public:
     _method_symbolizer.is_symbolizing_method();
   }
 
+  inline const ArrayStore &get_array_store() const {
+    return _array_store;
+  }
+
 public:
   std::string get_current_code_pos();
+  std::string get_code_pos_for_first(const std::string &str);
 
 public:
   SymInstance *get_or_alloc_sym_inst(oop obj);
@@ -80,9 +108,14 @@ public:
   void detach_tmp_exp(sym_tmp_id_t sym_tmp_id);
 
   inline void __attribute__((optimize("O0"))) record_path_condition(Expression *sym_exp) {
+    if (!_path_condition_enabled) {
+      return;
+    }
+
     _path_condition.add(sym_exp);
   }
 
+  ArrayInternal* get_or_create_array_internal(arrayOop oop);
 public:
   inline ShadowStack &get_shadow_stack() { return _s_stack; }
   /**
