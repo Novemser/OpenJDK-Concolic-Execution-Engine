@@ -55,7 +55,7 @@ void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuf
 InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, obj);
-  if (obj) {
+  if (obj != NULL) {
     _type = obj->klass()->name()->as_C_string();
   }
   ss.print("%lu", obj->get_sym_rid());
@@ -65,7 +65,7 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
 PlaceHolderSymbolExp::PlaceHolderSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'P', T_OBJECT, obj);
-  if (obj) {
+  if (obj != NULL) {
     _type = obj->klass()->name()->as_C_string();
   }
   this->finalize(ss.size());
