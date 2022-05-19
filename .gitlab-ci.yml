@@ -2,7 +2,7 @@ stages:
   - build
   - test
 
-before_script:
+.export_build_jdk: &export_build_jdk
   - export JAVA_HOME=$CI_PROJECT_DIR/build/linux-x86_64-normal-zero-release/images/j2sdk-image
 
 build-jdk:
@@ -25,6 +25,7 @@ test-unit:
   stage: test
   script:
     - cd concolic-test
+    - *export_build_jdk
     - gradle test
 
 # test-shopizer:
