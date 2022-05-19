@@ -16,9 +16,9 @@ build-jdk:
  script:
   - ./scripts/configure-ci.sh
   - make hotspot jdk images JOBS=24 CONF=linux-x86_64-normal-zero-release
- artifacts:
-   paths:
-     - build/linux-x86_64-normal-zero-release/images/j2sdk-image
+#  artifacts:
+#    paths:
+#      - build/linux-x86_64-normal-zero-release/images/j2sdk-image
 
 #build-shopizer:
 #  stage: build
