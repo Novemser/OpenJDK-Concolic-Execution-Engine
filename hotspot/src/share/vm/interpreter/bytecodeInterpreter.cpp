@@ -194,7 +194,7 @@
 // initialization (which is is the initialization of the table pointer...)
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
 #define DISPATCH(opcode)\
-//  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
+  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
   goto *(void*)dispatch_table[opcode]
 #else
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
@@ -1015,7 +1015,7 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if not defined(USELABELS) && defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-//      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
+      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
 #endif
 
 #ifdef USELABELS
@@ -2120,6 +2120,7 @@ run:
                 ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset +
                                                              (-2) + 1);
             oop obj = ((objArrayOop) arrObj)->obj_at(index);
+            bool isElemNull = (obj == NULL);
             if (arrObj->is_symbolic()) {
               SymArr *sym_arr =
                   ConcolicMngr::ctx->get_or_alloc_sym_array(arrObj);
@@ -2144,17 +2145,6 @@ run:
                   new OpSymExpression(  \
                     index_exp, new ConExpression(index), op_eq, true
                   )
-              );
-              if (obj->is_symbolic()) {
-                ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
-                    index,
-                    ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp()
-                );
-              }
-            } else if (obj->is_symbolic()) {
-              ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
-                  index,
-                  ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp()
               );
             }
           }
@@ -2267,6 +2257,7 @@ run:
             Expression *index_exp =
                 ConcolicMngr::ctx->get_and_detach_stack_slot(stack_offset +
                                                              (-3) + 1);
+            bool isElemNull = (rhsObject == NULL);
             if (arrObj->is_symbolic()) {
               if (!arrObj->is_symbolic()) {
                 ConcolicMngr::ctx->alloc_sym_array(arrObj);
@@ -2294,16 +2285,26 @@ run:
                     index_exp, new ConExpression(index), op_eq, true
                 )
               );
-              if (rhsObject->is_symbolic()) {
+              if (!isElemNull && rhsObject->is_symbolic()) {
                 ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
                     index,
                     ConcolicMngr::ctx->get_sym_inst(rhsObject)->get_ref_exp()
-                    );
+                );
+              } else {
+                ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
+                    index,
+                    NULL
+                );
               }
-            } else if (rhsObject->is_symbolic()) {
+            } else if (!isElemNull && rhsObject->is_symbolic()) {
               ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
                   index,
                   ConcolicMngr::ctx->get_sym_inst(rhsObject)->get_ref_exp()
+              );
+            } else {
+              ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
+                  index,
+                  NULL
               );
             }
           }
@@ -4177,7 +4178,7 @@ void BytecodeInterpreter::print_debug_info(interpreterState istate, address pc, 
       ResourceMark rm;
       tty->print_cr(CL_YELLOW "=================================================================" CNONE);
       tty->print_cr("current stack pointer %p %p %d", topOfStack, istate->stack_base(), GET_STACK_OFFSET);
-      ConcolicMngr::ctx->print_stack_trace();
+//      ConcolicMngr::ctx->print_stack_trace();
       methodHandle mh(THREAD, (Method *) method);
       BytecodeTracer::set_closure(BytecodeTracer::std_closure());
       BytecodeTracer::trace(mh, pc, tty);

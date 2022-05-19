@@ -63,7 +63,7 @@
 #ifndef ENABLE_WEBRIDGE
     assert(top_zero_frame() == NULL, "junk on stack prior to Java call");
 #else
-    if (!_first_print_assertion) {
+    if (top_zero_frame() != NULL && !_first_print_assertion) {
       tty->print_cr("[Info] Unconfirmed assertion violated on record_base_of_stack_pointer");
       _first_print_assertion = true;
     }
@@ -74,7 +74,7 @@
     assert(base_sp == NULL, "should be");
     assert(top_zero_frame() == NULL, "junk on stack after Java call");
 #else
-    if (!_first_print_assertion) {
+    if ((top_zero_frame() != NULL || base_sp != NULL) && !_first_print_assertion) {
       tty->print_cr("[Info] Unconfirmed assertion violated on set_base_of_stack_pointer");
       _first_print_assertion = true;
     }
