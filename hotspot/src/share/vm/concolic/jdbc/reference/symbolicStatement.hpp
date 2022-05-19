@@ -93,6 +93,8 @@ public:
 
   virtual bool is_txn_control() { return false; }
 
+  virtual Expression *get_ref_exp();
+
 public:
   bool need_recursive() { return false; }
   void print();

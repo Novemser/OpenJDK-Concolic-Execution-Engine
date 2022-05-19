@@ -216,6 +216,10 @@ const exp_map_t &SymStmt::get_param_exps() const {
   return _param_exps;
 }
 
+Expression *SymStmt::get_ref_exp() {
+  return NULL;
+}
+
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
 
 void StatementSymbolExp::print() {
