@@ -2,8 +2,6 @@ package concolic.test.array;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ArrayTest {
     static class InternalLong {
         long value;
@@ -16,17 +14,14 @@ public class ArrayTest {
     void testConcreteArrayStoreSymbolicValue() {
         long a[] = new long[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
         InternalLong i = new InternalLong(42);
-        System.out.println("S-1");
         System.startConcolic();
-//        System.symbolize(i);
-        System.out.println("S0");
-//        a[5] = i.value;
-//        if (a[5] > 0) {}
-        System.out.println("S1");
-//        String pathCondition = System.getPathCondition();
-        System.out.println("S2");
-//        System.out.println(pathCondition);
-//        assertTrue(pathCondition.contains("PathCondition"));
+        System.symbolize(i);
+        a[5] = i.value;
+        if (a[5] > 0) {}
+        String pathCondition = System.getPathCondition();
+        if (!pathCondition.equals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"J\",\"_exp\":\"M_J_1_field24\"},\"_op\":\"--\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_expr\":\"Y_J_0\"}},\"_op\":\">\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_expr\":\"Y_I_0\"}}]")) {
+            throw new RuntimeException("Unexpected path condition:" + pathCondition);
+        }
         System.endConcolic();
     }
 }
