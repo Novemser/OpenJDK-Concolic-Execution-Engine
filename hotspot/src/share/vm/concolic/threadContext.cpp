@@ -199,8 +199,11 @@ std::string ThreadContext::get_current_code_pos() {
   address bcp = istate->bcp();
 
   Method *method = istate->method();
-  int bci = method->bci_from(bcp);
-  int line = method->line_number_from_bci(bci);
+  int line = -1;
+  if (bcp != NULL) {
+    int bci = method->bci_from(bcp);
+    line = method->line_number_from_bci(bci);
+  }
 
   method->print_name(&ss);
   ss.print(":%d", line);
