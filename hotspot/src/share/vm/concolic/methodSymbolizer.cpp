@@ -18,6 +18,7 @@
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
+#include "concolic/reference/internal/symbolicUnsafe.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateMethod.hpp"
 #include "memory/resourceArea.hpp"
@@ -46,6 +47,7 @@ void MethodSymbolizer::init_helper_methods() {
   SymTimestamp::init_register_class(this);
 //  SymHibernateKey::init_register_class(this);
 //  SymHibernateMethod::init_register_class(this);
+  SymbolicUnsafe::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,
@@ -124,6 +126,14 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
                   callee_method->name_and_sig_as_C_string());
     invoke_method_helper(_handle);
     need_symbolize = true;
+  } else {
+    for (size_t klz_index = 0;
+         klz_index < _classes_prefix_to_symbolize.size();
+         ++klz_index) {
+      if (callee_holder_name.find(_classes_prefix_to_symbolize[klz_index]) != std::string::npos) {
+        need_symbolize = true;
+      }
+    }
   }
 
   if (need_symbolize) {
@@ -314,6 +324,10 @@ void MethodSymbolizer::print() {
       }
     }
   }
+}
+
+void MethodSymbolizer::add_prefix_symbolic_class(const std::string class_name) {
+  _classes_prefix_to_symbolize.push_back(class_name);
 }
 
 sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;

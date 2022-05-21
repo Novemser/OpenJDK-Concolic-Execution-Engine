@@ -176,7 +176,7 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
     BasicType type = handle.get_result_type();
     Expression *exp = NULL;
     oop obj = NULL;
-
+    tty->print_cr("SymString finish_method_helper %s", callee_name.c_str());
     switch (type) {
     case T_VOID:
 //      if (callee_name == "getChars") {
@@ -196,7 +196,8 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
       }
       break;
     case T_ARRAY:
-      ShouldNotCallThis();
+      tty->print_cr("[Warning] Array result type not handled by method String.%s", callee_name.c_str());
+//      ShouldNotCallThis();
       break;
     default:
       exp = new OpStrExpression(callee_name, handle.get_param_list());

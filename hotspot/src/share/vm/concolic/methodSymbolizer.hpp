@@ -27,6 +27,7 @@ class MethodSymbolizer {
   MethodSymbolizerHandle _handle;
   invoke_helper_method_map_t _invoke_helper_methods;
   finish_helper_method_map_t _finish_helper_methods;
+  std::vector<std::string> _classes_prefix_to_symbolize;
 
 public:
   MethodSymbolizer();
@@ -59,6 +60,8 @@ public:
                            intptr_t *locals, int locals_offset);
   void add_invoke_helper_methods(const std::string class_name, bool(*invoke_helper_func)(MethodSymbolizerHandle&));
   void add_finish_helper_methods(const std::string class_name, Expression*(*finish_helper_func)(MethodSymbolizerHandle&));
+
+  void add_prefix_symbolic_class(const std::string class_name);
 };
 
 class MethodReturnSymbolExp : public SymbolExpression {
