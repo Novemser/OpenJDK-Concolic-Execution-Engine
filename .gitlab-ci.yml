@@ -7,26 +7,16 @@ stages:
 
 cache:
   paths:
-    - build/
+    - build/linux-x86_64-normal-zero-release/images/j2sdk-image
     - concolic-test/.gradle/caches
     - concolic-test/.gradle/wrapper
 
 build-jdk:
- stage: build
- script:
-  - ./scripts/configure-ci.sh
-  - make clean JOBS=24 CONF=linux-x86_64-normal-zero-release
-  - make hotspot jdk images JOBS=24 CONF=linux-x86_64-normal-zero-release
-#  artifacts:
-#    paths:
-#      - build/linux-x86_64-normal-zero-release/images/j2sdk-image
-
-#build-shopizer:
-#  stage: build
-#  script:
-#    - git clone git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
-#    - cd shopizer
-#    - git checkout 73747973c0d938df18caa366a8bd8a20906a9e2a
+  stage: build
+  script:
+    - ./scripts/configure-ci.sh
+    - make clean JOBS=24 CONF=linux-x86_64-normal-zero-release
+    - make hotspot jdk images JOBS=30 CONF=linux-x86_64-normal-zero-release
 
 test-unit:
   stage: test
@@ -36,10 +26,10 @@ test-unit:
     - ./gradlew test
 
 test-shopizer:
- stage: test
- script:
-   - git clone --depth 1 --branch openjdk_concolic_adapt git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
-   - cd shopizer
-   - cd $CI_PROJECT_DIR/shopizer/sm-shop
-   - *export_build_jdk
-   - mvn test -X
+  stage: test
+  script:
+    - git clone --depth 1 --branch openjdk_concolic_adapt git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
+    - cd shopizer
+    - cd $CI_PROJECT_DIR/shopizer/sm-shop
+    - *export_build_jdk
+    - mvn test -X
