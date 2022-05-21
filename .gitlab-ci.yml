@@ -41,4 +41,5 @@ test-shopizer:
    - git clone --depth 1 --branch openjdk_concolic_adapt git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
    - cd shopizer
    - cd $CI_PROJECT_DIR/shopizer/sm-shop
+   - *export_build_jdk
    - mvn test -X
