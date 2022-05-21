@@ -12,6 +12,8 @@ class ArrayInternal {
 private:
   std::vector<Expression* > _element_exprs;
   Expression* _length_expr;
+
+  void try_resize(int index);
 public:
   ArrayInternal(int length) {
     _element_exprs.resize(length);
