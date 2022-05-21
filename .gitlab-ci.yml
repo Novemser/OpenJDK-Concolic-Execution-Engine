@@ -34,11 +34,10 @@ test-unit:
     - *export_build_jdk
     - ./gradlew test
 
-# test-shopizer:
-#   stage: test
-#   script:
-#     - git clone --depth 1 --branch openjdk_concolic_adapt git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
-#     - cd shopizer
-#     - export JAVA_HOME=$CI_PROJECT_DIR/build/linux-x86_64-normal-zero-release/jdk
-#     - cd $CI_PROJECT_DIR/shopizer/sm-shop
-#     - mvn test
+test-shopizer:
+ stage: test
+ script:
+   - git clone --depth 1 --branch openjdk_concolic_adapt git@ipads.se.sjtu.edu.cn:ipads-storage/codebase/wbridge/shopizer.git
+   - cd shopizer
+   - cd $CI_PROJECT_DIR/shopizer/sm-shop
+   - mvn test -X

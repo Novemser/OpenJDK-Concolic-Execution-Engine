@@ -39,13 +39,13 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIE
 
   saveTemp(argCppStr);
 
-  Handle arg;
-  JavaCalls::call_static(
-      &result, klass,
-      vmSymbols::_add_SQLTemplate(),
-      vmSymbols::_add_SQLTemplate_signature(),
-      arg, currentThread
-  );
+//  Handle arg;
+//  JavaCalls::call_static(
+//      &result, klass,
+//      vmSymbols::_add_SQLTemplate(),
+//      vmSymbols::_add_SQLTemplate_signature(),
+//      arg, currentThread
+//  );
 }
 
 static std::string tmp_file_location = "/tmp/webridgeMngr.tmp.sp.string";
