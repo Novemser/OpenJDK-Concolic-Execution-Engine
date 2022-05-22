@@ -5,8 +5,9 @@
 #include "arrayInternal.hpp"
 
 void ArrayInternal::store(int index, Expression *exp) {
-  guarantee(index >= 0 && index < (int) _element_exprs.size(), "Must be >= 0 && < size");
-//  try_resize(index);
+  guarantee(index >= 0, "Must be >= 0");
+  try_resize(index);
+  guarantee(index < (int) _element_exprs.size(), "Must be < size");
   _element_exprs[index] = exp;
   if (exp != NULL) {
     exp->inc_ref();
@@ -23,7 +24,7 @@ Expression *ArrayInternal::load(int index) {
 
 void ArrayInternal::try_resize(int index) {
   if (index >= (int) _element_exprs.size()) {
-    _element_exprs.resize(index, NULL);
+    _element_exprs.resize(index + 1, NULL);
   }
 }
 
