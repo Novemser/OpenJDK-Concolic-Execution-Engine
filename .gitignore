@@ -10,3 +10,5 @@ builds/
 *.log
 cmake-build-debug/
 compile_commands.json
+core
+*/core

@@ -14,6 +14,13 @@ public class ArrayTest {
     }
 
     @Test
+    void testArray() {
+        // WARNING: due to wired issue about running unit test with gradle under openjdk-concolic,
+        // I place separate testing functions together in one function (as a workaround to tickle the original wired issue)
+        testConcreteArrayStoreSymbolicValue();
+        testSymbolicArrayStoreSymbolicValue();
+    }
+
     void testConcreteArrayStoreSymbolicValue() {
         long a[] = new long[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
         InternalLong i = new InternalLong(42);
@@ -27,7 +34,6 @@ public class ArrayTest {
         System.endConcolic();
     }
 
-    @Test
     void testSymbolicArrayStoreSymbolicValue() {
         long a[] = new long[]{10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
         InternalLong i = new InternalLong(42);
