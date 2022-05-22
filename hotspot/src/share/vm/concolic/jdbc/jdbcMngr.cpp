@@ -10,33 +10,38 @@
 #include <string>
 
 JdbcMngr::~JdbcMngr() {
-  ulong size = _txs.size();
-  for (ulong i = 0; i < size; ++i) {
-    delete _txs[i];
-  }
-  _txs.clear();
+//  ulong size = _txs.size();
+//  for (ulong i = 0; i < size; ++i) {
+//    delete _txs[i];
+//  }
+//  _txs.clear();
+//  size_t size = _sym_stmt_list.size();
+//  for (size_t stmt_index = 0; stmt_index < size; stmt_index++) {
+//    delete _sym_stmt_list[stmt_index].first;
+//  }
+//  _sym_stmt_list.clear();
 }
 
 void JdbcMngr::set_auto_commit(jboolean auto_commit, jlong conn_id) {
   tty->print_cr("[Txn] set_auto_commit: %us, conn_id:%ld", auto_commit, conn_id);
-  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
+//  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
   SymSetAutoCommit* autoCommit = new SymSetAutoCommit(auto_commit);
   autoCommit->set_pc(ConcolicMngr::ctx->get_path_condition());
   _sym_stmt_list.push_back(std::make_pair(autoCommit, conn_id));
 
-  if (!auto_commit) {
-    tx_id_t tx_id = _txs.size();
-    TxInfo *tx = new TxInfo(tx_id);
-    _txs.push_back(tx);
-
-    guarantee(iter == _conn_ongoing_tx.end(), "should be");
-    _conn_ongoing_tx[conn_id] = tx;
-  } else {
-    if (iter != _conn_ongoing_tx.end()) {
-      iter->second->commit();
-      _conn_ongoing_tx.erase(iter);
-    }
-  }
+//  if (!auto_commit) {
+//    tx_id_t tx_id = _txs.size();
+//    TxInfo *tx = new TxInfo(tx_id);
+//    _txs.push_back(tx);
+//
+//    guarantee(iter == _conn_ongoing_tx.end(), "should be");
+//    _conn_ongoing_tx[conn_id] = tx;
+//  } else {
+//    if (iter != _conn_ongoing_tx.end()) {
+//      iter->second->commit();
+//      _conn_ongoing_tx.erase(iter);
+//    }
+//  }
 }
 
 void JdbcMngr::commit(jlong conn_id) {
@@ -49,11 +54,11 @@ void JdbcMngr::commit(jlong conn_id) {
 void JdbcMngr::print() {
   // txns
 //  tty->print("txns:");
-  ulong size = _txs.size();
+//  ulong size = _txs.size();
 //  for (ulong i = 0; i < size; ++i) {
 //    _txs[i]->print();
 //  }
-  tty->print_cr("[Print] Txn size:%lu, sql list size:%lu", size, _sym_stmt_list.size());
+  tty->print_cr("[Print] Sql list size:%lu", _sym_stmt_list.size());
   for (ulong i = 0; i < _sym_stmt_list.size(); i++) {
     std::pair<SymStmt *, jlong> &pair = _sym_stmt_list[i];
     tty->print("[Connection %lu] ", pair.second);
@@ -63,38 +68,38 @@ void JdbcMngr::print() {
 //    _txs[i]->print();
 //  }
   // persistent obj
-  tty->print_cr("persistent objects:");
-  for (RidToStringIt pair = persistentObjStackTrace.begin(); pair != persistentObjStackTrace.end(); pair++) {
-    tty->print_cr("%ld: %s", pair->first, pair->second.c_str());
-  }
-
-  // checker
-  ulong unrecorded_select_count = 0;
-  ulong unrecorded_nonselect_count = 0;
-  ulong num_txs = _txs.size();
-  for (ulong i = 0; i < num_txs; ++i) {
-    TxInfo *tx = _txs[i];
-    std::vector<SymStmt*> stmts = tx->get_stmts();
-    ulong num_stmts = stmts.size();
-    tty->print_cr("|txn: %-8lu =====================================", i);
-    for (ulong j = 0; j < num_stmts; j++) {
-      if (stmts[j]->get_obj_rid() == 0) {
-        tty->print_cr("|%-8lu|  ????  |%-128s...|", stmts[j]->get_sym_rid(), stmts[j]->get_sql_template().c_str());
-        if (stmts[j]->get_sql_template().find("select") == 0) {
-          unrecorded_select_count++;
-        } else {
-          unrecorded_nonselect_count++;
-        }
-      } else {
-        tty->print_cr("|%-8lu|%-8lu|%-32s...|", stmts[j]->get_sym_rid(), stmts[j]->get_obj_rid(), stmts[j]->get_sql_template().c_str());
-      }
-    }
-    tty->print_cr("|===================================================");
-  }
-  tty->print_cr("total number of stmts that doesn't have a corresponding object: %lu",
-                unrecorded_select_count + unrecorded_nonselect_count);
-  tty->print_cr("among them %lu are select, %lu are non-select", unrecorded_select_count, unrecorded_nonselect_count);
-  tty->print_cr("note that if non-select is not 0, then you may need to check the process of collections (I didn't deal with them)!\n");
+//  tty->print_cr("persistent objects:");
+//  for (RidToStringIt pair = persistentObjStackTrace.begin(); pair != persistentObjStackTrace.end(); pair++) {
+//    tty->print_cr("%ld: %s", pair->first, pair->second.c_str());
+//  }
+//
+//  // checker
+//  ulong unrecorded_select_count = 0;
+//  ulong unrecorded_nonselect_count = 0;
+//  ulong num_txs = _txs.size();
+//  for (ulong i = 0; i < num_txs; ++i) {
+//    TxInfo *tx = _txs[i];
+//    std::vector<SymStmt*> stmts = tx->get_stmts();
+//    ulong num_stmts = stmts.size();
+//    tty->print_cr("|txn: %-8lu =====================================", i);
+//    for (ulong j = 0; j < num_stmts; j++) {
+//      if (stmts[j]->get_obj_rid() == 0) {
+//        tty->print_cr("|%-8lu|  ????  |%-128s...|", stmts[j]->get_sym_rid(), stmts[j]->get_sql_template().c_str());
+//        if (stmts[j]->get_sql_template().find("select") == 0) {
+//          unrecorded_select_count++;
+//        } else {
+//          unrecorded_nonselect_count++;
+//        }
+//      } else {
+//        tty->print_cr("|%-8lu|%-8lu|%-32s...|", stmts[j]->get_sym_rid(), stmts[j]->get_obj_rid(), stmts[j]->get_sql_template().c_str());
+//      }
+//    }
+//    tty->print_cr("|===================================================");
+//  }
+//  tty->print_cr("total number of stmts that doesn't have a corresponding object: %lu",
+//                unrecorded_select_count + unrecorded_nonselect_count);
+//  tty->print_cr("among them %lu are select, %lu are non-select", unrecorded_select_count, unrecorded_nonselect_count);
+//  tty->print_cr("note that if non-select is not 0, then you may need to check the process of collections (I didn't deal with them)!\n");
 
 }
 
@@ -103,13 +108,13 @@ void JdbcMngr::record_stmt(SymStmt *stmt, jlong conn_id) {
 //  stmt->print();
   _sym_stmt_list.push_back(std::make_pair(stmt, conn_id));
 
-  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
-  if (iter != _conn_ongoing_tx.end()) {
-    // There's no ongoing transaction in conn_id connection
-    guarantee(iter->second, "should be");
-    iter->second->record_stmt(stmt);
-    tty->print_cr("Recorded stmt into txn %lu", iter->first);
-  }
+//  std::map<jlong, TxInfo *>::iterator iter = _conn_ongoing_tx.find(conn_id);
+//  if (iter != _conn_ongoing_tx.end()) {
+//    // There's no ongoing transaction in conn_id connection
+//    guarantee(iter->second, "should be");
+//    iter->second->record_stmt(stmt);
+//    tty->print_cr("Recorded stmt into txn %lu", iter->first);
+//  }
 }
 
 void JdbcMngr::record_stmt_obj_pair(oop stmt_or_proxy, oop obj) {

@@ -38,6 +38,12 @@ ThreadContext::~ThreadContext() {
   _sym_tmp_exps.clear();
 
   _path_condition.gc();
+  ArrayStore::iterator arr_it;
+
+  for (arr_it = _array_store.begin(); arr_it != _array_store.end(); arr_it++) {
+    guarantee(arr_it->second != NULL, "Array store should not be null");
+    delete arr_it->second;
+  }
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
