@@ -38,6 +38,7 @@ private:
   sym_tmp_id_t _sym_tmp_id_counter;
 
   bool _path_condition_enabled;
+  std::set<oop> _allocated_objs;
 public:
   ThreadContext(JavaThread *jt);
   ~ThreadContext();

@@ -466,6 +466,12 @@ JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classL
                                                    true,
                                                    THREAD);
 
+  if (klass == NULL) {
+    tty->print_cr(
+        "[WeBridge] Required class _wbridge_storedprocedure_StoredProcedureManager not found! Add to your class path");
+    return;
+  }
+
   KlassHandle klass_handle(THREAD, klass);
   // Check if we should initialize the class
   if (klass_handle->oop_is_instance()) {

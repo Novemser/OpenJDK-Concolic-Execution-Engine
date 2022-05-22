@@ -44,6 +44,11 @@ ThreadContext::~ThreadContext() {
     guarantee(arr_it->second != NULL, "Array store should not be null");
     delete arr_it->second;
   }
+
+  std::set<oop>::iterator _allocated_objs_iter;
+  for (_allocated_objs_iter = _allocated_objs.begin(); _allocated_objs_iter != _allocated_objs.end(); _allocated_objs_iter++) {
+    (*_allocated_objs_iter)->set_sym_rid(NULL_SYM_RID);
+  }
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
@@ -110,7 +115,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   }
 
   this->set_sym_ref(sym_rid, sym_inst);
-
+  _allocated_objs.insert(obj);
   return sym_inst;
 }
 
@@ -146,7 +151,7 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 
   this->record_path_condition(
       new ArrayInitExpression(sym_arr->get_sym_rid(), array));
-
+  _allocated_objs.insert(array);
   return sym_arr;
 }
 
