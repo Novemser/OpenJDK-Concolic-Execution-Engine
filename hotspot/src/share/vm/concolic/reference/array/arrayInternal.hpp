@@ -11,11 +11,15 @@
 class ArrayInternal {
 private:
   std::vector<Expression* > _element_exprs;
-  Expression* _length_expr;
+
+  void try_resize(int index);
 public:
   ArrayInternal(int length) {
-    _element_exprs.resize(length);
+    guarantee(length > 0, "Array length should be > 0");
+    _element_exprs.resize(length + 1, NULL);
   }
+  ~ArrayInternal();
+
   void store(int index, Expression* exp);
   Expression* load(int index);
 };
