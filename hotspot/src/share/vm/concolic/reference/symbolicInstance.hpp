@@ -31,10 +31,7 @@ public:
     return exp;
   }
   virtual Expression *get_ref_exp() = 0;
-//  {
-//    ShouldNotCallThis();
-//    return NULL;
-//  }
+
   virtual void set_ref_exp(Expression *) { ShouldNotCallThis(); }
 
   virtual void init_sym_exp(int field_offset, Expression *exp) {

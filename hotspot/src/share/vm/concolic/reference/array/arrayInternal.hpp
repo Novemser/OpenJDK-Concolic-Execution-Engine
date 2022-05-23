@@ -4,6 +4,7 @@
 
 #ifndef JDK8_CDB_ARRAYINTERNAL_HPP
 #define JDK8_CDB_ARRAYINTERNAL_HPP
+#ifdef ENABLE_CONCOLIC
 #include "oops/oopsHierarchy.hpp"
 #include "concolic/exp/expression.hpp"
 
@@ -24,5 +25,5 @@ public:
   Expression* load(int index);
 };
 
-
+#endif
 #endif //JDK8_CDB_ARRAYINTERNAL_HPP

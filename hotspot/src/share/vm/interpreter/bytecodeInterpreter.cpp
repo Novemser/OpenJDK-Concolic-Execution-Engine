@@ -2299,7 +2299,6 @@ run:
                 );
               }
             } else if (!isElemNull && rhsObject->is_symbolic()) {
-              tty->print_cr("AASTORE P2");
               ConcolicMngr::ctx->get_or_create_array_internal(arrObj)->store(
                   index,
                   ConcolicMngr::ctx->get_sym_inst(rhsObject)->get_ref_exp()

@@ -349,7 +349,7 @@ JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
 #ifdef ENABLE_CONCOLIC
   if (obj == NULL) {
     // TODO: use THROW instead of assertion
-    assert(false, "JVM_Symbolize: obj is null");
+    guarantee(false, "JVM_Symbolize: obj is null");
   }
   // TODO: check behaviors when facing like `arrayOop`
   oop o = JNIHandles::resolve_non_null(obj);

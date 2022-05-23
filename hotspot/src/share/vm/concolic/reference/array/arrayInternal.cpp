@@ -1,7 +1,7 @@
 //
 // Created by gansen on 5/18/22.
 //
-
+#ifdef ENABLE_CONCOLIC
 #include "arrayInternal.hpp"
 
 void ArrayInternal::store(int index, Expression *exp) {
@@ -33,3 +33,4 @@ ArrayInternal::~ArrayInternal() {
     Expression::gc(_element_exprs[elem_index]);
   }
 }
+#endif
