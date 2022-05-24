@@ -2,6 +2,7 @@
 // Created by novemser on 5/9/22.
 //
 #include "jsonUtils.hpp"
+#ifdef ENABLE_WEBRIDGE
 
 #include "webridge/utils/rapidjson/writer.h"
 #include "webridge/utils/rapidjson/stringbuffer.h"
@@ -107,3 +108,4 @@ jstring jsonUtils::stringToOop(std::string input, JNIEnv *env, Thread *thread) {
   // TODO: try initialize the String object
   return NULL;
 }
+#endif

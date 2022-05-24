@@ -4,7 +4,7 @@
 
 #ifndef OPENJDK8_JSONUTILS_HPP
 #define OPENJDK8_JSONUTILS_HPP
-
+#ifdef ENABLE_WEBRIDGE
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -19,5 +19,5 @@ public:
   static jstring stringToOop(std::string input, JNIEnv *env, Thread* thread);
 };
 
-
+#endif
 #endif //OPENJDK8_JSONUTILS_HPP

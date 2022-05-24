@@ -521,6 +521,7 @@ JVM_ENTRY(jstring, JVM_GetPcStr(JNIEnv *env, jclass ignored))
   return (jstring) JNIHandles::make_local(env, str());
 #else
   ShouldNotReachHere();
+  return NULL;
 #endif
 JVM_END
 

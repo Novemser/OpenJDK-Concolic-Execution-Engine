@@ -5,10 +5,11 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef ENABLE_WEBRIDGE
+
 #include "webridgeMngr.hpp"
 #include "utils/jsonUtils.hpp"
 
-#ifdef ENABLE_WEBRIDGE
 
 #include "jni.h"
 #include "runtime/interfaceSupport.hpp"

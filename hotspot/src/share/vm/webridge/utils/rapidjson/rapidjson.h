@@ -434,7 +434,11 @@ RAPIDJSON_NAMESPACE_END
 */
 #ifndef RAPIDJSON_ASSERT
 //#include <cassert>
+#ifdef ENABLE_CONCOLIC
 #define RAPIDJSON_ASSERT(x) assert(x, "RapidJsonAssert")
+#else
+#define RAPIDJSON_ASSERT(x)
+#endif
 #endif // RAPIDJSON_ASSERT
 
 ///////////////////////////////////////////////////////////////////////////////

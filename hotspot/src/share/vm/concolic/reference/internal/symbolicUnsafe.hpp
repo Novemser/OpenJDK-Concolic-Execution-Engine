@@ -4,6 +4,7 @@
 
 #ifndef JDK8_CDB_SYMBOLICUNSAFE_HPP
 #define JDK8_CDB_SYMBOLICUNSAFE_HPP
+#ifdef ENABLE_CONCOLIC
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/methodSymbolizer.hpp"
 #include "concolic/exp/expression.hpp"
@@ -16,5 +17,5 @@ public:
   static void init_register_class(MethodSymbolizer *m_symbolizer);
 };
 
-
+#endif
 #endif //JDK8_CDB_SYMBOLICUNSAFE_HPP

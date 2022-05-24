@@ -1,6 +1,7 @@
 //
 // Created by gansen on 5/23/22.
 //
+#ifdef ENABLE_CONCOLIC
 
 #include "symbolicString.hpp"
 #include "symbolicHttpServletRequest.hpp"
@@ -53,3 +54,4 @@ void SymbolicHttpServletRequest::init_register_class(MethodSymbolizer *m_symboli
 }
 
 
+#endif

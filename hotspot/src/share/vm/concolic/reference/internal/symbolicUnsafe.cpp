@@ -1,6 +1,7 @@
 //
 // Created by gansen on 5/20/22.
 //
+#ifdef ENABLE_CONCOLIC
 
 #include "symbolicUnsafe.hpp"
 
@@ -28,3 +29,4 @@ void SymbolicUnsafe::init_register_class(MethodSymbolizer *m_symbolizer) {
     m_symbolizer->add_finish_helper_methods(klasses[index]->c_str(), finish_method_helper);
   }
 }
+#endif

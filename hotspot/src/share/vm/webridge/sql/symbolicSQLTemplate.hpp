@@ -1,7 +1,7 @@
 //
 // Created by gansen on 5/2/22.
 //
-
+#ifdef ENABLE_WEBRIDGE
 #ifndef JDK8_CDB_SYMBOLICSQLTEMPLATE_HPP
 #define JDK8_CDB_SYMBOLICSQLTEMPLATE_HPP
 
@@ -81,5 +81,5 @@ public:
   }
 };
 
-
 #endif //JDK8_CDB_SYMBOLICSQLTEMPLATE_HPP
+#endif
