@@ -70,6 +70,7 @@ StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, "'String'");
   ss.print("%lu", sym_rid);
+  _type = vmSymbols::java_lang_String()->as_C_string();
   this->finalize(ss.size());
 }
 
@@ -77,6 +78,7 @@ ConStringSymbolExp::ConStringSymbolExp(oop obj) {
   ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'Y', T_OBJECT, "'String'");
+  _type = vmSymbols::java_lang_String()->as_C_string();
   ss.print("%s", OopUtils::java_string_to_c(obj));
   this->finalize(ss.size());
 }
@@ -84,6 +86,7 @@ ConStringSymbolExp::ConStringSymbolExp(oop obj) {
 ConStringSymbolExp::ConStringSymbolExp(const std::string &str) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'Y', T_OBJECT, "'String'");
+  _type = vmSymbols::java_lang_String()->as_C_string();
   ss.print("%s", str.c_str());
   this->finalize(ss.size());
 }

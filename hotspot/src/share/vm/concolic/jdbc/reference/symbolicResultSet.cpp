@@ -75,7 +75,7 @@ void SymResSet::print() {
 
 void SymResSet::set_sym_stmt(SymStmt *sym_stmt) {
   _sym_stmt = sym_stmt;
-  _sql_id = sym_stmt->get_sym_rid();
+  _sql_id = sym_stmt->get_query_id();
   _ref_exp = new ResultSetSymbolExp(this);
   _ref_exp->inc_ref();
   sym_stmt->set_row_count_exp(new ResultSetSymbolExp(this, true), 0);

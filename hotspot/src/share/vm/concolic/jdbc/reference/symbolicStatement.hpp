@@ -10,6 +10,7 @@
 #include "oops/oop.inline.hpp"
 #include "utilities/debug.hpp"
 #include "concolic/methodSymbolizer.hpp"
+#include "symbolicResultSet.hpp"
 
 class SymStmt;
 
@@ -35,6 +36,8 @@ public:
   }
 
 private:
+  static int _global_query_id;
+
   static std::set<std::string> target_class_names;
   static std::set<std::string> init_target_class_names();
   static std::set<std::string> skip_method_names;
@@ -51,6 +54,8 @@ private:
   int _row_count;
   sym_rid_t obj_rid;
   PathCondition _pc;
+  SymResSet* _result_set;
+  int _query_id;
 
 public:
   SymStmt(sym_rid_t sym_rid);
@@ -95,6 +100,11 @@ public:
 
   virtual Expression *get_ref_exp();
 
+  SymResSet *get_result_set() const;
+
+  void set_result_set(SymResSet *resultSet);
+
+  inline int get_query_id() { return _query_id; }
 public:
   bool need_recursive() { return false; }
   void print();

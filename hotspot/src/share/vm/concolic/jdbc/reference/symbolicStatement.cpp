@@ -12,6 +12,7 @@
 #include "concolic/reference/symbolicTimestamp.hpp"
 
 long SymStmt::execute_counter = 0;
+int SymStmt::_global_query_id = 0;
 
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
@@ -68,7 +69,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   return map;
 }
 
-SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL),_row_count(0), obj_rid(NULL_SYM_RID) {}
+SymStmt::SymStmt(sym_rid_t sym_rid) : SymInstance(sym_rid), _sql_template(""), _row_count_exp(NULL),_row_count(0), obj_rid(NULL_SYM_RID), _result_set(NULL), _query_id(++_global_query_id) {}
 
 SymStmt::~SymStmt() {
   exp_map_t::iterator iter;
@@ -173,6 +174,7 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       SymResSet *sym_res_set =
           (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
       sym_res_set->set_sym_stmt(sym_stmt);
+      sym_stmt->set_result_set(sym_res_set);
     } else if (callee_name == "executeUpdate") {
       jint row_count = handle.get_result<jint>(T_INT);
       exp = new ResultSetSymbolExp(sym_stmt);
@@ -218,6 +220,14 @@ const exp_map_t &SymStmt::get_param_exps() const {
 
 Expression *SymStmt::get_ref_exp() {
   return NULL;
+}
+
+SymResSet *SymStmt::get_result_set() const {
+  return _result_set;
+}
+
+void SymStmt::set_result_set(SymResSet *resultSet) {
+  _result_set = resultSet;
 }
 
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};

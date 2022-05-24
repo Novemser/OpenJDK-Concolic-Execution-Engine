@@ -23,12 +23,21 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     writer.Key("isTxnControl");
     writer.Bool(stmt->is_txn_control());
     writer.Key("sqlId");
-    writer.Int(stmt->get_sym_rid());
+    writer.Int(stmt->get_query_id());
     writer.Key("rowCountExp");
     if (stmt->get_row_count_exp()) {
       stmt->get_row_count_exp()->serialize(writer);
     } else {
       writer.Null();
+    }
+    SymResSet *resSet = stmt->get_result_set();
+    writer.Key("rowCount");
+    if (!stmt->is_txn_control()) {
+      guarantee(resSet != NULL, "Should not be null");
+      writer.Int(resSet->get_row_id());
+    } else {
+      // txn control stmt returns 0 rows
+      writer.Int(0);
     }
 
     // SQL parameters
