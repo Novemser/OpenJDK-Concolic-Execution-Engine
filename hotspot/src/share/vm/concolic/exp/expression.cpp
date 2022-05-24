@@ -140,7 +140,7 @@ void ConExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer
   writer.String("ConstExpr");
   writer.Key("_java_type");
   writer.String(_type.c_str());
-  writer.Key("_expr");
+  writer.Key("_exp");
   writer.String(_str);
 }
 

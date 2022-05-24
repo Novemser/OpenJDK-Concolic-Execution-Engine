@@ -74,6 +74,7 @@ public:
 class ConSymbolExp : public SymbolExpression {
 public:
   ConSymbolExp(const char* str, BasicType type);
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 

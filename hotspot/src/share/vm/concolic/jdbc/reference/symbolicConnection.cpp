@@ -40,7 +40,7 @@ void SymConn::init_register_class(MethodSymbolizer *m_symbolizer) {
 bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
-  tty->print_cr("invoke_method_helper callee_name in sym Connection:%s", callee_name.c_str());
+//  tty->print_cr("invoke_method_helper callee_name in sym Connection:%s", callee_name.c_str());
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     if (callee_name == "prepareStatement") {
       oop obj = handle.get_param<oop>(1);
@@ -73,7 +73,7 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 Expression *SymConn::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  tty->print_cr("finish_method_helper callee_name in sym Connection:%s", callee_name.c_str());
+//  tty->print_cr("finish_method_helper callee_name in sym Connection:%s", callee_name.c_str());
   if (callee_name == "prepareStatement") {
     oop res_obj = handle.get_result<oop>(T_OBJECT);
 

@@ -88,6 +88,15 @@ ConSymbolExp::ConSymbolExp(const char* str, BasicType type) {
   this->finalize(ss.size());
 }
 
+void ConSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("ConSymbolExp");
+  writer.Key("_java_type");
+  writer.String(_type.c_str());
+  writer.Key("_exp");
+  writer.String(_str.c_str());
+}
+
 
 ArraySymbolExp::ArraySymbolExp(sym_rid_t sym_arr_oid, int version,
                                BasicType type) {

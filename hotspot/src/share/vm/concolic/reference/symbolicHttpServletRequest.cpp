@@ -10,7 +10,6 @@ bool SymbolicHttpServletRequest::invoke_method_helper(MethodSymbolizerHandle &ha
   const std::string callee_name = handle.get_callee_name();
   handle.get_result_type();
   if (callee_name.find("getParameter") == std::string::npos) {
-    tty->print_cr("not handle callee:%s", callee_name.c_str());
     return false;
   }
   return true;

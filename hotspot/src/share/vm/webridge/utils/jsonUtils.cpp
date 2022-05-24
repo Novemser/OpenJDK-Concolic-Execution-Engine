@@ -5,6 +5,11 @@
 
 #include "webridge/utils/rapidjson/writer.h"
 #include "webridge/utils/rapidjson/stringbuffer.h"
+#include <algorithm>
+
+void toUpperCase(std::string &str) {
+  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+}
 
 std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStmt *, jlong> > &sym_stmt_list) {
   using namespace rapidjson;
@@ -15,11 +20,12 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
   for (size_t index = 0; index < sym_stmt_list.size(); ++index) {
     const std::pair<SymStmt *, jlong> &elem = sym_stmt_list[index];
     SymStmt *stmt = elem.first;
+    std::string templateStr = stmt->get_sql_template();
     writer.StartObject();
     writer.Key("connNo");
     writer.Int64(elem.second);
     writer.Key("sqlTemplate");
-    writer.String(stmt->get_sql_template().c_str());
+    writer.String(templateStr.c_str());
     writer.Key("isTxnControl");
     writer.Bool(stmt->is_txn_control());
     writer.Key("sqlId");
@@ -32,7 +38,8 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     }
     SymResSet *resSet = stmt->get_result_set();
     writer.Key("rowCount");
-    if (!stmt->is_txn_control()) {
+    toUpperCase(templateStr);
+    if (!stmt->is_txn_control() && templateStr != "SELECT 1") {
       guarantee(resSet != NULL, "Should not be null");
       writer.Int(resSet->get_row_id());
     } else {
@@ -95,7 +102,7 @@ jstring jsonUtils::stringToOop(std::string input, JNIEnv *env, Thread *thread) {
 //      input.length(), (void*)input.c_str()
 //  };
   assert(strClz->oop_is_instance(), "Should be InstanceKlass");
-  InstanceKlass* ik = (InstanceKlass*) strClz;
+  InstanceKlass *ik = (InstanceKlass *) strClz;
   assert(ik->is_initialized(), "Should be initialized");
   // TODO: try initialize the String object
   return NULL;
