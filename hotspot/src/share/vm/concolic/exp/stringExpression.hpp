@@ -45,6 +45,7 @@ class ConStringSymbolExp : public SymbolExpression {
 public:
     ConStringSymbolExp(oop obj);
     ConStringSymbolExp(const std::string& str);
+    virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 
 #endif

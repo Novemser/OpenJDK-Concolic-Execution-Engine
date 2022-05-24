@@ -91,4 +91,13 @@ ConStringSymbolExp::ConStringSymbolExp(const std::string &str) {
   this->finalize(ss.size());
 }
 
+void ConStringSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("ConStringSymbolExp");
+  writer.Key("_java_type");
+  writer.String(_type.c_str());
+  writer.Key("_exp");
+  writer.String(_str.c_str());
+}
+
 #endif
