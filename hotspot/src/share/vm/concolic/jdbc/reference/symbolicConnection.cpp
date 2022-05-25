@@ -17,6 +17,7 @@ method_set_t SymConn::init_handle_method_names() {
   m_set.insert("prepareStatement");
   m_set.insert("createStatement");
   m_set.insert("setAutoCommit");
+  m_set.insert("commit");
   return m_set;
 }
 
@@ -56,6 +57,7 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
     } else if (callee_name == "createStatement") {
     } else if (callee_name == "commit") {
       long conn_id = JdbcUtils::get_conn_connection_id(handle.get_param<oop>(0));
+      tty->print_cr("OK calling commit...");
       ConcolicMngr::ctx->get_jdbc_mngr().commit(conn_id);
     } else {
       ShouldNotCallThis();

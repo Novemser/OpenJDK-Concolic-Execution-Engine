@@ -49,7 +49,7 @@ void MethodSymbolizer::init_helper_methods() {
 //  SymHibernateKey::init_register_class(this);
 //  SymHibernateMethod::init_register_class(this);
   SymbolicUnsafe::init_register_class(this);
-  SymbolicHttpServletRequest::init_register_class(this);
+//  SymbolicHttpServletRequest::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,
