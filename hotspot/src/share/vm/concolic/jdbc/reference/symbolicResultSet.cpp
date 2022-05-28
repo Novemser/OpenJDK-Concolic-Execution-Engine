@@ -47,6 +47,7 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   set.insert("checkRowPos");
   set.insert("checkClosed");
   set.insert("getInstance");
+  set.insert("getMetaData");
   set.insert("checkColumnBounds");
   // do not handle clob~
   set.insert("getClob");
@@ -93,63 +94,58 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
     need_symbolize = true;
-  } else if (handle_method_names.find(callee_name) !=
-                 handle_method_names.end() ||
-             skip_method_names.find(callee_name) != skip_method_names.end()) {
-    if (strncmp("get", callee_name.c_str(), 3) == 0) {
-      if (callee_name == "getInstance") {
-        return need_symbolize = true;
-      }
-      oop res_set_obj = handle.get_param<oop>(0);
-      SymResSet *sym_res_set =
-          (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
+  } else if (handle_method_names.find(callee_name) != handle_method_names.end()) {
+    oop res_set_obj = handle.get_param<oop>(0);
+    SymResSet *sym_res_set =
+        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
 
-      oop this_obj = res_set_obj;
-      BasicType col_type;
-      {
-        ResourceMark rm;
-        SignatureStream ss(handle.get_callee_method()->signature());
-        col_type = ss.type();
-      }
-
-      if (col_type != T_OBJECT) {
-        return need_symbolize = true;
-      }
-      oop col_str_obj = handle.get_param<oop>(1);
-      JavaThread* thread = JavaThread::current();
-      guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
-                "should be string");
-
-      // use index to name the symbolic result set result
-      // prepare calling parameters
-      //  - calling param: 1. resultSet obj 2. the same string as calling the getXXX. They are already ready in stack.
-      JavaValue res(T_INT);
-      KlassHandle klass(thread, this_obj->klass());
-      const char* signature = "(Ljava/lang/String;)I";
-      const char* func_name = "findColumn";
-      JavaThreadState lastState = thread->thread_state();
-      // must transfer thread state to state_VM
-      thread->set_thread_state(_thread_in_vm);
-      tty->print_cr("Calling virtual %s.findColumn,result set class:%s", handle.get_callee_holder_name().c_str(),
-                    this_obj->klass()->name()->as_C_string());
-      // temporally disable concolic execution flag to avoid corruption of MethodSymbolizerHandle
-      ThreadContext* tc = ConcolicMngr::ctx;
-      ConcolicMngr::ctx = NULL;
-      JavaCalls::call_virtual(
-          &res,
-          Handle(this_obj),
-          klass,
-          SymbolTable::lookup(func_name, (int) strlen(func_name), thread),
-          SymbolTable::lookup(signature, (int) strlen(signature), thread),
-          Handle(col_str_obj),
-          thread
-      );
-      ConcolicMngr::ctx = tc;
-      // don't forget to restore the thread state
-      thread->set_thread_state(lastState);
-      assert(sym_res_set->_last_got_index == -1, "Should not be any pending index recording");
-      sym_res_set->_last_got_index = res.get_jint();
+    oop this_obj = res_set_obj;
+    BasicType col_type;
+    {
+      ResourceMark rm;
+      SignatureStream ss(handle.get_callee_method()->signature());
+      col_type = ss.type();
     }
+
+    if (col_type != T_OBJECT) {
+      return need_symbolize = true;
+    }
+    oop col_str_obj = handle.get_param<oop>(1);
+    JavaThread* thread = JavaThread::current();
+    guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
+              "should be string");
+
+    // use index to name the symbolic result set result
+    // prepare calling parameters
+    //  - calling param: 1. resultSet obj 2. the same string as calling the getXXX. They are already ready in stack.
+    JavaValue res(T_INT);
+    KlassHandle klass(thread, this_obj->klass());
+    const char* signature = "(Ljava/lang/String;)I";
+    const char* func_name = "findColumn";
+    JavaThreadState lastState = thread->thread_state();
+    // must transfer thread state to state_VM
+    thread->set_thread_state(_thread_in_vm);
+    tty->print_cr("Calling virtual %s.findColumn,result set class:%s", handle.get_callee_holder_name().c_str(),
+                  this_obj->klass()->name()->as_C_string());
+    // temporally disable concolic execution flag to avoid corruption of MethodSymbolizerHandle
+    ThreadContext* tc = ConcolicMngr::ctx;
+    ConcolicMngr::ctx = NULL;
+    JavaCalls::call_virtual(
+        &res,
+        Handle(this_obj),
+        klass,
+        SymbolTable::lookup(func_name, (int) strlen(func_name), thread),
+        SymbolTable::lookup(signature, (int) strlen(signature), thread),
+        Handle(col_str_obj),
+        thread
+    );
+    ConcolicMngr::ctx = tc;
+    // don't forget to restore the thread state
+    thread->set_thread_state(lastState);
+    assert(sym_res_set->_last_got_index == -1, "Should not be any pending index recording");
+    sym_res_set->_last_got_index = res.get_jint();
+    need_symbolize = true;
+  } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
     handle.get_callee_method()->print_name(tty);
@@ -163,11 +159,7 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
-  if (strncmp("get", callee_name.c_str(), 3) == 0) {
-    if (callee_name == "getInstance") {
-      return exp;
-    }
-
+  if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(this_obj);
@@ -204,6 +196,9 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
       tty->print_cr(" should handled by SymResSet");
       ShouldNotCallThis();
     }
+  } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
+    // DO NOTHING ABOUT skipped method
+    return NULL;
   } else if (callee_name == "next") {
     oop this_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =
