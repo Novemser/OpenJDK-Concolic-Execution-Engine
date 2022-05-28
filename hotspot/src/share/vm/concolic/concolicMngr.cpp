@@ -31,6 +31,11 @@ jlong ConcolicMngr::startConcolic(JavaThread *thread) {
 }
 
 jlong ConcolicMngr::endConcolic() {
+  if (!ctx) {
+    tty->print_cr("Warning: corrupted concolic execution thread state, is startConcolic() invoked properly?");
+    return 1;
+  }
+
   pthread_mutex_lock(&mutex);
 
   assert(_num_threads_in_concolic == 1, "should be");
