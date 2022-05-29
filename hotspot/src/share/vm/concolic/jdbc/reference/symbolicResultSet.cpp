@@ -94,6 +94,9 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
     need_symbolize = true;
+  } else if (callee_name == "getObject") {
+    // inside getObject, getInt/Long/String etc. will be invoked
+    need_symbolize = false;
   } else if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     oop res_set_obj = handle.get_param<oop>(0);
     SymResSet *sym_res_set =

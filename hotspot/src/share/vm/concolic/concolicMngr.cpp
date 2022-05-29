@@ -27,6 +27,7 @@ jlong ConcolicMngr::startConcolic(JavaThread *thread) {
 
   ctx = new ThreadContext(thread);
   pthread_mutex_unlock(&mutex);
+  tty->print_cr("Starting concolic execution");
   return 0;
 }
 
