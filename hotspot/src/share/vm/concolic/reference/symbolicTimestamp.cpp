@@ -69,4 +69,8 @@ void SymTimestamp::print() {
   tty->print("\n");
 }
 
+void SymTimestamp::set_sym_exp(int field_offset, Expression *exp) {
+  ShouldNotCallThis();
+}
+
 #endif

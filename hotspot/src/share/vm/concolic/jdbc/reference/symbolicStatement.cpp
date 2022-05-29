@@ -230,6 +230,10 @@ void SymStmt::set_result_set(SymResSet *resultSet) {
   _result_set = resultSet;
 }
 
+void SymStmt::set_sym_exp(int field_offset, Expression *exp) {
+  ShouldNotCallThis();
+}
+
 StatementSymbolExp::StatementSymbolExp(SymStmt *sym_stmt) : _sym_stmt(sym_stmt) {};
 
 void StatementSymbolExp::print() {
@@ -248,12 +252,20 @@ bool SymSetAutoCommit::is_txn_control() {
   return true;
 }
 
+void SymSetAutoCommit::set_sym_exp(int field_offset, Expression *exp) {
+
+}
+
 void SymCommit::print() {
   tty->print_cr("#commit");
 }
 
 bool SymCommit::is_txn_control() {
   return true;
+}
+
+void SymCommit::set_sym_exp(int field_offset, Expression *exp) {
+
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

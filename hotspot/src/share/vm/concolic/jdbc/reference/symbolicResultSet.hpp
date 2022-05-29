@@ -66,6 +66,8 @@ public:
 
   SymStmt *get_sym_stmt();
 
+  virtual void set_sym_exp(int field_offset, Expression *exp);
+
 public:
   bool need_recursive() { return false; }
 

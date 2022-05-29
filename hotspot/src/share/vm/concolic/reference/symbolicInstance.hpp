@@ -37,9 +37,7 @@ public:
   virtual void init_sym_exp(int field_offset, Expression *exp) {
     ShouldNotCallThis();
   }
-  virtual void set_sym_exp(int field_offset, Expression *exp) {
-    ShouldNotCallThis();
-  }
+  virtual void set_sym_exp(int field_offset, Expression *exp) = 0;
 
   virtual void print() = 0;
   virtual bool need_recursive() { return true; }

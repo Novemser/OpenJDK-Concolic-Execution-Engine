@@ -65,10 +65,11 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
     need_symbolize = true;
   } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
-  } else {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled by SymConn");
   }
+//  else {
+////    handle.get_callee_method()->print_name(tty);
+////    tty->print_cr(" handled by SymConn");
+//  }
 
   return need_symbolize;
 }

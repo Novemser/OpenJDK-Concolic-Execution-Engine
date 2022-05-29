@@ -142,4 +142,8 @@ void SymBigDecimal::print() {
   tty->print("\n");
 }
 
+void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
+  ShouldNotCallThis();
+}
+
 #endif

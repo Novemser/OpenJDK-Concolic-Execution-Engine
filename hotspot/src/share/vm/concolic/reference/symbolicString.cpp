@@ -216,4 +216,8 @@ Expression *SymString::get_exp_of(oop obj) {
   }
 }
 
+void SymString::set_sym_exp(int field_offset, Expression *exp) {
+  ShouldNotCallThis();
+}
+
 #endif

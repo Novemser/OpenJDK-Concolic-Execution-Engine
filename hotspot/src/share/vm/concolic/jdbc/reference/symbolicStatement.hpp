@@ -109,6 +109,8 @@ public:
   bool need_recursive() { return false; }
   void print();
 
+  virtual void set_sym_exp(int field_offset, Expression *exp);
+
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);
@@ -143,6 +145,8 @@ public:
   void print();
 
   virtual bool is_txn_control();
+
+  virtual void set_sym_exp(int field_offset, Expression *exp);
 };
 
 class SymCommit : public SymStmt {
@@ -154,6 +158,8 @@ public:
   void print();
 
   virtual bool is_txn_control();
+
+  virtual void set_sym_exp(int field_offset, Expression *exp);
 };
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

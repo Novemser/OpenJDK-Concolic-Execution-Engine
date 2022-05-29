@@ -48,6 +48,7 @@ std::set<std::string> SymResSet::init_skip_method_names() {
   set.insert("checkClosed");
   set.insert("getInstance");
   set.insert("getMetaData");
+  set.insert("$jacocoInit");
   set.insert("checkColumnBounds");
   // do not handle clob~
   set.insert("getClob");
@@ -84,7 +85,7 @@ void SymResSet::set_sym_stmt(SymStmt *sym_stmt) {
 
 bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = true;
+  bool need_symbolize = false;
 
   // WANING: Do not invoke ConcolicMngr::ctx->get_sym_inst(this) on static methods
 //  tty->print_cr("invoke_method_helper:%s", callee_name.c_str());
@@ -152,8 +153,8 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     need_symbolize = true;
   } else {
     handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" handled by SymResSet");
-    ShouldNotCallThis();
+    tty->print_cr("%s should handled by SymResSet", handle.get_callee_name().c_str());
+//    ShouldNotCallThis();
   }
 
   return need_symbolize;
@@ -221,6 +222,14 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 SymStmt *SymResSet::get_sym_stmt() { return _sym_stmt; }
+
+void SymResSet::set_sym_exp(int field_offset, Expression *exp) {
+  if (exp != NULL) {
+    tty->print_cr("Setting symRes field offset:%d", field_offset);
+    exp->print_cr();
+    ShouldNotCallThis();
+  }
+}
 
 ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, bool is_size) {
   stringStream ss(str_buf, BUF_SIZE);
