@@ -32,4 +32,4 @@ test-shopizer:
     - cd shopizer
     - cd $CI_PROJECT_DIR/shopizer/sm-shop
     - *export_build_jdk
-    - mvn test -X
+    - mvn test -Dtest="ProductTest" -X
