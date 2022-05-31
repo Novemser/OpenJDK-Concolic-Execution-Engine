@@ -306,7 +306,7 @@ void ThreadContext::memory_leak_check() {
                 Expression::total_count);
 }
 
-const PathCondition &ThreadContext::get_path_condition() const {
+PathCondition &ThreadContext::get_path_condition() {
   return _path_condition;
 }
 

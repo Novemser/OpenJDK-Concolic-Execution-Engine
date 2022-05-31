@@ -74,7 +74,7 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   need_recording = false;
-  tty->print_cr("SymBigDecimal::invoke_method_helper:%s", handle.get_callee_name().c_str());
+//  tty->print_cr("SymBigDecimal::invoke_method_helper:%s", handle.get_callee_name().c_str());
 
 #ifdef ENABLE_WEBRIDGE
   if (handle_method_names.find(handle.get_callee_method()->name_and_sig_as_C_string()) != handle_method_names.end()) {
@@ -143,9 +143,9 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     symObj->symbolize_bigDecimal(thisDecimal, refExp);
   } else if (signature == "java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;" ||
              signature == "java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;") {
-
+    ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
-
+    ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
     Expression* paramDoubleExp = handle.get_param_list()[1];
     guarantee(paramDoubleExp != NULL, "Should not be null");
@@ -221,7 +221,7 @@ Expression *SymBigDecimal::get_con_exp(oop obj) {
   oop str_obj = OopUtils::bigd_to_java_string(obj);
   ResourceMark rm;
   const char *str = OopUtils::java_string_to_c(str_obj);
-  return new ConSymbolExp(str, T_DOUBLE);
+  return new ConSymbolExp("BIGDECIMAL", T_DOUBLE);
 }
 
 void SymBigDecimal::print() {
@@ -231,7 +231,7 @@ void SymBigDecimal::print() {
 }
 
 void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
-  ShouldNotCallThis();
+  _internal_fields[field_offset] = exp;
 }
 
 #ifdef ENABLE_WEBRIDGE

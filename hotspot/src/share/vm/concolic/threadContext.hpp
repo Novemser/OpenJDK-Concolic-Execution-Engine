@@ -57,7 +57,7 @@ public:
     _jdbc_mngr.record_persistent_obj(obj);
   }
 
-  const PathCondition &get_path_condition() const;
+  PathCondition &get_path_condition();
 
   void set_pc_enabled(bool pathConditionEnabled);
 

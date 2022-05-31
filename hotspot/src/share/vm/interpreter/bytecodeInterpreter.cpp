@@ -194,7 +194,7 @@
 // initialization (which is is the initialization of the table pointer...)
 #if defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
 #define DISPATCH(opcode)\
-  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
+//  BytecodeInterpreter::print_debug_info(istate, pc, topOfStack); \
   goto *(void*)dispatch_table[opcode]
 #else
 #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
@@ -1015,7 +1015,7 @@ run:
       assert(topOfStack < istate->stack_base(), "Stack underrun");
 
 #if not defined(USELABELS) && defined(ENABLE_CONCOLIC) && defined(CONCOLIC_DEBUG)
-      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
+//      BytecodeInterpreter::print_debug_info(istate, pc, topOfStack);
 #endif
 
 #ifdef USELABELS

@@ -17,6 +17,10 @@ void PathCondition::gc() {
     delete _conds[i];
   }
   _conds.clear();
+  if (_pc_str != NULL) {
+    delete _pc_str;
+    _pc_str = NULL;
+  }
 }
 
 void PathCondition::print() {

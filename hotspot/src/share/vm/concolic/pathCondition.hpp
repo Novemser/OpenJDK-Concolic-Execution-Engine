@@ -26,11 +26,12 @@ class PathCondition {
 
 private:
   std::vector<Condition *> _conds;
+  char * _pc_str;
 
 public:
-  PathCondition() {}
+  PathCondition() : _pc_str(NULL) {}
 
-  PathCondition(const PathCondition& original) {
+  PathCondition(const PathCondition& original) : _pc_str(NULL) {
     for (size_t index = 0; index < original._conds.size(); ++index) {
       this->_conds.push_back(original._conds[index]);
     }
@@ -41,13 +42,16 @@ public:
   }
 
   void add(Expression *exp);
+
   void gc();
+
   void print();
+
   void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
     writer.StartArray();
     for (size_t index = 0; index < _conds.size(); index++) {
-      Condition* cond = _conds[index];
-      Expression* expr = cond->_exp;
+      Condition *cond = _conds[index];
+      Expression *expr = cond->_exp;
       if (expr) {
         expr->serialize(writer);
       }
@@ -55,12 +59,19 @@ public:
     writer.EndArray();
   }
 
-  const char* toString() const {
+  const char* toString() {
     using namespace rapidjson;
     StringBuffer s;
     Writer<StringBuffer> writer(s);
     serialize(writer);
-    return s.GetString();
+    const char* res = s.GetString();
+    if (_pc_str != NULL) {
+      // Delete old str first
+      delete _pc_str;
+    }
+    _pc_str = new char[strlen(res)];
+    strcpy(_pc_str, s.GetString());
+    return _pc_str;
   }
 };
 
