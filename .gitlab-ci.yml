@@ -18,17 +18,17 @@ build-jdk:
     - make clean JOBS=24 CONF=linux-x86_64-normal-zero-release
     - make hotspot jdk images JOBS=30 CONF=linux-x86_64-normal-zero-release
 
+# TODO: a workaround for #126 that cannot run all tests at once
 test-unit:
   stage: test
   script:
     - cd concolic-test
     - *export_build_jdk
-#    - ./gradlew test TODO: fix #126 cannot run all tests at once
-  - ./gradlew clean test --tests concolic.test.symbolic.BigDecimalTest
-  - ./gradlew clean test --tests concolic.test.array.ArrayTest
-  - ./gradlew clean test --tests concolic.test.unsafe.UnsafeTest
-  - ./gradlew clean test --tests concolic.test.webridge.JavaEntryPointTest
-  - ./gradlew clean test --tests concolic.test.webridge.SanityTest
+    - ./gradlew clean test --tests concolic.test.symbolic.BigDecimalTest
+    - ./gradlew clean test --tests concolic.test.array.ArrayTest
+    - ./gradlew clean test --tests concolic.test.unsafe.UnsafeTest
+    - ./gradlew clean test --tests concolic.test.webridge.JavaEntryPointTest
+    - ./gradlew clean test --tests concolic.test.webridge.SanityTest
 
 test-shopizer:
   stage: test
