@@ -1159,7 +1159,10 @@
                                                                                                                         \
   /* WeBridge related symbols */                                                                                        \
   do_intrinsic(_add_SQLTemplate_intrinsic, _wbridge_storedprocedure_StoredProcedureManager, _add_SQLTemplate, _add_SQLTemplate_signature, F_S)  \
-   do_signature(_add_SQLTemplate_signature, "(Ledu/sjtu/ipads/wbridge/sql/SymbolicSQLTemplate;)V") \
+   do_signature(_add_SQLTemplate_signature, "(Ledu/sjtu/ipads/wbridge/sql/SymbolicSQLTemplate;)V")                      \
+  do_class(java_math_BigDecimal,                      "java/math/BigDecimal")                                           \
+   do_name(bd_intCompact, "intCompact") \
+   do_name(bd_scale, "scale") \
     /*end*/
 
 

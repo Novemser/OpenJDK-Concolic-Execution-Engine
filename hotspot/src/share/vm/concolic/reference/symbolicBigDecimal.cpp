@@ -5,6 +5,17 @@
 #include "concolic/exp/arrayInitExpression.hpp"
 #include "concolic/utils.hpp"
 
+
+#ifdef ENABLE_WEBRIDGE
+
+#include "concolic/reference/symbolicString.hpp"
+#include "concolic/exp/stringExpression.hpp"
+#include "webridge/utils/rapidjson/document.h"
+
+#include <map>
+
+std::string SymBigDecimal::DECIMAL_WRAPPER = "$BIG_DECIMAL$";
+#endif
 const char *SymBigDecimal::TYPE_NAME = "java/math/BigDecimal";
 bool SymBigDecimal::need_recording = false;
 
@@ -13,6 +24,13 @@ std::set<std::string> SymBigDecimal::handle_method_names = init_handle_method_na
 
 std::set<std::string> SymBigDecimal::init_handle_method_names() {
   std::set<std::string> set;
+#ifdef ENABLE_WEBRIDGE
+  set.insert("java.math.BigDecimal.<init>(D)V");
+  set.insert("java.math.BigDecimal.<init>(Ljava/lang/String;)V");
+  set.insert("java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;");
+  set.insert("java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;");
+  set.insert("java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;");
+#else
   set.insert("<init>");
   set.insert("valueOf");
   set.insert("equals");
@@ -22,6 +40,7 @@ std::set<std::string> SymBigDecimal::init_handle_method_names() {
   set.insert("subtract");
   set.insert("divide");
   set.insert("compareTo");
+#endif
   return set;
 }
 
@@ -35,16 +54,37 @@ std::map<std::string, bool> SymBigDecimal::init_skip_method_names() {
 void SymBigDecimal::init_register_class(MethodSymbolizer *m_symbolizer) {
   m_symbolizer->add_invoke_helper_methods(SymBigDecimal::TYPE_NAME, invoke_method_helper);
   m_symbolizer->add_finish_helper_methods(SymBigDecimal::TYPE_NAME, finish_method_helper);
+  m_symbolizer->add_method_exit_callback(SymBigDecimal::TYPE_NAME, method_exit_callback);
 }
 
 SymBigDecimal::SymBigDecimal(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
 
-SymBigDecimal::~SymBigDecimal() { Expression::gc(_exp); }
+SymBigDecimal::~SymBigDecimal() {
+  Expression::gc(_exp);
+#ifdef ENABLE_WEBRIDGE
+  std::map<int, Expression *>::iterator iter = _internal_fields.begin();
+  while (iter != _internal_fields.end()) {
+    iter++;
+    Expression::gc((*iter).second);
+  }
+#endif
+}
 
 bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
-  bool need_symbolize = true;
+  bool need_symbolize = false;
   need_recording = false;
+  tty->print_cr("SymBigDecimal::invoke_method_helper:%s", handle.get_callee_name().c_str());
+
+#ifdef ENABLE_WEBRIDGE
+  if (handle_method_names.find(handle.get_callee_method()->name_and_sig_as_C_string()) != handle_method_names.end()) {
+    need_recording = handle.general_check_param_symbolized();
+    if (need_recording) {
+      handle.general_prepare_param();
+    }
+    return true;
+  }
+#else
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     need_recording = handle.general_check_param_symbolized();
     if (need_recording) {
@@ -66,11 +106,58 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
       tty->print_cr(" handled by SymBigDecimal, need recording %c", recording ? 'Y' : 'N');
     }
   }
-
+#endif
   return need_symbolize;
 }
 
 Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) {
+#ifdef ENABLE_WEBRIDGE
+  ResourceMark rm;
+  std::string signature = handle.get_callee_method()->name_and_sig_as_C_string();
+  ConcolicMngr::ctx->get_method_symbolizer().set_has_callback(false);
+  if (signature == "java.math.BigDecimal.<init>(Ljava/lang/String;)V") {
+    oop paramStr = handle.get_param<oop>(1);
+    assert(paramStr->klass()->name()->equals(SymString::TYPE_NAME), "should be string");
+    if (!paramStr->is_symbolic()) {
+      return NULL;
+    }
+    SymString *symStr = reinterpret_cast<SymString *>(ConcolicMngr::ctx->get_sym_inst(paramStr));
+    oop thisDecimal = handle.get_param<oop>(0);
+    SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
+    );
+    Expression *refExp = symStr->get_ref_exp();
+
+    guarantee(refExp != NULL, "Should not be null");
+    if (refExp->is_op_str_expression()) {
+      OpStrExpression *opExp = reinterpret_cast<OpStrExpression *>(refExp);
+      if (opExp->get_name() == "valueOf") {
+        guarantee(opExp->get_param_list().size() == 1, "Should contain only 1 parameter");
+        // inner expression
+        refExp = opExp->get_param_list()[0];
+      } else {
+        tty->print_cr("%s not implemented in sym big decimal conversion", opExp->get_name().c_str());
+        ShouldNotCallThis();
+      }
+    }
+
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    refExp->serialize(writer);
+    rapidjson::Document doc;
+    doc.Parse(s.GetString());
+    rapidjson::Value &name = doc["_exp"];
+    symObj->set_bigDecimal_symbolic(thisDecimal, name.GetString());
+  } else if (signature == "java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;" ||
+             signature == "java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;") {
+
+  } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
+
+  } else if (signature == "java.math.BigDecimal.<init>(D)V") {
+
+  }
+  return NULL;
+#else
   if (!need_recording) {
     return NULL;
   }
@@ -119,6 +206,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
   }
 
   return exp;
+#endif
 }
 
 Expression *SymBigDecimal::get_exp_of(oop obj) {
@@ -132,7 +220,7 @@ Expression *SymBigDecimal::get_exp_of(oop obj) {
 Expression *SymBigDecimal::get_con_exp(oop obj) {
   oop str_obj = OopUtils::bigd_to_java_string(obj);
   ResourceMark rm;
-  const char* str = OopUtils::java_string_to_c(str_obj);
+  const char *str = OopUtils::java_string_to_c(str_obj);
   return new ConSymbolExp(str, T_DOUBLE);
 }
 
@@ -145,5 +233,57 @@ void SymBigDecimal::print() {
 void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
   ShouldNotCallThis();
 }
+
+#ifdef ENABLE_WEBRIDGE
+
+void SymBigDecimal::method_exit_callback(MethodSymbolizerHandle &handle) {
+}
+
+void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
+  guarantee(decimalOOp != NULL, "Should not be null");
+  Klass *bdClz = decimalOOp->klass();
+  guarantee(bdClz->name() == vmSymbols::java_math_BigDecimal(), "should equal");
+  fieldDescriptor fd_intCmp;
+  fieldDescriptor fd_scale;
+  bdClz->find_field(
+      vmSymbols::bd_intCompact(),
+      vmSymbols::long_signature(),
+      &fd_intCmp
+  );
+  bdClz->find_field(
+      vmSymbols::bd_scale(),
+      vmSymbols::int_signature(),
+      &fd_scale
+  );
+
+  std::string intCmpName = DECIMAL_WRAPPER
+                           + name
+                           + "intCompact"
+                           + DECIMAL_WRAPPER;
+
+  std::string scaleName = DECIMAL_WRAPPER
+                          + name
+                          + "scale"
+                          + DECIMAL_WRAPPER;
+
+  init_sym_exp(fd_intCmp.offset(), new SymbolExpression(intCmpName.c_str(), intCmpName.length()));
+  init_sym_exp(fd_scale.offset(), new SymbolExpression(scaleName.c_str(), scaleName.length()));
+}
+
+void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
+  guarantee(exp != NULL, "should not be null");
+  exp->inc_ref();
+
+  if (_internal_fields.find(field_offset) != _internal_fields.end()) {
+    Expression::gc(_internal_fields[field_offset]);
+  }
+  _internal_fields[field_offset] = exp;
+}
+
+Expression *SymBigDecimal::get(int field_offset) {
+  return _internal_fields[field_offset];
+}
+
+#endif
 
 #endif

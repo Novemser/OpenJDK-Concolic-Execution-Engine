@@ -66,6 +66,10 @@ void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   writer.EndArray();
 }
 
+const exp_list_t &OpStrExpression::get_param_list() const {
+  return _param_list;
+}
+
 StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, "'String'");

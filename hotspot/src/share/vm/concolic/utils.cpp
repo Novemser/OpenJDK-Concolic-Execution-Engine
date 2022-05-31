@@ -25,7 +25,8 @@ typeArrayOop OopUtils::java_string_to_char_array(oop str_obj) {
         klass = str_obj->klass();
     } else if (str_obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME)){
         klass = str_obj->klass()->super();
-    } else{
+    } else {
+        tty->print_cr("Not handled type %s", str_obj->klass()->name()->as_C_string());
         ShouldNotReachHere();
     }
   ik = (InstanceKlass *)klass;
@@ -234,7 +235,12 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
 
   JavaValue result(T_OBJECT);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(true);
+  JavaThreadState lastState = thread->thread_state();
+  // must transfer thread state to state_VM
+  thread->set_thread_state(_thread_in_vm);
+  tty->print_cr("Calling big decimal to string");
   JavaCalls::call(&result, toStringMethod, &java_args, thread);
+  thread->set_thread_state(lastState);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
 
   return reinterpret_cast<oop&>(result.get_value_addr()->l);

@@ -25,13 +25,17 @@ void PathConditionPruner::method_exit(ZeroFrame *callee_frame) {
 
 class_method_map_t PathConditionPruner::init_skip_method_names() {
   class_method_map_t classes;
-  std::set<std::string> val;
-  val.insert("valueOf");
-  classes["java/lang/Long"] = val;
-  classes["java/lang/Byte"] = val;
-  classes["java/lang/Short"] = val;
-  classes["java/lang/Integer"] = val;
-  classes["java/lang/Boolean"] = val;
+  std::set<std::string> valBoxing;
+  std::set<std::string> valBigDecimal;
+  valBoxing.insert("valueOf");
+  valBigDecimal.insert("<init>");
+  classes["java/lang/Long"] = valBoxing;
+  classes["java/lang/Byte"] = valBoxing;
+  classes["java/lang/Short"] = valBoxing;
+  classes["java/lang/Integer"] = valBoxing;
+  classes["java/lang/Boolean"] = valBoxing;
+  // empty methods indicate all methods should skip
+  classes["java/math/BigDecimal"] = valBigDecimal;
   return classes;
 }
 
@@ -59,6 +63,10 @@ bool PathConditionPruner::should_prune(ZeroFrame *callee_frame) {
           ->method()->method_holder()->name()->as_C_string());
 
   if (_classes_method_to_skip.find(mth_holder_name) != _classes_method_to_skip.end()) {
+    // empty methods indicate all methods should skip
+    if (_classes_method_to_skip[mth_holder_name].empty()) {
+      return true;
+    }
     const std::string mth_name(callee_frame->as_interpreter_frame()->interpreter_state()
                                    ->method()->name()->as_C_string());
     if (_classes_method_to_skip[mth_holder_name].find(mth_name) !=

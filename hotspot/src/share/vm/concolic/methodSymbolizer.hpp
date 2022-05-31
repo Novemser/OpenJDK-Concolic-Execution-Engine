@@ -29,6 +29,18 @@ class MethodSymbolizer {
   finish_helper_method_map_t _finish_helper_methods;
   std::vector<std::string> _classes_prefix_to_symbolize;
 
+#ifdef ENABLE_WEBRIDGE
+public:
+  bool _has_callbacks;
+  typedef std::map<std::string, void (*)(MethodSymbolizerHandle &)> method_exit_callback_map_t;
+  method_exit_callback_map_t _method_exit_callback_methods;
+
+  void method_exit(ZeroFrame *caller_frame);
+
+  void add_method_exit_callback(const std::string class_name, void(*method_exit_callback)(MethodSymbolizerHandle &));
+
+#endif
+
 public:
   MethodSymbolizer();
   ~MethodSymbolizer();
@@ -38,6 +50,10 @@ public:
   inline bool __attribute__((optimize("O0"))) is_symbolizing_method() { return _symbolizing_method; }
 
   inline void set_symbolizing_method(bool symbolizing_method) { _symbolizing_method = symbolizing_method; }
+
+  bool has_callback() const;
+
+  void set_has_callback(bool shouldProcessFinishMethod);
 
   void add_method(const char *class_name, const char *method_name);
   void invoke_method(ZeroFrame *caller_frame, ZeroFrame *callee_frame);

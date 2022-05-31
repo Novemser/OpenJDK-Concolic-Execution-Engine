@@ -32,6 +32,8 @@ public:
     bool is_op_str_expression() { return true; }
     std::string &get_name() { return _name; }
 
+  const exp_list_t &get_param_list() const;
+
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 };
 

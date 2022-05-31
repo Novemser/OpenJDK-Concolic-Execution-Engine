@@ -38,6 +38,10 @@ public:
     return ctx && ctx->get_method_symbolizer().has_handling_methods();
   }
 
+  static bool has_callback() {
+    return ctx && ctx->has_callback();
+  }
+
   inline static void warning_reach_unhandled_bytecode(const char *bytecode) {
     if (can_do_concolic()) {
       tty->print_cr("[WARNING] reach unhandled bytecode %s!!!!", bytecode);
@@ -48,6 +52,14 @@ public:
   inline static void __attribute__((optimize("O0"))) record_path_condition(Expression *sym_exp) {
     ctx->record_path_condition(sym_exp);
 
+  }
+
+  static void method_enter_callback(ZeroFrame *caller_frame, ZeroFrame *callee_frame) {
+
+  }
+
+  static void method_exit_callback(ZeroFrame *caller_frame) {
+    ctx->get_method_symbolizer().method_exit(caller_frame);
   }
 #else
   static jlong startConcolic();

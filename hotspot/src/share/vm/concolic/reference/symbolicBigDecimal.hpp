@@ -16,11 +16,23 @@ public:
   static std::map<std::string, bool> skip_method_names;
   static std::map<std::string, bool> init_skip_method_names();
   static bool need_recording;
-
+#ifdef ENABLE_WEBRIDGE
+  static std::string DECIMAL_WRAPPER;
+#endif
 
 private:
-  Expression *_exp;
+#ifdef ENABLE_WEBRIDGE
+  std::map<int, Expression*> _internal_fields;
+  void set_bigDecimal_symbolic(oop decimalOOp, std::string name);
 
+public:
+  virtual void init_sym_exp(int field_offset, Expression *exp);
+
+  virtual Expression *get(int field_offset);
+
+private:
+#endif
+  Expression *_exp;
 public:
   SymBigDecimal(sym_rid_t sym_rid);
   ~SymBigDecimal();
@@ -53,7 +65,9 @@ public:
   static Expression *get_exp_of(oop obj);
   static Expression *get_con_exp(oop obj);
   static void init_register_class(MethodSymbolizer *m_symbolizer);
-
+#ifdef ENABLE_WEBRIDGE
+  static void method_exit_callback(MethodSymbolizerHandle &handle);
+#endif
 private:
   static method_set_t init_symbolized_methods();
 };

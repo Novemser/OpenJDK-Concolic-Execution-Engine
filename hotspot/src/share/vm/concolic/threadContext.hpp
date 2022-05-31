@@ -85,6 +85,10 @@ public:
     return _array_store;
   }
 
+  inline bool has_callback() const {
+    return _method_symbolizer.has_callback();
+  }
+
 public:
   std::string get_current_code_pos();
   std::string get_code_pos_for_first(const std::string &str);

@@ -29,6 +29,7 @@
 
 MethodSymbolizer::MethodSymbolizer() {
   _symbolizing_method = false;
+  _has_callbacks = false;
   init_helper_methods();
   handling_methods.clear();
 }
@@ -330,6 +331,34 @@ void MethodSymbolizer::print() {
 
 void MethodSymbolizer::add_prefix_symbolic_class(const std::string class_name) {
   _classes_prefix_to_symbolize.push_back(class_name);
+}
+
+bool MethodSymbolizer::has_callback() const {
+  return _has_callbacks;
+}
+
+void MethodSymbolizer::set_has_callback(bool has_callback) {
+  _has_callbacks = has_callback;
+}
+
+void MethodSymbolizer::method_exit(ZeroFrame *caller_frame) {
+  if (caller_frame != _handle.get_caller_frame()) {
+    return;
+  }
+
+  const std::string &callee_holder_name = _handle.get_callee_holder_name();
+  if (_method_exit_callback_methods.find(callee_holder_name) ==
+      _method_exit_callback_methods.end()) {
+    return;
+  }
+
+  _method_exit_callback_methods[callee_holder_name](_handle);
+  _handle.reset();
+}
+
+void MethodSymbolizer::add_method_exit_callback(const std::string class_name,
+                                                void (*method_exit_callback)(MethodSymbolizerHandle &)) {
+  _method_exit_callback_methods[class_name] = method_exit_callback;
 }
 
 sym_rid_t MethodReturnSymbolExp::sym_method_count = 0;
