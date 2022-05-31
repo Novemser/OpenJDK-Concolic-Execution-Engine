@@ -29,6 +29,7 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   std::set<std::string> valBigDecimal;
   valBoxing.insert("valueOf");
   valBigDecimal.insert("<init>");
+//  valBigDecimal.insert("toString");
   classes["java/lang/Long"] = valBoxing;
   classes["java/lang/Byte"] = valBoxing;
   classes["java/lang/Short"] = valBoxing;

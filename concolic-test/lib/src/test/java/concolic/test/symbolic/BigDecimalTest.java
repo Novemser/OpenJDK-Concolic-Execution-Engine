@@ -14,6 +14,18 @@ public class BigDecimalTest {
         if (bd.intValue() == 42) {}
         System.endConcolic();
     }
+
+    @Test
+    public void testDoubleInit() {
+        System.startConcolic();
+        // String val = new String("10");
+        Double val = new Double(1.0);
+        System.symbolize(val);
+        BigDecimal bd = new BigDecimal(val.doubleValue());
+        // BigDecimal bd = new BigDecimal(1.2d);
+        if (bd.doubleValue() == 3.2d) {}
+        System.endConcolic();
+    }
 //    @Test
 //    public void testArithmetic() {
 //        Integer val = new Integer(10);

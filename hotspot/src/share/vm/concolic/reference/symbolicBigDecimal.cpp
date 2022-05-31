@@ -140,21 +140,21 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
         ShouldNotCallThis();
       }
     }
-
-    rapidjson::StringBuffer s;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-    refExp->serialize(writer);
-    rapidjson::Document doc;
-    doc.Parse(s.GetString());
-    rapidjson::Value &name = doc["_exp"];
-    symObj->set_bigDecimal_symbolic(thisDecimal, name.GetString());
+    symObj->symbolize_bigDecimal(thisDecimal, refExp);
   } else if (signature == "java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;" ||
              signature == "java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;") {
 
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
 
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
-
+    Expression* paramDoubleExp = handle.get_param_list()[1];
+    guarantee(paramDoubleExp != NULL, "Should not be null");
+    oop thisDecimal = handle.get_param<oop>(0);
+    assert(thisDecimal != NULL, "should not be null");
+    SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
+    );
+    symObj->symbolize_bigDecimal(thisDecimal, paramDoubleExp);
   }
   return NULL;
 #else
@@ -282,6 +282,17 @@ void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
 
 Expression *SymBigDecimal::get(int field_offset) {
   return _internal_fields[field_offset];
+}
+
+void SymBigDecimal::symbolize_bigDecimal(oop decimalOOp, Expression *parentExp) {
+  rapidjson::StringBuffer s;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+  parentExp->serialize(writer);
+  rapidjson::Document doc;
+  doc.Parse(s.GetString());
+  // TODO: replace the hard coded expression access
+  rapidjson::Value &name = doc["_exp"];
+  this->set_bigDecimal_symbolic(decimalOOp, name.GetString());
 }
 
 #endif
