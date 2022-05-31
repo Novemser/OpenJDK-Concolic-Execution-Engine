@@ -23,7 +23,12 @@ test-unit:
   script:
     - cd concolic-test
     - *export_build_jdk
-    - ./gradlew test
+#    - ./gradlew test TODO: fix #126 cannot run all tests at once
+  - ./gradlew clean test --tests concolic.test.symbolic.BigDecimalTest
+  - ./gradlew clean test --tests concolic.test.array.ArrayTest
+  - ./gradlew clean test --tests concolic.test.unsafe.UnsafeTest
+  - ./gradlew clean test --tests concolic.test.webridge.JavaEntryPointTest
+  - ./gradlew clean test --tests concolic.test.webridge.SanityTest
 
 test-shopizer:
   stage: test
