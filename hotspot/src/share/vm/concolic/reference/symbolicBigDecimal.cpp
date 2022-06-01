@@ -27,9 +27,10 @@ std::set<std::string> SymBigDecimal::init_handle_method_names() {
 #ifdef ENABLE_WEBRIDGE
   set.insert("java.math.BigDecimal.<init>(D)V");
   set.insert("java.math.BigDecimal.<init>(Ljava/lang/String;)V");
+  set.insert("java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;");
-  set.insert("java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;");
+//  set.insert("java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;");
 #else
   set.insert("<init>");
   set.insert("valueOf");
@@ -64,8 +65,8 @@ SymBigDecimal::~SymBigDecimal() {
 #ifdef ENABLE_WEBRIDGE
   std::map<int, Expression *>::iterator iter = _internal_fields.begin();
   while (iter != _internal_fields.end()) {
+    Expression::gc(iter->second);
     iter++;
-    Expression::gc((*iter).second);
   }
 #endif
 }
@@ -110,6 +111,7 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
   return need_symbolize;
 }
 
+// TODO: confirm whether we should take care intValue
 Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) {
 #ifdef ENABLE_WEBRIDGE
   ResourceMark rm;
@@ -143,7 +145,16 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     symObj->symbolize_bigDecimal(thisDecimal, refExp);
   } else if (signature == "java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;" ||
              signature == "java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;") {
-    ShouldNotCallThis();
+    guarantee(handle.get_callee_method()->is_static(), "should be static method");
+    if (handle.get_param_list()[0] == NULL) {
+      return NULL;
+    }
+
+    oop resultDecimal = handle.get_result<oop>(T_OBJECT);
+    SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal)
+    );
+    symObj->symbolize_bigDecimal(resultDecimal, handle.get_param_list()[0]);
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
@@ -155,6 +166,43 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
         ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
     );
     symObj->symbolize_bigDecimal(thisDecimal, paramDoubleExp);
+  } else if (signature == "java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;") {
+    jint newScale = handle.get_param<jint>(1);
+    assert(newScale >= 0, "Scale should >= 0");
+    assert(handle.get_param_list().size() == 3, "size should be 3");
+    guarantee(handle.get_param_list()[1] == NULL || handle.get_param_list()[2],
+              "currently only handle concrete scaling");
+    oop thisDecimal = handle.get_param<oop>(0);
+    oop resultDecimal = handle.get_result<oop>(T_OBJECT);
+    assert(thisDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
+    assert(resultDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
+    SymBigDecimal *symThisDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_sym_inst(thisDecimal));
+    SymBigDecimal *symResDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal));
+    guarantee(symThisDecimal != NULL, "Only handle symbolic decimal case[symThisDecimal]");
+    guarantee(symResDecimal != NULL, "Only handle symbolic decimal case[symResDecimal]");
+    int intCmpFldOffset = symThisDecimal->int_compact_offset(thisDecimal);
+    int scaleFldOffset = symThisDecimal->scale_offset(thisDecimal);
+    Expression *intCmpExp = symThisDecimal->get(intCmpFldOffset);
+    Expression *scaleExp = symThisDecimal->get(scaleFldOffset);
+    if (intCmpExp == NULL && scaleExp == NULL) {
+      // not a correctly initialized symbolic decimal
+      ShouldNotCallThis();
+    }
+
+    int curScale = thisDecimal->int_field(intCmpFldOffset);
+    if (newScale > curScale) {
+      int num = (int) std::pow(10, newScale - curScale);
+      symResDecimal->set_sym_exp(
+          intCmpFldOffset,
+          new OpSymExpression(intCmpExp, new ConExpression(num), op_mul)
+      );
+    } else if (newScale < curScale) {
+      int num = (int) std::pow(10, curScale - newScale);
+      symResDecimal->set_sym_exp(
+          intCmpFldOffset,
+          new OpSymExpression(intCmpExp, new ConExpression(num), op_mul)
+      );
+    }
   }
   return NULL;
 #else
@@ -221,7 +269,7 @@ Expression *SymBigDecimal::get_con_exp(oop obj) {
   oop str_obj = OopUtils::bigd_to_java_string(obj);
   ResourceMark rm;
   const char *str = OopUtils::java_string_to_c(str_obj);
-  return new ConSymbolExp("BIGDECIMAL", T_DOUBLE);
+  return new ConSymbolExp(str, T_DOUBLE);
 }
 
 void SymBigDecimal::print() {
@@ -231,6 +279,9 @@ void SymBigDecimal::print() {
 }
 
 void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
+  if (exp) {
+    exp->inc_ref();
+  }
   _internal_fields[field_offset] = exp;
 }
 
@@ -240,22 +291,6 @@ void SymBigDecimal::method_exit_callback(MethodSymbolizerHandle &handle) {
 }
 
 void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
-  guarantee(decimalOOp != NULL, "Should not be null");
-  Klass *bdClz = decimalOOp->klass();
-  guarantee(bdClz->name() == vmSymbols::java_math_BigDecimal(), "should equal");
-  fieldDescriptor fd_intCmp;
-  fieldDescriptor fd_scale;
-  bdClz->find_field(
-      vmSymbols::bd_intCompact(),
-      vmSymbols::long_signature(),
-      &fd_intCmp
-  );
-  bdClz->find_field(
-      vmSymbols::bd_scale(),
-      vmSymbols::int_signature(),
-      &fd_scale
-  );
-
   std::string intCmpName = DECIMAL_WRAPPER
                            + name
                            + "intCompact"
@@ -266,8 +301,8 @@ void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
                           + "scale"
                           + DECIMAL_WRAPPER;
 
-  init_sym_exp(fd_intCmp.offset(), new SymbolExpression(intCmpName.c_str(), intCmpName.length()));
-  init_sym_exp(fd_scale.offset(), new SymbolExpression(scaleName.c_str(), scaleName.length()));
+  init_sym_exp(int_compact_offset(decimalOOp), new SymbolExpression(intCmpName.c_str(), intCmpName.length()));
+  init_sym_exp(scale_offset(decimalOOp), new SymbolExpression(scaleName.c_str(), scaleName.length()));
 }
 
 void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
@@ -291,8 +326,46 @@ void SymBigDecimal::symbolize_bigDecimal(oop decimalOOp, Expression *parentExp) 
   rapidjson::Document doc;
   doc.Parse(s.GetString());
   // TODO: replace the hard coded expression access
-  rapidjson::Value &name = doc["_exp"];
-  this->set_bigDecimal_symbolic(decimalOOp, name.GetString());
+  if (!strcmp(doc["_type"].GetString(), "BinaryExpression")) {
+    std::string expStr = s.GetString();
+    StringUtils::replaceAll(expStr, "{", "_");
+    StringUtils::replaceAll(expStr, "}", "_");
+    StringUtils::replaceAll(expStr, "\"", "_");
+    StringUtils::replaceAll(expStr, ",", "__");
+    StringUtils::replaceAll(expStr, ":", "_");
+    StringUtils::replaceAll(expStr, "\\", "_");
+    this->set_bigDecimal_symbolic(decimalOOp, expStr.c_str());
+  } else {
+    this->set_bigDecimal_symbolic(decimalOOp, doc["_exp"].GetString());
+  }
+}
+
+int SymBigDecimal::int_compact_offset(oop decimalOOp) {
+  assert(decimalOOp != NULL, "Should not be null");
+  Klass *bdClz = decimalOOp->klass();
+  guarantee(bdClz->name() == vmSymbols::java_math_BigDecimal(), "should equal");
+
+  fieldDescriptor fd_intCmp;
+  bdClz->find_field(
+      vmSymbols::bd_intCompact(),
+      vmSymbols::long_signature(),
+      &fd_intCmp
+  );
+  return fd_intCmp.offset();
+}
+
+int SymBigDecimal::scale_offset(oop decimalOOp) {
+  assert(decimalOOp != NULL, "Should not be null");
+  Klass *bdClz = decimalOOp->klass();
+  guarantee(bdClz->name() == vmSymbols::java_math_BigDecimal(), "should equal");
+
+  fieldDescriptor fd_scale;
+  bdClz->find_field(
+      vmSymbols::bd_scale(),
+      vmSymbols::int_signature(),
+      &fd_scale
+  );
+  return fd_scale.offset();
 }
 
 #endif

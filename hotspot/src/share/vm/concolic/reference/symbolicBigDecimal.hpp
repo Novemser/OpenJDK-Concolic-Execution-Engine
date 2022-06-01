@@ -25,6 +25,8 @@ private:
   std::map<int, Expression*> _internal_fields;
   void set_bigDecimal_symbolic(oop decimalOOp, std::string name);
   void symbolize_bigDecimal(oop decimalOOp, Expression* parentExp);
+  int int_compact_offset(oop decimal);
+  int scale_offset(oop decimal);
 public:
   virtual void init_sym_exp(int field_offset, Expression *exp);
 

@@ -27,6 +27,7 @@ ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt), _sym_r
 ThreadContext::~ThreadContext() {
   for (SymStore::iterator iter = _sym_refs.begin(); iter != _sym_refs.end();
        ++iter) {
+    guarantee(iter->second != NULL, "Sym instance should not be null");
     delete iter->second;
   }
   _sym_refs.clear();

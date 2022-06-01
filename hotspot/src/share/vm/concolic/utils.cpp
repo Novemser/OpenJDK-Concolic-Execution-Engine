@@ -238,10 +238,9 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
   JavaThreadState lastState = thread->thread_state();
   // must transfer thread state to state_VM
   thread->set_thread_state(_thread_in_vm);
-  tty->print_cr("Calling big decimal to string");
-  const char * methodToStringSig = "()Ljava/lang/String;";
-  Symbol* sig = SymbolTable::lookup(methodToStringSig, strlen(methodToStringSig), thread);
-  JavaCalls::call_virtual(&result, instKlass, vmSymbols::toString_name(), sig, &java_args, thread);
+//  tty->print_cr("Calling big decimal to string");
+  JavaCalls::call_virtual(&result, instKlass, vmSymbols::toString_name(), vmSymbols::void_string_signature(),
+                          &java_args, thread);
   thread->set_thread_state(lastState);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
   oop res = reinterpret_cast<oop>(result.get_jobject());
@@ -253,4 +252,13 @@ oop OopUtils::value_of_map_node(oop node_obj) {
   return node_obj->obj_field(40);
 }
 
+void StringUtils::replaceAll(std::string &str, const std::string &from, const std::string &to) {
+  if (from.empty())
+    return;
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+  }
+}
 #endif
