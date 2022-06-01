@@ -16,7 +16,6 @@ public class BigDecimalTest {
         if (bd.intValue() == 42) {
         }
         assertEquals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_L'String'_1intCompact$BIG_DECIMAL$\"},\"_op\":\"--\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_exp\":\"Y_J_-9223372036854775808\"}},\"_op\":\"!=\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_L'String'_1scale$BIG_DECIMAL$\"},\"_op\":\"==\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":null,\"_op\":\"2i\",\"_right\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_L'String'_1intCompact$BIG_DECIMAL$\"}},\"_op\":\"!=\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_42\"}}]", System.getPathCondition());
-        System.out.println("PC=" + System.getPathCondition());
         System.endConcolic();
     }
 

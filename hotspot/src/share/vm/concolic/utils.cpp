@@ -229,7 +229,7 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
 //  }
 
   // 121 is the index of toString() in BigDecimal
-  Method* toStringMethod = methods->at(121);
+//  Method* toStringMethod = methods->at(121);
   JavaCallArguments java_args(1);
   java_args.push_oop(bigd);
 
@@ -239,11 +239,14 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
   // must transfer thread state to state_VM
   thread->set_thread_state(_thread_in_vm);
   tty->print_cr("Calling big decimal to string");
-  JavaCalls::call(&result, toStringMethod, &java_args, thread);
+  const char * methodToStringSig = "()Ljava/lang/String;";
+  Symbol* sig = SymbolTable::lookup(methodToStringSig, strlen(methodToStringSig), thread);
+  JavaCalls::call_virtual(&result, instKlass, vmSymbols::toString_name(), sig, &java_args, thread);
   thread->set_thread_state(lastState);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
-
-  return reinterpret_cast<oop&>(result.get_value_addr()->l);
+  oop res = reinterpret_cast<oop>(result.get_jobject());
+  guarantee(res->klass()->name() == vmSymbols::java_lang_String(), "should be string");
+  return res;
 }
 
 oop OopUtils::value_of_map_node(oop node_obj) {
