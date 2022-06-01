@@ -42,50 +42,50 @@ public class BigDecimalTest {
         assertEquals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":null,\"_op\":\"2l\",\"_right\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"I\",\"_exp\":\"M_I_1_field24\"}},\"_op\":\"--\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_exp\":\"Y_J_-9223372036854775808\"}},\"_op\":\"!=\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"BinaryExpression\",\"_left\":null,\"_op\":\"2i\",\"_right\":{\"_type\":\"BinaryExpression\",\"_left\":null,\"_op\":\"2l\",\"_right\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"I\",\"_exp\":\"M_I_1_field24\"}}},\"_op\":\"!=\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_3\"}}]", System.getPathCondition());
         System.endConcolic();
     }
-//    @Test
-//    public void testArithmetic() {
-//        Integer val = new Integer(10);
-//        System.startConcolic();
-//        System.symbolize(val);
-//        BigDecimal bd = new BigDecimal(val);
-////        System.symbolize(bd);
-//        BigDecimal res = bd.add(bd).multiply(bd).divide(bd);
-//        if (res.intValue() == 11) {
-//        }
-//        System.endConcolic();
-//    }
-//
-//    @Test
-//    public void testValueOf() {
-//        Integer val = new Integer(10);
-//        System.startConcolic();
-//        System.symbolize(val);
-//        BigDecimal bd = BigDecimal.valueOf(val);
-//        if (bd.longValue() == 10) {
-//        }
-//        System.endConcolic();
-//    }
-//
-//    @Test
-//    public void testCompareToConcrete() {
-//        System.startConcolic();
-//        Integer val = new Integer(10);
-//        System.symbolize(val);
-//        BigDecimal bd = BigDecimal.valueOf(val);
-//        bd.compareTo(BigDecimal.valueOf(42));
-//        System.endConcolic();
-//    }
-//
-//    @Test
-//    public void testCompareToSymbolic() {
-//        System.startConcolic();
-//        Integer val = new Integer(10);
-//        System.symbolize(val);
-//        BigDecimal bd = BigDecimal.valueOf(val);
-//        bd.compareTo(bd);
-//        System.endConcolic();
-//    }
-//
+
+    @Test
+    public void testArithmetic() {
+        Integer val = new Integer(10);
+        System.startConcolic();
+        System.symbolize(val);
+        BigDecimal bd = new BigDecimal(val);
+        BigDecimal res = bd.add(bd).multiply(bd).divide(bd);
+        if (res.intValue() == 11) {
+        }
+        System.endConcolic();
+    }
+
+    @Test
+    public void testValueOf() {
+        Integer val = new Integer(10);
+        System.startConcolic();
+        System.symbolize(val);
+        BigDecimal bd = BigDecimal.valueOf(val);
+        if (bd.longValue() == 10) {
+        }
+        System.endConcolic();
+    }
+
+    @Test
+    public void testCompareToConcrete() {
+        System.startConcolic();
+        Integer val = new Integer(10);
+        System.symbolize(val);
+        BigDecimal bd = BigDecimal.valueOf(val);
+        bd.compareTo(BigDecimal.valueOf(42));
+        System.endConcolic();
+    }
+
+    @Test
+    public void testCompareToSymbolic() {
+        System.startConcolic();
+        Integer val = new Integer(10);
+        System.symbolize(val);
+        BigDecimal bd = BigDecimal.valueOf(val);
+        bd.compareTo(bd);
+        System.endConcolic();
+    }
+
     @Test
     public void testSetScaleSmaller() {
         System.startConcolic();
