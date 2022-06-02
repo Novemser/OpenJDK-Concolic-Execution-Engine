@@ -105,12 +105,14 @@ public:
   void set_result_set(SymResSet *resultSet);
 
   inline int get_query_id() { return _query_id; }
+
+  inline int get_concrete_row_count() { return _row_count; }
 public:
   bool need_recursive() { return false; }
   void print();
 
   virtual void set_sym_exp(int field_offset, Expression *exp);
-
+  bool is_write_sql();
 public:
   static bool invoke_method_helper(MethodSymbolizerHandle &handle);
   static Expression *finish_method_helper(MethodSymbolizerHandle &handle);

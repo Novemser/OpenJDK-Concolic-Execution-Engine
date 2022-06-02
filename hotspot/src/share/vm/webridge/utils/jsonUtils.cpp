@@ -37,15 +37,10 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     } else {
       writer.Null();
     }
-    SymResSet *resSet = stmt->get_result_set();
     writer.Key("rowCount");
     toUpperCase(templateStr);
     if (!stmt->is_txn_control() && templateStr != "SELECT 1") {
-      if (resSet == NULL) {
-        tty->print_cr("UNHANDLED SQL:%s", templateStr.c_str());
-      }
-      guarantee(resSet != NULL, "Should not be null");
-      writer.Int(resSet->get_row_id());
+      writer.Int(stmt->get_concrete_row_count());
     } else {
       // txn control stmt returns 0 rows
       writer.Int(0);

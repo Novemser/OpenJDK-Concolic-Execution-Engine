@@ -1586,8 +1586,16 @@ run:
       CASE(_i2l)
           : /* convert top of stack int to long */
       {
-        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
+//        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
 
+        if (ConcolicMngr::can_do_concolic()) {
+          int stack_offset = GET_STACK_OFFSET;
+          Expression *old_exp =
+              ConcolicMngr::ctx->get_stack_slot(stack_offset -1);
+          if (old_exp) {
+            ConcolicMngr::ctx->set_stack_slot(stack_offset, old_exp);
+          }
+        }
         // this is ugly QQQ
         jlong r = VMint2Long(STACK_INT(-1));
         MORE_STACK(-1); // Pop

@@ -268,4 +268,13 @@ void SymCommit::set_sym_exp(int field_offset, Expression *exp) {
 
 }
 
+bool SymStmt::is_write_sql() {
+  if (_sql_template.length() == 0) return false;
+  // TODO refactor
+  if (!_sql_template.rfind("UPDATE", 0) || !_sql_template.rfind("update", 0)) return true;
+  if (!_sql_template.rfind("INSERT", 0) || !_sql_template.rfind("insert", 0)) return true;
+  if (!_sql_template.rfind("DELETE", 0) || !_sql_template.rfind("delete", 0)) return true;
+  return false;
+}
+
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC
