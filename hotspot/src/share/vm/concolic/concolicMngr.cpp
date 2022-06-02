@@ -61,6 +61,8 @@ void ConcolicMngr::symbolize(Handle handle) {
   if (can_do_concolic()) {
     tty->print("Symbolize!\n");
     ctx->symbolize(handle);
+  } else {
+    tty->print_cr("Warning: symbolize canned without proper ctx, try System.startConcolic() before symbolize");
   }
 //  tty->print_cr("----- %s", ctx->get_code_pos_for_first("main").c_str());
 }

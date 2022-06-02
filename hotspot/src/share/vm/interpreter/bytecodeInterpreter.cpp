@@ -1392,6 +1392,49 @@ run:
         UPDATE_PC_AND_CONTINUE(1);
       }
 
+// Simplification of lcmp related pc:
+//  original issue: comparison of two long is translated to 2 path conditions(cmp + == 0), which is not easy to be translated into sql
+//  thus simplify as follows:
+// Since the entire pathconditon information is determined here,
+// do not need to propgate the expression to following jmp instructions.
+
+// TODO: generalization of lcmp related pc.
+//  Original PC:
+//  a < b
+//  Expected PC:
+//  a != b
+//  Details see #132
+#ifdef ENABLE_WEBRIDGE
+#define CONCOLIC_CMP_TRIPLE_RES(l_off, r_off, r, l_value, r_value, res_off)             \
+  if (ConcolicMngr::can_do_concolic()) {                                       \
+    int stack_offset = GET_STACK_OFFSET;                                       \
+    Expression *left =                                                         \
+        ConcolicMngr::ctx->get_stack_slot(stack_offset + l_off);               \
+    Expression *right =                                                        \
+        ConcolicMngr::ctx->get_stack_slot(stack_offset + r_off);               \
+    if (left || right) {                                                       \
+      if (!left) {                                                             \
+        left = new ConExpression(l_value);                                     \
+      }                                                                        \
+      if (!right) {                                                            \
+        right = new ConExpression(r_value);                                    \
+      }                                                                        \
+      Expression *new_exp;                                                     \
+      if (r == 0) {                                                            \
+        new_exp = new OpSymExpression(left, right, op_eq);                     \
+      } else if (r == 1) {                                                     \
+        new_exp = new OpSymExpression(left, right, op_gt);                     \
+      } else {                                                                 \
+        new_exp = new OpSymExpression(left, right, op_lt);                     \
+      }                                                                        \
+      ConcolicMngr::ctx->record_path_condition(new_exp);                       \
+      ConcolicMngr::ctx->set_stack_slot(stack_offset + res_off, NULL);         \
+    }                                                                          \
+  }
+#else
+#define CONCOLIC_CMP_TRIPLE_RES(l_off, r_off, r, l_value, r_value, res_off)
+#endif
+
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_BINARY(l_off, r_off, res_off, l_value, r_value, op)       \
   if (ConcolicMngr::can_do_concolic()) {                                       \
@@ -1941,14 +1984,22 @@ run:
       CASE(_fcmpl):
       {
         int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), -1);
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CMP_TRIPLE_RES(-2, -1, r, STACK_FLOAT(-2), STACK_FLOAT(-1), -2);
+#else
         CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpl);
+#endif
         SET_STACK_INT(r, -2);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
       CASE(_fcmpg):
       {
         int r = VMfloatCompare(STACK_FLOAT(-2), STACK_FLOAT(-1), 1);
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CMP_TRIPLE_RES(-2, -1, r, STACK_FLOAT(-2), STACK_FLOAT(-1), -2);
+#else
         CONCOLIC_OPC_BINARY(-2, -1, -2, STACK_FLOAT(-2), STACK_FLOAT(-1), op_cmpg);
+#endif
         SET_STACK_INT(r, -2);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, -1);
       }
@@ -1956,7 +2007,11 @@ run:
       CASE(_dcmpl):
       {
         int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), -1);
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CMP_TRIPLE_RES(-3, -1, r, STACK_DOUBLE(-3), STACK_DOUBLE(-1), -4);
+#else
         CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpl);
+#endif
         MORE_STACK(-4); // Pop
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
@@ -1964,7 +2019,11 @@ run:
       CASE(_dcmpg):
       {
         int r = VMdoubleCompare(STACK_DOUBLE(-3), STACK_DOUBLE(-1), 1);
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CMP_TRIPLE_RES(-3, -1, r, STACK_DOUBLE(-3), STACK_DOUBLE(-1), -4);
+#else
         CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_DOUBLE(-3), STACK_DOUBLE(-1), op_cmpg);
+#endif
         MORE_STACK(-4); // Pop
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
@@ -1972,26 +2031,11 @@ run:
       CASE(_lcmp):
       {
         int r = VMlongCompare(STACK_LONG(-3), STACK_LONG(-1));
-//        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
-//        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp)
-        if (ConcolicMngr::can_do_concolic()) {
-          int stack_offset = GET_STACK_OFFSET;
-          Expression *left =
-              ConcolicMngr::ctx->get_stack_slot(stack_offset + -3);
-          Expression *right =
-              ConcolicMngr::ctx->get_stack_slot(stack_offset + -1);
-          if (left || right) {
-            if (!left) {
-              left = new ConExpression(STACK_LONG(-3));
-            }
-            if (!right) {
-              right = new ConExpression(STACK_LONG(-1));
-            }
-            Expression *new_exp = new OpSymExpression(left, right, op_cmp);
-            ConcolicMngr::ctx->set_stack_slot(stack_offset + -4, new_exp);
-          }
-        }
-
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CMP_TRIPLE_RES(-3, -1, r, STACK_LONG(-3), STACK_LONG(-1), -4);
+#else
+        CONCOLIC_OPC_BINARY(-3, -1, -4, STACK_LONG(-3), STACK_LONG(-1), op_cmp);
+#endif
         MORE_STACK(-4);
         SET_STACK_INT(r, 0);
         UPDATE_PC_AND_TOS_AND_CONTINUE(1, 1);
