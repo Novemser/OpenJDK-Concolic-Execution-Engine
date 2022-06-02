@@ -41,6 +41,9 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     writer.Key("rowCount");
     toUpperCase(templateStr);
     if (!stmt->is_txn_control() && templateStr != "SELECT 1") {
+      if (resSet == NULL) {
+        tty->print_cr("UNHANDLED SQL:%s", templateStr.c_str());
+      }
       guarantee(resSet != NULL, "Should not be null");
       writer.Int(resSet->get_row_id());
     } else {
