@@ -5,8 +5,9 @@
 #include "utilities/ostream.hpp"
 
 ulong Expression::total_count = 0;
+ulong Expression::unique_id = 0;
 
-Expression::Expression() : _ref_count(0) {
+Expression::Expression() : _ref_count(0), _unique_id(unique_id++) {
   total_count++;
 }
 

@@ -16,10 +16,12 @@
 class Expression {
 private:
   uint _ref_count;
+  uint _unique_id;
   std::string _java_code_position;
 
 public:
   static ulong total_count;
+  static ulong unique_id;
 
   static void gc(Expression *exp) {
     if (exp && exp->dec_ref()) {
@@ -49,6 +51,7 @@ public:
 
   const std::string &getJavaCodePosition() const;
 
+  inline int get_unique_id() { return _unique_id; }
 protected:
   Expression();
 

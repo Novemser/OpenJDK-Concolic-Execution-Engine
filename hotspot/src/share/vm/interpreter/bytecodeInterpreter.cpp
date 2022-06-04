@@ -49,6 +49,13 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/globalDefinitions.hpp"
 
+#ifdef ENABLE_WEBRIDGE
+#include <sstream>
+
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+#endif
+
 // no precompiled headers
 #ifdef CC_INTERP
 
@@ -1577,6 +1584,28 @@ run:
 
      /* negate the value on the top of the stack */
 
+#ifdef ENABLE_WEBRIDGE
+#define CONCOLIC_CONVERT_TYPE(input_offset, output_offset, inplace, type)  \
+      if (ConcolicMngr::can_do_concolic()) {  \
+        int stack_offset = GET_STACK_OFFSET;  \
+        Expression *old_exp = \
+            ConcolicMngr::ctx->get_stack_slot(stack_offset + input_offset);  \
+        if (inplace)  \
+          ConcolicMngr::ctx->set_stack_slot(stack_offset + output_offset, old_exp); \
+        else if (old_exp) {  \
+          std::string name = SSTR("CAST_" << old_exp->get_unique_id());  \
+          SymbolExpression *new_exp = new SymbolExpression(name.c_str(), name.length());  \
+          new_exp->set_type(type);  \
+          ConcolicMngr::ctx->set_stack_slot(stack_offset + output_offset, new_exp); \
+          ConcolicMngr::record_path_condition(  \
+            new OpSymExpression(old_exp, new_exp, op_eq)  \
+          );  \
+        } \
+      }
+#else
+#define CONCOLIC_CONVERT_TYPE(input_offset, output_offset, inplace, type)
+#endif
+
 #ifdef ENABLE_CONCOLIC
 #define CONCOLIC_OPC_UNARY(input_offset, output_offset, op)                    \
   if (ConcolicMngr::can_do_concolic()) {                                       \
@@ -1621,7 +1650,11 @@ run:
       CASE(_i2f)
           : /* convert top of stack int to float */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, false, "F");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2f);
+#endif
         SET_STACK_FLOAT(VMint2Float(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
@@ -1629,16 +1662,11 @@ run:
       CASE(_i2l)
           : /* convert top of stack int to long */
       {
-//        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
-
-        if (ConcolicMngr::can_do_concolic()) {
-          int stack_offset = GET_STACK_OFFSET;
-          Expression *old_exp =
-              ConcolicMngr::ctx->get_stack_slot(stack_offset -1);
-          if (old_exp) {
-            ConcolicMngr::ctx->set_stack_slot(stack_offset, old_exp);
-          }
-        }
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, 0, true, "L");
+#else
+        CONCOLIC_OPC_UNARY(-1, 0, op_2l);
+#endif
         // this is ugly QQQ
         jlong r = VMint2Long(STACK_INT(-1));
         MORE_STACK(-1); // Pop
@@ -1650,7 +1678,11 @@ run:
       CASE(_i2d)
           : /* convert top of stack int to double */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, 0, false, "D");
+#else
         CONCOLIC_OPC_UNARY(-1, 0, op_2d);
+#endif
 
         // this is ugly QQQ (why cast to jlong?? )
         jdouble r = (jlong)STACK_INT(-1);
@@ -1663,7 +1695,11 @@ run:
       CASE(_l2i)
           : /* convert top of stack long to int */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -2, true, "I");
+#else
         CONCOLIC_OPC_UNARY(-1, -2, op_2i);
+#endif
 
         jint r = VMlong2Int(STACK_LONG(-1));
         MORE_STACK(-2); // Pop
@@ -1674,7 +1710,11 @@ run:
       CASE(_l2f)
           : /* convert top of stack long to float */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -2, false, "F");
+#else
         CONCOLIC_OPC_UNARY(-1, -2, op_2f);
+#endif
 
         jlong r = STACK_LONG(-1);
         MORE_STACK(-2); // Pop
@@ -1685,7 +1725,11 @@ run:
       CASE(_l2d)
           : /* convert top of stack long to double */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, false, "D");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2d);
+#endif
 
         jlong r = STACK_LONG(-1);
         MORE_STACK(-2); // Pop
@@ -1696,7 +1740,12 @@ run:
       CASE(_f2i)
           : /* Convert top of stack float to int */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, false, "I");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2i);
+#endif
+
         SET_STACK_INT(SharedRuntime::f2i(STACK_FLOAT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
@@ -1704,7 +1753,11 @@ run:
       CASE(_f2l)
           : /* convert top of stack float to long */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, 0, false, "L");
+#else
         CONCOLIC_OPC_UNARY(-1, 0, op_2l);
+#endif
 
         jlong r = SharedRuntime::f2l(STACK_FLOAT(-1));
         MORE_STACK(-1); // POP
@@ -1715,7 +1768,11 @@ run:
       CASE(_f2d)
           : /* convert top of stack float to double */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, 0, true, "D");
+#else
         CONCOLIC_OPC_UNARY(-1, 0, op_2d);
+#endif
 
         jfloat f;
         jdouble r;
@@ -1729,7 +1786,11 @@ run:
       CASE(_d2i)
           : /* convert top of stack double to int */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -2, false, "I");
+#else
         CONCOLIC_OPC_UNARY(-1, -2, op_2i);
+#endif
 
         jint r1 = SharedRuntime::d2i(STACK_DOUBLE(-1));
         MORE_STACK(-2);
@@ -1740,7 +1801,11 @@ run:
       CASE(_d2f)
           : /* convert top of stack double to float */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -2, true, "F");
+#else
         CONCOLIC_OPC_UNARY(-1, -2, op_2f);
+#endif
 
         jfloat r1 = VMdouble2Float(STACK_DOUBLE(-1));
         MORE_STACK(-2);
@@ -1751,7 +1816,11 @@ run:
       CASE(_d2l)
           : /* convert top of stack double to long */
       {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, false, "L");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2l);
+#endif
 
         jlong r1 = SharedRuntime::d2l(STACK_DOUBLE(-1));
         MORE_STACK(-2);
@@ -1760,19 +1829,31 @@ run:
       }
 
       CASE(_i2b) : {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, true, "B");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2b);
+#endif
         SET_STACK_INT(VMint2Byte(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
 
       CASE(_i2c) : {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, true, "C");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2c);
+#endif
         SET_STACK_INT(VMint2Char(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }
 
       CASE(_i2s) : {
+#ifdef ENABLE_WEBRIDGE
+        CONCOLIC_CONVERT_TYPE(-1, -1, true, "S");
+#else
         CONCOLIC_OPC_UNARY(-1, -1, op_2s);
+#endif
         SET_STACK_INT(VMint2Short(STACK_INT(-1)), -1);
         UPDATE_PC_AND_CONTINUE(1);
       }

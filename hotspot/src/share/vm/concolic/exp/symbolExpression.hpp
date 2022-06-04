@@ -54,6 +54,8 @@ public:
   void print();
 
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+
+  inline void set_type(std::string new_type) { _type = new_type; }
 };
 
 class InstanceSymbolExp : public SymbolExpression {
