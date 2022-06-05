@@ -41,8 +41,6 @@ protected:
   std::string _str;
   std::string _type;
 
-  void set(const char *buf, int length);
-
   /**
    * The following calls must be called in order!
    */
@@ -52,6 +50,7 @@ protected:
 
 public:
   void print();
+  void set(const char *buf, int length);
 
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
 

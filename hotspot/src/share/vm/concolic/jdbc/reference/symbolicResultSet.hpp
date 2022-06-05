@@ -26,6 +26,8 @@ public:
   inline static bool target(const std::string &class_name) {
     return target_class_names.find(class_name) != target_class_names.end();
   }
+protected:
+  void get_ret_val_name(int col_i, std::string& input);
 
 private:
   static std::set<std::string> target_class_names;

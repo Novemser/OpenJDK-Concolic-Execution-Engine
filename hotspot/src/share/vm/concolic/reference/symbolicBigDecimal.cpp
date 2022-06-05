@@ -167,34 +167,27 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     );
     symObj->symbolize_bigDecimal(thisDecimal, paramDoubleExp);
   } else if (signature == "java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;") {
-    tty->print_cr("STEP0");
     jint newScale = handle.get_param<jint>(1);
-    tty->print_cr("STEP0.1,newScale=%d", newScale);
     assert(newScale >= 0, "Scale should >= 0");
     assert(handle.get_param_list().size() == 3, "size should be 3");
     guarantee(handle.get_param_list()[1] == NULL || handle.get_param_list()[2],
               "currently only handle concrete scaling");
-    tty->print_cr("STEP1");
     oop thisDecimal = handle.get_param<oop>(0);
     oop resultDecimal = handle.get_result<oop>(T_OBJECT);
     assert(thisDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
     assert(resultDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
-    tty->print_cr("STEP2");
     SymBigDecimal *symThisDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_sym_inst(thisDecimal));
     SymBigDecimal *symResDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal));
     guarantee(symThisDecimal != NULL, "Only handle symbolic decimal case[symThisDecimal]");
     guarantee(symResDecimal != NULL, "Only handle symbolic decimal case[symResDecimal]");
-    tty->print_cr("STEP3");
     int intCmpFldOffset = symThisDecimal->int_compact_offset(thisDecimal);
     int scaleFldOffset = symThisDecimal->scale_offset(thisDecimal);
     Expression *intCmpExp = symThisDecimal->get(intCmpFldOffset);
     Expression *scaleExp = symThisDecimal->get(scaleFldOffset);
-    tty->print_cr("STEP4");
     if (intCmpExp == NULL && scaleExp == NULL) {
       // not a correctly initialized symbolic decimal
       ShouldNotCallThis();
     }
-    tty->print_cr("STEP5");
 
     int curScale = thisDecimal->int_field(intCmpFldOffset);
     if (newScale > curScale) {

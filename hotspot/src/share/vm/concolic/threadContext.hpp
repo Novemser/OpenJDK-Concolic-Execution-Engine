@@ -156,6 +156,7 @@ public:
   void swap_two_stack_slot(int off1, int off2);
   void copy_entry_from_local_to_stack(int local_offset, int stack_offset);
   void copy_entry_from_stack_to_local(int stack_offset, int local_offset);
+  void symbolize_recursive(oop obj);
 
 private:
   inline ShadowTable &get_last_stack() {
@@ -185,7 +186,6 @@ private:
   }
 
 private:
-  void symbolize_recursive(oop obj);
 
   void set_sym_ref(sym_rid_t sym_rid, SymRef *sym_ref) {
     _sym_refs.insert(std::make_pair(sym_rid, sym_ref));

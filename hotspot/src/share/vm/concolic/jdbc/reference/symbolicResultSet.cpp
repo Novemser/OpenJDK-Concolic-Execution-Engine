@@ -8,6 +8,8 @@
 #include "concolic/jdbc/reference/symbolicStatement.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/utils.hpp"
+#include "concolic/exp/stringExpression.hpp"
+#include "concolic/reference/symbolicBigDecimal.hpp"
 
 std::set<std::string> SymResSet::target_class_names = init_target_class_names();
 
@@ -15,6 +17,7 @@ std::set<std::string> SymResSet::init_target_class_names() {
   std::set<std::string> set;
   set.insert("com/mysql/jdbc/JDBC42ResultSet");
   set.insert("com/mysql/jdbc/ResultSetImpl");
+//  set.insert("TestBigDecimal$StubResultSet");
   return set;
 }
 
@@ -177,9 +180,15 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 
     BasicType res_type = handle.get_result_type();
     oop res_obj = NULL;
+    const char* res_obj_signature_name = NULL;
     if (res_type == T_OBJECT) {
       res_obj = handle.get_result<oop>(T_OBJECT);
+      if (res_obj != NULL) {
+        res_obj_signature_name = res_obj->klass()->signature_name();
+      }
     }
+
+    jint col_i;
     if (col_type == T_OBJECT) {
       oop col_str_obj = handle.get_param<oop>(1);
       guarantee(col_str_obj->klass()->name()->equals(SymString::TYPE_NAME),
@@ -190,15 +199,44 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
 //      exp = new ResultSetSymbolExp(sym_res_set, res.get_jint(), res_type, res_obj);
       // multiple String name could corresponds to one column in the result, this can cause ambiguous symbolic names.
       // use index as unique identifier!
-      exp = new ResultSetSymbolExp(sym_res_set, sym_res_set->_last_got_index, res_type, res_obj);
+      col_i = sym_res_set->_last_got_index;
       sym_res_set->_last_got_index = -1;
     } else if (col_type == T_INT) {
-      jint col_i = handle.get_param<int>(1);
-      exp = new ResultSetSymbolExp(sym_res_set, col_i, res_type, res_obj);
+      col_i = handle.get_param<int>(1);
     } else {
       handle.get_callee_method()->print_name(tty);
       tty->print_cr(" should handled by SymResSet");
       ShouldNotCallThis();
+    }
+
+    if (res_obj_signature_name == NULL) {
+      exp = new ResultSetSymbolExp(sym_res_set, col_i, res_type, res_obj);
+    } else {
+      // TODO: result variable different object type handling
+      // 1. String 2. bigdecimal 3. date/time
+      std::string res_tp = res_obj_signature_name;
+      std::string exp_name;
+      sym_res_set->get_ret_val_name(col_i, exp_name);
+      guarantee(!exp_name.empty(), "should not be empty exp_name");
+
+      if (res_tp == "Ljava/lang/String;") {
+        SymString *sym_str = reinterpret_cast<SymString *>(
+            ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
+        );
+        StringSymbolExp *sym_str_exp = (StringSymbolExp *) sym_str->get_ref_exp();
+        sym_str_exp->set(exp_name.c_str(), (int) exp_name.length());
+        exp = sym_str_exp;
+      } else if (res_tp == "Ljava/math/BigDecimal;") {
+        SymBigDecimal *sym_bd = reinterpret_cast<SymBigDecimal *>(
+            ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
+        );
+        sym_bd->set_bigDecimal_symbolic(res_obj, exp_name);
+      } else if (res_tp == "Ljava/sql/Timestamp;" || res_tp == "Ljava/sql/Date;") {
+        ConcolicMngr::ctx->symbolize_recursive(res_obj);
+      } else {
+        tty->print_cr("Not implement %s", res_obj_signature_name);
+        ShouldNotCallThis();
+      }
     }
   } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     // DO NOTHING ABOUT skipped method
@@ -275,6 +313,16 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, int col_i,
   ss.print("RS_q%lu_r%d_col%d", sym_res_set->_sql_id, sym_res_set->_row_id,
            col_i);
   this->finalize(ss.size());
+}
+
+// TODO: refactor ResultSetSymbolExp ctor to use the same name generation logic
+void SymResSet::get_ret_val_name(int col_i, std::string &input) {
+  const int BUFFER_SIZE = 1024;
+  char buffer[BUFFER_SIZE];
+  stringStream ss(buffer, BUFFER_SIZE);
+  ss.print("RS_q%lu_r%d_col%d", this->_sql_id, this->_row_id, col_i);
+  std::string val = std::string(buffer, ss.size());
+  input.swap(val);
 }
 
 #endif // ENABLE_CONCOLIC && CONCOLIC_JDBC

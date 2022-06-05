@@ -9,11 +9,11 @@ method_set_t SymTimestamp::symbolized_methods = init_symbolized_methods();
 
 method_set_t SymTimestamp::init_symbolized_methods() {
   method_set_t m_set;
-  m_set.insert("<init>");
-  m_set.insert("getTime");
-  m_set.insert("getNanos");
-  m_set.insert("setTime");
-  m_set.insert("setNanos");
+//  m_set.insert("<init>");
+//  m_set.insert("getTime");
+//  m_set.insert("getNanos");
+//  m_set.insert("setTime");
+//  m_set.insert("setNanos");
   return m_set;
 }
 
@@ -39,6 +39,7 @@ Expression *SymTimestamp::get_exp_of(oop obj) {
   } else {
     ResourceMark rm;
     //now, we can't care about the value of a concrete Timestamp
+//    ShouldNotCallThis();
     exp = new ConExpression(0.0);
   }
   return exp;
@@ -48,7 +49,10 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = false;
   if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
+//    if (handle.general_check_param_symbolized()) {
     need_symbolize = true;
+//      handle.general_prepare_param();
+//    }
   } else {
     handle.get_callee_method()->print_name(tty);
     tty->print_cr("unhandled by SymTimestamp:");
@@ -60,6 +64,9 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
 Expression *SymTimestamp::finish_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   Expression *exp = NULL;
+//  if (symbolized_methods.find(callee_name) != symbolized_methods.end()) {
+//    ShouldNotCallThis();
+//  }
   return exp;
 }
 
@@ -69,8 +76,25 @@ void SymTimestamp::print() {
   tty->print("\n");
 }
 
+void SymTimestamp::init_sym_exp(int field_offset, Expression *exp) {
+  guarantee(exp != NULL, "should not be null");
+  exp->inc_ref();
+
+  if (_internal_fields.find(field_offset) != _internal_fields.end()) {
+    Expression::gc(_internal_fields[field_offset]);
+  }
+  _internal_fields[field_offset] = exp;
+}
+
+Expression *SymTimestamp::get(int field_offset) {
+  return _internal_fields[field_offset];
+}
+
 void SymTimestamp::set_sym_exp(int field_offset, Expression *exp) {
-  ShouldNotCallThis();
+  if (exp) {
+    exp->inc_ref();
+  }
+  _internal_fields[field_offset] = exp;
 }
 
 #endif

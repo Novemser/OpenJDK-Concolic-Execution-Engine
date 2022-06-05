@@ -21,6 +21,8 @@ std::set<std::string> SymStmt::init_target_class_names() {
   set.insert("com/mysql/jdbc/JDBC42PreparedStatement");
   set.insert("com/mysql/jdbc/PreparedStatement");
   set.insert("com/mysql/jdbc/StatementImpl");
+//  set.insert("TestBigDecimal$StubPreparedStmt");
+//  set.insert("TestBigDecimal$StubStmt");
   return set;
 }
 
@@ -111,10 +113,11 @@ void SymStmt::print() {
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
+  tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
 
   if (callee_name == "execute") {
     int param_size = handle.get_callee_method()->size_of_parameters();
-    assert(param_size == 2, "currently, we only support stmt.execute(String)");
+    guarantee(param_size == 2, "currently, we only support stmt.execute(String)");
 
     oop stmt_obj = handle.get_param<oop>(0);
     oop str_obj = handle.get_param<oop>(1);
@@ -162,7 +165,7 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
 
   if (strncmp("execute", callee_name.c_str(), 7) == 0) {
     oop this_obj = handle.get_param<oop>(0);
-    SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(this_obj);
+    SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj));
     // set current path conditon for statement
     sym_stmt->set_pc(ConcolicMngr::ctx->get_path_condition());
 //    ConcolicMngr::ctx->record_path_condition(new StatementSymbolExp(sym_stmt));

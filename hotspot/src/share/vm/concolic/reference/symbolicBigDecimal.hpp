@@ -23,12 +23,12 @@ public:
 private:
 #ifdef ENABLE_WEBRIDGE
   std::map<int, Expression*> _internal_fields;
-  void set_bigDecimal_symbolic(oop decimalOOp, std::string name);
-  void symbolize_bigDecimal(oop decimalOOp, Expression* parentExp);
   int int_compact_offset(oop decimal);
   int scale_offset(oop decimal);
+  void symbolize_bigDecimal(oop decimalOOp, Expression* parentExp);
 public:
   virtual void init_sym_exp(int field_offset, Expression *exp);
+  void set_bigDecimal_symbolic(oop decimalOOp, std::string name);
 
   virtual Expression *get(int field_offset);
 

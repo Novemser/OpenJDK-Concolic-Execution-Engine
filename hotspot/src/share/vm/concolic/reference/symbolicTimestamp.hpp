@@ -14,6 +14,7 @@ public:
   static method_set_t symbolized_methods;
 private:
   Expression *_exp;
+  std::map<int, Expression*> _internal_fields;
 
 public:
   SymTimestamp(sym_rid_t sym_rid);
@@ -31,8 +32,12 @@ public:
     _exp->inc_ref();
   };
 
-  bool need_recursive() { return false; }
+  bool need_recursive() { return true; }
   void print();
+
+  virtual void init_sym_exp(int field_offset, Expression *exp);
+
+  virtual Expression *get(int field_offset);
 
   virtual void set_sym_exp(int field_offset, Expression *exp);
 
