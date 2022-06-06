@@ -13,6 +13,7 @@ method_set_t SymString::handle_method_names = init_handle_method_names();
 std::map<std::string, bool> SymString::skip_method_names =
     init_skip_method_names();
 bool SymString::need_recording = false;
+std::map<std::string, oop> SymString::INTERN_MAP;
 
 method_set_t SymString::init_handle_method_names() {
   method_set_t m_set;
@@ -185,12 +186,36 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
       exp = SymbolExpression::get(Sym_VOID);
       break;
     case T_OBJECT:
-      obj = handle.get_result<oop>(type);
+      if (handle.get_callee_method()->is_native()) {
+        obj = handle.get_callee_istate()->oop_temp();
+      } else {
+        obj = handle.get_result<oop>(type);
+      }
       if (obj != NULL) {
-        guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME),
-                  "should be");
-        ConcolicMngr::ctx->get_or_alloc_sym_inst(obj)->set_ref_exp(
-            new OpStrExpression(callee_name, handle.get_param_list()));
+        ResourceMark rm;
+        if (callee_name == "intern") {
+          assert(handle.get_callee_method()->is_native(), "should be native");
+          std::string str(java_lang_String::as_utf8_string(obj));
+          if (INTERN_MAP.find(str) == INTERN_MAP.end()) {
+            JavaThread* thread = JavaThread::current();
+            JavaThreadState lastState = thread->thread_state();
+            // must transfer thread state to state_VM
+            thread->set_thread_state(_thread_in_vm);
+            INTERN_MAP.insert(
+                std::make_pair(str,
+                               java_lang_String::create_oop_from_str(str.c_str(), thread))
+            );
+            thread->set_thread_state(lastState);
+          }
+          obj = INTERN_MAP[str];
+          // replace the obj in native stack
+          handle.get_callee_frame()->as_interpreter_frame()->interpreter_state()->set_oop_temp(obj);
+        }
+        guarantee(obj->klass()->name()->equals(SymString::TYPE_NAME), "should be");
+        SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+        if (sym_inst != NULL) {
+          sym_inst->set_ref_exp(new OpStrExpression(callee_name, handle.get_param_list()));
+        }
       } else {
         exp = SymbolExpression::get(Sym_NULL);
       }

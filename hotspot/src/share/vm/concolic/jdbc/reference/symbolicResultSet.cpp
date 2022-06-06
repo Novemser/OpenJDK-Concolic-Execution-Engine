@@ -223,7 +223,9 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
         SymString *sym_str = reinterpret_cast<SymString *>(
             ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
         );
-        StringSymbolExp *sym_str_exp = (StringSymbolExp *) sym_str->get_ref_exp();
+        StringSymbolExp *sym_str_exp = reinterpret_cast<StringSymbolExp *>(
+            sym_str->get_ref_exp()
+        );
         sym_str_exp->set(exp_name.c_str(), (int) exp_name.length());
         exp = sym_str_exp;
       } else if (res_tp == "Ljava/math/BigDecimal;") {

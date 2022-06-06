@@ -15,6 +15,7 @@ public:
   static method_set_t handle_method_names;
   static std::map<std::string, bool> skip_method_names;
   static bool need_recording;
+  static std::map<std::string, oop> INTERN_MAP;
 private:
   Expression *_ref_exp;
   Expression *_exp;
