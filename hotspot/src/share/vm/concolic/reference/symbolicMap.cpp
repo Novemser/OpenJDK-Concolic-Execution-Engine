@@ -66,10 +66,10 @@ bool SymMap::invoke_method_helper(MethodSymbolizerHandle &handle) {
   bool need_symbolize = true;
   need_recording = false;
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
-    need_recording = SymMap::check_param_symbolized(handle);
-    if (need_recording) {
-      SymMap::prepare_param(handle);
-    }
+//    need_recording = SymMap::check_param_symbolized(handle);
+//    if (need_recording) {
+//      SymMap::prepare_param(handle);
+//    }
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
     if (iter != skip_method_names.end()) {

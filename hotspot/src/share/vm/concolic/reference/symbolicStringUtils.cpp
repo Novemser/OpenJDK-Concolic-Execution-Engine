@@ -62,14 +62,14 @@ bool SymStrUtils::invoke_method_helper(MethodSymbolizerHandle &handle) {
       if (!need_symbolize) {
         bool recording = handle.general_check_param_symbolized();
         handle.get_callee_method()->print_name(tty);
-        tty->print_cr(" skipped by SymStrUtils, need recording %c",
-                      recording ? 'Y' : 'N');
+//        tty->print_cr(" skipped by SymStrUtils, need recording %c",
+//                      recording ? 'Y' : 'N');
       }
     } else {
       bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymStrUtils, need recording %c",
-                    recording ? 'Y' : 'N');
+//      tty->print_cr(" handled by SymStrUtils, need recording %c",
+//                    recording ? 'Y' : 'N');
     }
   }
 
