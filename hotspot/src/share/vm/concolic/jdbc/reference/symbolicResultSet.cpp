@@ -17,7 +17,7 @@ std::set<std::string> SymResSet::init_target_class_names() {
   std::set<std::string> set;
   set.insert("com/mysql/jdbc/JDBC42ResultSet");
   set.insert("com/mysql/jdbc/ResultSetImpl");
-//  set.insert("TestBigDecimal$StubResultSet");
+  set.insert("TestBigDecimal$StubResultSet"); // for test purpose only
   return set;
 }
 
@@ -103,8 +103,17 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     need_symbolize = false;
   } else if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     oop res_set_obj = handle.get_param<oop>(0);
-    SymResSet *sym_res_set =
-        (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
+    SymResSet * sym_res_set;
+    if (res_set_obj->is_symbolic()) {
+      sym_res_set = reinterpret_cast<SymResSet *>(ConcolicMngr::ctx->get_sym_inst(res_set_obj));
+    } else {
+      // Sometimes, res_set_obj.getXXX is invoked without explicit invocation executeQuery before ahead.
+      // One possible reason is that a virtual invocation is inlined by the jvm.
+      // Since executeQuery marks the res_set_obj symbolic, we manually mark it here.
+      // TODO: implement this
+      guarantee(false,
+                "explicit invocation to executeQuery might be optimized out, res_set_obj is not properly initialized");
+    }
 
     oop this_obj = res_set_obj;
     BasicType col_type;

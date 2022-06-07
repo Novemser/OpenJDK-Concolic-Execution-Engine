@@ -21,8 +21,8 @@ std::set<std::string> SymStmt::init_target_class_names() {
   set.insert("com/mysql/jdbc/JDBC42PreparedStatement");
   set.insert("com/mysql/jdbc/PreparedStatement");
   set.insert("com/mysql/jdbc/StatementImpl");
-//  set.insert("TestBigDecimal$StubPreparedStmt");
-//  set.insert("TestBigDecimal$StubStmt");
+  set.insert("TestBigDecimal$StubPreparedStmt");// for test purpose only
+  set.insert("TestBigDecimal$StubStmt");// for test purpose only
   return set;
 }
 
