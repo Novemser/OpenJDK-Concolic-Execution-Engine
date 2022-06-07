@@ -22,6 +22,7 @@
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateMethod.hpp"
 #include "concolic/reference/symbolicHttpServletRequest.hpp"
+#include "concolic/reference/symbolicNDFunc.hpp"
 #include "memory/resourceArea.hpp"
 #include "runtime/signature.hpp"
 #include "utilities/exceptions.hpp"
@@ -51,6 +52,7 @@ void MethodSymbolizer::init_helper_methods() {
 //  SymHibernateMethod::init_register_class(this);
   SymbolicUnsafe::init_register_class(this);
 //  SymbolicHttpServletRequest::init_register_class(this);
+  SymbolicNDFunc::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,
@@ -70,6 +72,7 @@ MethodSymbolizer::~MethodSymbolizer() {
       delete sym_class_map_it->second;
     }
   }
+  SymbolicNDFunc::gc();
 }
 
 void MethodSymbolizer::add_method(const char *class_name,

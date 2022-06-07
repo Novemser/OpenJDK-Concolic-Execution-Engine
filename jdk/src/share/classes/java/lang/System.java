@@ -442,7 +442,7 @@ public final class System {
      */
     public static native void recordPersistentObj(Object obj);
 
-    public static void weBridgeAnalysis(ClassLoader classLoader) {
+    public static String weBridgeAnalysis(ClassLoader classLoader) {
     /** TODO: currently JVM is unable to call Class.forName inside java.lang.System.
       *   this is due to implementation specific restrictions of openjdk 8. Consider
       *   relax the restriction.
@@ -453,10 +453,10 @@ public final class System {
 //         } catch (ClassNotFoundException e) {
 //           throw new RuntimeException(e);
 //         }
-        weBridgeAnalysis0(classLoader);
+        return weBridgeAnalysis0(classLoader);
     }
 
-    private static native void weBridgeAnalysis0(ClassLoader classLoader);
+    private static native String weBridgeAnalysis0(ClassLoader classLoader);
     /**
      * Copies an array from the specified source array, beginning at the
      * specified position, to the specified position of the destination array.

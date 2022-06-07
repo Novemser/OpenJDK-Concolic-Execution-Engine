@@ -456,7 +456,7 @@ JVM_ENTRY(void, JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj
 #endif
 JVM_END
 
-JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader))
+JVM_ENTRY(jstring, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader))
   JVMWrapper("JVM_WeBridgeAnalysis");
 #ifdef ENABLE_WEBRIDGE
   Handle h_loader(THREAD, JNIHandles::resolve(classLoader));
@@ -469,7 +469,8 @@ JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classL
   if (klass == NULL) {
     tty->print_cr(
         "[WeBridge] Required class _wbridge_storedprocedure_StoredProcedureManager not found! Add to your class path");
-    return;
+    Handle str = java_lang_String::create_from_platform_dependent_str("", THREAD);
+    return (jstring) JNIHandles::make_local(env, str());
   }
 
   KlassHandle klass_handle(THREAD, klass);
@@ -486,9 +487,12 @@ JVM_ENTRY(void, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classL
 //    tty->print_cr("WeBridge initialized failed! Could not find main StoredProcedure manager");
 //    return;
 //  }
-  webridgeMngr::analyse(ConcolicMngr::ctx, klass, env);
+  std::string resStr = webridgeMngr::analyse(ConcolicMngr::ctx, klass, env);
+  Handle str = java_lang_String::create_from_platform_dependent_str(resStr.c_str(), THREAD);
+  return (jstring) JNIHandles::make_local(env, str());
 #else
-  return;
+  ShouldNotReachHere();
+  return NULL;
 #endif
 JVM_END
 

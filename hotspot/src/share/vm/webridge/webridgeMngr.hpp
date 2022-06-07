@@ -18,11 +18,11 @@ private:
   static void saveTemp(const std::string &str);
 
 public:
-  static void analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env);
+  static std::string analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env);
 
 #else
   public:
-      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass, JNIEnv *env) {}
+      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass, JNIEnv *env) { return ""; }
 #endif
 };
 
