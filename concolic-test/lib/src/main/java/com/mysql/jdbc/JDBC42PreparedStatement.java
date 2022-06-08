@@ -341,7 +341,7 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
         // TODO Auto-generated method stub
-
+        if (x != null) x.hashCode();
     }
 
     @Override
@@ -371,7 +371,7 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
         // TODO Auto-generated method stub
-
+        if (x != null) x.hashCode();
     }
 
     @Override

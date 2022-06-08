@@ -22,11 +22,28 @@ void SymTimestamp::init_register_class(MethodSymbolizer *m_symbolizer) {
   m_symbolizer->add_finish_helper_methods(SymTimestamp::TYPE_NAME, finish_method_helper);
 }
 
-SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
-SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)) {}
+SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL), _exp_converted(NULL) {}
+SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)), _exp_converted(NULL) {
+  guarantee(obj != NULL, "should not be null");
+  Klass *tsClz = obj->klass();
+  guarantee(tsClz->name() == vmSymbols::java_sql_Timestamp(), "should equals");
+
+  fieldDescriptor fd_fastTime;
+  tsClz->find_field(
+      vmSymbols::fastTime(),
+      vmSymbols::long_signature(),
+      &fd_fastTime
+  );
+  _fastTimeFldOffset = fd_fastTime.offset();
+}
 
 SymTimestamp::~SymTimestamp() {
   Expression::gc(_exp);
+  std::map<int, Expression*>::iterator iter = _internal_fields.begin();
+  for (; iter != _internal_fields.end(); iter++) {
+    Expression::gc(iter->second);
+  }
+  Expression::gc(_exp_converted);
 }
 
 Expression *SymTimestamp::get_exp_of(oop obj) {
@@ -96,6 +113,18 @@ void SymTimestamp::set_sym_exp(int field_offset, Expression *exp) {
   }
   Expression::gc(_internal_fields[field_offset]);
   _internal_fields[field_offset] = exp;
+}
+
+Expression *SymTimestamp::get_ref_exp() {
+  // return fast time
+  Expression *exp = _internal_fields[_fastTimeFldOffset];
+  if (exp == NULL) return exp;
+  Expression::gc(_exp_converted);
+  // FROM_UNIXTIME is base on seconds, so we need to convert million seconds to seconds
+  _exp_converted = new OpSymExpression(
+      exp, new ConExpression(1000), op_div
+  );
+  return _exp_converted;
 }
 
 #endif

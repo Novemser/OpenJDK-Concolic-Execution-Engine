@@ -1162,7 +1162,9 @@
    do_signature(_add_SQLTemplate_signature, "(Ledu/sjtu/ipads/wbridge/sql/SymbolicSQLTemplate;)V")                      \
   do_class(java_math_BigDecimal,                      "java/math/BigDecimal")                                           \
    do_name(bd_intCompact, "intCompact") \
-   do_name(bd_scale, "scale") \
+   do_name(bd_scale, "scale")                                                                                           \
+  do_class(java_sql_Timestamp, "java/sql/Timestamp")  \
+   do_name(fastTime, "fastTime")                                                                                                             \
     /*end*/
 
 

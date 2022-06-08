@@ -29,8 +29,8 @@ std::string webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlas
     return "";
   }
 
-  JavaVM *jvm;
-  JavaValue result(T_VOID);
+//  JavaVM *jvm;
+//  JavaValue result(T_VOID);
   Thread *currentThread = Thread::current();
   ResourceMark rm;
   KlassHandle klass(currentThread, weBridgeSPEntryKlass);

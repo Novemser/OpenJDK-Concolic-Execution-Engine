@@ -52,6 +52,7 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     exp_map_t param_exprs = stmt->get_param_exps();
     exp_map_t::iterator iter;
     std::vector<int> expr_position_index;
+    tty->print_cr("param_exprs size:%lu", param_exprs.size());
     for (iter = param_exprs.begin(); iter != param_exprs.end(); ++iter) {
       expr_position_index.push_back(iter->first);
     }

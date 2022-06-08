@@ -15,6 +15,7 @@
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
+#include "concolic/reference/symbolicNDFunc.hpp"
 
 // An object closure to reset symbolic ids
 class RestoreSymbolicClosure : public ObjectClosure {
@@ -41,7 +42,6 @@ ThreadContext::~ThreadContext() {
     guarantee(iter->second != NULL, "Sym instance should not be null");
     delete iter->second;
   }
-  tty->print_cr("TC1");
   _sym_refs.clear();
 
   int size = _sym_tmp_exps.size();
@@ -49,25 +49,18 @@ ThreadContext::~ThreadContext() {
     Expression::gc(_sym_tmp_exps[i]);
   }
   _sym_tmp_exps.clear();
-  tty->print_cr("TC2");
-//if (true) return;
   _path_condition.gc();
   ArrayStore::iterator arr_it;
-  tty->print_cr("TC3");
 
   for (arr_it = _array_store.begin(); arr_it != _array_store.end(); arr_it++) {
     guarantee(arr_it->second != NULL, "Array store should not be null");
     delete arr_it->second;
   }
-  tty->print_cr("TC4");
+  SymbolicNDFunc::gc();
+
   RestoreSymbolicClosure rso;
   Universe::heap()->safe_object_iterate(&rso);
 
-//  std::set<oop>::iterator _allocated_objs_iter;
-//  for (_allocated_objs_iter = _allocated_objs.begin(); _allocated_objs_iter != _allocated_objs.end(); _allocated_objs_iter++) {
-//    (*_allocated_objs_iter)->set_sym_rid(NULL_SYM_RID);
-//  }
-  tty->print_cr("TC5");
   Expression::finalize_dangling_objects();
 }
 
@@ -118,7 +111,7 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   } else if (klass_symbol->equals(SymPrimitive<double>::TYPE_NAME)) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
   } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
-    sym_inst = new SymBigDecimal(sym_rid);
+    sym_inst = new SymBigDecimal(sym_rid, obj);
   } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
     sym_inst = new SymTimestamp(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {

@@ -14,7 +14,9 @@ public:
   static method_set_t symbolized_methods;
 private:
   Expression *_exp;
+  Expression *_exp_converted;
   std::map<int, Expression*> _internal_fields;
+  int _fastTimeFldOffset;
 
 public:
   SymTimestamp(sym_rid_t sym_rid);
@@ -25,7 +27,8 @@ public:
     return class_name == TYPE_NAME;
   }
 
-  Expression *get_ref_exp() { return _exp; };
+  Expression *get_ref_exp();
+
   void set_ref_exp(Expression *exp) {
     Expression::gc(_exp);
     _exp = exp;

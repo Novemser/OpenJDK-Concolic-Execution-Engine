@@ -13,12 +13,9 @@ SymbolicNDFunc::SymbolicNDFunc(sym_rid_t sym_rid) : SymInstance(sym_rid) {
 
 void SymbolicNDFunc::gc() {
   for (size_t index = 0; index < _exps.size(); ++index) {
-    if (_exps[index] != NULL) {
-      delete _exps[index];
-    }
+    Expression::gc(_exps[index]);
   }
   _exps.clear();
-  assert(_exps.empty(), "should be empty");
 }
 
 SymbolicNDFunc::~SymbolicNDFunc() {
@@ -47,4 +44,8 @@ void SymbolicNDFunc::init_register_class(MethodSymbolizer *m_symbolizer) {
   m_symbolizer->add_invoke_helper_methods(vmSymbols::java_lang_System()->as_C_string(), invoke_method_helper);
   m_symbolizer->add_finish_helper_methods(vmSymbols::java_lang_System()->as_C_string(), finish_method_helper);
   _exps.clear();
+}
+
+void SymbolicNDFunc::print() {
+  ShouldNotCallThis();
 }

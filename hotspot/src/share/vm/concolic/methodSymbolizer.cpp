@@ -72,7 +72,6 @@ MethodSymbolizer::~MethodSymbolizer() {
       delete sym_class_map_it->second;
     }
   }
-  SymbolicNDFunc::gc();
 }
 
 void MethodSymbolizer::add_method(const char *class_name,

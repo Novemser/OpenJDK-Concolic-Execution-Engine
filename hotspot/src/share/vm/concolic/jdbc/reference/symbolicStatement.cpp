@@ -113,7 +113,7 @@ void SymStmt::print() {
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
-  tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
+//  tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
 
   if (callee_name == "execute") {
     int param_size = handle.get_callee_method()->size_of_parameters();
@@ -148,7 +148,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     oop stmt_obj = handle.get_param<oop>(0);
     jint index = handle.get_param<jint>(1);
     Expression *value_exp = SymStmt::get_param_exp(handle, support_set_methods[callee_name], callee_name);
-    SymStmt *sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(stmt_obj));
     sym_stmt->set_param(index, value_exp);
   } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
     handle.get_callee_method()->print_name(tty);

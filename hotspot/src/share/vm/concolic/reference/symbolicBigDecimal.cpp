@@ -58,7 +58,9 @@ void SymBigDecimal::init_register_class(MethodSymbolizer *m_symbolizer) {
   m_symbolizer->add_method_exit_callback(SymBigDecimal::TYPE_NAME, method_exit_callback);
 }
 
-SymBigDecimal::SymBigDecimal(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL) {}
+SymBigDecimal::SymBigDecimal(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(NULL),
+                                                           _int_compact_offset(int_compact_offset(obj)),
+                                                           _scale_offset(scale_offset(obj)) {}
 
 SymBigDecimal::~SymBigDecimal() {
   Expression::gc(_exp);
@@ -158,7 +160,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
-    Expression* paramDoubleExp = handle.get_param_list()[1];
+    Expression *paramDoubleExp = handle.get_param_list()[1];
     guarantee(paramDoubleExp != NULL, "Should not be null");
     oop thisDecimal = handle.get_param<oop>(0);
     assert(thisDecimal != NULL, "should not be null");
@@ -177,11 +179,12 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     assert(thisDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
     assert(resultDecimal->klass()->name() == vmSymbols::java_math_BigDecimal(), "should be");
     SymBigDecimal *symThisDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_sym_inst(thisDecimal));
-    SymBigDecimal *symResDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal));
+    SymBigDecimal *symResDecimal = reinterpret_cast<SymBigDecimal *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(
+        resultDecimal));
     guarantee(symThisDecimal != NULL, "Only handle symbolic decimal case[symThisDecimal]");
     guarantee(symResDecimal != NULL, "Only handle symbolic decimal case[symResDecimal]");
-    int intCmpFldOffset = symThisDecimal->int_compact_offset(thisDecimal);
-    int scaleFldOffset = symThisDecimal->scale_offset(thisDecimal);
+    int intCmpFldOffset = symThisDecimal->_int_compact_offset;
+    int scaleFldOffset = symThisDecimal->_scale_offset;
     Expression *intCmpExp = symThisDecimal->get(intCmpFldOffset);
     Expression *scaleExp = symThisDecimal->get(scaleFldOffset);
     if (intCmpExp == NULL && scaleExp == NULL) {
@@ -306,8 +309,8 @@ void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
                           + "scale"
                           + DECIMAL_WRAPPER;
 
-  init_sym_exp(int_compact_offset(decimalOOp), new SymbolExpression(intCmpName.c_str(), intCmpName.length()));
-  init_sym_exp(scale_offset(decimalOOp), new SymbolExpression(scaleName.c_str(), scaleName.length()));
+  init_sym_exp(_int_compact_offset, new SymbolExpression(intCmpName.c_str(), intCmpName.length()));
+  init_sym_exp(_scale_offset, new SymbolExpression(scaleName.c_str(), scaleName.length()));
 }
 
 void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
@@ -371,6 +374,45 @@ int SymBigDecimal::scale_offset(oop decimalOOp) {
       &fd_scale
   );
   return fd_scale.offset();
+}
+
+Expression *SymBigDecimal::get_ref_exp() {
+  if (_exp == NULL) {
+    set_ref_exp(
+        new BigDecimalExpression(
+            get(_scale_offset), get(_int_compact_offset)
+        )
+    );
+  }
+  return _exp;
+}
+
+BigDecimalExpression::BigDecimalExpression(Expression *scale, Expression *intCompact) : _scale(scale),
+                                                                                        _intCompact(intCompact) {
+}
+
+BigDecimalExpression::~BigDecimalExpression() {
+  Expression::gc(_scale);
+  Expression::gc(_intCompact);
+}
+
+void BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  writer.Key("_type");
+  writer.String("BigDecimalExpression");
+
+  writer.Key("_scale");
+  if (_scale != NULL) {
+    _scale->serialize(writer);
+  } else {
+    writer.Null();
+  }
+
+  writer.Key("_intCompact");
+  if (_intCompact != NULL) {
+    _intCompact->serialize(writer);
+  } else {
+    writer.Null();
+  }
 }
 
 #endif

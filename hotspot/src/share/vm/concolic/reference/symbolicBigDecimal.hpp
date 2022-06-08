@@ -26,6 +26,8 @@ private:
   int int_compact_offset(oop decimal);
   int scale_offset(oop decimal);
   void symbolize_bigDecimal(oop decimalOOp, Expression* parentExp);
+  int _scale_offset;
+  int _int_compact_offset;
 public:
   virtual void init_sym_exp(int field_offset, Expression *exp);
   void set_bigDecimal_symbolic(oop decimalOOp, std::string name);
@@ -36,14 +38,14 @@ private:
 #endif
   Expression *_exp;
 public:
-  SymBigDecimal(sym_rid_t sym_rid);
+  SymBigDecimal(sym_rid_t sym_rid, oop obj);
   ~SymBigDecimal();
 
   inline static bool target(const std::string &class_name) {
     return class_name == TYPE_NAME;
   }
 
-  Expression *get_ref_exp() { return _exp; };
+  Expression *get_ref_exp();
   void set_ref_exp(Expression *exp) {
     Expression::gc(_exp);
     _exp = exp;
@@ -72,6 +74,18 @@ public:
 #endif
 private:
   static method_set_t init_symbolized_methods();
+};
+
+class BigDecimalExpression : public Expression {
+private:
+  Expression* _scale;
+  Expression* _intCompact;
+protected:
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+
+public:
+  BigDecimalExpression(Expression* _scale, Expression* _intCompact);
+  ~BigDecimalExpression();
 };
 
 #endif // ENABLE_CONCOLIC
