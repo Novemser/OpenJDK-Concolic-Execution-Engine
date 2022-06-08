@@ -466,6 +466,10 @@ JVM_ENTRY(jstring, JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject cla
                                                    true,
                                                    THREAD);
 
+  if (HAS_PENDING_EXCEPTION) {
+    CLEAR_PENDING_EXCEPTION;
+  }
+
   if (klass == NULL) {
     tty->print_cr(
         "[WeBridge] Required class _wbridge_storedprocedure_StoredProcedureManager not found! Add to your class path");
