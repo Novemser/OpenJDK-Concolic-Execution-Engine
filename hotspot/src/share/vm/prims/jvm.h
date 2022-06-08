@@ -152,7 +152,7 @@ JVM_RecordStmtObj(JNIEnv *env, jclass ignored, jobject stmt, jobject obj);
 JNIEXPORT void JNICALL
 JVM_RecordPersistentObj(JNIEnv *env, jclass ignored, jobject obj);
 
-JNIEXPORT void JNICALL
+JNIEXPORT jstring JNICALL
 JVM_WeBridgeAnalysis(JNIEnv *env, jclass ignored, jobject classLoader);
 
 JNIEXPORT void JNICALL

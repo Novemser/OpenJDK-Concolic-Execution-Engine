@@ -15,10 +15,10 @@
 #include "runtime/interfaceSupport.hpp"
 #include "jvm_misc.hpp"
 
-void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env) {
+std::string webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIEnv *env) {
   if (!ctx) {
     tty->print_cr("[WeBridge] No associated thread context found, concolic execution might not enabled!");
-    return;
+    return "";
   }
 
   JdbcMngr jdbc_mgr = ctx->get_jdbc_mngr();
@@ -26,7 +26,7 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIE
       jdbc_mgr.get_sym_stmt_list();
   tty->print_cr("[WeBridge] Received %ld SQL Statements", sym_stmt_list.size());
   if (sym_stmt_list.empty()) {
-    return;
+    return "";
   }
 
   JavaVM *jvm;
@@ -39,7 +39,7 @@ void webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlass, JNIE
   std::string argCppStr = jsonUtils::statementsToJsonString(sym_stmt_list);
 
   saveTemp(argCppStr);
-
+  return argCppStr;
 //  Handle arg;
 //  JavaCalls::call_static(
 //      &result, klass,
