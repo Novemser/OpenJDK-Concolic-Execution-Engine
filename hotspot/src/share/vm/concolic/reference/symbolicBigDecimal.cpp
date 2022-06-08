@@ -282,6 +282,11 @@ void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
   if (exp) {
     exp->inc_ref();
   }
+
+  if (_internal_fields.find(field_offset) != _internal_fields.end()) {
+    Expression::gc(_internal_fields[field_offset]);
+  }
+
   _internal_fields[field_offset] = exp;
 }
 

@@ -18,19 +18,18 @@ private:
   uint _ref_count;
   uint _unique_id;
   std::string _java_code_position;
+  static std::set<Expression *> deleted;
+  static std::set<Expression *> keep;
 
 public:
   static ulong total_count;
   static ulong unique_id;
-
-  static void gc(Expression *exp) {
-    if (exp && exp->dec_ref()) {
-      delete exp;
-    }
-  }
+  static void gc(Expression *exp);
+  static void init_gc_helper();
+  static void finalize_dangling_objects();
 
 public:
-  virtual ~Expression() { total_count--; }
+  virtual ~Expression();
   virtual void print();
   void print_cr();
   virtual bool is_op_str_expression() { return false; }

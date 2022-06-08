@@ -16,11 +16,22 @@
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
 
+// An object closure to reset symbolic ids
+class RestoreSymbolicClosure : public ObjectClosure {
+public:
+  void do_object(oop o) {
+    if (o != NULL) {
+      o->set_sym_rid(NULL_SYM_RID);
+    }
+  }
+};
+
 ThreadContext::ThreadContext(JavaThread *jt) : _thread(jt), _s_stack(jt), _sym_rid_counter(), _sym_tmp_id_counter(),
                                                _path_condition_enabled(true) {
   init_sym_rid_counter();
   init_sym_tmp_id_counter();
 
+  Expression::init_gc_helper();
   SymbolExpression::init_single_instances();
 }
 
@@ -30,6 +41,7 @@ ThreadContext::~ThreadContext() {
     guarantee(iter->second != NULL, "Sym instance should not be null");
     delete iter->second;
   }
+  tty->print_cr("TC1");
   _sym_refs.clear();
 
   int size = _sym_tmp_exps.size();
@@ -37,19 +49,26 @@ ThreadContext::~ThreadContext() {
     Expression::gc(_sym_tmp_exps[i]);
   }
   _sym_tmp_exps.clear();
-
+  tty->print_cr("TC2");
+//if (true) return;
   _path_condition.gc();
   ArrayStore::iterator arr_it;
+  tty->print_cr("TC3");
 
   for (arr_it = _array_store.begin(); arr_it != _array_store.end(); arr_it++) {
     guarantee(arr_it->second != NULL, "Array store should not be null");
     delete arr_it->second;
   }
+  tty->print_cr("TC4");
+  RestoreSymbolicClosure rso;
+  Universe::heap()->safe_object_iterate(&rso);
 
-  std::set<oop>::iterator _allocated_objs_iter;
-  for (_allocated_objs_iter = _allocated_objs.begin(); _allocated_objs_iter != _allocated_objs.end(); _allocated_objs_iter++) {
-    (*_allocated_objs_iter)->set_sym_rid(NULL_SYM_RID);
-  }
+//  std::set<oop>::iterator _allocated_objs_iter;
+//  for (_allocated_objs_iter = _allocated_objs.begin(); _allocated_objs_iter != _allocated_objs.end(); _allocated_objs_iter++) {
+//    (*_allocated_objs_iter)->set_sym_rid(NULL_SYM_RID);
+//  }
+  tty->print_cr("TC5");
+  Expression::finalize_dangling_objects();
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
@@ -62,7 +81,6 @@ SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
 
 SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   sym_rid_t sym_rid = get_next_sym_rid();
-  obj->set_sym_rid(sym_rid);
   SymInstance *sym_inst;
   ResourceMark rm;
 
@@ -114,9 +132,9 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   else {
     sym_inst = new SymObj(sym_rid);
   }
-
+  obj->set_sym_rid(sym_rid);
   this->set_sym_ref(sym_rid, sym_inst);
-  _allocated_objs.insert(obj);
+//  _allocated_objs.insert(obj);
   return sym_inst;
 }
 
@@ -152,7 +170,7 @@ SymArr *ThreadContext::alloc_sym_array(arrayOop array, Expression *length_exp) {
 
   this->record_path_condition(
       new ArrayInitExpression(sym_arr->get_sym_rid(), array));
-  _allocated_objs.insert(array);
+//  _allocated_objs.insert(array);
   return sym_arr;
 }
 

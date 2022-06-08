@@ -6,9 +6,30 @@
 
 ulong Expression::total_count = 0;
 ulong Expression::unique_id = 0;
+std::set<Expression *> Expression::deleted;
+std::set<Expression *> Expression::keep;
 
 Expression::Expression() : _ref_count(0), _unique_id(unique_id++) {
+  keep.insert(this);
+  if (deleted.count(this) > 0) {
+    deleted.erase(this);
+  }
   total_count++;
+}
+
+Expression::~Expression() {
+  deleted.insert(this);
+  total_count--;
+}
+
+void Expression::gc(Expression *exp) {
+  if (exp && deleted.count(exp) > 0) {
+    return;
+  }
+
+  if (exp && exp->dec_ref()) {
+    delete exp;
+  }
 }
 
 void Expression::print() { tty->indent().print("ref_count: %u at code %s", _ref_count, _java_code_position.c_str()); }
@@ -24,6 +45,27 @@ void Expression::set_java_code_position(const std::string &javaCodePosition) {
 
 const std::string &Expression::getJavaCodePosition() const {
   return _java_code_position;
+}
+
+
+void Expression::init_gc_helper() {
+  // just perform sanity check
+  guarantee(deleted.empty(), "should be empty");
+  guarantee(keep.empty(), "should be empty");
+}
+
+void Expression::finalize_dangling_objects() {
+  tty->print_cr("Cleaning %lu dangling expressions", keep.size());
+  for (std::set<Expression *>::iterator iter = keep.begin(); iter != keep.end(); ++iter) {
+    Expression* exp = *iter;
+    if (deleted.count(exp) > 0) {
+      continue;
+    }
+    delete exp;
+  }
+  guarantee(total_count == 0, "total_count should be 0");
+  keep.clear();
+  deleted.clear();
 }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,

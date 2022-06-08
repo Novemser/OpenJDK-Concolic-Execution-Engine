@@ -72,10 +72,10 @@ ArrayInternal *ThreadContext::get_or_create_array_internal(arrayOop oop) {
   }
 
   if (_array_store.find(oop) == _array_store.end()) {
-    _array_store[oop] = new ArrayInternal(oop->length());
+    _array_store.insert(std::make_pair(oop, new ArrayInternal(oop->length())));
   }
 
-  return _array_store[oop];
+  return _array_store.at(oop);
 }
 
 

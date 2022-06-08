@@ -94,6 +94,7 @@ void SymTimestamp::set_sym_exp(int field_offset, Expression *exp) {
   if (exp) {
     exp->inc_ref();
   }
+  Expression::gc(_internal_fields[field_offset]);
   _internal_fields[field_offset] = exp;
 }
 
