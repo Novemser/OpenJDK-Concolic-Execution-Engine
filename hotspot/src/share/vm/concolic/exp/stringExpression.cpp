@@ -32,7 +32,7 @@ OpStrExpression::~OpStrExpression() {
   for (int i = 0; i < size; ++i) {
     Expression::gc(_param_list[i]);
   }
-  delete _param_cache;
+  delete[] _param_cache;
 }
 
 void OpStrExpression::print() {
@@ -55,16 +55,26 @@ void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   writer.Key("_name");
   writer.String(_name.c_str());
   writer.Key("_param_list");
-  writer.StartArray();
-  for (size_t index = 0; index < _param_list.size(); ++index) {
-    Expression *expr = _param_list[index];
-    if (expr) {
-      expr->serialize(writer);
-    } else {
-      writer.Null();
+  if (_param_cache == NULL) {
+    using namespace rapidjson;
+    StringBuffer s;
+    Writer<StringBuffer> cache_writer(s);
+    cache_writer.StartArray();
+    for (size_t index = 0; index < _param_list.size(); ++index) {
+      Expression *expr = _param_list[index];
+      if (expr) {
+        expr->serialize(cache_writer);
+      } else {
+        cache_writer.Null();
+      }
     }
+    cache_writer.EndArray();
+    _param_cache = new char[s.GetLength() + 1];
+    strcpy(_param_cache, s.GetString());
+    assert(strlen(_param_cache) == s.GetLength(), "should equals");
   }
-  writer.EndArray();
+
+  writer.RawValue(_param_cache, strlen(_param_cache), rapidjson::kArrayType);
 }
 
 const exp_list_t &OpStrExpression::get_param_list() const {
