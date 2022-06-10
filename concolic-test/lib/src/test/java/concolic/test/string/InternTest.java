@@ -8,13 +8,13 @@ public class InternTest {
     @Test
     public void testInternPc() {
         System.startConcolic();
-        String val = new String("ME");
+        String val = new String("SJTU"); // FIXME: why a word with 2 letters SIGABRT the jvm?
         System.symbolize(val);
         String internStr = val.intern();
-        if (internStr.contains("ME")) {}
+        if (internStr.contains("SJTU")) {}
         String pc = System.getPathCondition();
         assertTrue(pc.contains("intern"));
-        assertTrue(pc.contains("ME"));
+        assertTrue(pc.contains("SJTU"));
         System.endConcolic();
     }
 

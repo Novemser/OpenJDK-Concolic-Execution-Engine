@@ -60,17 +60,18 @@ public:
   }
 
   const char* toString() {
+    if (_pc_str != NULL) {
+      return _pc_str;
+    }
+
     using namespace rapidjson;
     StringBuffer s;
     Writer<StringBuffer> writer(s);
     serialize(writer);
     const char* res = s.GetString();
-    if (_pc_str != NULL) {
-      // Delete old str first
-      delete _pc_str;
-    }
+    guarantee(_pc_str == NULL, "should be null");
     _pc_str = new char[strlen(res)];
-    strcpy(_pc_str, s.GetString());
+    strcpy(_pc_str, res);
     return _pc_str;
   }
 };
