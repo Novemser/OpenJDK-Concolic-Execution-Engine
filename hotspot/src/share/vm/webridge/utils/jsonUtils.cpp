@@ -3,6 +3,7 @@
 //
 #include "jsonUtils.hpp"
 #ifdef ENABLE_WEBRIDGE
+#include <ctime>
 
 #include "webridge/utils/rapidjson/writer.h"
 #include "webridge/utils/rapidjson/stringbuffer.h"
@@ -18,7 +19,10 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
   Writer<StringBuffer> writer(s);
   writer.StartArray();
   // traverse and add all the sql template
+  std::vector<double> elp;
   for (size_t index = 0; index < sym_stmt_list.size(); ++index) {
+    std::clock_t start;
+    start = std::clock();
     const std::pair<SymStmt *, jlong> &elem = sym_stmt_list[index];
     SymStmt *stmt = elem.first;
     std::string templateStr = stmt->get_sql_template();
@@ -52,7 +56,7 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     exp_map_t param_exprs = stmt->get_param_exps();
     exp_map_t::iterator iter;
     std::vector<int> expr_position_index;
-    tty->print_cr("param_exprs size:%lu", param_exprs.size());
+//    tty->print_cr("param_exprs size:%lu", param_exprs.size());
     for (iter = param_exprs.begin(); iter != param_exprs.end(); ++iter) {
       expr_position_index.push_back(iter->first);
     }
@@ -84,9 +88,15 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
     pc.serialize(writer);
 
     writer.EndObject();
+    double elapsed = (std::clock() - start) / (double)(CLOCKS_PER_SEC / 1000);
+    tty->print_cr("SQL %lu used %f ms to serialize", index, elapsed);
+    elp.push_back(elapsed);
   }
   writer.EndArray();
 
+//  for (size_t index = 0; index < elp.size(); ++index) {
+//    tty->print_cr("EPTIME: %lu %f", index, elp[index]);
+//  }
   return std::string(s.GetString());
 }
 

@@ -42,7 +42,7 @@ jlong ConcolicMngr::endConcolic() {
   assert(_num_threads_in_concolic == 1, "should be");
   --_num_threads_in_concolic;
 
-  ctx->print();
+//  ctx->print();
   delete ctx;
   ctx = NULL;
   ThreadContext::memory_leak_check();
