@@ -15,7 +15,7 @@ PlaceholderExpression::PlaceholderExpression(PlaceholderExpression::Function typ
   _count = functionInvCounter[type];
 }
 
-void PlaceholderExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void PlaceholderExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("PlaceholderExpression");
   writer.Key("_place_holder_func");

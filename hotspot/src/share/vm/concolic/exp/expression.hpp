@@ -55,10 +55,10 @@ protected:
   Expression();
 
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const = 0;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) = 0;
 
 public:
-  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
     writer.StartObject();
     if (!_java_code_position.empty()) {
       writer.Key("_code_position");
@@ -76,6 +76,8 @@ private:
   Expression *_left;
   Expression *_right;
   SymbolicOp _op;
+  char* _left_cache;
+  char* _right_cache;
 
 public:
   OpSymExpression(Expression *l, Expression *r, SymbolicOp op, bool cmp = true);
@@ -86,7 +88,7 @@ public:
   void print();
 
 protected:
-  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 class ConExpression : public Expression {
@@ -109,7 +111,7 @@ public:
 public:
   void print();
 
-  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 class ArrayExpression : public Expression {
@@ -129,7 +131,7 @@ public:
 public:
   void print();
 
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 typedef std::vector<Expression *> exp_list_t;

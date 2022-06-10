@@ -3,6 +3,7 @@
 #include "concolic/concolicMngr.hpp"
 #include "concolic/pathCondition.hpp"
 #include "utilities/ostream.hpp"
+#include "webridge/utils/rapidjson/document.h"
 
 void __attribute__((optimize("O0"))) PathCondition::add(Expression *exp) {
   const std::string &code_pos = ConcolicMngr::ctx->get_current_code_pos();

@@ -52,7 +52,7 @@ public:
   void print();
   void set(const char *buf, int length);
 
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
   inline void set_type(std::string new_type) { _type = new_type; }
 };
@@ -75,7 +75,7 @@ public:
 class ConSymbolExp : public SymbolExpression {
 public:
   ConSymbolExp(const char* str, BasicType type);
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 

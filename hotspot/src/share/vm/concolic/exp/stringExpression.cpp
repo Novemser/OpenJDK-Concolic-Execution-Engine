@@ -6,7 +6,7 @@
 
 OpStrExpression::OpStrExpression(const std::string &method,
                                  exp_list_t &param_list)
-    : _name(method) {
+    : _name(method), _param_cache(NULL) {
   // all exp must be not null
 
   _param_list.swap(param_list);
@@ -20,7 +20,7 @@ OpStrExpression::OpStrExpression(const std::string &method,
 }
 
 OpStrExpression::OpStrExpression(const std::string &method, Expression *exp)
-    : _name(method) {
+    : _name(method), _param_cache(NULL) {
   if (exp) {
     exp->inc_ref();
   }
@@ -32,6 +32,7 @@ OpStrExpression::~OpStrExpression() {
   for (int i = 0; i < size; ++i) {
     Expression::gc(_param_list[i]);
   }
+  delete _param_cache;
 }
 
 void OpStrExpression::print() {
@@ -48,7 +49,7 @@ OpStrExpression *OpStrExpression::to_string(Expression *exp) {
   return new OpStrExpression("toString", exp);
 }
 
-void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("OpStrExpression");
   writer.Key("_name");
@@ -95,7 +96,7 @@ ConStringSymbolExp::ConStringSymbolExp(const std::string &str) {
   this->finalize(ss.size());
 }
 
-void ConStringSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void ConStringSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("ConStringSymbolExp");
   writer.Key("_java_type");

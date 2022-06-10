@@ -27,7 +27,7 @@ public:
 public:
   void print();
 
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
 private:
   static oop get_obj(arrayOop array, BasicType type, int i);

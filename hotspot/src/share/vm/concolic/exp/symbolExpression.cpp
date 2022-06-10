@@ -43,7 +43,7 @@ void SymbolExpression::finalize(int length) {
 
 void SymbolExpression::print() { tty->indent().print("%s", _str.c_str()); }
 
-void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void SymbolExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("SymbolExpression");
   writer.Key("_java_type");
@@ -88,7 +88,7 @@ ConSymbolExp::ConSymbolExp(const char* str, BasicType type) {
   this->finalize(ss.size());
 }
 
-void ConSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void ConSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("ConSymbolExp");
   writer.Key("_java_type");

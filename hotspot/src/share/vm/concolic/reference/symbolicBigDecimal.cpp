@@ -396,7 +396,7 @@ BigDecimalExpression::~BigDecimalExpression() {
   Expression::gc(_intCompact);
 }
 
-void BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("BigDecimalExpression");
 

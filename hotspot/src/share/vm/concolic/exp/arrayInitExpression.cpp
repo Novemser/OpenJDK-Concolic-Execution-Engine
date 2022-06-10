@@ -117,7 +117,7 @@ oop ArrayInitExpression::get_obj(arrayOop array, BasicType T, int i) {
   return *(oop *)(((address)array->base(T)) + i * sizeof(oop));
 }
 
-void ArrayInitExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void ArrayInitExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("array_init_expr");
   writer.Key("_arr_str");

@@ -243,7 +243,7 @@ void StatementSymbolExp::print() {
   tty->print("#SymStmt(%lu): %s", _sym_stmt->get_sym_rid(), _sym_stmt->_sql_template.c_str());
 }
 
-void StatementSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void StatementSymbolExp::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   ShouldNotCallThis();
 }
 

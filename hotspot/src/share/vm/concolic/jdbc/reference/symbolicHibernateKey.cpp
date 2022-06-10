@@ -111,7 +111,7 @@ Expression* HibernateKeyExpression::get_composite_key_exp(oop obj) {
   return key_generator.get_key_exp();
 }
 
-void HibernateKeyExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void HibernateKeyExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   ShouldNotCallThis();
 }
 

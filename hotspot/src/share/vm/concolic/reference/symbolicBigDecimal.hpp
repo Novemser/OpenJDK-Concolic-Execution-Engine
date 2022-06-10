@@ -81,7 +81,7 @@ private:
   Expression* _scale;
   Expression* _intCompact;
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
 public:
   BigDecimalExpression(Expression* _scale, Expression* _intCompact);

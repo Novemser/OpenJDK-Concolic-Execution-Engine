@@ -32,7 +32,7 @@ public:
   void print();
 
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
 private:
   void set_key_exp(oop key_obj);

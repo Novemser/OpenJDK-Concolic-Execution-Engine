@@ -17,7 +17,7 @@ public:
   PlaceholderExpression(Function type);
 
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
 public:
   virtual void print();

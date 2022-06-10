@@ -3,6 +3,7 @@
 #include "concolic/exp/expression.hpp"
 #include "concolic/concolicMngr.hpp"
 #include "utilities/ostream.hpp"
+#include <cstring>
 
 ulong Expression::total_count = 0;
 ulong Expression::unique_id = 0;
@@ -70,7 +71,7 @@ void Expression::finalize_dangling_objects() {
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
                                  bool cmp)
-    : _left(l), _right(r), _op(cmp ? op : NotSymbolicOp[op]) {
+    : _left(l), _right(r), _op(cmp ? op : NotSymbolicOp[op]), _left_cache(NULL), _right_cache(NULL) {
   if (_left) {
     _left->inc_ref();
   }
@@ -81,7 +82,7 @@ OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,
 }
 
 OpSymExpression::OpSymExpression(Expression *r, SymbolicOp op)
-    : _left(NULL), _right(r), _op(op) {
+    : _left(NULL), _right(r), _op(op), _left_cache(NULL), _right_cache(NULL) {
   if (_right) {
     _right->inc_ref();
   }
@@ -91,6 +92,8 @@ OpSymExpression::OpSymExpression(Expression *r, SymbolicOp op)
 OpSymExpression::~OpSymExpression() {
   Expression::gc(_left);
   Expression::gc(_right);
+  delete[] _left_cache;
+  delete[] _right_cache;
 }
 
 void OpSymExpression::print() {
@@ -103,13 +106,22 @@ void OpSymExpression::print() {
   tty->print(")");
 }
 
-void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
+  using namespace rapidjson;
   writer.Key("_type");
   writer.String("BinaryExpression");
 
   writer.Key("_left");
   if (_left) {
-    _left->serialize(writer);
+//    _left->serialize(writer);
+    if (!_left_cache) {
+      StringBuffer s;
+      Writer<StringBuffer> cache_writer(s);
+      _left->serialize(cache_writer);
+      _left_cache = new char[s.GetLength() + 1];
+      strcpy(_left_cache, s.GetString());
+    }
+    writer.RawValue(_left_cache, strlen(_left_cache), kObjectType);
   } else {
     writer.Null();
   }
@@ -119,7 +131,15 @@ void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
 
   writer.Key("_right");
   if (_right) {
-    _right->serialize(writer);
+//    _right->serialize(writer);
+    if (!_right_cache) {
+      StringBuffer s;
+      Writer<StringBuffer> cache_writer(s);
+      _right->serialize(cache_writer);
+      _right_cache = new char[s.GetLength() + 1];
+      strcpy(_right_cache, s.GetString());
+    }
+    writer.RawValue(_right_cache, strlen(_right_cache), kObjectType);
   } else {
     writer.Null();
   }
@@ -178,7 +198,7 @@ void ConExpression::print() {
   tty->indent().print("%s", _str);
 }
 
-void ConExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void ConExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("ConstExpr");
   writer.Key("_java_type");

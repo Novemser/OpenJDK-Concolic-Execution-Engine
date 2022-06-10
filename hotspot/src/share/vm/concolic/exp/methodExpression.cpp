@@ -45,7 +45,7 @@ void MethodExpression::print() {
   tty->print(")");
 }
 
-void MethodExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void MethodExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("MethodExpression");
   writer.Key("_name");

@@ -40,7 +40,7 @@ void ArrayExpression::print() {
   // _value_exp->print();
 }
 
-void ArrayExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+void ArrayExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("_array_expr");
   writer.Key("_arr_str");

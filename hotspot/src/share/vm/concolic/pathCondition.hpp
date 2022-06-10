@@ -47,7 +47,7 @@ public:
 
   void print();
 
-  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) const {
+  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
     writer.StartArray();
     for (size_t index = 0; index < _conds.size(); index++) {
       Condition *cond = _conds[index];
@@ -70,7 +70,7 @@ public:
     serialize(writer);
     const char* res = s.GetString();
     guarantee(_pc_str == NULL, "should be null");
-    _pc_str = new char[strlen(res)];
+    _pc_str = new char[s.GetLength() + 1];
     strcpy(_pc_str, res);
     return _pc_str;
   }

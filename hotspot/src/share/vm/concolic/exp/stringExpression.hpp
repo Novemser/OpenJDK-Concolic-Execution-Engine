@@ -18,6 +18,7 @@
 class OpStrExpression : public Expression {
     std::string _name;
     exp_list_t _param_list;
+    char *_param_cache;
 
 public:
 
@@ -34,7 +35,7 @@ public:
 
   const exp_list_t &get_param_list() const;
 
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 class StringSymbolExp : public SymbolExpression {
@@ -47,7 +48,7 @@ class ConStringSymbolExp : public SymbolExpression {
 public:
     ConStringSymbolExp(oop obj);
     ConStringSymbolExp(const std::string& str);
-    virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+    virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 };
 
 #endif

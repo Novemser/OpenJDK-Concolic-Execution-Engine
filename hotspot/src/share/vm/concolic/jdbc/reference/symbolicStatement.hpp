@@ -21,7 +21,7 @@ public:
   StatementSymbolExp(SymStmt *sym_stmt);
 
 protected:
-  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) const;
+  virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
 public:
   void print();
