@@ -224,6 +224,13 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
       tty->print_cr("[Warning] Array result type not handled by method String.%s", callee_name.c_str());
 //      ShouldNotCallThis();
       break;
+    case T_BOOLEAN: {
+      // boolean operations on two strings are converted to equivalent path condition
+      ConcolicMngr::record_path_condition(
+          new OpStrExpression(callee_name, handle.get_param_list())
+      );
+      break;
+    }
     default:
       exp = new OpStrExpression(callee_name, handle.get_param_list());
     }
@@ -243,6 +250,10 @@ Expression *SymString::get_exp_of(oop obj) {
 
 void SymString::set_sym_exp(int field_offset, Expression *exp) {
   ShouldNotCallThis();
+}
+
+bool SymString::get_condition_value(oop s1, oop s2, std::string comp) {
+  return false;
 }
 
 #endif

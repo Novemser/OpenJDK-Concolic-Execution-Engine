@@ -79,7 +79,7 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
     } else {
       bool recording = handle.general_check_param_symbolized();
       handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymList, need recording %c", recording ? 'Y' : 'N');
+//      tty->print_cr(" handled by SymList, need recording %c", recording ? 'Y' : 'N');
     }
   }
 

@@ -4,7 +4,7 @@
 
 #ifndef JDK8_CDB_PLACEHOLDEREXPRESSION_HPP
 #define JDK8_CDB_PLACEHOLDEREXPRESSION_HPP
-
+#ifdef ENABLE_WEBRIDGE
 #include "concolic/exp/expression.hpp"
 
 class PlaceholderExpression : public Expression {
@@ -28,5 +28,5 @@ private:
   int _count;
 };
 
-
+#endif
 #endif //JDK8_CDB_PLACEHOLDEREXPRESSION_HPP

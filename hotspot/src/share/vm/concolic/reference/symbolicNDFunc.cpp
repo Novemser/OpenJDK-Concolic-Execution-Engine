@@ -4,7 +4,7 @@
 
 #include "symbolicNDFunc.hpp"
 #include "concolic/exp/placeholderExpression.hpp"
-
+#ifdef ENABLE_WEBRIDGE
 std::vector<Expression *> SymbolicNDFunc::_exps;
 
 SymbolicNDFunc::SymbolicNDFunc(sym_rid_t sym_rid) : SymInstance(sym_rid) {
@@ -49,3 +49,4 @@ void SymbolicNDFunc::init_register_class(MethodSymbolizer *m_symbolizer) {
 void SymbolicNDFunc::print() {
   ShouldNotCallThis();
 }
+#endif

@@ -3,7 +3,7 @@
 //
 
 #include "placeholderExpression.hpp"
-
+#ifdef ENABLE_WEBRIDGE
 std::map<PlaceholderExpression::Function, int> PlaceholderExpression::functionInvCounter;
 
 PlaceholderExpression::PlaceholderExpression(PlaceholderExpression::Function type) : _type(type), _count(0) {
@@ -38,3 +38,4 @@ void PlaceholderExpression::serialize_internal(rapidjson::Writer<rapidjson::Stri
 void PlaceholderExpression::print() {
   tty->print_cr("PlaceHolderExp:%u.%d", _type, _count);
 }
+#endif

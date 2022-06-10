@@ -51,6 +51,7 @@ public:
 private:
   static method_set_t init_handle_method_names();
   static std::map<std::string, bool> init_skip_method_names();
+  static bool get_condition_value(oop s1, oop s2, std::string comp);
 };
 
 #endif // ENABLE_CONCOLIC

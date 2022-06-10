@@ -22,7 +22,7 @@ public:
 
 #else
   public:
-      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass, JNIEnv *env) { return ""; }
+      static void analyse(ThreadContext *ctx, Klass* weBridgeSPEntryKlass, JNIEnv *env) { return; }
 #endif
 };
 

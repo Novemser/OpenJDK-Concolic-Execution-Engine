@@ -119,11 +119,14 @@ Expression *SymTimestamp::get_ref_exp() {
   // return fast time
   Expression *exp = _internal_fields[_fastTimeFldOffset];
   if (exp == NULL) return exp;
+  if (_exp_converted != NULL) return _exp_converted;
   Expression::gc(_exp_converted);
   // FROM_UNIXTIME is base on seconds, so we need to convert million seconds to seconds
   _exp_converted = new OpSymExpression(
       exp, new ConExpression(1000), op_div
   );
+  _exp_converted->inc_ref();
+//  tty->print_cr("new op_div location:%p", _exp_converted);
   return _exp_converted;
 }
 

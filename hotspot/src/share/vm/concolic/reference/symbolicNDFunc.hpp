@@ -5,7 +5,7 @@
 #ifndef JDK8_CDB_SYMBOLICNDFUNC_HPP
 #define JDK8_CDB_SYMBOLICNDFUNC_HPP
 
-
+#ifdef ENABLE_WEBRIDGE
 #include "concolic/defs.hpp"
 #include "concolic/methodSymbolizerHandle.hpp"
 #include "concolic/reference/symbolicInstance.hpp"
@@ -40,5 +40,5 @@ private:
   static std::vector<Expression*> _exps;
 };
 
-
+#endif
 #endif //JDK8_CDB_SYMBOLICNDFUNC_HPP
