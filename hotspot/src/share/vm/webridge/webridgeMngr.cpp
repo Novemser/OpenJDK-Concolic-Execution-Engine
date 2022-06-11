@@ -31,10 +31,10 @@ std::string webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlas
 
 //  JavaVM *jvm;
 //  JavaValue result(T_VOID);
-  Thread *currentThread = Thread::current();
-  ResourceMark rm;
-  KlassHandle klass(currentThread, weBridgeSPEntryKlass);
-  assert(!klass.is_null(), "Invalid WeBridgeSPEntryKlass!");
+//  Thread *currentThread = Thread::current();
+//  ResourceMark rm;
+//  KlassHandle klass(currentThread, weBridgeSPEntryKlass);
+//  assert(!klass.is_null(), "Invalid WeBridgeSPEntryKlass!");
   // TODO: replace the stub with WeBridge processing methods
   std::string argCppStr = jsonUtils::statementsToJsonString(sym_stmt_list);
 
