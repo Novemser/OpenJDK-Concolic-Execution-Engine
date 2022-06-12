@@ -73,7 +73,7 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
 //    }
   } else {
     handle.get_callee_method()->print_name(tty);
-    tty->print_cr("unhandled by SymTimestamp:");
+//    tty->print_cr("unhandled by SymTimestamp:");
   }
 
   return need_symbolize;

@@ -21,12 +21,12 @@ std::set<std::string> SymSet::handle_method_names = init_handle_method_names();
 
 std::set<std::string> SymSet::init_handle_method_names() {
   std::set<std::string> set;
-  set.insert("add");
-  set.insert("remove");
-  set.insert("contains");
-  set.insert("isEmpty");
-  set.insert("clear");
-  set.insert("size");
+//  set.insert("add");
+//  set.insert("remove");
+//  set.insert("contains");
+//  set.insert("isEmpty");
+//  set.insert("clear");
+//  set.insert("size");
   return set;
 }
 
@@ -59,7 +59,7 @@ bool SymSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     need_recording = SymSet::check_param_symbolized(handle);
     if (need_recording) {
-      SymSet::prepare_param(handle);
+//      SymSet::prepare_param(handle);
     }
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);

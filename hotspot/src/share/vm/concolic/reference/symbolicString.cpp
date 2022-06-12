@@ -177,7 +177,7 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
     BasicType type = handle.get_result_type();
     Expression *exp = NULL;
     oop obj = NULL;
-    tty->print_cr("SymString finish_method_helper %s", callee_name.c_str());
+//    tty->print_cr("SymString finish_method_helper %s", callee_name.c_str());
     switch (type) {
     case T_VOID:
 //      if (callee_name == "getChars") {
