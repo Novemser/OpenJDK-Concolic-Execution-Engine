@@ -20,17 +20,17 @@ std::set<std::string> SymList::handle_method_names = init_handle_method_names();
 
 std::set<std::string> SymList::init_handle_method_names() {
   std::set<std::string> set;
-  set.insert("add");
-  set.insert("get");
-  set.insert("remove");
-  set.insert("removeAll");
-  set.insert("addAll");
-  set.insert("contains");
-  set.insert("isEmpty");
-  set.insert("clear");
-  set.insert("size");
-  set.insert("toArray");
-  set.insert("empty");
+//  set.insert("add");
+//  set.insert("get");
+//  set.insert("remove");
+//  set.insert("removeAll");
+//  set.insert("addAll");
+//  set.insert("contains");
+//  set.insert("isEmpty");
+//  set.insert("clear");
+//  set.insert("size");
+//  set.insert("toArray");
+//  set.insert("empty");
   return set;
 }
 
@@ -70,7 +70,7 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
   if (handle_method_names.find(callee_name) != handle_method_names.end()) {
     need_recording = handle.general_check_param_symbolized();
     if (need_recording) {
-      handle.general_prepare_param();
+//      handle.general_prepare_param();
     }
   } else {
     std::map<std::string, bool>::iterator iter = skip_method_names.find(callee_name);
@@ -78,7 +78,7 @@ bool SymList::invoke_method_helper(MethodSymbolizerHandle &handle) {
       need_symbolize = iter->second;
     } else {
       bool recording = handle.general_check_param_symbolized();
-      handle.get_callee_method()->print_name(tty);
+//      handle.get_callee_method()->print_name(tty);
 //      tty->print_cr(" handled by SymList, need recording %c", recording ? 'Y' : 'N');
     }
   }
@@ -93,9 +93,9 @@ Expression *SymList::finish_method_helper(MethodSymbolizerHandle &handle) {
   }
 
   Expression *exp = NULL;
-  if (handle_method_names.find(handle.get_callee_name()) != handle_method_names.end()) {
-    exp = handle.general_prepare_result_helper();
-  }
+//  if (handle_method_names.find(handle.get_callee_name()) != handle_method_names.end()) {
+//    exp = handle.general_prepare_result_helper();
+//  }
   return exp;
 }
 

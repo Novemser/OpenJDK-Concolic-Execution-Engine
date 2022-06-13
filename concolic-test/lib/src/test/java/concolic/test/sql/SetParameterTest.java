@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -60,5 +61,16 @@ public class SetParameterTest {
         assertTrue(res.contains("_scale"));
         assertTrue(res.contains("_intCompact"));
         assertTrue(res.contains("$BIG_DECIMAL$"));
+    }
+
+    @Test
+    public void testSetSQLDate() throws SQLException {
+        System.startConcolic();
+        Date dt = new Date(System.currentTimeMillis());
+        pstmt.setDate(1, dt);
+        pstmt.executeQuery();
+        String res = System.weBridgeAnalysis(getClass().getClassLoader());
+        assertTrue(res.contains("TO_TIMESTAMP"));
+        assertTrue(res.contains("currentTimeMills"));
     }
 }

@@ -67,8 +67,8 @@ bool SymSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
       need_symbolize = iter->second;
     } else {
       bool recording = SymSet::check_param_symbolized(handle);
-      handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" handled by SymSet, need recording %c", recording ? 'Y' : 'N');
+//      handle.get_callee_method()->print_name(tty);
+//      tty->print_cr(" handled by SymSet, need recording %c", recording ? 'Y' : 'N');
     }
   }
 

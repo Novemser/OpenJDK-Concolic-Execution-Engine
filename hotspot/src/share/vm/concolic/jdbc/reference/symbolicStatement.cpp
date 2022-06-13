@@ -66,6 +66,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   map["setString"] = T_OBJECT;
   map["setNull"] = T_OBJECT;
   map["setTimestamp"] = T_OBJECT;
+  map["setDate"] = T_OBJECT;
   map["setBigDecimal"] = T_OBJECT;
   map["setCharacterStream"] = T_OBJECT;
   return map;
@@ -113,7 +114,7 @@ void SymStmt::print() {
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
-//  tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
+  tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
 
   if (callee_name == "execute") {
     int param_size = handle.get_callee_method()->size_of_parameters();
@@ -151,9 +152,10 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(stmt_obj));
     sym_stmt->set_param(index, value_exp);
   } else if (skip_method_names.find(callee_name) == skip_method_names.end()) {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr(" unhandled by SymStmt");
+//    handle.get_callee_method()->print_name(tty);
     // ShouldNotCallThis();
+  } else {
+    tty->print_cr("SSSS%s unhandled by SymStmt", callee_name.c_str());
   }
 
   return need_symbolize;
@@ -198,7 +200,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setNull") {
     value_exp = SymbolExpression::get(Sym_NULL);
-  } else if (callee_name == "setTimestamp") {
+  } else if (callee_name == "setTimestamp" || callee_name == "setDate") {
     value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setBigDecimal") {
     value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));

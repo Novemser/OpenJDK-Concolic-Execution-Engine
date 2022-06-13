@@ -27,7 +27,8 @@ SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL)
 SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)), _exp_converted(NULL) {
   guarantee(obj != NULL, "should not be null");
   Klass *tsClz = obj->klass();
-  guarantee(tsClz->name() == vmSymbols::java_sql_Timestamp(), "should equals");
+  guarantee(tsClz->name() == vmSymbols::java_sql_Timestamp() || tsClz->name()->equals("java/util/Date") ||
+            tsClz->name()->equals("java/sql/Date"), "should equals");
 
   fieldDescriptor fd_fastTime;
   tsClz->find_field(
@@ -48,14 +49,15 @@ SymTimestamp::~SymTimestamp() {
 }
 
 Expression *SymTimestamp::get_exp_of(oop obj) {
-  assert(obj->klass()->name()->equals(TYPE_NAME), "should be");
+  ResourceMark rm;
+  assert(obj->klass()->name()->equals(TYPE_NAME) || obj->klass()->name()->equals("java/util/Date") ||
+         obj->klass()->name()->equals("java/sql/Date"), "should be");
   Expression *exp;
   if (obj->is_symbolic()) {
     SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
     exp = sym_inst->get_ref_exp();
     assert(exp != NULL, "NOT NULL");
   } else {
-    ResourceMark rm;
     //now, we can't care about the value of a concrete Timestamp
 //    ShouldNotCallThis();
     exp = new ConExpression(0.0);
@@ -72,7 +74,7 @@ bool SymTimestamp::invoke_method_helper(MethodSymbolizerHandle &handle) {
 //      handle.general_prepare_param();
 //    }
   } else {
-    handle.get_callee_method()->print_name(tty);
+//    handle.get_callee_method()->print_name(tty);
 //    tty->print_cr("unhandled by SymTimestamp:");
   }
 

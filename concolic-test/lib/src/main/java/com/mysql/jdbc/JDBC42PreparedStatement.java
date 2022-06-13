@@ -359,7 +359,7 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setDate(int parameterIndex, Date x) throws SQLException {
         // TODO Auto-generated method stub
-
+        if (x != null) x.hashCode();
     }
 
     @Override

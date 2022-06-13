@@ -113,9 +113,6 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
       this->get_sym_methods(_handle.get_callee_holder_name());
   BasicType basicType = primitive_target(_handle.get_callee_holder_name());
   const std::string& callee_holder_name = _handle.get_callee_holder_name();
-  if (_handle.get_callee_name() == "getTime") {
-    tty->print_cr("invoke_method:%s", _handle.get_callee_method()->name_and_sig_as_C_string());
-  }
 
   if (basicType != T_ILLEGAL) {
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
@@ -130,8 +127,8 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   } else if (sym_methods != NULL &&
              sym_methods->find(_handle.get_callee_name()) !=
              sym_methods->end()) {
-    tty->print_cr("Calling function name: %s",
-                  callee_method->name_and_sig_as_C_string());
+//    tty->print_cr("Calling function name: %s",
+//                  callee_method->name_and_sig_as_C_string());
     invoke_method_helper(_handle);
     need_symbolize = true;
   } else {
@@ -151,7 +148,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   }
 }
 
-void MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
+void __attribute__((optimize("O0"))) MethodSymbolizer::finish_method(ZeroFrame *caller_frame) {
   if (caller_frame == _handle.get_caller_frame()) {
     Expression *exp = NULL;
     BasicType basicType = primitive_target(_handle.get_callee_holder_name());

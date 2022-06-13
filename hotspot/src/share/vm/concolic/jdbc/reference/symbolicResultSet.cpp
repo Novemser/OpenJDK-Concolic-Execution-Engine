@@ -141,8 +141,8 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     JavaThreadState lastState = thread->thread_state();
     // must transfer thread state to state_VM
     thread->set_thread_state(_thread_in_vm);
-    tty->print_cr("Calling virtual %s.findColumn,result set class:%s", handle.get_callee_holder_name().c_str(),
-                  this_obj->klass()->name()->as_C_string());
+//    tty->print_cr("Calling virtual %s.findColumn,result set class:%s", handle.get_callee_holder_name().c_str(),
+//                  this_obj->klass()->name()->as_C_string());
     // temporally disable concolic execution flag to avoid corruption of MethodSymbolizerHandle
     ThreadContext* tc = ConcolicMngr::ctx;
     ConcolicMngr::ctx = NULL;
@@ -164,8 +164,8 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
   } else if (skip_method_names.find(callee_name) != skip_method_names.end()) {
     need_symbolize = true;
   } else {
-    handle.get_callee_method()->print_name(tty);
-    tty->print_cr("%s should handled by SymResSet", handle.get_callee_name().c_str());
+//    handle.get_callee_method()->print_name(tty);
+//    tty->print_cr("%s should handled by SymResSet", handle.get_callee_name().c_str());
 //    ShouldNotCallThis();
   }
 
@@ -214,7 +214,7 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
       col_i = handle.get_param<int>(1);
     } else {
       handle.get_callee_method()->print_name(tty);
-      tty->print_cr(" should handled by SymResSet");
+//      tty->print_cr(" should handled by SymResSet");
       ShouldNotCallThis();
     }
 
