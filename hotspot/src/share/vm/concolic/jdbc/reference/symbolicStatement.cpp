@@ -140,6 +140,9 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     int param_size = handle.get_callee_method()->size_of_parameters();
     execute_counter++;
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
+  } else if (callee_name == "setObject") {
+    // inside set object, jdbc invokes setXXX
+    need_symbolize = false;
   } else if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
     ArgumentCount arg_cnt = ArgumentCount(handle.get_callee_method()->signature());
     if (arg_cnt.size() > 3) {

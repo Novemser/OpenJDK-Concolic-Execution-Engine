@@ -317,7 +317,7 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setInt(int parameterIndex, int x) throws SQLException {
         // TODO Auto-generated method stub
-
+        getClass();
     }
 
     @Override
@@ -347,7 +347,7 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
         // TODO Auto-generated method stub
-
+        x.hashCode();
     }
 
     @Override
@@ -401,7 +401,16 @@ public class JDBC42PreparedStatement implements PreparedStatement {
     @Override
     public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
         // TODO Auto-generated method stub
-
+        switch (targetSqlType) {
+            case java.sql.Types.VARCHAR:
+                setString(parameterIndex, (String) x);
+                break;
+            case Types.INTEGER:
+                setInt(parameterIndex, ((Integer) x));
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

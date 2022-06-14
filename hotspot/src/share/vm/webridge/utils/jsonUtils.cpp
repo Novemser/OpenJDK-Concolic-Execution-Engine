@@ -65,11 +65,18 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
       if (expr_position_index[0] != 1) {
         tty->print_cr("Parameter index starts from %d rather than 0. SQL:%s", expr_position_index[0],
                       stmt->get_sql_template().c_str());
-        assert(false, "Parameter index must starts from 0!");
+        guarantee(false, "Parameter index must starts from 1!");
       }
       if (expr_position_index[expr_position_index.size() - 1] != (int) expr_position_index.size()) {
         tty->print_cr("Parameter index should be consequent. SQL:%s", stmt->get_sql_template().c_str());
-        assert(false, "Non-consequent parameter index");
+        std::vector<int>::iterator iter_idx = expr_position_index.begin();
+        for (; iter_idx != expr_position_index.end(); iter_idx++) {
+          tty->print("%d", *iter_idx);
+          if (iter_idx + 1 != expr_position_index.end()) {
+            tty->print(",");
+          }
+        }
+        guarantee(false, "Non-consequent parameter index");
       }
     }
     for (size_t param_index = 0; param_index < expr_position_index.size(); ++param_index) {
