@@ -51,8 +51,8 @@ const std::string &Expression::getJavaCodePosition() const {
 
 void Expression::init_gc_helper() {
   // just perform sanity check
-  guarantee(deleted.empty(), "should be empty");
-  guarantee(keep.empty(), "should be empty");
+  guarantee(deleted.empty(), "should be empty, did u forget to call endConcolic()?");
+  guarantee(keep.empty(), "should be empty, did u forget to call endConcolic()?");
 }
 
 void Expression::finalize_dangling_objects() {

@@ -112,7 +112,7 @@ public class SetParameterTest {
         JSONArray jArr = JSONArray.parseArray(res);
         assertEquals(2, jArr.size());
         assertTrue(res.contains("1655274444828"));
-        assertTrue(res.contains("RS_q1_r0_col1#fastTime"));
+        assertTrue(res.contains("#fastTime"));
         assertTrue(res.contains("TO_TIMESTAMP"));
     }
 }
