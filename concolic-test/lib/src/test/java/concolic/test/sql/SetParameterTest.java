@@ -95,4 +95,24 @@ public class SetParameterTest {
         assertEquals("SymbolExpression", pam2.getString("_type"));
         assertEquals("I", pam2.getString("_java_type"));
     }
+
+    @Test
+    public void testConcreteSetDate() throws Exception {
+        System.startConcolic();
+        PreparedStatement pstmt = new JDBC42PreparedStatement();
+        PreparedStatement pstmt2 = new JDBC42PreparedStatement();
+        Date dt = new Date(1655274444828L);
+        pstmt.setDate(1, dt);
+        ResultSet rs = pstmt.executeQuery();
+        Timestamp preTs = rs.getTimestamp(1);
+
+        pstmt2.setTimestamp(1, preTs);
+        pstmt2.executeQuery();
+        String res = System.weBridgeAnalysis(getClass().getClassLoader());
+        JSONArray jArr = JSONArray.parseArray(res);
+        assertEquals(2, jArr.size());
+        assertTrue(res.contains("1655274444828"));
+        assertTrue(res.contains("RS_q1_r0_col1#fastTime"));
+        assertTrue(res.contains("TO_TIMESTAMP"));
+    }
 }

@@ -1165,6 +1165,7 @@
    do_name(bd_scale, "scale")                                                                                           \
   do_class(java_sql_Timestamp, "java/sql/Timestamp")  \
    do_name(fastTime, "fastTime")                                                                                                             \
+   do_name(nanos, "nanos")                                                                                                             \
     /*end*/
 
 

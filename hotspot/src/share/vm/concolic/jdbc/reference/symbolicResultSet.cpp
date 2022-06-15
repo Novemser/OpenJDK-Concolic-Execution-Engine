@@ -10,6 +10,8 @@
 #include "concolic/utils.hpp"
 #include "concolic/exp/stringExpression.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
+#include "concolic/reference/symbolicDate.hpp"
+#include "concolic/reference/symbolicTimestamp.hpp"
 
 std::set<std::string> SymResSet::target_class_names = init_target_class_names();
 
@@ -242,8 +244,16 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
             ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
         );
         sym_bd->set_bigDecimal_symbolic(res_obj, exp_name);
-      } else if (res_tp == "Ljava/sql/Timestamp;" || res_tp == "Ljava/sql/Date;") {
-        ConcolicMngr::ctx->symbolize_recursive(res_obj);
+      } else if (res_tp == "Ljava/sql/Timestamp;") {
+        SymTimestamp *sym_bd = reinterpret_cast<SymTimestamp *>(
+            ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
+        );
+        sym_bd->set_timestamp_symbolic(res_obj, exp_name);
+      } else if (res_tp == "Ljava/sql/Date;") {
+        SymbolicDate *sym_bd = reinterpret_cast<SymbolicDate *>(
+            ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
+        );
+        sym_bd->set_date_symbolic(res_obj, exp_name);
       } else {
         tty->print_cr("Not implement %s", res_obj_signature_name);
         ShouldNotCallThis();

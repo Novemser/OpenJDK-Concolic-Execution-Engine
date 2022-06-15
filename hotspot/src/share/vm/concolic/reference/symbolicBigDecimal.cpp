@@ -301,12 +301,12 @@ void SymBigDecimal::method_exit_callback(MethodSymbolizerHandle &handle) {
 void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
   std::string intCmpName = DECIMAL_WRAPPER
                            + name
-                           + "intCompact"
+                           + "#intCompact"
                            + DECIMAL_WRAPPER;
 
   std::string scaleName = DECIMAL_WRAPPER
                           + name
-                          + "scale"
+                          + "#scale"
                           + DECIMAL_WRAPPER;
 
   init_sym_exp(_int_compact_offset, new SymbolExpression(intCmpName.c_str(), intCmpName.length()));

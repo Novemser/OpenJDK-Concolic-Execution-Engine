@@ -10,6 +10,7 @@
 #include "concolic/jdbc/jdbcUtils.hpp"
 #include "concolic/reference/symbolicString.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
+#include "concolic/reference/symbolicDate.hpp"
 
 long SymStmt::execute_counter = 0;
 int SymStmt::_global_query_id = 0;
@@ -203,8 +204,10 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     value_exp = SymString::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setNull") {
     value_exp = SymbolExpression::get(Sym_NULL);
-  } else if (callee_name == "setTimestamp" || callee_name == "setDate") {
+  } else if (callee_name == "setTimestamp") {
     value_exp = SymTimestamp::get_exp_of(handle.get_param<oop>(offset));
+  } else if (callee_name == "setDate") {
+    value_exp = SymbolicDate::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setBigDecimal") {
     value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setCharacterStream") {

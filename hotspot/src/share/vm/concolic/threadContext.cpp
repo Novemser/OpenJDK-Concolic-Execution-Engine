@@ -12,6 +12,7 @@
 #include "concolic/reference/symbolicStringBuilder.hpp"
 #include "concolic/reference/symbolicBigDecimal.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
+#include "concolic/reference/symbolicDate.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "utilities/vmError.hpp"
 #include "utilities/exceptions.hpp"
@@ -112,9 +113,10 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
     sym_inst = new SymPrimitive<jdouble>(sym_rid);
   } else if (klass_symbol->equals(SymBigDecimal::TYPE_NAME)) {
     sym_inst = new SymBigDecimal(sym_rid, obj);
-  } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME) || klass_symbol->equals("java/util/Date") ||
-             klass_symbol->equals("java/sql/Date")) {
+  } else if (klass_symbol->equals(SymTimestamp::TYPE_NAME)) {
     sym_inst = new SymTimestamp(sym_rid, obj);
+  } else if (klass_symbol->equals(SymbolicDate::TYPE_NAME)) {
+    sym_inst = new SymbolicDate(sym_rid, obj);
   } else if (SymStmt::target(class_name)) {
     sym_inst = new SymStmt(sym_rid);
   } else if (SymResSet::target(class_name)) {

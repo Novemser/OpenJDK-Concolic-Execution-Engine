@@ -27,8 +27,7 @@ SymTimestamp::SymTimestamp(sym_rid_t sym_rid) : SymInstance(sym_rid), _exp(NULL)
 SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _exp(new InstanceSymbolExp(obj)), _exp_converted(NULL) {
   guarantee(obj != NULL, "should not be null");
   Klass *tsClz = obj->klass();
-  guarantee(tsClz->name() == vmSymbols::java_sql_Timestamp() || tsClz->name()->equals("java/util/Date") ||
-            tsClz->name()->equals("java/sql/Date"), "should equals");
+  guarantee(tsClz->name() == vmSymbols::java_sql_Timestamp(), "should equals");
 
   fieldDescriptor fd_fastTime;
   tsClz->find_field(
@@ -36,7 +35,14 @@ SymTimestamp::SymTimestamp(sym_rid_t sym_rid, oop obj) : SymInstance(sym_rid), _
       vmSymbols::long_signature(),
       &fd_fastTime
   );
+  fieldDescriptor fd_nanos;
+  tsClz->find_field(
+      vmSymbols::nanos(),
+      vmSymbols::int_signature(),
+      &fd_nanos
+  );
   _fastTimeFldOffset = fd_fastTime.offset();
+  _nanosFldOffset = fd_nanos.offset();
 }
 
 SymTimestamp::~SymTimestamp() {
@@ -50,17 +56,25 @@ SymTimestamp::~SymTimestamp() {
 
 Expression *SymTimestamp::get_exp_of(oop obj) {
   ResourceMark rm;
-  assert(obj->klass()->name()->equals(TYPE_NAME) || obj->klass()->name()->equals("java/util/Date") ||
-         obj->klass()->name()->equals("java/sql/Date"), "should be");
+  Klass* tsClz = obj->klass();
+  assert(tsClz->name()->equals(TYPE_NAME), "should be");
   Expression *exp;
   if (obj->is_symbolic()) {
     SymInstance *sym_inst = ConcolicMngr::ctx->get_sym_inst(obj);
     exp = sym_inst->get_ref_exp();
     assert(exp != NULL, "NOT NULL");
   } else {
-    //now, we can't care about the value of a concrete Timestamp
-//    ShouldNotCallThis();
-    exp = new ConExpression(0.0);
+    fieldDescriptor fd_fastTime;
+    tsClz->find_field(
+        vmSymbols::fastTime(),
+        vmSymbols::long_signature(),
+        &fd_fastTime
+    );
+    exp = new SymbolicFunction(SymbolicFunction::TO_TIMESTAMP,
+                               new OpSymExpression(
+                                   new ConExpression(obj->long_field(fd_fastTime.offset())), new ConExpression(1000),
+                                   op_div
+                               ));
   }
   return exp;
 }
@@ -132,6 +146,13 @@ Expression *SymTimestamp::get_ref_exp() {
   _exp_converted->inc_ref();
 //  tty->print_cr("new op_div location:%p", _exp_converted);
   return _exp_converted;
+}
+
+void SymTimestamp::set_timestamp_symbolic(oop tsOOp, std::string name) {
+  std::string fastTimeName = name + "#fastTime";
+  std::string nanosName = name + "#nanos";
+  init_sym_exp(_fastTimeFldOffset, new SymbolExpression(fastTimeName.c_str(), fastTimeName.length()));
+  init_sym_exp(_nanosFldOffset, new SymbolExpression(nanosName.c_str(), nanosName.length()));
 }
 
 #endif
