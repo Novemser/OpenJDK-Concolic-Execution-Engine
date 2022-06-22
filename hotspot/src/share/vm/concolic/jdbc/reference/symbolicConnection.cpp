@@ -57,7 +57,7 @@ bool SymConn::invoke_method_helper(MethodSymbolizerHandle &handle) {
     } else if (callee_name == "createStatement") {
     } else if (callee_name == "commit") {
       long conn_id = JdbcUtils::get_conn_connection_id(handle.get_param<oop>(0));
-      tty->print_cr("OK calling commit...");
+      tty->print_cr("Connection[%lu] calling commit", conn_id);
       ConcolicMngr::ctx->get_jdbc_mngr().commit(conn_id);
     } else {
       ShouldNotCallThis();

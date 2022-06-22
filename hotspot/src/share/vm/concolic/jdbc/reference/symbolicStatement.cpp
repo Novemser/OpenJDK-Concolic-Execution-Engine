@@ -14,6 +14,9 @@
 
 long SymStmt::execute_counter = 0;
 int SymStmt::_global_query_id = 0;
+#ifdef ENABLE_WEBRIDGE
+std::string SymStmt::_webridge_recorder_class = "edu/sjtu/ipads/wbridge/sql/ResultSetHolder";
+#endif
 
 std::set<std::string> SymStmt::target_class_names = init_target_class_names();
 
@@ -24,6 +27,9 @@ std::set<std::string> SymStmt::init_target_class_names() {
   set.insert("com/mysql/jdbc/StatementImpl");
   set.insert("TestBigDecimal$StubPreparedStmt");// for test purpose only
   set.insert("TestBigDecimal$StubStmt");// for test purpose only
+#ifdef ENABLE_WEBRIDGE
+  set.insert(_webridge_recorder_class);// for recorded trace execution
+#endif
   return set;
 }
 
@@ -140,7 +146,53 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
     int param_size = handle.get_callee_method()->size_of_parameters();
     execute_counter++;
+#ifdef ENABLE_WEBRIDGE
+    if (handle.get_callee_holder_name() != _webridge_recorder_class) {
+      guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
+    } else {
+      intptr_t * caller_locals =
+          handle.get_caller_frame()->as_interpreter_frame()->interpreter_state()->locals();
+      oop stmt_obj = *(oop *) (caller_locals - handle.get_caller_stack_begin_offset());
+      ResourceMark rm;
+      char* stmt_clz_name = stmt_obj->klass()->name()->as_C_string();
+      guarantee(target_class_names.find(stmt_clz_name) != target_class_names.end(),
+                (std::string("unexpected obj class type:") + stmt_clz_name).c_str());
+      assert(param_size == 1, "should be 1");
+      oop str_obj = handle.get_param<oop>(0);
+      assert(str_obj->klass()->name() == vmSymbols::java_lang_String(), "must be string query string");
+      const char *c_sql_template = OopUtils::java_string_to_c(str_obj);
+      SymStmt *sym_stmt;
+      if (stmt_obj->is_symbolic()) {
+        sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_sym_inst(stmt_obj));
+      } else {
+        sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->alloc_sym_inst(stmt_obj));
+      }
+      sym_stmt->set_sql_template(c_sql_template);
+    }
+  } else if (callee_name == "doTxnRelatedSQL") {
+    assert(handle.get_caller_frame()->is_interpreter_frame(), "must be");
+    ResourceMark rm;
+    intptr_t * caller_locals =
+        handle.get_caller_frame()->as_interpreter_frame()->interpreter_state()->locals();
+    oop conn_obj = *(oop *) (caller_locals - handle.get_caller_stack_begin_offset());
+    tty->print_cr("!!!ResultSetHolder conn_obj clz is %s", conn_obj->klass()->signature_name());
+    long conn_id = JdbcUtils::get_conn_connection_id(conn_obj);
+    oop query_str_oop = handle.get_param<oop>(0);
+    std::string query_str = java_lang_String::as_utf8_string(query_str_oop);
+    tty->print_cr("received query str %s", query_str.c_str());
+    if (query_str == "commit") {
+      ConcolicMngr::ctx->get_jdbc_mngr().commit(conn_id);
+    } else if (query_str == "set autocommit=1") {
+      ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(true, conn_id);
+    } else if (query_str == "set autocommit=0") {
+      ConcolicMngr::ctx->get_jdbc_mngr().set_auto_commit(false, conn_id);
+    } else {
+      guarantee(false, query_str.c_str());
+    }
+    need_symbolize = false;
+#else
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
+#endif
   } else if (callee_name == "setObject") {
     // inside set object, jdbc invokes setXXX
     need_symbolize = false;
@@ -159,7 +211,7 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 //    handle.get_callee_method()->print_name(tty);
     // ShouldNotCallThis();
   } else {
-    tty->print_cr("SSSS%s unhandled by SymStmt", callee_name.c_str());
+    tty->print_cr("[SymbolicStatement] %s unhandled by SymStmt", callee_name.c_str());
   }
 
   return need_symbolize;
@@ -170,7 +222,21 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   Expression *exp = NULL;
 
   if (strncmp("execute", callee_name.c_str(), 7) == 0) {
+#ifdef ENABLE_WEBRIDGE
+    oop this_obj;
+    if (handle.get_callee_holder_name() == _webridge_recorder_class) {
+      assert(handle.get_caller_frame()->is_interpreter_frame(), "must be");
+      ResourceMark rm;
+      intptr_t *caller_locals =
+          handle.get_caller_frame()->as_interpreter_frame()->interpreter_state()->locals();
+      this_obj = *(oop *) (caller_locals - handle.get_caller_stack_begin_offset());
+      guarantee(!strcmp(this_obj->klass()->signature_name(), "Lcom/mysql/jdbc/JDBC42PreparedStatement;"), "should be");
+    } else {
+      this_obj = handle.get_param<oop>(0);
+    }
+#else
     oop this_obj = handle.get_param<oop>(0);
+#endif
     SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj));
     // set current path conditon for statement
     sym_stmt->set_pc(ConcolicMngr::ctx->get_path_condition());

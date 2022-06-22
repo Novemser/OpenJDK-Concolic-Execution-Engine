@@ -63,6 +63,7 @@ ThreadContext::~ThreadContext() {
   Universe::heap()->safe_object_iterate(&rso);
 
   Expression::finalize_dangling_objects();
+  SymString::INTERN_MAP.clear();
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {

@@ -37,7 +37,9 @@ public:
 
 private:
   static int _global_query_id;
-
+#ifdef ENABLE_WEBRIDGE
+  static std::string _webridge_recorder_class;
+#endif
   static std::set<std::string> target_class_names;
   static std::set<std::string> init_target_class_names();
   static std::set<std::string> skip_method_names;

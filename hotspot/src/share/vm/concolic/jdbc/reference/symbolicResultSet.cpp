@@ -20,6 +20,7 @@ std::set<std::string> SymResSet::init_target_class_names() {
   set.insert("com/mysql/jdbc/JDBC42ResultSet");
   set.insert("com/mysql/jdbc/ResultSetImpl");
   set.insert("TestBigDecimal$StubResultSet"); // for test purpose only
+  set.insert("edu/sjtu/ipads/wbridge/sql/result/MultipleRowResultSetImpl");
   return set;
 }
 

@@ -47,6 +47,11 @@ public:
                                                          field_offset, type));
   }
 
+  inline void init_sym_exp(int field_offset, BasicType type, std::string name) {
+    return init_sym_exp(field_offset, new FieldSymbolExp(this->get_sym_rid(),
+                                                         name, type));
+  }
+
   static Expression* get_exp_of(oop obj);
 };
 
