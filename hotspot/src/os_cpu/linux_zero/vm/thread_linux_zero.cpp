@@ -47,7 +47,7 @@ void JavaThread::push_zero_frame(ZeroFrame *zframe) {
   }
 #ifdef ENABLE_WEBRIDGE
 //  ConcolicMngr::method_enter_callback(_top_zero_frame, *(ZeroFrame **)zframe);
-  if (ConcolicMngr::can_do_concolic()) {
+  if (ConcolicMngr::ctx != NULL) {
     PathConditionPruner::method_enter(_top_zero_frame);
   }
 #endif
@@ -73,8 +73,8 @@ void JavaThread::pop_zero_frame() {
   }
 #ifdef ENABLE_WEBRIDGE
 //  ConcolicMngr::method_exit_callback(_top_zero_frame);
-  if (ConcolicMngr::can_do_concolic()) {
-    PathConditionPruner::method_exit(_top_zero_frame);
+  if (ConcolicMngr::ctx != NULL) {
+    PathConditionPruner::method_exit(temp_frame);
   }
 #endif
 #endif
