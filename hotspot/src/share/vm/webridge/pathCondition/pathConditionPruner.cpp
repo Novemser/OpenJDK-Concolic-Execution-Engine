@@ -10,15 +10,20 @@
 #include "concolic/concolicMngr.hpp"
 
 class_method_map_t PathConditionPruner::_classes_method_to_skip = init_skip_method_names();
+volatile int PathConditionPruner::_depth = 0;
 
 void PathConditionPruner::method_enter(ZeroFrame *callee_frame) {
-  if (should_prune(callee_frame)) {
-    PathConditionPruner::disable_pc_recording();
-  }
+  if (!should_prune(callee_frame)) return;
+  _depth++;
+  guarantee(_depth > 0, "Inconsistent pc pruner depth");
+  PathConditionPruner::disable_pc_recording();
 }
 
 void PathConditionPruner::method_exit(ZeroFrame *callee_frame) {
-  if (should_prune(callee_frame)) {
+  if (!should_prune(callee_frame)) return;
+  _depth--;
+  guarantee(_depth >= 0, "Unexpected depth < 0");
+  if (_depth == 0) {
     PathConditionPruner::enable_pc_recording();
   }
 }
@@ -37,6 +42,8 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["java/lang/Boolean"] = valBoxing;
   // empty methods indicate all methods should skip
   classes["java/math/BigDecimal"] = valBigDecimal;
+  classes["java/util/Locale"] = std::set<std::string>();
+  classes["sun/util/locale/LocaleUtils"] = std::set<std::string>();
   return classes;
 }
 
@@ -58,7 +65,7 @@ bool PathConditionPruner::should_prune(ZeroFrame *callee_frame) {
   if (!callee_method) {
     return false;
   }
-
+  ResourceMark rm;
   const std::string mth_holder_name(
       callee_frame->as_interpreter_frame()->interpreter_state()
           ->method()->method_holder()->name()->as_C_string());

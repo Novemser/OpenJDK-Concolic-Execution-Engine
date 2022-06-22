@@ -7,6 +7,7 @@
 #ifdef ENABLE_WEBRIDGE
 #include <set>
 #include <string>
+#include <vector>
 class ZeroFrame;
 #include "webridge/defs.hpp"
 
@@ -23,6 +24,7 @@ private:
 
   static void disable_pc_recording();
   static void enable_pc_recording();
+  static volatile int _depth;
 };
 
 #endif

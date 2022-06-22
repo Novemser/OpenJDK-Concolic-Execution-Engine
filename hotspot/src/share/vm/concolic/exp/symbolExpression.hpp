@@ -70,6 +70,7 @@ public:
 class FieldSymbolExp : public SymbolExpression {
 public:
   FieldSymbolExp(sym_rid_t sym_rid, int field_index, BasicType type);
+  FieldSymbolExp(sym_rid_t sym_rid, std::string name, BasicType type);
 };
 
 class ConSymbolExp : public SymbolExpression {

@@ -80,6 +80,15 @@ FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, int field_index,
   this->finalize(ss.size());
 }
 
+FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, std::string name,
+                               BasicType type) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', type);
+  ss.print("%lu_field_%s", sym_rid, name.c_str());
+  _type = type2char(type);
+  this->finalize(ss.size());
+}
+
 ConSymbolExp::ConSymbolExp(const char* str, BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'Y', type);
