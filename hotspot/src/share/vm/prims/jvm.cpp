@@ -366,6 +366,29 @@ JVM_ENTRY(void, JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj))
 #endif
 JVM_END
 
+JVM_ENTRY(void, JVM_Symbolize_prefix(JNIEnv *env, jclass ignored, jobject obj, jstring prefix))
+  JVMWrapper("JVM_Symbolize_prefix");
+#ifdef ENABLE_CONCOLIC
+  if (obj == NULL) {
+    // TODO: use THROW instead of assertion
+    guarantee(false, "JVM_Symbolize_prefix: obj is null");
+  }
+  // TODO: check behaviors when facing like `arrayOop`
+  oop o = JNIHandles::resolve_non_null(obj);
+  oop str = JNIHandles::resolve_non_null(prefix);
+
+  {
+    HandleMark hm;
+
+    Handle handle(THREAD, o);
+    assert(handle()->is_oop(), "JVM_Symbolize_prefix: obj not an oop");
+    ConcolicMngr::symbolize(handle, java_lang_String::as_utf8_string(str));
+  }
+#else
+  return;
+#endif
+JVM_END
+
 JVM_ENTRY(void, JVM_PrintSymExp(JNIEnv *env, jclass ignored, jobject obj))
   JVMWrapper("JVM_PrintSymExp");
 #ifdef ENABLE_CONCOLIC

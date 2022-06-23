@@ -84,7 +84,7 @@ FieldSymbolExp::FieldSymbolExp(sym_rid_t sym_rid, std::string name,
                                BasicType type) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', type);
-  ss.print("%lu_field_%s", sym_rid, name.c_str());
+  ss.print("field_%s", name.c_str());
   _type = type2char(type);
   this->finalize(ss.size());
 }

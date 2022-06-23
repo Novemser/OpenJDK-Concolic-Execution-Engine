@@ -46,6 +46,7 @@ public:
   inline JavaThread *get_thread() { return _thread; }
 
   inline void symbolize(Handle handle) { this->symbolize_recursive(handle()); }
+  inline void symbolize(Handle handle, std::string prefix) { this->symbolize_recursive(handle(), prefix); }
   inline void symbolize_method(const char *class_name,
                                const char *method_name) {
     _method_symbolizer.add_method(class_name, method_name);
@@ -157,6 +158,7 @@ public:
   void copy_entry_from_local_to_stack(int local_offset, int stack_offset);
   void copy_entry_from_stack_to_local(int stack_offset, int local_offset);
   void symbolize_recursive(oop obj);
+  void symbolize_recursive(oop obj, std::string prefix);
 
 private:
   inline ShadowTable &get_last_stack() {

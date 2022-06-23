@@ -3,6 +3,7 @@
 //
 
 #include "symbolicFunction.hpp"
+#ifdef ENABLE_WEBRIDGE
 
 SymbolicFunction::SymbolicFunction(SymbolicFunction::FunctionType type, Expression *parameterExpr) : _type(type),
                                                                                                      _parameterExpr(
@@ -35,3 +36,4 @@ void SymbolicFunction::serialize_internal(rapidjson::Writer<rapidjson::StringBuf
 SymbolicFunction::~SymbolicFunction() {
   Expression::gc(_parameterExpr);
 }
+#endif

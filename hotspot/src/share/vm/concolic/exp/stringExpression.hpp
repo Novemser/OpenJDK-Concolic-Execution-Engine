@@ -41,6 +41,7 @@ public:
 class StringSymbolExp : public SymbolExpression {
 public:
   StringSymbolExp(sym_rid_t sym_rid);
+  StringSymbolExp(sym_rid_t sym_rid, std::string name);
 };
 
 

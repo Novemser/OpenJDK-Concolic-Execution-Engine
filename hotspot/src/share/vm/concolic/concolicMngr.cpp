@@ -67,6 +67,16 @@ void ConcolicMngr::symbolize(Handle handle) {
 //  tty->print_cr("----- %s", ctx->get_code_pos_for_first("main").c_str());
 }
 
+void ConcolicMngr::symbolize(Handle handle, const char* prefix) {
+  if (can_do_concolic()) {
+    tty->print("Symbolize!\n");
+    ctx->symbolize(handle, prefix);
+  } else {
+    tty->print_cr("Warning: symbolize canned without proper ctx, try System.startConcolic() before symbolize");
+  }
+//  tty->print_cr("----- %s", ctx->get_code_pos_for_first("main").c_str());
+}
+
 void ConcolicMngr::symbolizeMethod(Handle holder_name_handle,
                                    Handle callee_name_handle) {
   ResourceMark rm;

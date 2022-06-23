@@ -42,6 +42,7 @@ static JNINativeMethod methods[] = {
     {"startConcolic",       "()J",                     (void *)&JVM_StartConcolic},
     {"endConcolic",         "()J",                     (void *)&JVM_EndConcolic},
     {"symbolize",           "(" OBJ ")V",              (void *)&JVM_Symbolize},
+    {"symbolize",           "(" OBJ "Ljava/lang/String;" ")V", (void *)&JVM_Symbolize_prefix},
     {"symbolizeMethod",     "(" OBJ OBJ ")V",          (void *)&JVM_SymbolizeMethod},
     {"arraycopy",           "(" OBJ "I" OBJ "II)V",    (void *)&JVM_ArrayCopy},
     {"recordStmtObj",       "(" OBJ OBJ ")V",          (void *)&JVM_RecordStmtObj},

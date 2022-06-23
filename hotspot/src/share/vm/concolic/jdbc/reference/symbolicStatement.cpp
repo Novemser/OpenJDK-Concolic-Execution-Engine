@@ -175,11 +175,11 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     intptr_t * caller_locals =
         handle.get_caller_frame()->as_interpreter_frame()->interpreter_state()->locals();
     oop conn_obj = *(oop *) (caller_locals - handle.get_caller_stack_begin_offset());
-    tty->print_cr("!!!ResultSetHolder conn_obj clz is %s", conn_obj->klass()->signature_name());
+//    tty->print_cr("!!!ResultSetHolder conn_obj clz is %s", conn_obj->klass()->signature_name());
     long conn_id = JdbcUtils::get_conn_connection_id(conn_obj);
     oop query_str_oop = handle.get_param<oop>(0);
     std::string query_str = java_lang_String::as_utf8_string(query_str_oop);
-    tty->print_cr("received query str %s", query_str.c_str());
+//    tty->print_cr("received query str %s", query_str.c_str());
     if (query_str == "commit") {
       ConcolicMngr::ctx->get_jdbc_mngr().commit(conn_id);
     } else if (query_str == "set autocommit=1") {

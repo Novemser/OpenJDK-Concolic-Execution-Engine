@@ -195,6 +195,20 @@ void ThreadContext::symbolize_recursive(oop obj) {
   // tty->print_cr(CL_CYAN"================================================================="CNONE);
 }
 
+void ThreadContext::symbolize_recursive(oop obj, std::string prefix) {
+//  tty->print_cr(obj->klass()->signature_name());
+//  tty->print_cr(obj->klass()->name()->as_C_string());
+//  SimpleFieldPrinter field_printer(obj);
+//   field_printer.do_recursive();
+
+  FieldSymbolizer field_symbolzier(obj, *this, prefix);
+  field_symbolzier.do_recursive();
+  // OopTraverser oop_traverser;
+  // tty->print_cr(CL_CYAN"================================================================="CNONE);
+  // obj->oop_iterate(&oop_traverser);
+  // tty->print_cr(CL_CYAN"================================================================="CNONE);
+}
+
 sym_tmp_id_t ThreadContext::get_next_sym_tmp_id(Expression *sym_exp) {
   sym_rid_t sym_tmp_id = _sym_tmp_id_counter++;
   sym_exp->inc_ref();

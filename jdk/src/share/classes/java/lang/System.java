@@ -428,6 +428,11 @@ public final class System {
     public static native void symbolize(Object obj);
 
     /**
+     * make an Object symbolic with prefix for symbolic variable name
+     */
+    public static native void symbolize(Object obj, String prefix);
+
+    /**
      * make an method symbolic
      */
     public static native void symbolizeMethod(Object holder_name, Object callee_name);

@@ -34,6 +34,9 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   std::set<std::string> valBigDecimal;
   valBoxing.insert("valueOf");
   valBigDecimal.insert("<init>");
+//  valBigDecimal.insert("setScale");
+//  valBigDecimal.insert("valueOf");
+//  valBigDecimal.insert("add");
 //  valBigDecimal.insert("toString");
   classes["java/lang/Long"] = valBoxing;
   classes["java/lang/Byte"] = valBoxing;
@@ -44,6 +47,10 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["java/math/BigDecimal"] = valBigDecimal;
   classes["java/util/Locale"] = std::set<std::string>();
   classes["sun/util/locale/LocaleUtils"] = std::set<std::string>();
+  classes["java/security/AccessController"] = std::set<std::string>();
+  classes["java/lang/ClassLoader"] = std::set<std::string>();
+  classes["sun/misc/Launcher"] = std::set<std::string>();
+  classes["java/text/Format"] = std::set<std::string>();
   return classes;
 }
 

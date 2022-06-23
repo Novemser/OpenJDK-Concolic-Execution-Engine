@@ -144,6 +144,9 @@ JNIEXPORT void JNICALL
 JVM_Symbolize(JNIEnv *env, jclass ignored, jobject obj);
 
 JNIEXPORT void JNICALL
+JVM_Symbolize_prefix(JNIEnv *env, jclass ignored, jobject obj, jstring prefix);
+
+JNIEXPORT void JNICALL
 JVM_SymbolizeMethod(JNIEnv *env, jclass ignored, jobject holder_name, jobject callee_name);
 
 JNIEXPORT void JNICALL

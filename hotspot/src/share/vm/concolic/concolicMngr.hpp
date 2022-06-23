@@ -18,6 +18,7 @@ public:
   static jlong startConcolic(JavaThread *thread);
   static jlong endConcolic();
   static void symbolize(Handle handle);
+  static void symbolize(Handle handle, const char* prefix);
   static void symbolizeMethod(Handle holder_name_handle,
                               Handle callee_name_handle);
   static void printSymExp(Handle handle);

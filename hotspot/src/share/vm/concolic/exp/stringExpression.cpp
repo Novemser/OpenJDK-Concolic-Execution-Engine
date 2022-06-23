@@ -89,6 +89,14 @@ StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
   this->finalize(ss.size());
 }
 
+StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid, std::string name) {
+  stringStream ss(str_buf, BUF_SIZE);
+  set_head(ss, 'M', T_OBJECT, "'String'");
+  ss.print("%s", name.c_str());
+  _type = vmSymbols::java_lang_String()->as_C_string();
+  this->finalize(ss.size());
+}
+
 ConStringSymbolExp::ConStringSymbolExp(oop obj) {
   ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);

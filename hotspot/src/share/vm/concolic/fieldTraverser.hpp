@@ -50,10 +50,15 @@ class FieldSymbolizer : public FieldTraverser {
 private:
   ThreadContext &_ctx;
   std::vector<SymRef *> _sym_refs;
+  std::vector<std::string> _prefix_lst;
 
 public:
   FieldSymbolizer(oop obj, ThreadContext &ctx)
       : FieldTraverser(obj), _ctx(ctx) {}
+  FieldSymbolizer(oop obj, ThreadContext &ctx, std::string prefix)
+      : FieldTraverser(obj), _ctx(ctx) {
+    _prefix_lst.push_back(prefix);
+  }
   bool print_field(fieldDescriptor *fd, oop obj);
   bool print_element(int index, arrayOop array_obj);
 
@@ -66,6 +71,8 @@ protected:
   virtual void after_instance_helper();
   virtual bool before_array_helper();
   virtual void after_array_helper();
+
+  std::string concatCurrentSymbolicName(fieldDescriptor* fd);
 };
 
 class SimpleFieldPrinter : public FieldTraverser {

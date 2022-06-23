@@ -257,6 +257,7 @@ SUNWprivate_1.1 {
                 JVM_StartConcolic;
                 JVM_EndConcolic;
                 JVM_Symbolize;
+                JVM_Symbolize_prefix;
                 JVM_SymbolizeMethod;
                 JVM_PrintSymExp;
                 JVM_RecordStmtObj;

@@ -123,6 +123,14 @@ void FieldTraverser::print_indent() {
  * FieldSymbolizer
  */
 
+std::string FieldSymbolizer::concatCurrentSymbolicName(fieldDescriptor* fd) {
+  std::string name = _prefix_lst.back() + "_" + std::string(fd->name()->as_C_string());
+  StringUtils::replaceAll(name, "/", "_");
+  StringUtils::replaceAll(name, ":", "_");
+  StringUtils::replaceAll(name, "$", "__");
+  return name;
+}
+
 bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   // print_indent();
   // tty->print("---- %d\n", fd->offset());
@@ -134,8 +142,20 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
   BasicType type = fd->field_type();
   this->print_field(fd,obj);
   switch (type) {
-  case T_OBJECT:
-    return obj->obj_field(fd->offset()) != NULL;
+  case T_OBJECT: {
+    oop fld_oop = obj->obj_field(fd->offset());
+    if (fld_oop == NULL) return false;
+    if (fld_oop->klass()->name() == vmSymbols::java_lang_String()) {
+      sym_inst = this->_ctx.get_sym_inst(obj);
+      assert(sym_inst == (SymInstance *)this->_sym_refs.back(),
+             "should be equal");
+      SymString* sym_str_inst = reinterpret_cast<SymString *>(this->_ctx.get_or_alloc_sym_inst(fld_oop));
+      sym_str_inst->set_ref_exp(new StringSymbolExp(obj->get_sym_rid(), concatCurrentSymbolicName(fd)));
+      sym_inst->init_sym_exp(fd->offset(), sym_str_inst->get_ref_exp());
+      return false;
+    }
+    return true;
+  }
   case T_ARRAY: {
     arrayOop array_obj = (arrayOop)(obj->obj_field(fd->offset()));
     if (array_obj != NULL) {
@@ -148,7 +168,8 @@ bool FieldSymbolizer::do_field_helper(fieldDescriptor *fd, oop obj) {
     sym_inst = this->_ctx.get_sym_inst(obj);
     assert(sym_inst == (SymInstance *)this->_sym_refs.back(),
            "should be equal");
-    sym_inst->init_sym_exp(fd->offset(), type);
+    sym_inst->init_sym_exp(fd->offset(), type, concatCurrentSymbolicName(fd));
+//      sym_inst->init_sym_exp(fd->offset(), type);
     return false;
   }
 }
@@ -166,9 +187,21 @@ bool FieldSymbolizer::before_instance_helper() {
   if (sym_inst && sym_inst->need_recursive()) {
     _sym_refs.push_back(sym_inst);
 
-    tty->indent().print_cr("%s",this->_obj->klass()->name()->as_C_string());
+    char * clz_name = this->_obj->klass()->name()->as_C_string();
     tty->inc();
+    if (!_prefix_lst.empty()) {
+      _prefix_lst.push_back(_prefix_lst.back() + "_" + clz_name);
+    } else {
+      _prefix_lst.push_back(clz_name);
+    }
     return true;
+  } else if (this->_obj->klass()->name() == vmSymbols::java_lang_String()) {
+    // rename plain String symbolic expressions
+    SymString* sym_str_inst = reinterpret_cast<SymString *>(sym_inst);
+    if (!_prefix_lst.empty()) {
+      sym_str_inst->set_ref_exp(new StringSymbolExp(sym_inst->get_sym_rid(), _prefix_lst.back()));
+    }
+    return false;
   } else {
     return false;
   }
@@ -177,6 +210,7 @@ bool FieldSymbolizer::before_instance_helper() {
 void FieldSymbolizer::after_instance_helper() {
     _sym_refs.pop_back();
     tty->dec();
+    _prefix_lst.pop_back();
 }
 
 bool FieldSymbolizer::do_element_helper(int index, arrayOop array_obj) {
@@ -221,12 +255,19 @@ bool FieldSymbolizer::before_array_helper() {
   _sym_refs.push_back(sym_arr);
 
   tty->indent().print_cr("symbolize array rid:%lu type:%c length:%d",array_obj->get_sym_rid(),type2char(type),array_obj->length());
+  char * arr_clz_name = array_obj->klass()->name()->as_C_string();
+  if (!_prefix_lst.empty()) {
+    _prefix_lst.push_back(_prefix_lst.back() + arr_clz_name);
+  } else {
+    _prefix_lst.push_back(arr_clz_name);
+  }
   tty->inc();
 }
 
 void FieldSymbolizer::after_array_helper() {
     _sym_refs.pop_back();
     tty->dec();
+    _prefix_lst.pop_back();
 }
 
 /**************************************************
