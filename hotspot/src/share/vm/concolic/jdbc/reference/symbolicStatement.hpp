@@ -127,6 +127,7 @@ private:
 public:
   static long getExecuteCounter() { return execute_counter; }
   static long resetExecuteCounter() { execute_counter = 0; }
+  static long resetGlobalCounter() { _global_query_id = 0; }
 };
 
 class SymSetAutoCommit : public SymStmt {

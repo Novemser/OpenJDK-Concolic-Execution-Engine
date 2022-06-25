@@ -64,6 +64,7 @@ ThreadContext::~ThreadContext() {
 
   Expression::finalize_dangling_objects();
   SymString::INTERN_MAP.clear();
+  SymStmt::resetGlobalCounter();
 }
 
 SymInstance *ThreadContext::get_or_alloc_sym_inst(oop obj) {
