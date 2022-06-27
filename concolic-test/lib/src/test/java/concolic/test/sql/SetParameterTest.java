@@ -60,7 +60,33 @@ public class SetParameterTest {
         String res = System.weBridgeAnalysis(getClass().getClassLoader());
         assertTrue(res.contains("_scale"));
         assertTrue(res.contains("_intCompact"));
-        assertTrue(res.contains("$BIG_DECIMAL$"));
+        assertTrue(res.contains("\"M_J_field_java_lang_Long_value\""));
+    }
+
+    @Test
+    public void testSetBigDecimalAddSymbolic() throws SQLException {
+        System.startConcolic();
+        Double d1 = new Double(1.0);
+        Double d2 = new Double(2.0);
+        System.symbolize(d1);
+        System.symbolize(d2);
+        BigDecimal bd1 = new BigDecimal(d1);
+        BigDecimal bd2 = new BigDecimal(d2);
+        BigDecimal bdRes = bd1.add(bd2);
+        pstmt.setBigDecimal(1, bdRes);
+        pstmt.executeQuery();
+        String res = System.weBridgeAnalysis(getClass().getClassLoader());
+        JSONArray jArr = JSONArray.parseArray(res);
+        assertEquals(1, jArr.size());
+        JSONObject jRes = jArr.getJSONObject(0);
+        JSONArray params = jRes.getJSONArray("parameterExprs");
+        assertEquals(1, params.size());
+        JSONObject paramJson = params.getJSONObject(0);
+        assertEquals("BigDecimalExpression", paramJson.getString("_type"));
+        JSONObject binaryExprJson = paramJson.getJSONObject("_intCompact");
+        assertEquals("BinaryExpression", binaryExprJson.getString("_type"));
+        assertEquals("+", binaryExprJson.getString("_op"));
+        assertTrue(binaryExprJson.toString().contains("\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\""));
     }
 
     @Test

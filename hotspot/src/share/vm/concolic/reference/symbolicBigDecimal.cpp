@@ -156,7 +156,17 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
         ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal)
     );
-    symObj->symbolize_bigDecimal(resultDecimal, handle.get_param_list()[0]);
+    exp_list_t pam_lst = handle.get_param_list();
+    symObj->set_sym_exp(
+        symObj->int_compact_offset(resultDecimal), pam_lst[0]
+    );
+
+    if (pam_lst.size() > 1) {
+      // for java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;
+      symObj->set_sym_exp(
+          symObj->scale_offset(resultDecimal), pam_lst[1]
+      );
+    }
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
