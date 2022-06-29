@@ -48,6 +48,7 @@
 #include "runtime/threadCritical.hpp"
 #include "utilities/exceptions.hpp"
 #include "utilities/globalDefinitions.hpp"
+#include "concolic/exp/typeCastExpression.hpp"
 
 #ifdef ENABLE_WEBRIDGE
 #include <sstream>
@@ -1593,8 +1594,7 @@ run:
         if (inplace)  \
           ConcolicMngr::ctx->set_stack_slot(stack_offset + output_offset, old_exp); \
         else if (old_exp) {  \
-          std::string name = SSTR("CAST_" << old_exp->get_unique_id());  \
-          SymbolExpression *new_exp = new SymbolExpression(name.c_str(), name.length());  \
+          TypeCastExpression *new_exp = new TypeCastExpression(old_exp);  \
           new_exp->set_type(type);  \
           ConcolicMngr::ctx->set_stack_slot(stack_offset + output_offset, new_exp); \
           ConcolicMngr::record_path_condition(  \

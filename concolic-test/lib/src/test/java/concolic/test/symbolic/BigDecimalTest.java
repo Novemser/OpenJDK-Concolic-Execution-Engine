@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BigDecimalTest {
     @AfterEach
@@ -34,8 +33,7 @@ public class BigDecimalTest {
         if (bd.doubleValue() == 3.2d) {
         }
         String pc = System.getPathCondition();
-        assertTrue(pc.contains("\"},\"_op\":\"<\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"D\",\"_exp\":\"Y_D_3.200000e+00\"}}]"));
-        assertTrue(pc.contains("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"},\"_op\":\">\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_exp\":\"Y_J_-9223372036854775808\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#scale$BIG_DECIMAL$\"},\"_op\":\"==\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"},\"_op\":\"==\",\"_right\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"D\",\"_exp\":\"CAST_"));
+        assertEquals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"},\"_op\":\">\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_exp\":\"Y_J_-9223372036854775808\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#scale$BIG_DECIMAL$\"},\"_op\":\"==\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"},\"_op\":\"==\",\"_right\":{\"_type\":\"TypeCastExpression\",\"_java_type\":\"D\",\"_exp\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"}}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"TypeCastExpression\",\"_java_type\":\"D\",\"_exp\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"\",\"_exp\":\"$BIG_DECIMAL$M_D_field_java_lang_Double_value#intCompact$BIG_DECIMAL$\"}},\"_op\":\"<\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"D\",\"_exp\":\"Y_D_3.200000e+00\"}}]", pc);
     }
 
     @Test
@@ -121,5 +119,14 @@ public class BigDecimalTest {
         BigDecimal newBd = bd.setScale(15);
         if (newBd.intValue() == 10) {
         }
+    }
+
+    @Test
+    public void testL2D() {
+        System.startConcolic();
+        Long valLong = new Long(42L);
+        System.symbolize(valLong);
+        if (valLong > 3.0d) {}
+        assertEquals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"J\",\"_exp\":\"M_J_field_java_lang_Long_value\"},\"_op\":\"==\",\"_right\":{\"_type\":\"TypeCastExpression\",\"_java_type\":\"D\",\"_exp\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"J\",\"_exp\":\"M_J_field_java_lang_Long_value\"}}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"TypeCastExpression\",\"_java_type\":\"D\",\"_exp\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"J\",\"_exp\":\"M_J_field_java_lang_Long_value\"}},\"_op\":\">\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"D\",\"_exp\":\"Y_D_3.000000e+00\"}}]", System.getPathCondition());
     }
 }

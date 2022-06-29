@@ -2,6 +2,7 @@
 
 #include "concolic/exp/expression.hpp"
 #include "concolic/concolicMngr.hpp"
+#include "webridge/utils/rapidjson/document.h"
 #include "utilities/ostream.hpp"
 #include <cstring>
 
@@ -67,6 +68,23 @@ void Expression::finalize_dangling_objects() {
   guarantee(total_count == 0, "total_count should be 0");
   keep.clear();
   deleted.clear();
+}
+
+std::string Expression::get_name() {
+  rapidjson::StringBuffer s;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+  serialize(writer);
+  rapidjson::Document doc;
+  doc.Parse(s.GetString());
+  if (doc.HasMember("_exp")) {
+    return doc["_exp"].GetString();
+  } else if (doc.HasMember("_type")) {
+    if (doc["_type"].GetString() == std::string("BinaryExpression")) {
+      return "BinaryExpression";
+    }
+  } else {
+    guarantee(false, (std::string("Not implemented expression get_name:") + s.GetString()).c_str());
+  }
 }
 
 OpSymExpression::OpSymExpression(Expression *l, Expression *r, SymbolicOp op,

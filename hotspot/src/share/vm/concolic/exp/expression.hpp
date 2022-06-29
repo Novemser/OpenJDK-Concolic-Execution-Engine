@@ -67,6 +67,8 @@ public:
     serialize_internal(writer);
     writer.EndObject();
   }
+
+  std::string get_name();
 };
 
 class OpSymExpression : public Expression {
