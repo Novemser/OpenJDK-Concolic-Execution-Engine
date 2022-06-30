@@ -51,6 +51,7 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["java/lang/ClassLoader"] = std::set<std::string>();
   classes["sun/misc/Launcher"] = std::set<std::string>();
   classes["java/text/Format"] = std::set<std::string>();
+  classes["java/text/NumberFormat"] = std::set<std::string>();
   classes["java/util/UUID"] = std::set<std::string>();
   classes["com/fasterxml/jackson/databind/ObjectWriter"] = std::set<std::string>();
   classes["java/text/SimpleDateFormat"] = std::set<std::string>();
