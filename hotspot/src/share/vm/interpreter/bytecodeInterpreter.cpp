@@ -1420,6 +1420,8 @@ run:
         ConcolicMngr::ctx->get_stack_slot(stack_offset + l_off);               \
     Expression *right =                                                        \
         ConcolicMngr::ctx->get_stack_slot(stack_offset + r_off);               \
+    ConcolicMngr::ctx->set_stack_slot(stack_offset + l_off, NULL);             \
+    ConcolicMngr::ctx->set_stack_slot(stack_offset + r_off, NULL);             \
     if (left || right) {                                                       \
       if (!left) {                                                             \
         left = new ConExpression(l_value);                                     \

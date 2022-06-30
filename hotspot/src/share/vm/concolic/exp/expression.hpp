@@ -68,7 +68,7 @@ public:
     writer.EndObject();
   }
 
-  std::string get_name();
+  virtual std::string get_name();
 };
 
 class OpSymExpression : public Expression {
@@ -85,6 +85,7 @@ public:
   OpSymExpression(Expression *l, Expression *r, SymbolicOp op, bool cmp = true);
   OpSymExpression(Expression *r, SymbolicOp op);
   ~OpSymExpression();
+  virtual std::string get_name();
 
 public:
   void print();
@@ -134,6 +135,8 @@ public:
   void print();
 
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+
+  virtual std::string get_name();
 };
 
 typedef std::vector<Expression *> exp_list_t;

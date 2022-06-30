@@ -135,4 +135,22 @@ void ArrayInitExpression::serialize_internal(rapidjson::Writer<rapidjson::String
   writer.EndArray();
 }
 
+std::string ArrayInitExpression::get_name() {
+  std::string name = "";
+  name += _arr_str;
+  for (size_t index = 0; index < _arr_exps.size(); ++index) {
+    Expression* expr = _arr_exps[index];
+    if (expr) {
+      name += expr->get_name();
+    } else {
+      name += "null";
+    }
+
+    if (index != (_arr_exps.size() - 1)) {
+      name += "_";
+    }
+  }
+  return name;
+}
+
 #endif

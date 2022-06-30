@@ -12,3 +12,8 @@ void TypeCastExpression::serialize_internal(rapidjson::Writer<rapidjson::StringB
   writer.Key("_exp");
   _exp_to_cast->serialize(writer);
 }
+
+std::string TypeCastExpression::get_name() {
+  std::string name = "CAST_AS_" + _type + "_";
+  return name + _exp_to_cast->get_name();
+}

@@ -23,18 +23,18 @@ private:
   Expression *_exp_to_cast;
 public:
   TypeCastExpression(Expression *exp) : _exp_to_cast(exp) {
-    if (_exp_to_cast) {
-      _exp_to_cast->inc_ref();
+    if (exp) {
+      exp->inc_ref();
     }
   }
 
   ~TypeCastExpression() {
-    if (_exp_to_cast) {
-      _exp_to_cast->dec_ref();
-    }
+    Expression::gc(_exp_to_cast);
   }
 
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+
+  virtual std::string get_name();
 };
 
 #endif

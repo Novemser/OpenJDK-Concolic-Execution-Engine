@@ -26,10 +26,14 @@ std::set<std::string> SymBigDecimal::init_handle_method_names() {
   std::set<std::string> set;
 #ifdef ENABLE_WEBRIDGE
   set.insert("java.math.BigDecimal.<init>(D)V");
+  set.insert("java.math.BigDecimal.<init>(I)V");
+  set.insert("java.math.BigDecimal.<init>(J)V");
   set.insert("java.math.BigDecimal.<init>(Ljava/lang/String;)V");
   set.insert("java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;");
+//  set.insert("java.math.BigDecimal.add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;");
+//  set.insert("java.math.BigDecimal.add(JIJI)Ljava/math/BigDecimal;");
 //  set.insert("java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;");
 #else
   set.insert("<init>");
@@ -81,8 +85,24 @@ bool SymBigDecimal::invoke_method_helper(MethodSymbolizerHandle &handle) {
 
 #ifdef ENABLE_WEBRIDGE
   if (handle_method_names.find(handle.get_callee_method()->name_and_sig_as_C_string()) != handle_method_names.end()) {
+//    if (std::string(handle.get_callee_method()->name_and_sig_as_C_string()) == "java.math.BigDecimal.add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;") {
+//      tty->print_cr("hit here");
+//      return false;
+//    }
+//    if (std::string(handle.get_callee_method()->name_and_sig_as_C_string()) == "java.math.BigDecimal.add(JIJI)Ljava/math/BigDecimal;") {
+//      tty->print_cr("hit here2");
+//    }
     if (handle.general_check_param_symbolized()) {
       handle.general_prepare_param();
+      if (callee_name == "java.math.BigDecimal.<init>(D)V") {
+        oop thisDecimal = handle.get_param<oop>(0);
+        assert(thisDecimal != NULL, "should not be null");
+        SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+            ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
+        );
+        assert(symObj, "???");
+        return false;
+      }
       return true;
     }
   }
@@ -169,15 +189,33 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     }
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
-  } else if (signature == "java.math.BigDecimal.<init>(D)V") {
-    Expression *paramDoubleExp = handle.get_param_list()[1];
-    guarantee(paramDoubleExp != NULL, "Should not be null");
+  } else if (signature == "java.math.BigDecimal.add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;") {
+    Expression *param1 = handle.get_param_list()[0];
+    tty->print_cr("pp1");
+  } else if (signature == "java.math.BigDecimal.add(JIJI)Ljava/math/BigDecimal;") {
+    Expression *param1 = handle.get_param_list()[0];
+    tty->print_cr("pp2");
+  } else if (signature == "java.math.BigDecimal.<init>(I)V" ||
+             signature == "java.math.BigDecimal.<init>(J)V") {
+    Expression *param = handle.get_param_list()[1];
+    guarantee(param != NULL, "Should not be null");
     oop thisDecimal = handle.get_param<oop>(0);
     assert(thisDecimal != NULL, "should not be null");
     SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
         ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
     );
-    symObj->symbolize_bigDecimal(thisDecimal, paramDoubleExp);
+    // directly set int-compact to param expression
+    symObj->set_sym_exp(symObj->_int_compact_offset, param);
+  } else if (signature == "java.math.BigDecimal.<init>(D)V") {
+    Expression *param = handle.get_param_list()[1];
+    guarantee(param != NULL, "Should not be null");
+    oop thisDecimal = handle.get_param<oop>(0);
+    assert(thisDecimal != NULL, "should not be null");
+    SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
+    );
+    // TODO: seems there's symbolic lose in this way: param is not correctly related with symBigdecimal
+    symObj->symbolize_bigDecimal(thisDecimal, param);
   } else if (signature == "java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;") {
     jint newScale = handle.get_param<jint>(1);
     assert(newScale >= 0, "Scale should >= 0");
@@ -338,24 +376,7 @@ Expression *SymBigDecimal::get(int field_offset) {
 }
 
 void SymBigDecimal::symbolize_bigDecimal(oop decimalOOp, Expression *parentExp) {
-  rapidjson::StringBuffer s;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-  parentExp->serialize(writer);
-  rapidjson::Document doc;
-  doc.Parse(s.GetString());
-  // TODO: replace the hard coded expression access
-  if (!strcmp(doc["_type"].GetString(), "BinaryExpression")) {
-    std::string expStr = s.GetString();
-    StringUtils::replaceAll(expStr, "{", "_");
-    StringUtils::replaceAll(expStr, "}", "_");
-    StringUtils::replaceAll(expStr, "\"", "_");
-    StringUtils::replaceAll(expStr, ",", "__");
-    StringUtils::replaceAll(expStr, ":", "_");
-    StringUtils::replaceAll(expStr, "\\", "_");
-    this->set_bigDecimal_symbolic(decimalOOp, expStr.c_str());
-  } else {
-    this->set_bigDecimal_symbolic(decimalOOp, doc["_exp"].GetString());
-  }
+  this->set_bigDecimal_symbolic(decimalOOp, parentExp->get_name());
 }
 
 int SymBigDecimal::int_compact_offset(oop decimalOOp) {

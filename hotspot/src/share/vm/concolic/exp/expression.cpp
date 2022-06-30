@@ -78,10 +78,6 @@ std::string Expression::get_name() {
   doc.Parse(s.GetString());
   if (doc.HasMember("_exp")) {
     return doc["_exp"].GetString();
-  } else if (doc.HasMember("_type")) {
-    if (doc["_type"].GetString() == std::string("BinaryExpression")) {
-      return "BinaryExpression";
-    }
   } else {
     guarantee(false, (std::string("Not implemented expression get_name:") + s.GetString()).c_str());
   }
@@ -161,6 +157,22 @@ void OpSymExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   } else {
     writer.Null();
   }
+}
+
+std::string OpSymExpression::get_name() {
+  std::string name = "";
+  if (_left) {
+    name = _left->get_name();
+  } else {
+    name = "null";
+  }
+  name = name + SymbolicOpStr[_op];
+  if (_right) {
+    name = name + _right->get_name();
+  } else {
+    name = name + "null";
+  }
+  return name;
 }
 
 ConExpression::ConExpression(jboolean z) {

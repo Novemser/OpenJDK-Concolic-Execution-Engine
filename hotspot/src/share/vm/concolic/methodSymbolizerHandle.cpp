@@ -66,6 +66,7 @@ int __attribute__((optimize("O0"))) MethodSymbolizerHandle::general_prepare_para
   Expression *exp = NULL;
   if (is_java_primitive(type)) {
     exp = this->get_primitive_exp(locals_offset, type);
+    locals_offset += type2size[type] - 1;
   } else if (type == T_OBJECT) {
     oop obj = this->get_param<oop>(locals_offset);
     if (obj != NULL) {

@@ -61,4 +61,26 @@ void ArrayExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   }
 }
 
+std::string ArrayExpression::get_name() {
+  std::string name = "";
+  if (_is_load) {
+    name = "(select " + std::string(_arr_str) + " ";
+  } else {
+    name = "(store " + std::string(_arr_str) + " ";
+  }
+  if (_index_exp) {
+    name += _index_exp->get_name();
+  } else {
+    name += "null";
+  }
+  name += "_";
+  if (_value_exp) {
+    name += _value_exp->get_name();
+  } else {
+    name += "null";
+  }
+
+  return name;
+}
+
 #endif

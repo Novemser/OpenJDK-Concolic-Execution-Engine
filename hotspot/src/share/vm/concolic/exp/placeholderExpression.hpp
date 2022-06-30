@@ -22,6 +22,8 @@ protected:
 public:
   virtual void print();
 
+  virtual std::string get_name();
+
 private:
   static std::map<Function, int> functionInvCounter; // record stack trace
   Function _type;

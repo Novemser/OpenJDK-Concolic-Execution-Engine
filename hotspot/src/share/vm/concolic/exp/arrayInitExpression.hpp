@@ -29,6 +29,8 @@ public:
 
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
+  virtual std::string get_name();
+
 private:
   static oop get_obj(arrayOop array, BasicType type, int i);
 };

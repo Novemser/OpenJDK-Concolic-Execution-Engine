@@ -44,7 +44,7 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["java/lang/Integer"] = valBoxing;
   classes["java/lang/Boolean"] = valBoxing;
   // empty methods indicate all methods should skip
-  classes["java/math/BigDecimal"] = valBigDecimal;
+//  classes["java/math/BigDecimal"] = valBigDecimal;
   classes["java/util/Locale"] = std::set<std::string>();
   classes["sun/util/locale/LocaleUtils"] = std::set<std::string>();
   classes["java/security/AccessController"] = std::set<std::string>();
