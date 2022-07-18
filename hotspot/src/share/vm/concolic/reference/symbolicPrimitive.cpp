@@ -172,7 +172,7 @@ template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymboliz
     set_symbolic_field(
         handle.get_result<oop>(handle.get_result_type()),
         vmSymbols::value_name(),
-        vmSymbols::short_signature(),
+        vmSymbols::char_signature(),
         handle
     );
   }
@@ -269,18 +269,25 @@ template <> Expression * SymPrimitive<jdouble>::finish_method_helper(MethodSymbo
 template<class T>
 void
 SymPrimitive<T>::set_symbolic_field(oop obj, Symbol *fld_name, Symbol *fld_tp_sig, MethodSymbolizerHandle &handle) {
-  assert(!handle.get_param_list().empty(), "Should contain at least 1 parameter");
+  guarantee(!handle.get_param_list().empty(), "Should contain at least 1 parameter");
+  tty->print_cr("set_symbolic_field 1");
   Expression *exp = handle.get_param_list()[0];
-  assert(obj, "Should get result long object");
+  tty->print_cr("set_symbolic_field 2");
+  guarantee(obj, "Should get result long object");
   SymInstance *sym_inst = ConcolicMngr::ctx->get_or_alloc_sym_inst(obj);
+  tty->print_cr("set_symbolic_field 3");
   fieldDescriptor fd;
   Klass *fld_klass = obj->klass()->find_field(
       fld_name,
       fld_tp_sig,
       &fd
   );
-  assert(fld_klass != NULL, "Field not found!");
+  tty->print_cr("set_symbolic_field 4");
+  ResourceMark rm;
+  std::string msg = std::string("Field not found:") + obj->klass()->signature_name() + ", " + fld_name->as_C_string();
+  guarantee(fld_klass != NULL, msg.c_str());
   sym_inst->set_sym_exp(fd.offset(), exp);
+  tty->print_cr("set_symbolic_field 5");
 }
 
 template<class T>
