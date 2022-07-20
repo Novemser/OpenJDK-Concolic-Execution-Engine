@@ -59,7 +59,10 @@ typeArrayOop oopFactory::new_typeArray(BasicType type, int length, TRAPS) {
     * This is where an object created
     * We can set the default sym_rid here
     */
-  result->set_sym_rid(NULL_SYM_RID);
+  assert(result, "allocated result should not be null");
+  if (result) {
+    result->set_sym_rid(NULL_SYM_RID);
+  }
 #endif
   return result;
 }
