@@ -29,9 +29,7 @@
 #include "utilities/exceptions.hpp"
 #include "utilities/ostream.hpp"
 
-MethodSymbolizer::MethodSymbolizer() {
-  _symbolizing_method = false;
-  _has_callbacks = false;
+MethodSymbolizer::MethodSymbolizer() : _symbolizing_method(false), _has_callbacks(false) {
   init_helper_methods();
   handling_methods.clear();
 }
@@ -106,6 +104,11 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   _handle.set_callee_holder_name(
       callee_method->method_holder()->name()->as_C_string());
   _handle.set_callee_name(callee_method->name()->as_C_string());
+//  if (_handle.get_callee_name() == "executeQuery") {
+//    tty->print_cr("intercepting execute query... of %s, can do concolic:%d",
+//                  _handle.get_callee_holder_name().c_str(),
+//                  ConcolicMngr::can_do_concolic());
+//  }
 
   /**
    * Whether we need to symbolize the process of this function
@@ -144,7 +147,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
   }
 
   if (need_symbolize) {
-    this->_symbolizing_method = true;
+    this->set_symbolizing_method(true);
   } else {
     _handle.reset();
   }
@@ -170,7 +173,7 @@ void __attribute__((optimize("O0"))) MethodSymbolizer::finish_method(ZeroFrame *
     ConcolicMngr::ctx->set_stack_slot_if_possible(
         _handle.get_caller_stack_begin_offset() + delta, exp);
     this->_handle.reset();
-    this->_symbolizing_method = false;
+    this->set_symbolizing_method(false);
   }
 }
 

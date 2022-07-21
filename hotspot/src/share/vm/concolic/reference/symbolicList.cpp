@@ -38,7 +38,7 @@ std::map<std::string, bool> SymList::skip_method_names = init_skip_method_names(
 
 std::map<std::string, bool> SymList::init_skip_method_names() {
   std::map<std::string, bool> map;
-  map["<init>"] = true;// really?
+  map["<init>"] = false;// really? TODO: check whether this is needed
   map["sort"] = true;
   map["iterator"] = true;
   map["listIterator"] = true; // really???
