@@ -10,6 +10,7 @@
 #include "concolic/concolicMngr.hpp"
 
 class_method_map_t PathConditionPruner::_classes_method_to_skip = init_skip_method_names();
+std::set<std::string> PathConditionPruner::_classes_to_skip_name_prefix = init_classes_to_skip_name_prefix();
 volatile int PathConditionPruner::_depth = 0;
 
 void PathConditionPruner::method_enter(ZeroFrame *callee_frame) {
@@ -56,6 +57,9 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["com/fasterxml/jackson/databind/ObjectWriter"] = std::set<std::string>();
   classes["java/text/SimpleDateFormat"] = std::set<std::string>();
   classes["ch/qos/logback/classic/Logger"] = std::set<std::string>();
+  classes["org/springframework/security/web/firewall/StrictHttpFirewall"] = std::set<std::string>();
+  classes["org/apache/catalina/connector/Request"] = std::set<std::string>();
+  classes["com/salesmanager/shop/store/security/JWTTokenUtil"] = std::set<std::string>();
   return classes;
 }
 
@@ -95,7 +99,23 @@ bool PathConditionPruner::should_prune(ZeroFrame *callee_frame) {
     }
   }
 
+  std::set<std::string>::iterator _iter = _classes_to_skip_name_prefix.begin();
+  for (; _iter != _classes_to_skip_name_prefix.end(); _iter++) {
+    if (mth_holder_name.find(*_iter) != std::string::npos) return true;
+  }
+
   return false;
+}
+
+std::set<std::string> PathConditionPruner::init_classes_to_skip_name_prefix() {
+  std::set<std::string> s;
+  s.insert("io/jsonwebtoken");
+  s.insert("com/fasterxml");
+  s.insert("edu/sjtu/ipads/wbridge/storedprocedure/invocation/SPInvokeManager");
+  s.insert("java/io");
+  s.insert("java/util/Calendar");
+  s.insert("java/util/regex");
+  return s;
 }
 
 #endif

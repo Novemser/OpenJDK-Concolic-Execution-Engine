@@ -25,7 +25,18 @@ public class BinaryCmpTest {
 
         }
         String pc = System.getPathCondition();
-        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"equals\",\"_param_list\":[{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_AllTooWell\"}]}]", pc);
+        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"equals\",\"_is_not\":false,\"_param_list\":[{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_AllTooWell\"}]}]", pc);
+    }
+
+    @Test
+    public void testNotEquals() {
+        String val = new String("AllTooWell");
+        System.symbolize(val);
+        if (!val.equals("AllTooWells")) {
+
+        }
+        String pc = System.getPathCondition();
+        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"equals\",\"_is_not\":true,\"_param_list\":[{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_AllTooWells\"}]}]", pc);
     }
 
     @Test
@@ -36,6 +47,6 @@ public class BinaryCmpTest {
 
         }
         String pc = System.getPathCondition();
-        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"contains\",\"_param_list\":[{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_AllTooWell\"}]}]", pc);
+        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"contains\",\"_is_not\":false,\"_param_list\":[{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_AllTooWell\"}]}]", pc);
     }
 }

@@ -6,7 +6,22 @@
 
 OpStrExpression::OpStrExpression(const std::string &method,
                                  exp_list_t &param_list)
-    : _name(method), _param_cache(NULL) {
+    : _name(method), _param_cache(NULL), _is_not(false) {
+  // all exp must be not null
+
+  _param_list.swap(param_list);
+  int size = _param_list.size();
+  for (int i = 0; i < size; ++i) {
+    Expression *exp = _param_list[i];
+    if (exp) {
+      exp->inc_ref();
+    }
+  }
+}
+
+OpStrExpression::OpStrExpression(const std::string &method,
+                                 exp_list_t &param_list, bool is_not)
+    : _name(method), _param_cache(NULL), _is_not(is_not) {
   // all exp must be not null
 
   _param_list.swap(param_list);
@@ -20,7 +35,7 @@ OpStrExpression::OpStrExpression(const std::string &method,
 }
 
 OpStrExpression::OpStrExpression(const std::string &method, Expression *exp)
-    : _name(method), _param_cache(NULL) {
+    : _name(method), _param_cache(NULL), _is_not(false) {
   if (exp) {
     exp->inc_ref();
   }
@@ -54,6 +69,9 @@ void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
   writer.String("OpStrExpression");
   writer.Key("_name");
   writer.String(_name.c_str());
+  writer.Key("_is_not");
+  writer.Bool(_is_not);
+
   writer.Key("_param_list");
   if (_param_cache == NULL) {
     using namespace rapidjson;
@@ -79,6 +97,25 @@ void OpStrExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuff
 
 const exp_list_t &OpStrExpression::get_param_list() const {
   return _param_list;
+}
+
+std::string OpStrExpression::get_name() {
+  std::string name;
+  name += _name;
+  name += "(";
+  for (size_t index = 0; index < _param_list.size(); ++index) {
+    Expression *expr = _param_list[index];
+    if (expr) {
+      name += expr->get_name();
+    } else {
+      name += "null";
+    }
+    if (index != _param_list.size() - 1) {
+      name += ",";
+    }
+  }
+  name += ")";
+  return name;
 }
 
 StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {

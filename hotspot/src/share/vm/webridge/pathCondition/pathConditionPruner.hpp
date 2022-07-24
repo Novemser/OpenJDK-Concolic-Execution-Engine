@@ -19,6 +19,8 @@ public:
 private:
   static class_method_map_t init_skip_method_names();
   static class_method_map_t _classes_method_to_skip;
+  static std::set<std::string> _classes_to_skip_name_prefix;
+  static std::set<std::string> init_classes_to_skip_name_prefix();
 
   static bool should_prune(ZeroFrame* callee_frame);
 

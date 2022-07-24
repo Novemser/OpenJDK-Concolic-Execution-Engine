@@ -161,7 +161,7 @@ void __attribute__((optimize("O0"))) SymStrBuilder::add_to_string_for_param_list
     } else if (type == T_OBJECT && obj->is_instance() &&
         (obj->klass()->name()->equals(SymString::TYPE_NAME) || obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME))
         || (param_list[i]->is_op_str_expression() &&
-            strncmp("toString", ((OpStrExpression *) param_list[i])->get_name().c_str(), 8) == 0)) {
+            strncmp("toString", ((OpStrExpression *) param_list[i])->get_op_name().c_str(), 8) == 0)) {
       ret.push_back(param_list[i]);
     } else {
       ret.push_back(new OpStrExpression("toString", param_list[i]));

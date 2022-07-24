@@ -19,10 +19,12 @@ class OpStrExpression : public Expression {
     std::string _name;
     exp_list_t _param_list;
     char *_param_cache;
+    bool _is_not;
 
 public:
 
     OpStrExpression(const std::string &method, exp_list_t &param_list);
+    OpStrExpression(const std::string &method, exp_list_t &param_list, bool is_not);
     OpStrExpression(const std::string &method, Expression* exp);
     ~OpStrExpression();
 
@@ -31,7 +33,8 @@ public:
 
     static OpStrExpression* to_string(Expression* exp);
     bool is_op_str_expression() { return true; }
-    std::string get_name() { return _name; }
+    std::string get_name();
+    std::string get_op_name() { return _name; }
 
   const exp_list_t &get_param_list() const;
 

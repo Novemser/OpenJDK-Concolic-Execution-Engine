@@ -155,7 +155,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     guarantee(refExp != NULL, "Should not be null");
     if (refExp->is_op_str_expression()) {
       OpStrExpression *opExp = reinterpret_cast<OpStrExpression *>(refExp);
-      if (opExp->get_name() == "valueOf") {
+      if (opExp->get_op_name() == "valueOf") {
         guarantee(opExp->get_param_list().size() == 1, "Should contain only 1 parameter");
         // inner expression
         refExp = opExp->get_param_list()[0];

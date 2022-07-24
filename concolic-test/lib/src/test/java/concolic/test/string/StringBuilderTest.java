@@ -30,6 +30,6 @@ public class StringBuilderTest {
         System.symbolize(val);
         String res = stringBuilder.append(val).append(getNull()).toString();
         if (res.contains("UTJS")) {}
-        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"contains\",\"_param_list\":[{\"_type\":\"OpStrExpression\",\"_name\":\"concat\",\"_param_list\":[{\"_type\":\"OpStrExpression\",\"_name\":\"concat\",\"_param_list\":[{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_\"},{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"}]},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_null\"}]},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_UTJS\"}]}]", System.getPathCondition());
+        assertEquals("[{\"_type\":\"OpStrExpression\",\"_name\":\"contains\",\"_is_not\":true,\"_param_list\":[{\"_type\":\"OpStrExpression\",\"_name\":\"concat\",\"_is_not\":false,\"_param_list\":[{\"_type\":\"OpStrExpression\",\"_name\":\"concat\",\"_is_not\":false,\"_param_list\":[{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_\"},{\"_type\":\"SymbolExpression\",\"_java_type\":\"java/lang/String\",\"_exp\":\"M_L'String'_1\"}]},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_null\"}]},{\"_type\":\"ConStringSymbolExp\",\"_java_type\":\"java/lang/String\",\"_exp\":\"Y_L'String'_UTJS\"}]}]", System.getPathCondition());
     }
 }
