@@ -115,6 +115,7 @@ std::set<std::string> PathConditionPruner::init_classes_to_skip_name_prefix() {
   s.insert("java/io");
   s.insert("java/util/Calendar");
   s.insert("java/util/regex");
+  s.insert("org/apache/commons");
   return s;
 }
 
