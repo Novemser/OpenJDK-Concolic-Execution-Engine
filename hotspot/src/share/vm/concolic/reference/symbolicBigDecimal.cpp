@@ -435,14 +435,16 @@ void BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::Strin
   if (_scale != NULL) {
     _scale->serialize(writer);
   } else {
-    writer.Null();
+    Expression* e = new ConExpression(0);
+    e->serialize(writer); // TODO: check when this field could be 0
   }
 
   writer.Key("_intCompact");
   if (_intCompact != NULL) {
     _intCompact->serialize(writer);
   } else {
-    writer.Null();
+    Expression* e = new ConExpression(0);
+    e->serialize(writer); // TODO: check when this field could be 0
   }
 }
 
