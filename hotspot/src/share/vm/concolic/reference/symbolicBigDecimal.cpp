@@ -251,7 +251,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
       long num = std::pow(10, curScale - newScale);
       symResDecimal->set_sym_exp(
           intCmpFldOffset,
-          new OpSymExpression(intCmpExp, new ConExpression(num), op_mul)
+          new OpSymExpression(intCmpExp, new ConExpression(num), op_div)
       );
     }
   }
