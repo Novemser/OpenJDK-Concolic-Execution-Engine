@@ -240,15 +240,15 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
       ShouldNotCallThis();
     }
 
-    int curScale = thisDecimal->int_field(intCmpFldOffset);
+    int curScale = thisDecimal->int_field(scaleFldOffset);
     if (newScale > curScale) {
-      int num = (int) std::pow(10, newScale - curScale);
+      long num = std::pow(10, newScale - curScale);
       symResDecimal->set_sym_exp(
           intCmpFldOffset,
           new OpSymExpression(intCmpExp, new ConExpression(num), op_mul)
       );
     } else if (newScale < curScale) {
-      int num = (int) std::pow(10, curScale - newScale);
+      long num = std::pow(10, curScale - newScale);
       symResDecimal->set_sym_exp(
           intCmpFldOffset,
           new OpSymExpression(intCmpExp, new ConExpression(num), op_mul)
@@ -332,6 +332,11 @@ void SymBigDecimal::print() {
 void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
   if (exp) {
     exp->inc_ref();
+    if (field_offset == _int_compact_offset && exp->get_name().find("-2147") != std::string::npos) {
+      std::string pos = ConcolicMngr::ctx->get_current_code_pos();
+      tty->print_cr("|||||%s, at %s", exp->get_name().c_str(), pos.c_str());
+      ConcolicMngr::ctx->print_stack_trace();
+    }
   }
 
   if (_internal_fields.find(field_offset) != _internal_fields.end()) {
@@ -364,6 +369,11 @@ void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
 void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
   guarantee(exp != NULL, "should not be null");
   exp->inc_ref();
+  if (field_offset == _int_compact_offset && exp->get_name().find("-2147") != std::string::npos) {
+    std::string pos = ConcolicMngr::ctx->get_current_code_pos();
+    tty->print_cr("|||||%s, at %s", exp->get_name().c_str(), pos.c_str());
+    ConcolicMngr::ctx->print_stack_trace();
+  }
 
   if (_internal_fields.find(field_offset) != _internal_fields.end()) {
     Expression::gc(_internal_fields[field_offset]);
