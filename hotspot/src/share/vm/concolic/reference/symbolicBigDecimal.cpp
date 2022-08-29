@@ -29,6 +29,7 @@ std::set<std::string> SymBigDecimal::init_handle_method_names() {
   set.insert("java.math.BigDecimal.<init>(I)V");
   set.insert("java.math.BigDecimal.<init>(J)V");
   set.insert("java.math.BigDecimal.<init>(Ljava/lang/String;)V");
+  set.insert("java.math.BigDecimal.<init>(Ljava/math/BigInteger;JII)V");
   set.insert("java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(J)Ljava/math/BigDecimal;");
   set.insert("java.math.BigDecimal.valueOf(JII)Ljava/math/BigDecimal;");
@@ -177,6 +178,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
         ConcolicMngr::ctx->get_or_alloc_sym_inst(resultDecimal)
     );
     exp_list_t pam_lst = handle.get_param_list();
+    guarantee(pam_lst[0] != NULL, "value symbol should not be null");
     symObj->set_sym_exp(
         symObj->int_compact_offset(resultDecimal), pam_lst[0]
     );
@@ -186,15 +188,17 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
       symObj->set_sym_exp(
           symObj->scale_offset(resultDecimal), pam_lst[1]
       );
+    } else {
+      symObj->set_sym_exp(
+          symObj->scale_offset(resultDecimal), new ConExpression(0)
+      );
     }
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
   } else if (signature == "java.math.BigDecimal.add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;") {
     Expression *param1 = handle.get_param_list()[0];
-    tty->print_cr("pp1");
   } else if (signature == "java.math.BigDecimal.add(JIJI)Ljava/math/BigDecimal;") {
     Expression *param1 = handle.get_param_list()[0];
-    tty->print_cr("pp2");
   } else if (signature == "java.math.BigDecimal.<init>(I)V" ||
              signature == "java.math.BigDecimal.<init>(J)V") {
     Expression *param = handle.get_param_list()[1];
@@ -206,6 +210,7 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     );
     // directly set int-compact to param expression
     symObj->set_sym_exp(symObj->_int_compact_offset, param);
+    symObj->set_sym_exp(symObj->_scale_offset, new ConExpression(0));
   } else if (signature == "java.math.BigDecimal.<init>(D)V") {
     Expression *param = handle.get_param_list()[1];
     guarantee(param != NULL, "Should not be null");
@@ -216,6 +221,19 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     );
     // TODO: seems there's symbolic lose in this way: param is not correctly related with symBigdecimal
     symObj->symbolize_bigDecimal(thisDecimal, param);
+  } else if (signature == "java.math.BigDecimal.<init>(Ljava/math/BigInteger;JII)V") {
+    Expression *intValExp = handle.get_param_list()[2];
+    Expression *scaleExp = handle.get_param_list()[3];
+    guarantee(intValExp != NULL, "Should not be null");
+    guarantee(scaleExp != NULL, "Should not be null");
+    oop thisDecimal = handle.get_param<oop>(0);
+    assert(thisDecimal != NULL, "should not be null");
+    SymBigDecimal *symObj = reinterpret_cast<SymBigDecimal *>(
+        ConcolicMngr::ctx->get_or_alloc_sym_inst(thisDecimal)
+    );
+    // directly set int-compact to param expression
+    symObj->set_sym_exp(symObj->_int_compact_offset, intValExp);
+    symObj->set_sym_exp(symObj->_scale_offset, scaleExp);
   } else if (signature == "java.math.BigDecimal.setScale(II)Ljava/math/BigDecimal;") {
     jint newScale = handle.get_param<jint>(1);
     assert(newScale >= 0, "Scale should >= 0");
@@ -241,6 +259,12 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     }
 
     int curScale = thisDecimal->int_field(scaleFldOffset);
+    guarantee(newScale == resultDecimal->int_field(scaleFldOffset), "newScale in parameter should equals to result decimal's scale");
+    symResDecimal->set_sym_exp(
+        scaleFldOffset,
+        new ConExpression(newScale)
+    );
+    tty->print_cr("newScale:%d, curScale:%d", newScale, curScale);
     if (newScale > curScale) {
       long num = std::pow(10, newScale - curScale);
       symResDecimal->set_sym_exp(
@@ -332,11 +356,6 @@ void SymBigDecimal::print() {
 void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
   if (exp) {
     exp->inc_ref();
-    if (field_offset == _int_compact_offset && exp->get_name().find("-2147") != std::string::npos) {
-      std::string pos = ConcolicMngr::ctx->get_current_code_pos();
-      tty->print_cr("|||||%s, at %s", exp->get_name().c_str(), pos.c_str());
-      ConcolicMngr::ctx->print_stack_trace();
-    }
   }
 
   if (_internal_fields.find(field_offset) != _internal_fields.end()) {
@@ -369,11 +388,6 @@ void SymBigDecimal::set_bigDecimal_symbolic(oop decimalOOp, std::string name) {
 void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
   guarantee(exp != NULL, "should not be null");
   exp->inc_ref();
-  if (field_offset == _int_compact_offset && exp->get_name().find("-2147") != std::string::npos) {
-    std::string pos = ConcolicMngr::ctx->get_current_code_pos();
-    tty->print_cr("|||||%s, at %s", exp->get_name().c_str(), pos.c_str());
-    ConcolicMngr::ctx->print_stack_trace();
-  }
 
   if (_internal_fields.find(field_offset) != _internal_fields.end()) {
     Expression::gc(_internal_fields[field_offset]);
@@ -430,6 +444,12 @@ Expression *SymBigDecimal::get_ref_exp() {
 
 BigDecimalExpression::BigDecimalExpression(Expression *scale, Expression *intCompact) : _scale(scale),
                                                                                         _intCompact(intCompact) {
+  if (_scale == NULL) {
+    _scale = new ConExpression(0);
+  }
+  if (_intCompact == NULL) {
+    _intCompact = new ConExpression(0);
+  }
 }
 
 BigDecimalExpression::~BigDecimalExpression() {
