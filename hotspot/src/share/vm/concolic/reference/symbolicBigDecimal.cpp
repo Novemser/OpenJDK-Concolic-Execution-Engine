@@ -195,10 +195,6 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
     }
   } else if (signature == "java.math.BigDecimal.valueOf(Ljava/math/BigInteger;II)Ljava/math/BigDecimal;") {
     ShouldNotCallThis();
-  } else if (signature == "java.math.BigDecimal.add(Ljava/math/BigDecimal;)Ljava/math/BigDecimal;") {
-    Expression *param1 = handle.get_param_list()[0];
-  } else if (signature == "java.math.BigDecimal.add(JIJI)Ljava/math/BigDecimal;") {
-    Expression *param1 = handle.get_param_list()[0];
   } else if (signature == "java.math.BigDecimal.<init>(I)V" ||
              signature == "java.math.BigDecimal.<init>(J)V") {
     Expression *param = handle.get_param_list()[1];
@@ -260,9 +256,11 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
 
     int curScale = thisDecimal->int_field(scaleFldOffset);
     guarantee(newScale == resultDecimal->int_field(scaleFldOffset), "newScale in parameter should equals to result decimal's scale");
+    Expression* newScaleExp = new ConExpression(newScale);
+    newScaleExp->inc_ref();
     symResDecimal->set_sym_exp(
         scaleFldOffset,
-        new ConExpression(newScale)
+        newScaleExp
     );
     tty->print_cr("newScale:%d, curScale:%d", newScale, curScale);
     if (newScale > curScale) {
@@ -276,6 +274,12 @@ Expression *SymBigDecimal::finish_method_helper(MethodSymbolizerHandle &handle) 
       symResDecimal->set_sym_exp(
           intCmpFldOffset,
           new OpSymExpression(intCmpExp, new ConExpression(num), op_div)
+      );
+    } else {
+      // scale not changed
+      symResDecimal->set_sym_exp(
+          intCmpFldOffset,
+          intCmpExp
       );
     }
   }
@@ -363,6 +367,7 @@ void SymBigDecimal::set_sym_exp(int field_offset, Expression *exp) {
   }
 
   _internal_fields[field_offset] = exp;
+  _exp = NULL;
 }
 
 #ifdef ENABLE_WEBRIDGE
@@ -393,6 +398,7 @@ void SymBigDecimal::init_sym_exp(int field_offset, Expression *exp) {
     Expression::gc(_internal_fields[field_offset]);
   }
   _internal_fields[field_offset] = exp;
+  _exp = NULL;
 }
 
 Expression *SymBigDecimal::get(int field_offset) {
@@ -446,9 +452,11 @@ BigDecimalExpression::BigDecimalExpression(Expression *scale, Expression *intCom
                                                                                         _intCompact(intCompact) {
   if (_scale == NULL) {
     _scale = new ConExpression(0);
+    _scale->inc_ref();
   }
   if (_intCompact == NULL) {
     _intCompact = new ConExpression(0);
+    _intCompact->inc_ref();
   }
 }
 
@@ -457,7 +465,7 @@ BigDecimalExpression::~BigDecimalExpression() {
   Expression::gc(_intCompact);
 }
 
-void BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
+void __attribute__((optimize("O0"))) BigDecimalExpression::serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
   writer.Key("_type");
   writer.String("BigDecimalExpression");
 

@@ -112,6 +112,18 @@ public class BigDecimalTest {
     }
 
     @Test
+    public void testSetScaleEq() {
+        System.startConcolic();
+        Integer val = new Integer(10);
+        System.symbolize(val);
+        BigDecimal bd = BigDecimal.valueOf(val);
+        BigDecimal newBd = bd.setScale(0);
+        if (newBd.intValue() == 10) {
+        }
+        assertEquals("[{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"I\",\"_exp\":\"M_I_field_java_lang_Integer_value\"},\"_op\":\">\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"J\",\"_exp\":\"Y_J_-9223372036854775808\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"},\"_op\":\"==\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_0\"}},{\"_type\":\"BinaryExpression\",\"_left\":{\"_type\":\"SymbolExpression\",\"_java_type\":\"I\",\"_exp\":\"M_I_field_java_lang_Integer_value\"},\"_op\":\"==\",\"_right\":{\"_type\":\"ConstExpr\",\"_java_type\":\"I\",\"_exp\":\"Y_I_10\"}}]", System.getPathCondition());
+    }
+
+    @Test
     public void testConcreteShouldWork() {
         System.startConcolic();
         Integer val = new Integer(10);
