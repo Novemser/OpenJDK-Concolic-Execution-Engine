@@ -147,7 +147,12 @@ int SymString::prepare_param_helper(MethodSymbolizerHandle &handle,
     if (obj == NULL) {
       exp = SymbolExpression::get(Sym_NULL);
     } else {
-      exp = SymString::get_exp_of(obj);
+      if (obj->klass()->name()->equals("sun/nio/cs/UTF_8")) {
+        // no need to symbolize parameter of {public byte[] getBytes(Charset charset)}
+        exp = NULL;
+      } else {
+        exp = SymString::get_exp_of(obj);
+      }
     }
   } else if (type == T_ARRAY) {
     tty->print_cr("record string method having a array param: ");
