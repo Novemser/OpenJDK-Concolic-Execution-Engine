@@ -60,6 +60,7 @@ class_method_map_t PathConditionPruner::init_skip_method_names() {
   classes["org/springframework/security/web/firewall/StrictHttpFirewall"] = std::set<std::string>();
   classes["org/apache/catalina/connector/Request"] = std::set<std::string>();
   classes["com/salesmanager/shop/store/security/JWTTokenUtil"] = std::set<std::string>();
+  classes["org/springframework/web/util/UrlPathHelper"] = std::set<std::string>();
   return classes;
 }
 
@@ -116,6 +117,9 @@ std::set<std::string> PathConditionPruner::init_classes_to_skip_name_prefix() {
   s.insert("java/util/Calendar");
   s.insert("java/util/regex");
   s.insert("org/apache/commons");
+  s.insert("org/springframework/web/servlet/mvc/method/annotation/AbstractMessageConverterMethodProcessor");
+  s.insert("org/springframework/util/AntPathMatcher");
+  s.insert("org/springframework/web/servlet/mvc/condition/PatternsRequestCondition");
   return s;
 }
 
