@@ -52,6 +52,7 @@ std::string webridgeMngr::analyse(ThreadContext *ctx, Klass *weBridgeSPEntryKlas
 static std::string tmp_file_location = "/tmp/webridgeMngr.tmp.sp.string";
 
 void webridgeMngr::saveTemp(const std::string &str) {
+  tty->print_cr("[WeBridge] Saving result to tmp location:%s", tmp_file_location.c_str());
   std::fstream out_file;
   out_file.open(tmp_file_location.c_str(), std::ios::out);
   if (!out_file) {
@@ -60,6 +61,7 @@ void webridgeMngr::saveTemp(const std::string &str) {
   }
   out_file << str;
   out_file.close();
+  tty->print_cr("[WeBridge] Successfully Saved result to tmp location:%s", tmp_file_location.c_str());
 }
 
 #endif

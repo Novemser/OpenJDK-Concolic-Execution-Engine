@@ -16,6 +16,7 @@ std::set<std::string> SymMap::init_target_class_names() {
   set.insert("java/util/LinkedHashMap");
   set.insert("org/hibernate/internal/util/collections/ConcurrentReferenceHashMap");
   set.insert("java/util/Hashtable");
+  set.insert("java/util/concurrent/ConcurrentHashMap");
   return set;
 }
 

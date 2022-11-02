@@ -2,6 +2,7 @@
 
 #include "concolic/shadow/shadowTable.hpp"
 #include "utilities/ostream.hpp"
+#include "concolic/concolicMngr.hpp"
 
 ShadowTable::ShadowTable() {}
 
@@ -29,4 +30,29 @@ void ShadowTable::print() {
   }
 }
 
+void ShadowTable::set_slot(int offset, Expression *exp, sym_rid_t sym_rid, int index) {
+  Entry &entry = _tbl[offset];
+  entry.exp = exp;
+  entry.sym_rid = sym_rid;
+  entry.index = index;
+}
+
+Expression *ShadowTable::get_slot(int offset) {
+  Expression *ret = _tbl[offset].exp;
+  // assert(ret, "not null");
+  return ret;
+}
+
+void ShadowTable::set_slot(int offset, Expression *exp) {
+  Entry &entry = _tbl[offset];
+  entry.exp = exp;
+}
+
 #endif
+
+ShadowTable::Entry &ShadowTable::Entry::operator=(const ShadowTable::Entry &other) {
+  this->sym_rid = other.sym_rid;
+  this->index = other.index;
+  this->exp = other.exp;
+  return *this;
+}

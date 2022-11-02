@@ -28,12 +28,7 @@ public:
       exp = NULL;
     }
 
-    Entry &operator=(const Entry &other) {
-      this->sym_rid = other.sym_rid;
-      this->index = other.index;
-      this->exp = other.exp;
-      return *this;
-    }
+    Entry &operator=(const Entry &other);
   };
 
 private:
@@ -47,25 +42,13 @@ public:
 
   void set_slot(int offset, const Entry &other) { _tbl[offset] = other; }
 
-  void set_slot(int offset, Expression *exp, sym_rid_t sym_rid, int index) {
-    Entry &entry = _tbl[offset];
-    entry.exp = exp;
-    entry.sym_rid = sym_rid;
-    entry.index = index;
-  }
+  void set_slot(int offset, Expression *exp, sym_rid_t sym_rid, int index);
 
-  void set_slot(int offset, Expression *exp) {
-    Entry &entry = _tbl[offset];
-    entry.exp = exp;
-  }
+  void set_slot(int offset, Expression *exp);
 
   void clear_slot(int offset) { _tbl[offset].reset(); }
 
-  Expression *get_slot(int offset) {
-    Expression *ret = _tbl[offset].exp;
-    // assert(ret, "not null");
-    return ret;
-  }
+  Expression *get_slot(int offset);
 
   inline Entry &get_entry(int offset) { return _tbl[offset]; }
 

@@ -58,7 +58,7 @@ protected:
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer) = 0;
 
 public:
-  void serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
+  void __attribute__((optimize("O0"))) serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {
     writer.StartObject();
     if (!_java_code_position.empty()) {
       writer.Key("_code_position");

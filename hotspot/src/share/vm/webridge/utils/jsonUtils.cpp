@@ -101,6 +101,7 @@ std::string jsonUtils::statementsToJsonString(const std::vector<std::pair<SymStm
   }
   writer.EndArray();
 
+  tty->print_cr("[WeBridge] Finished serialization");
 //  for (size_t index = 0; index < elp.size(); ++index) {
 //    tty->print_cr("EPTIME: %lu %f", index, elp[index]);
 //  }

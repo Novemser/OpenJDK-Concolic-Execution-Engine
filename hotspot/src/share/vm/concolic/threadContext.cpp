@@ -81,6 +81,14 @@ SymInstance *ThreadContext::alloc_sym_inst(oop obj) {
   ResourceMark rm;
 
   Symbol *klass_symbol = obj->klass()->name();
+  if (klass_symbol == NULL) {
+    guarantee(false, "unexpected null class");
+    sym_inst = new SymResSet(sym_rid);
+    obj->set_sym_rid(sym_rid);
+    this->set_sym_ref(sym_rid, sym_inst);
+//  _allocated_objs.insert(obj);
+    return sym_inst;
+  }
   std::string class_name(klass_symbol->as_C_string());
 //  tty->print_cr("alloc_sym_inst for %s", klass_symbol->as_C_string());
 

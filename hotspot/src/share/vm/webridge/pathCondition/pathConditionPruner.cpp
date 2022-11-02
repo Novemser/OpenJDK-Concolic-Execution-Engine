@@ -120,6 +120,8 @@ std::set<std::string> PathConditionPruner::init_classes_to_skip_name_prefix() {
   s.insert("org/springframework/web/servlet/mvc/method/annotation/AbstractMessageConverterMethodProcessor");
   s.insert("org/springframework/util/AntPathMatcher");
   s.insert("org/springframework/web/servlet/mvc/condition/PatternsRequestCondition");
+  s.insert("org/springframework/context/support/ReloadableResourceBundleMessageSource");
+  s.insert("org/broadleafcommerce/common/time/SystemTime");
   return s;
 }
 

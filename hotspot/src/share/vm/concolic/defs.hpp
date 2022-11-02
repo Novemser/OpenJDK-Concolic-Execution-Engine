@@ -11,10 +11,10 @@
 
 // Symbolioc Reference ID related
 #define NULL_SYM_RID 0
-#define MAX_SYM_RID 10000
+#define MAX_SYM_RID 100000
 typedef ulong sym_rid_t;
 
-#define MAX_SYM_TMP_ID 10000
+#define MAX_SYM_TMP_ID 100000
 typedef int sym_tmp_id_t;
 
 typedef ulong tx_id_t;
