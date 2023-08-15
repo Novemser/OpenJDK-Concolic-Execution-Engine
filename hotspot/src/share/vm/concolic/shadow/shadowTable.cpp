@@ -48,7 +48,6 @@ void ShadowTable::set_slot(int offset, Expression *exp) {
   entry.exp = exp;
 }
 
-#endif
 
 ShadowTable::Entry &ShadowTable::Entry::operator=(const ShadowTable::Entry &other) {
   this->sym_rid = other.sym_rid;
@@ -56,3 +55,4 @@ ShadowTable::Entry &ShadowTable::Entry::operator=(const ShadowTable::Entry &othe
   this->exp = other.exp;
   return *this;
 }
+#endif
