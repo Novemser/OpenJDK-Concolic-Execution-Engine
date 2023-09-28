@@ -3,6 +3,7 @@
     <method v="2">
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="Compile java" run_configuration_type="ShConfigurationType" />
       <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Unzip Debug Info" run_configuration_type="ShConfigurationType" />
     </method>
   </configuration>
 </component>
