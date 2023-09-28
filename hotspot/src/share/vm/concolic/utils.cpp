@@ -243,7 +243,7 @@ oop OopUtils::bigd_to_java_string(oop bigd) {
                           &java_args, thread);
   thread->set_thread_state(lastState);
   ConcolicMngr::ctx->get_method_symbolizer().set_symbolizing_method(false);
-  oop res = reinterpret_cast<oop>(result.get_jobject());
+  oop res = (oop)result.get_jobject();
   guarantee(res->klass()->name() == vmSymbols::java_lang_String(), "should be string");
   return res;
 }

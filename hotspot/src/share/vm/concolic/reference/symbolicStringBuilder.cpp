@@ -107,7 +107,7 @@ int SymStrBuilder::prepare_param_helper(MethodSymbolizerHandle &handle,
     oop obj = handle.get_param<oop>(locals_offset);
     if (obj == NULL) {
       if (handle.get_callee_name() == "append") {
-        exp = new ConStringSymbolExp("null");
+        exp = new ConStringSymbolExp(std::string("null"));
       } else {
         ShouldNotCallThis();
       }
