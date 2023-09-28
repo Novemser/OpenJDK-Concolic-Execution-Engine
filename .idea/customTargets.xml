@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="37539e70-2375-464a-b768-8c4f4955c243" name="slow debug" defaultType="TOOL">
+      <configuration id="dd05cb4d-9579-426e-95b7-e16f48aaf835" name="slow debug">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_make slow debug" />
+        </build>
+        <clean type="TOOL">
+          <tool actionId="Tool_External Tools_make slow debug clean" />
+        </clean>
+      </configuration>
+    </target>
+  </component>
+</project>
