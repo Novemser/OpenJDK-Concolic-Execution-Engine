@@ -5,7 +5,6 @@ builds/
 .hg/
 */.hg/
 .vscode/
-.idea/
 *.iml
 *.log
 cmake-build-debug/
