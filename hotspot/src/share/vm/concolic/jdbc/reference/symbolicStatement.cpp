@@ -193,7 +193,10 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 #else
     guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
 #endif
-  } else if (callee_name == "setObject") {
+  } else if (callee_name == "setObject" ||
+              callee_name == "setNumericObject" ||
+              callee_name == "setBytes" ||
+              callee_name == "setNString") {
     // inside set object, jdbc invokes setXXX
     need_symbolize = false;
   } else if (SymStmt::support_set_methods.find(callee_name) != SymStmt::support_set_methods.end()) {
