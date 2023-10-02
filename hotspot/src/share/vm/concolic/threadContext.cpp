@@ -150,7 +150,7 @@ SymInstance *ThreadContext::get_sym_inst(sym_rid_t sym_rid) {
    * When this assertion is broken,
    * it means that the target object is not initialized with NULL_SYM_RID
    */
-  assert(ret != NULL, "null sym obj?");
+  guarantee(ret != NULL, "Unexpected null symbolic object. The object might not properly symbolized.");
   return ret;
 }
 

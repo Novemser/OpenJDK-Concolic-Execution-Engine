@@ -36,7 +36,7 @@ void ShadowFrame::copy() {
 }
 
 void ShadowFrame::check(ZeroFrame *zero_frame) {
-  assert(zero_frame == this->_zero_frame, "frame should be the same");
+  guarantee(zero_frame == this->_zero_frame, "frame should be the same");
 }
 
 void ShadowFrame::print_origin() {

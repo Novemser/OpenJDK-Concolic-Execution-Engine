@@ -124,25 +124,37 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
 
   if (callee_name == "execute") {
-    int param_size = handle.get_callee_method()->size_of_parameters();
-    guarantee(param_size == 2, "currently, we only support stmt.execute(String)");
-
-    oop stmt_obj = handle.get_param<oop>(0);
-    oop str_obj = handle.get_param<oop>(1);
-
-    ResourceMark rm;
-    const char *c_sql_template = OopUtils::java_string_to_c(str_obj);
-
-    SymStmt *sym_stmt;
-    if (stmt_obj->is_symbolic()) {
-      tty->print_cr("Statement(execute) with %lu", stmt_obj->get_sym_rid());
-      sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+    const int param_size = handle.get_callee_method()->size_of_parameters();
+    const std::string holder_name = handle.get_callee_holder_name();
+    if (holder_name.find("Prepared") != std::string::npos) {
+        if (param_size != 1) {
+            guarantee(false, "currently, we only support preparedStatement.execute() with 0 parameter");
+        }
+        execute_counter++;
     } else {
-      tty->print_cr("Statement(execute) with new statement");
-      sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(stmt_obj);
-    }
-    sym_stmt->set_sql_template(c_sql_template);
+        if (param_size != 2) {
+            tty->print_cr("=============================");
+            tty->print_cr("param_size is: %d", param_size);
+            tty->print_cr("name_and_sig is: %s", handle.get_callee_method()->name_and_sig_as_C_string());
+            guarantee(param_size == 2, "currently, we only support stmt.execute(String)");
+        }
 
+        oop stmt_obj = handle.get_param<oop>(0);
+        oop str_obj = handle.get_param<oop>(1);
+
+        ResourceMark rm;
+        const char *c_sql_template = OopUtils::java_string_to_c(str_obj);
+
+        SymStmt *sym_stmt;
+        if (stmt_obj->is_symbolic()) {
+            tty->print_cr("Statement(execute) with %lu", stmt_obj->get_sym_rid());
+            sym_stmt = (SymStmt *) ConcolicMngr::ctx->get_sym_inst(stmt_obj);
+        } else {
+            tty->print_cr("Statement(execute) with new statement");
+            sym_stmt = (SymStmt *) ConcolicMngr::ctx->alloc_sym_inst(stmt_obj);
+        }
+        sym_stmt->set_sql_template(c_sql_template);
+    }
   } else if (callee_name == "executeQuery" || callee_name == "executeUpdate") {
     int param_size = handle.get_callee_method()->size_of_parameters();
     execute_counter++;
@@ -257,8 +269,27 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
       jint row_count = handle.get_result<jint>(T_INT);
       exp = new ResultSetSymbolExp(sym_stmt);
       sym_stmt->set_row_count_exp(exp, row_count);
+    } else if (callee_name == "execute") {
+      jboolean exe_res = handle.get_result<jboolean>(T_BOOLEAN);
+      tty->print_cr("execute()_res:%d", exe_res);
     }
-
+  } else if (callee_name == "getResultSet") {
+    oop this_obj = handle.get_param<oop>(0);
+    SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj));
+    oop res_obj = handle.get_result<oop>(T_OBJECT);
+    SymResSet *sym_res_set =
+          (SymResSet *) ConcolicMngr::ctx->alloc_sym_inst(res_obj);
+    sym_res_set->set_sym_stmt(sym_stmt);
+    if (sym_stmt->get_result_set() != NULL) {
+        guarantee(false, "currently, we did not handle getResultSet() returning multiple result sets");
+    }
+    sym_stmt->set_result_set(sym_res_set);
+  } else if (callee_name == "getUpdateCount") {
+    oop this_obj = handle.get_param<oop>(0);
+    SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj));
+    jint row_count = handle.get_result<jint>(T_INT);
+    exp = new ResultSetSymbolExp(sym_stmt);
+    sym_stmt->set_row_count_exp(exp, row_count);
   }
   return exp;
 }
