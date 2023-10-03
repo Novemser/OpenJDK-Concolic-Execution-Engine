@@ -11,10 +11,8 @@
 
 class SymbolicMiscObjects: public SymInstance {
 public:
-    static const char *TYPE_NAME;
     static method_set_t handle_method_names;
     static std::map<std::string, bool> skip_method_names;
-
 
 public:
     static bool invoke_method_helper(MethodSymbolizerHandle &handle);

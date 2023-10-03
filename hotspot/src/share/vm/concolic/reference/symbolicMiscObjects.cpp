@@ -7,11 +7,18 @@
 
 #include "symbolicMiscObjects.h"
 
-const char *SymbolicMiscObjects::TYPE_NAME = "net/sf/jsqlparser/parser/CCJSqlParser";
-
 void SymbolicMiscObjects::init_register_class(MethodSymbolizer *m_symbolizer) {
-  m_symbolizer->add_invoke_helper_methods(SymbolicMiscObjects::TYPE_NAME, invoke_method_helper);
-  m_symbolizer->add_finish_helper_methods(SymbolicMiscObjects::TYPE_NAME, finish_method_helper);
+  std::vector<std::string> types;
+  // FIXME: concolic executing into some methods inside these classes triggers JVM crash. Investigate them later.
+  types.push_back("com/fasterxml/jackson/core/json/UTF8JsonGenerator");
+  types.push_back("com/fasterxml/jackson/databind/ser/BeanPropertyWriter");
+  types.push_back("net/sf/jsqlparser/parser/CCJSqlParser");
+  types.push_back("freemarker/core/FMParserTokenManager");
+  for (size_t types_index = 0; types_index < types.size(); ++types_index) {
+    tty->print_cr("Adding disable concolic handler for class %s", types[types_index].c_str());
+    m_symbolizer->add_invoke_helper_methods(types[types_index], invoke_method_helper);
+    m_symbolizer->add_finish_helper_methods(types[types_index], finish_method_helper);
+  }
 }
 
 bool SymbolicMiscObjects::invoke_method_helper(MethodSymbolizerHandle &handle) {
