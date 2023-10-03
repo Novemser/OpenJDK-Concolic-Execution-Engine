@@ -11,5 +11,15 @@
         </clean>
       </configuration>
     </target>
+    <target id="e31d157f-ccd7-4f54-9cae-b40cea08cbe7" name="zero release" defaultType="TOOL">
+      <configuration id="2ccd3030-80eb-49bc-9729-f80e3a766d11" name="zero release">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_make zero release" />
+        </build>
+        <clean type="TOOL">
+          <tool actionId="Tool_External Tools_make release clean" />
+        </clean>
+      </configuration>
+    </target>
   </component>
 </project>

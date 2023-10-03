@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="slow debug" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-cp example/ TestBigDecimal" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="openjdk8-webridge" TARGET_NAME="slow debug" CONFIG_NAME="slow debug" RUN_PATH="$PROJECT_DIR$/build/linux-x86_64-normal-zero-slowdebug/jdk/bin/java">
+  <configuration default="false" name="slow debug" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-cp example/ TestBigDecimal" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Closure-receiver" TARGET_NAME="slow debug" CONFIG_NAME="slow debug" RUN_PATH="$PROJECT_DIR$/build/linux-x86_64-normal-zero-slowdebug/jdk/bin/java">
     <method v="2">
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="Compile java" run_configuration_type="ShConfigurationType" />
       <option name="CLION.EXTERNAL.BUILD" enabled="true" />

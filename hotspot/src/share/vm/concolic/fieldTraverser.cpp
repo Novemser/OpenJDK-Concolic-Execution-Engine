@@ -124,6 +124,7 @@ void FieldTraverser::print_indent() {
  */
 
 std::string FieldSymbolizer::concatCurrentSymbolicName(fieldDescriptor* fd) {
+  ResourceMark rm;
   std::string name = _prefix_lst.back() + "_" + std::string(fd->name()->as_C_string());
   StringUtils::replaceAll(name, "/", "_");
   StringUtils::replaceAll(name, ":", "_");
@@ -182,7 +183,7 @@ void FieldSymbolizer::after_field_helper(unsigned offset, oop parent_obj) {
 bool FieldSymbolizer::before_instance_helper() {
   if (this->_obj->is_symbolic())
     return false;
-
+  ResourceMark rm;
   SymInstance *sym_inst = this->_ctx.alloc_sym_inst(this->_obj);
   if (sym_inst && sym_inst->need_recursive()) {
     _sym_refs.push_back(sym_inst);
@@ -253,7 +254,7 @@ bool FieldSymbolizer::before_array_helper() {
   sym_arr->set_length_exp(new ArrayLengthExp(sym_arr->get_sym_rid(), type));
 
   _sym_refs.push_back(sym_arr);
-
+  ResourceMark rm;
   tty->indent().print_cr("symbolize array rid:%lu type:%c length:%d",array_obj->get_sym_rid(),type2char(type),array_obj->length());
   char * arr_clz_name = array_obj->klass()->name()->as_C_string();
   if (!_prefix_lst.empty()) {
@@ -275,7 +276,7 @@ void FieldSymbolizer::after_array_helper() {
  */
 bool SimpleFieldPrinter::do_field_helper(fieldDescriptor *fd, oop obj) {
   this->print_indent();
-
+  ResourceMark rm;
   // print `signature` and `name`
   tty->print("'%d' '%s' '%s' '%d'", fd->offset(),
              fd->signature()->as_C_string(), fd->name()->as_C_string(),
@@ -369,9 +370,10 @@ bool CompositeKeyGenerator::do_field_helper(fieldDescriptor *fd, oop obj) {
 }
 
 bool FieldSymbolizer::print_field(fieldDescriptor *fd, oop obj)  {
-    tty->indent().print("symbolize field %s rid:%lu index:%d type:%s offset:%d\n",
-                fd->name()->as_C_string(), obj->get_sym_rid(), fd->index(),
-                        fd->signature()->as_C_string(), fd->offset());
+  ResourceMark rm;
+  tty->indent().print("symbolize field %s rid:%lu index:%d type:%s offset:%d\n",
+              fd->name()->as_C_string(), obj->get_sym_rid(), fd->index(),
+                      fd->signature()->as_C_string(), fd->offset());
 }
 
 bool FieldSymbolizer::print_element(int index, arrayOop array_obj)  {

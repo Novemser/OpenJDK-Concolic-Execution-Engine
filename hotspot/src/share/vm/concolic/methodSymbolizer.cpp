@@ -19,6 +19,7 @@
 #include "concolic/reference/symbolicPrimitive.hpp"
 #include "concolic/reference/symbolicTimestamp.hpp"
 #include "concolic/reference/symbolicDate.hpp"
+#include "concolic/reference/symbolicMiscObjects.h"
 #include "concolic/reference/internal/symbolicUnsafe.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateKey.hpp"
 #include "concolic/jdbc/reference/symbolicHibernateMethod.hpp"
@@ -53,6 +54,7 @@ void MethodSymbolizer::init_helper_methods() {
   SymbolicUnsafe::init_register_class(this);
 //  SymbolicHttpServletRequest::init_register_class(this);
   SymbolicNDFunc::init_register_class(this);
+  SymbolicMiscObjects::init_register_class(this);
 }
 
 void MethodSymbolizer::add_invoke_helper_methods(const std::string class_name,

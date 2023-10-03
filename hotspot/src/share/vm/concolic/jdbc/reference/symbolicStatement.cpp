@@ -121,6 +121,7 @@ void SymStmt::print() {
 bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
   const std::string &callee_name = handle.get_callee_name();
   bool need_symbolize = true;
+  ResourceMark rm;
   tty->print_cr("SymStmt.invoke_method_helper: Invoking %s", callee_name.c_str());
 
   if (callee_name == "execute") {
@@ -133,9 +134,6 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
         execute_counter++;
     } else {
         if (param_size != 2) {
-            tty->print_cr("=============================");
-            tty->print_cr("param_size is: %d", param_size);
-            tty->print_cr("name_and_sig is: %s", handle.get_callee_method()->name_and_sig_as_C_string());
             guarantee(param_size == 2, "currently, we only support stmt.execute(String)");
         }
 
@@ -311,6 +309,7 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
   } else if (callee_name == "setBigDecimal") {
     value_exp = SymBigDecimal::get_exp_of(handle.get_param<oop>(offset));
   } else if (callee_name == "setCharacterStream") {
+    ResourceMark rm;
     oop reader_obj = handle.get_param<oop>(offset);
     const std::string &cname = std::string(reader_obj->klass()->name()->as_C_string());
     if (cname == "java/io/StringReader") {

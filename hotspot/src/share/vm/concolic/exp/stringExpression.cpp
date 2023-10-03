@@ -119,6 +119,7 @@ std::string OpStrExpression::get_name() {
 }
 
 StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
+  ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, "'String'");
   ss.print("%lu", sym_rid);
@@ -127,6 +128,7 @@ StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid) {
 }
 
 StringSymbolExp::StringSymbolExp(sym_rid_t sym_rid, std::string name) {
+  ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, "'String'");
   ss.print("%s", name.c_str());
@@ -144,6 +146,7 @@ ConStringSymbolExp::ConStringSymbolExp(oop obj) {
 }
 
 ConStringSymbolExp::ConStringSymbolExp(const std::string &str) {
+  ResourceMark rm;
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'Y', T_OBJECT, "'String'");
   _type = vmSymbols::java_lang_String()->as_C_string();

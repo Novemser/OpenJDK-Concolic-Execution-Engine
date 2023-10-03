@@ -74,6 +74,7 @@ ArrayInitExpression::ArrayInitExpression(sym_rid_t array_id, arrayOop array) {
       } else if (ak->name()->equals(SymString::ARRAY_TYPE_NAME)) {
         value_exp = SymString::get_exp_of(get_obj(array, T, i));
       } else {
+        ResourceMark rm;
         tty->print_cr("Not implemented object array load for class:%s",
                       ak->name()->as_C_string());
         ShouldNotReachHere();

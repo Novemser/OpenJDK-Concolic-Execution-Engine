@@ -47,6 +47,7 @@ public:
   void sanityCheck() {
     Method *callee_method = _callee_istate->method();
     if (_caller_frame->is_interpreter_frame()) {
+      ResourceMark rm;
       interpreterState caller_istate = _caller_frame->as_interpreter_frame()->interpreter_state();
       char *callee_method_name_c_str = callee_method->method_holder()->name()->as_C_string();
       // for lambda expressions(where the call site might locate in java/lang/invoke),

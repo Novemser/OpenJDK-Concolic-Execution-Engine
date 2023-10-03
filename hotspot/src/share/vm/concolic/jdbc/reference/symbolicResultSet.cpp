@@ -327,6 +327,7 @@ ResultSetSymbolExp::ResultSetSymbolExp(SymResSet *sym_res_set, int col_i,
                                        BasicType type, oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   if (obj != NULL) {
+    ResourceMark rm;
     _type = obj->klass()->name()->as_C_string();
   } else {
     _type = type2char(type);

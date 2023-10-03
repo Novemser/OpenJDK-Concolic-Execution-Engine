@@ -7,6 +7,7 @@ jlong JdbcUtils::get_conn_connection_id(oop obj) {
   if (klass->name()->equals("com/mysql/jdbc/JDBC4Connection")) {
     return obj->long_field(1736);
   } else {
+    ResourceMark rm;
     tty->print_cr("Unhandled JDBC connection class: %s", klass->name()->as_C_string());
     ShouldNotCallThis();
   }

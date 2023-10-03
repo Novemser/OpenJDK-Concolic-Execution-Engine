@@ -166,6 +166,7 @@ template <> bool SymPrimitive<jdouble>::invoke_method_helper(MethodSymbolizerHan
 }
 
 template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(C)Ljava/lang/Character;")) {
     // get result object from stack
@@ -180,6 +181,7 @@ template <> Expression *SymPrimitive<jchar>::finish_method_helper(MethodSymboliz
 }
 
 template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(Z)Ljava/lang/Boolean;")) {
     // get result object from stack
@@ -193,6 +195,7 @@ template <> Expression *SymPrimitive<jboolean>::finish_method_helper(MethodSymbo
     return NULL;
 }
 template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(B)Ljava/lang/Byte;")) {
     // get result object from stack
@@ -207,6 +210,7 @@ template <> Expression *SymPrimitive<jbyte>::finish_method_helper(MethodSymboliz
 }
 
 template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(I)Ljava/lang/Integer;")) {
     // get result object from stack
@@ -222,6 +226,7 @@ template <> Expression * SymPrimitive<jint>::finish_method_helper(MethodSymboliz
 }
 
 template <> Expression * SymPrimitive<jshort>::finish_method_helper(MethodSymbolizerHandle &handle) {
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(S)Ljava/lang/Short;")) {
     // get result object from stack
@@ -243,7 +248,7 @@ template <> Expression * SymPrimitive<jlong>::finish_method_helper(MethodSymboli
           handle.get_param_list(), exp, false));
       return exp;
     }
-
+  ResourceMark rm;
   if (handle.get_callee_name() == "valueOf" &&
       !strcmp(handle.get_callee_method()->signature()->as_C_string(), "(J)Ljava/lang/Long;")) {
     // get result object from stack

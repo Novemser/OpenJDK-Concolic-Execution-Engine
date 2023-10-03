@@ -70,6 +70,9 @@ void JavaThread::pop_zero_frame() {
   _top_zero_frame = *(ZeroFrame **)_top_zero_frame;
 #ifdef ENABLE_CONCOLIC
   if (ConcolicMngr::can_do_concolic()) {
+//    if (temp_frame && temp_frame->is_interpreter_frame()) {
+//      tty->print_cr("Poping method: %s", temp_frame->as_interpreter_frame()->interpreter_state()->method()->name_and_sig_as_C_string());
+//    }
     ConcolicMngr::ctx->get_shadow_stack().pop(temp_frame);
   }
   if (ConcolicMngr::has_symbolized_method()) {

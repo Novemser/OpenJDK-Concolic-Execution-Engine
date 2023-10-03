@@ -56,6 +56,7 @@ InstanceSymbolExp::InstanceSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'M', T_OBJECT, obj);
   if (obj != NULL) {
+    ResourceMark rm;
     _type = obj->klass()->name()->as_C_string();
   }
   ss.print("%lu", obj->get_sym_rid());
@@ -66,6 +67,7 @@ PlaceHolderSymbolExp::PlaceHolderSymbolExp(oop obj) {
   stringStream ss(str_buf, BUF_SIZE);
   set_head(ss, 'P', T_OBJECT, obj);
   if (obj != NULL) {
+    ResourceMark rm;
     _type = obj->klass()->name()->as_C_string();
   }
   this->finalize(ss.size());

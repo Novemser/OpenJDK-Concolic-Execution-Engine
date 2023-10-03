@@ -2,11 +2,25 @@
   <tool name="make slow debug" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
     <exec>
       <option name="COMMAND" value="make" />
-      <option name="PARAMETERS" value="hotspot jdk images CONF=linux-x86_64-normal-zero-release" />
+      <option name="PARAMETERS" value="hotspot jdk images CONF=linux-x86_64-normal-zero-slowdebug" />
       <option name="WORKING_DIRECTORY" value="$USER_HOME$/openjdk8-webridge" />
     </exec>
   </tool>
   <tool name="make slow debug clean" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="make" />
+      <option name="PARAMETERS" value="clean CONF=linux-x86_64-normal-zero-slowdebug" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/openjdk8-webridge" />
+    </exec>
+  </tool>
+  <tool name="make zero release" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="make" />
+      <option name="PARAMETERS" value="hotspot jdk images CONF=linux-x86_64-normal-zero-release" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/openjdk8-webridge" />
+    </exec>
+  </tool>
+  <tool name="make release clean" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
     <exec>
       <option name="COMMAND" value="make" />
       <option name="PARAMETERS" value="clean CONF=linux-x86_64-normal-zero-release" />

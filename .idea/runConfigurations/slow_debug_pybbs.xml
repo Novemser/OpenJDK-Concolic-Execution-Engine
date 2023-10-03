@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="slow debug pybbs" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-jar target/pybbs.jar --spring.profiles.active=dev" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$/../pybbs-offline" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Closure-receiver" TARGET_NAME="slow debug" CONFIG_NAME="slow debug" RUN_PATH="$PROJECT_DIR$/build/linux-x86_64-normal-zero-slowdebug/jdk/bin/java">
+    <method v="2">
+      <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      <option name="RunConfigurationTask" enabled="false" run_configuration_name="Unzip Debug Info" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

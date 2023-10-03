@@ -59,7 +59,7 @@
   }
 
  public:
-  void record_base_of_stack_pointer() {
+  void inline __attribute__((optimize("O0"))) record_base_of_stack_pointer() {
 #ifndef ENABLE_WEBRIDGE
     assert(top_zero_frame() == NULL, "junk on stack prior to Java call");
 #else
