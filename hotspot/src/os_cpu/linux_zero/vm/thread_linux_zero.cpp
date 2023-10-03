@@ -40,7 +40,7 @@ void JavaThread::push_zero_frame(ZeroFrame *zframe) {
 //  if (_top_zero_frame && _top_zero_frame->is_interpreter_frame()) {
 //    ResourceMark rm;
 //    std::string name = _top_zero_frame->as_interpreter_frame()->interpreter_state()->method()->name()->as_C_string();
-//    if (name == "executeQuery") {
+//    if (name == "execute") {
 //      tty->print_cr("intercepted executeQuery from push zero frame, ConcolicMngr::can_do_concolic():%d", ConcolicMngr::can_do_concolic());
 //    }
 //  }

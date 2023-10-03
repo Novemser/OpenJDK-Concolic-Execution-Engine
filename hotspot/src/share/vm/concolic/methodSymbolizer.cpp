@@ -125,6 +125,9 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
     need_symbolize = primitive_invoke_method_helper(_handle, basicType);
   } else if (_invoke_helper_methods.find(callee_holder_name) != _invoke_helper_methods.end()) {
     need_symbolize = _invoke_helper_methods[callee_holder_name](_handle);
+//    if (need_symbolize) {
+//      tty->print_cr("symbolizing method: %s.%s", callee_holder_name.c_str(), _handle.get_callee_name().c_str());
+//    }
   } else if (SymPersister::target(_handle.get_callee_holder_name())) {
     need_symbolize = false;
     bool need_handling = SymPersister::invoke_method_helper(_handle);
@@ -144,6 +147,7 @@ void MethodSymbolizer::invoke_method(ZeroFrame *caller_frame,
          ++klz_index) {
       if (callee_holder_name.find(_classes_prefix_to_symbolize[klz_index]) != std::string::npos) {
         need_symbolize = true;
+//        tty->print_cr("symbolizing method: %s.%s", callee_holder_name.c_str(), _handle.get_callee_name().c_str());
       }
     }
   }

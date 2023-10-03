@@ -14,6 +14,8 @@ void SymbolicMiscObjects::init_register_class(MethodSymbolizer *m_symbolizer) {
   types.push_back("com/fasterxml/jackson/databind/ser/BeanPropertyWriter");
   types.push_back("net/sf/jsqlparser/parser/CCJSqlParser");
   types.push_back("freemarker/core/FMParserTokenManager");
+  types.push_back("org/apache/ibatis/ognl/OgnlParser");
+  types.push_back("org/apache/ibatis/ognl/Ognl");
   for (size_t types_index = 0; types_index < types.size(); ++types_index) {
     tty->print_cr("Adding disable concolic handler for class %s", types[types_index].c_str());
     m_symbolizer->add_invoke_helper_methods(types[types_index], invoke_method_helper);

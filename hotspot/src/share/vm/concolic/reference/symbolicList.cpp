@@ -53,6 +53,7 @@ std::map<std::string, bool> SymList::init_skip_method_names() {
   map["needsRecreate"] = false;
   map["countOccurrences"] = false;
   map["isWrapper"] = false;
+  map["forEach"] = false;
   return map;
 }
 
