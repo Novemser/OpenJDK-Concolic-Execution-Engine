@@ -247,6 +247,8 @@ Expression *SymString::finish_method_helper(MethodSymbolizerHandle &handle) {
 }
 
 Expression *SymString::get_exp_of(oop obj) {
+  if (obj == NULL) return SymbolExpression::get(Sym_NULL);
+
   if (obj->is_symbolic()) {
     return ConcolicMngr::ctx->get_sym_inst(obj)->get_ref_exp();
   } else {

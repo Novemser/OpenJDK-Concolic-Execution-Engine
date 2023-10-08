@@ -316,10 +316,10 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
       oop str_obj = reader_obj->obj_field(56);
       value_exp = SymString::get_exp_of(str_obj);
     } else {
-      ShouldNotReachHere();
+      guarantee(false, (std::string("Not implemented setCharacterStream.cname:") + cname).c_str());
     }
   } else {
-    ShouldNotReachHere();
+    guarantee(false, (std::string("Not implemented callee:") + callee_name).c_str());
   }
   return value_exp;
 }
