@@ -100,6 +100,7 @@ bool SymResSet::invoke_method_helper(MethodSymbolizerHandle &handle) {
     SymResSet *sym_res_set =
         (SymResSet *)ConcolicMngr::ctx->get_sym_inst(res_set_obj);
     sym_res_set->next();
+    tty->print_cr("SymResSet.invoke_method_helper: Invoking %s for rs: %p", callee_name.c_str(), sym_res_set);
     need_symbolize = true;
   } else if (callee_name == "getObject") {
     // inside getObject, getInt/Long/String etc. will be invoked
@@ -235,10 +236,15 @@ Expression *SymResSet::finish_method_helper(MethodSymbolizerHandle &handle) {
         SymString *sym_str = reinterpret_cast<SymString *>(
             ConcolicMngr::ctx->get_or_alloc_sym_inst(res_obj)
         );
-        StringSymbolExp *sym_str_exp = reinterpret_cast<StringSymbolExp *>(
-            sym_str->get_ref_exp()
-        );
-        sym_str_exp->set(exp_name.c_str(), (int) exp_name.length());
+        SymbolExpression *sym_str_exp;
+        if (sym_str == NULL) {
+          sym_str_exp = SymbolExpression::get(Sym_NULL);
+        } else {
+          sym_str_exp = reinterpret_cast<StringSymbolExp *>(
+              sym_str->get_ref_exp()
+          );
+          sym_str_exp->set(exp_name.c_str(), (int) exp_name.length());
+        }
         exp = sym_str_exp;
       } else if (res_tp == "Ljava/math/BigDecimal;") {
         SymBigDecimal *sym_bd = reinterpret_cast<SymBigDecimal *>(

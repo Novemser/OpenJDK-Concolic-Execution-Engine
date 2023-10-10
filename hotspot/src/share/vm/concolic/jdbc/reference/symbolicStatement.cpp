@@ -65,6 +65,7 @@ std::map<std::string, BasicType> SymStmt::init_support_set_methods() {
   std::map<std::string, BasicType> map;
   map["setBoolean"] = T_BOOLEAN;
   map["setByte"] = T_BYTE;
+  map["setBytes"] = T_ARRAY;
   map["setInt"] = T_INT;
   map["setShort"] = T_SHORT;
   map["setLong"] = T_LONG;
@@ -158,7 +159,11 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
     execute_counter++;
 #ifdef ENABLE_WEBRIDGE
     if (handle.get_callee_holder_name() != _webridge_recorder_class) {
-      guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
+      if (handle.get_callee_holder_name() != "com/mysql/jdbc/StatementImpl") {
+        guarantee(param_size == 1, "currently, we only support stmt.executeQuery()");
+      } else {
+        tty->print_cr("[unhandled query type] com.mysql.jdbc.StatementImpl.executeQuery, please use prepared statement instead for WeBridge to analysis");
+      }
     } else {
       intptr_t * caller_locals =
           handle.get_caller_frame()->as_interpreter_frame()->interpreter_state()->locals();
@@ -205,7 +210,6 @@ bool SymStmt::invoke_method_helper(MethodSymbolizerHandle &handle) {
 #endif
   } else if (callee_name == "setObject" ||
               callee_name == "setNumericObject" ||
-              callee_name == "setBytes" ||
               callee_name == "setNString") {
     // inside set object, jdbc invokes setXXX
     need_symbolize = false;
@@ -285,9 +289,11 @@ Expression *SymStmt::finish_method_helper(MethodSymbolizerHandle &handle) {
   } else if (callee_name == "getUpdateCount") {
     oop this_obj = handle.get_param<oop>(0);
     SymStmt *sym_stmt = reinterpret_cast<SymStmt *>(ConcolicMngr::ctx->get_or_alloc_sym_inst(this_obj));
-    jint row_count = handle.get_result<jint>(T_INT);
-    exp = new ResultSetSymbolExp(sym_stmt);
-    sym_stmt->set_row_count_exp(exp, row_count);
+    if (sym_stmt->is_write_sql()) {
+      jint row_count = handle.get_result<jint>(T_INT);
+      exp = new ResultSetSymbolExp(sym_stmt);
+      sym_stmt->set_row_count_exp(exp, row_count);
+    }
   }
   return exp;
 }
@@ -318,6 +324,8 @@ Expression *SymStmt::get_param_exp(MethodSymbolizerHandle &handle, BasicType typ
     } else {
       guarantee(false, (std::string("Not implemented setCharacterStream.cname:") + cname).c_str());
     }
+  } else if (callee_name == "setBytes") {
+    value_exp = ArrayExpression::get_exp_of(handle.get_param<oop>(offset));
   } else {
     guarantee(false, (std::string("Not implemented callee:") + callee_name).c_str());
   }

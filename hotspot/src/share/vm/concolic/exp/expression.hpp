@@ -137,6 +137,7 @@ public:
   virtual void serialize_internal(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
   virtual std::string get_name();
+  static Expression *get_exp_of(oop obj);
 };
 
 typedef std::vector<Expression *> exp_list_t;

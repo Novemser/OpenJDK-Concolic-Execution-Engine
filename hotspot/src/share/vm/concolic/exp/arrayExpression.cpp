@@ -2,6 +2,9 @@
 
 #include "concolic/exp/expression.hpp"
 #include "utilities/ostream.hpp"
+#include "symbolExpression.hpp"
+#include "stringExpression.hpp"
+#include <concolic/utils.hpp>
 
 ArrayExpression::ArrayExpression(sym_rid_t array_id, Expression *index_exp,
                                  Expression *value_exp, bool is_load, BasicType type)
@@ -81,6 +84,22 @@ std::string ArrayExpression::get_name() {
   }
 
   return name;
+}
+
+Expression *ArrayExpression::get_exp_of(oop obj) {
+  if (obj == NULL) return SymbolExpression::get(Sym_NULL);
+
+  if (obj->is_symbolic()) {
+    guarantee(false, "Currently array type symbolic parameter is not supported");
+  }
+  guarantee(obj->is_array(), "should be array");
+  typeArrayOop arrObj = static_cast<typeArrayOop>(obj);
+  std::string res;
+  for (int index = 0; index < arrObj->length(); ++index) {
+    jbyte c = arrObj->byte_at(index);
+    res += c;
+  }
+  return new ConStringSymbolExp(res);
 }
 
 #endif
