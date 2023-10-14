@@ -26,8 +26,9 @@ typeArrayOop OopUtils::java_string_to_char_array(oop str_obj) {
     } else if (str_obj->klass()->name()->equals(SymStrBuilder::TYPE_NAME)){
         klass = str_obj->klass()->super();
     } else {
-        tty->print_cr("Not handled type %s", str_obj->klass()->name()->as_C_string());
-        ShouldNotReachHere();
+        tty->print_cr("Not handled type %s, returning numm", str_obj->klass()->name()->as_C_string());
+//        ShouldNotReachHere();
+      return NULL;
     }
   ik = (InstanceKlass *)klass;
   const int value_field_index = 0;
