@@ -6,8 +6,32 @@
 
 Implementation of a concolic execution engine on top of Openjdk 8.
 
-The engine currently only supports interpreter mode execution.
+The engine currently supports interpreter mode execution.
+
+# Prerequisites
+We have tested the code in the following environment:
+
+Operating system: Ubuntu 16.04
+
+GCC/G++: 6.5.0
+
+# How to build
+First install necessary dependencies.
+## 
+```shell
+./scripts/install_dependencies.sh
+```
+Next, configure the project.
+```shell
+./scripts/configure.sh
+```
+Then, build the project.
+```shell
+make all -j CONF=linux-x86_64-normal-zero-release
+```
+
+The built concolic execution JDK path will be in `/build/linux-x86_64-normal-zero-release/images/j2sdk-image`.
 
 # Quick start
 
-Refer to the /docs directory and get your hands dirty.
+Refer to the `/concolic-test` directory to see examples on how to run Java programs with the concolic execution.
