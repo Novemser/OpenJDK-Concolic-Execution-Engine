@@ -4,7 +4,7 @@
 
 # WeBridge OpenJDK Concolic Execution Engine
 
-Implementation of a concolic execution engine on top of Openjdk 8.
+Implementation of a concolic execution engine on top of OpenJDK 8.
 
 The engine currently supports interpreter mode execution.
 
