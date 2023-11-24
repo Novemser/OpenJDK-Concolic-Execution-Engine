@@ -17,7 +17,6 @@ GCC/G++: 6.5.0
 
 # How to build
 First install necessary dependencies.
-## 
 ```shell
 ./scripts/install_dependencies.sh
 ```
