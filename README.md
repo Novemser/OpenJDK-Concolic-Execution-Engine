@@ -30,8 +30,8 @@ Then, build the project.
 make all -j CONF=linux-x86_64-normal-zero-release
 ```
 
-The built concolic execution JDK path will be in `/build/linux-x86_64-normal-zero-release/images/j2sdk-image`.
+The built concolic execution JDK path will be in `./build/linux-x86_64-normal-zero-release/images/j2sdk-image`. Next, set this path as your default `JAVA_HOME` to use the concolic execution JDK.
 
 # Quick start
 
-Refer to the `/concolic-test` directory to see examples on how to run Java programs with the concolic execution.
+Refer to the `./concolic-test` directory to see examples on how to run Java programs with the concolic execution engine.
