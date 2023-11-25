@@ -40,27 +40,27 @@ Create a `Demo.java` with the following content:
 import java.util.*;
 
 public class Demo {
-	public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         Integer val = new Integer(1);
         String str = new String("ipads");
 
-		// initialize the concolic execution engine, and symbolize the parameters that you'd like to track with symbolic information
-		System.startConcolic();
-		System.symbolize(val);
-		System.symbolize(str);
+        // initialize the concolic execution engine, and symbolize the parameters that you'd like to track with symbolic information
+        System.startConcolic();
+        System.symbolize(val);
+        System.symbolize(str);
 
         // compare the symbolic variable `val` with a concrete constant value. We would expect the path condition to be `val != 3`
         if (val == 3) {
-			System.out.println("Value = 3");
-		}
+            System.out.println("Value = 3");
+        }
 
         // next, we add another path condition
-		if (str.startsWith("ip")) {
-			System.out.println("Str starts with ip");
-		}
+        if (str.startsWith("ip")) {
+            System.out.println("Str starts with ip");
+        }
         System.out.println("Path condition=" + System.getPathCondition());
         System.endConcolic();
-	}
+    }
 }
 ```
 
